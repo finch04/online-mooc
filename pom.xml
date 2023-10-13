@@ -22,6 +22,7 @@
         <module>tj-trade</module>
         <module>tj-exam</module>
         <module>tj-data</module>
+
     </modules>
     <packaging>pom</packaging>
 
