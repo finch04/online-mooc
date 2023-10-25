@@ -12,6 +12,7 @@ public class FeignRelayUserInterceptor implements RequestInterceptor {
         if (userId == null) {
             return;
         }
+        //将当前系统的登录用户id 重新放入请求头中
         template.header(JwtConstants.USER_HEADER, userId.toString());
     }
 }

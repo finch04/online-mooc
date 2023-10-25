@@ -1,4 +1,4 @@
-package com.tianji.learning;
+package com.tianji.remark;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
@@ -11,13 +11,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-@SpringBootApplication
-@EnableScheduling//开启定时任务调度
-@MapperScan("com.tianji.learning.mapper")
 @Slf4j
-public class LearningApplication {
+@EnableScheduling
+@SpringBootApplication
+@MapperScan("com.tianji.remark.mapper")
+public class RemarkApplication {
     public static void main(String[] args) throws UnknownHostException {
-        SpringApplication app = new SpringApplicationBuilder(LearningApplication.class).build(args);
+        SpringApplication app = new SpringApplicationBuilder(RemarkApplication.class).build(args);
         Environment env = app.run(args).getEnvironment();
         String protocol = "http";
         if (env.getProperty("server.ssl.key-store") != null) {

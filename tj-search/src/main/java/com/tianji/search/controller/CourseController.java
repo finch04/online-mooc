@@ -1,5 +1,6 @@
 package com.tianji.search.controller;
 
+import com.tianji.api.client.search.SearchClient;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.search.domain.query.CoursePageQuery;
 import com.tianji.search.domain.vo.CourseVO;
@@ -23,13 +24,14 @@ public class CourseController {
     private final ISearchService searchService;
     private final ICourseService courseService;
 
+
     @ApiOperation("用户端课程搜索接口")
     @GetMapping("/portal")
     public PageDTO<CourseVO> queryCoursesForPortal(CoursePageQuery query){
         return searchService.queryCoursesForPortal(query);
     }
 
-    @ApiIgnore
+//    @ApiIgnore//swagger会忽略该接口
     @GetMapping("/name")
     public List<Long> queryCoursesIdByName(@RequestParam("keyword") String keyword){
         return searchService.queryCoursesIdByName(keyword);

@@ -506,4 +506,8 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
     private void sendRefundRequestAsync(RefundApply refundApply) {
         sendRefundRequestExecutor.execute(() -> this.sendRefundRequest(refundApply));
     }
+
+
+
+
 }
