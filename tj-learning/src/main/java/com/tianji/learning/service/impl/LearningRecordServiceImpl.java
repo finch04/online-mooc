@@ -4,6 +4,8 @@ import com.tianji.api.client.course.CourseClient;
 import com.tianji.api.dto.course.CourseFullInfoDTO;
 import com.tianji.api.dto.leanring.LearningLessonDTO;
 import com.tianji.api.dto.leanring.LearningRecordDTO;
+import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.constants.MqConstants;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.exceptions.DbException;
@@ -43,6 +45,7 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
     private final  CourseClient courseClient;
 
     private final LearningRecordDelayTaskHandler taskHandler;
+    private final RabbitMqHelper mqHelper;
 
 
     @Override
@@ -92,6 +95,7 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
         if(!isFinished){//如果本小节不是第一次学完，不用处理课表数据
             return;
         }
+
         handleLessonData(dto);
 
     }
@@ -180,6 +184,11 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
 
         //清理redis缓存
         taskHandler.cleanRecordCache(dto.getLessonId(),dto.getSectionId());
+        // 学完一节累加积分
+        mqHelper.send(
+                MqConstants.Exchange.LEARNING_EXCHANGE,
+                MqConstants.Key.LEARN_SECTION,
+                10);
 
         return true;
     }

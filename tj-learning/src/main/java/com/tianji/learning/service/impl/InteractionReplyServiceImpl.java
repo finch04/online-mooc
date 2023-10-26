@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.api.client.remark.RemarkClient;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
+import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.constants.MqConstants;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
@@ -20,6 +22,7 @@ import com.tianji.learning.domain.vo.ReplyVO;
 import com.tianji.learning.enums.QuestionStatus;
 import com.tianji.learning.mapper.InteractionQuestionMapper;
 import com.tianji.learning.mapper.InteractionReplyMapper;
+import com.tianji.learning.mq.msg.SignInMessage;
 import com.tianji.learning.service.IInteractionReplyService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +50,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
     private final UserClient userClient;
     private final InteractionQuestionMapper questionMapper;
     private final RemarkClient remarkClient;
+    private final RabbitMqHelper mqHelper;
 
     //新增评论
     @Override
@@ -76,6 +80,11 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
         //判断是否为学生提交
         if(dto.getIsStudent()){
             question.setStatus(QuestionStatus.UN_CHECK);
+            // 学生才需要累加积分
+            mqHelper.send(
+                    MqConstants.Exchange.LEARNING_EXCHANGE,
+                    MqConstants.Key.WRITE_REPLY,
+                    5);
         }
 
         questionMapper.updateById(question);
