@@ -1,5 +1,6 @@
 package com.tianji.exam.service.impl;
 
+import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tianji.api.dto.IdAndNumDTO;
 import com.tianji.api.dto.exam.QuestionBizDTO;
@@ -30,10 +31,10 @@ public class QuestionBizServiceImpl extends ServiceImpl<QuestionBizMapper, Quest
 
     @Override
     public int countUsedTimes(Long questionId) {
-        Integer count = lambdaQuery()
+        Long count = lambdaQuery()
                 .eq(QuestionBiz::getQuestionId, questionId)
                 .count();
-        return count == null ? 0 : count;
+        return count == null ? 0 : Convert.toInt(count);
     }
 
     @Override

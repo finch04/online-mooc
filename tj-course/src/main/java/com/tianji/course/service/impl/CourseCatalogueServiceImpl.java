@@ -128,8 +128,15 @@ public class CourseCatalogueServiceImpl extends ServiceImpl<CourseCatalogueMappe
         //4.组装数据
         SectionInfoDTO sectionInfoDTO = BeanUtils.toBean(courseCatalogue, SectionInfoDTO.class);
         //5.设置免费试看时长
-        sectionInfoDTO.setFreeDuration(courseCatalogue.getTrailer() == 1 ?
-                courseProperties.getMedia().getTrailerDuration() : 0);
+        // sectionInfoDTO.setFreeDuration(courseCatalogue.getTrailer() == 1 ?
+        //         courseProperties.getMedia().getTrailerDuration() : 0);
+        //5.璁剧疆鍏嶈垂璇曠湅鏃堕暱
+        sectionInfoDTO.setFreeDuration(
+                courseCatalogue.getTrailer() == 1 ?
+                        Optional.ofNullable(courseProperties.getMedia())
+                                .map(CourseProperties.Media::getTrailerDuration)
+                                .orElse(0) : 0
+        );
         return sectionInfoDTO;
     }
 

@@ -1,5 +1,6 @@
 package com.tianji.user.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.client.auth.AuthClient;
@@ -12,7 +13,6 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.ForbiddenException;
 import com.tianji.common.exceptions.UnauthorizedException;
 import com.tianji.common.utils.AssertUtils;
-import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.StringUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.user.domain.dto.UserFormDTO;
@@ -102,7 +102,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 3.封装vo
         UserType type = userDetail.getType();
         // 3.1.基本信息
-        UserDetailVO vo = BeanUtils.toBean(userDetail, UserDetailVO.class);
+        UserDetailVO vo = BeanUtil.toBean(userDetail, UserDetailVO.class);
         // 3.2.详情信息
         switch (type) {
             case STAFF:
@@ -126,7 +126,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 1.验证码校验
         codeService.verifyCode(user.getCellPhone(), code);
         // 2.判断手机号是否存在
-        Integer count = lambdaQuery().eq(User::getCellPhone, user.getCellPhone()).count();
+        int count = lambdaQuery().eq(User::getCellPhone, user.getCellPhone()).count().intValue();
         if (count > 0) {
             throw new BadRequestException(PHONE_ALREADY_EXISTS);
         }
@@ -179,7 +179,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setType(type);
         save(user);
         // 2.新增详情
-        UserDetail detail = BeanUtils.toBean(userDTO, UserDetail.class);
+        UserDetail detail = BeanUtil.toBean(userDTO, UserDetail.class);
         detail.setId(user.getId());
         detail.setType(type);
         if(type == UserType.TEACHER){
@@ -206,7 +206,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             updateById(user);
         }
         // 2.修改详情
-        UserDetail detail = BeanUtils.toBean(userDTO, UserDetail.class);
+        UserDetail detail = BeanUtil.toBean(userDTO, UserDetail.class);
         detail.setType(null);
         detailService.updateById(detail);
     }
@@ -236,7 +236,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             updateById(user);
         }
         // 2.更新用户详情
-        UserDetail detail = BeanUtils.toBean(userDTO, UserDetail.class);
+        UserDetail detail = BeanUtil.toBean(userDTO, UserDetail.class);
         detail.setRoleId(null);
         detail.setType(null);
         detailService.updateById(detail);

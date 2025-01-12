@@ -1,29 +1,29 @@
 package com.tianji.course.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * 三级分类
- * @author wusongsong
- * @since 2022/7/11 20:59
- * @version 1.0.0
- **/
+ * 分类
+ */
 @Data
-@ApiModel(description = "分类")
+@Schema(description = "分类")
 public class CateSimpleInfoVO {
-    @ApiModelProperty("一级分类")
+    @Schema(description = "一级分类id", example = "1")
     private Long firstCateId;
-    @ApiModelProperty("一级分类名称")
-    private String firstCateName;
-    @ApiModelProperty("二级分类id")
-    private Long secondCateId;
-    @ApiModelProperty("二级分类名称")
-    private String secondCateName;
-    @ApiModelProperty("三级分类id")
-    private Long thirdCateId;
-    @ApiModelProperty("三级分类名称")
-    private String thirdCateName;
 
+    @Schema(description = "一级分类名称", example = "计算机科学")
+    private String firstCateName;
+
+    @Schema(description = "二级分类id", example = "2")
+    private Long secondCateId;
+
+    @Schema(description = "二级分类名称", example = "软件开发")
+    private String secondCateName;
+
+    @Schema(description = "三级分类id", example = "3")
+    private Long thirdCateId;
+
+    @Schema(description = "三级分类名称", example = "编程")
+    private String thirdCateName;
 }

@@ -1,5 +1,6 @@
 package com.tianji.course.service.impl;
 
+import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -197,7 +198,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                         .eq(Course::getName, name)
                         .last(id != null, " and id !=" + id);
         //2.统计数量
-        Integer num = baseMapper.selectCount(queryWrapper);
+        Long num = baseMapper.selectCount(queryWrapper);
         if (num > 0) {
             return NameExistVO.EXISTED;
         }
@@ -419,7 +420,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                         .or().eq(Course::getSecondCateId, categoryId)
                         .or().eq(Course::getThirdCateId, categoryId);
         //2.统计课程数量
-        return baseMapper.selectCount(queryWrapper);
+        return Convert.toInt(baseMapper.selectCount(queryWrapper));
     }
 
     @Override

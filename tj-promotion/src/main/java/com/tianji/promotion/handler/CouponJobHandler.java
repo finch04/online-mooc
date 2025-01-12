@@ -15,7 +15,8 @@ public class CouponJobHandler {
 
     private final ICouponService couponService;
 
-    @XxlJob("couponIssueJobHandler")
+    // // TODO 任务重复，先注释
+    // @XxlJob("couponIssueJobHandler")
     public void handleCouponIssueJob() {
         // 1.获取分片信息，作为分页信息
         int page = XxlJobHelper.getShardIndex();
@@ -23,6 +24,7 @@ public class CouponJobHandler {
         int size = NumberUtils.parseInt(param);
         log.debug("准备开始处理优惠券发放任务，page={},size={}", page, size);
         // 2.分页处理待发放状态的优惠券
-        couponService.issueCouponByPage(page, size);
+        // TODO 代码报错，先注释掉
+        // couponService.issueCouponByPage(page, size);
     }
 }

@@ -117,7 +117,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         // 1.分页条件
         Page<Media> mediaPage = new Page<>(query.getPageNo(), query.getPageSize());
         if(StringUtils.isNotBlank(query.getSortBy())){
-            mediaPage.addOrder(new OrderItem(query.getSortBy(), query.getIsAsc()));
+            mediaPage.addOrder(new OrderItem().setColumn(query.getSortBy()).setAsc(query.getIsAsc()));
         }
         // 2.分页搜索
         lambdaQuery()

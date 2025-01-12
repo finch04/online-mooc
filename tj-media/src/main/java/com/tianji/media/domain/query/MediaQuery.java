@@ -1,15 +1,20 @@
 package com.tianji.media.domain.query;
 
 import com.tianji.common.domain.query.PageQuery;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel(description = "媒资搜索条件")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@Schema(description = "媒资搜索条件")
 public class MediaQuery extends PageQuery {
-    @ApiModelProperty("媒资名称关键字")
+    @Schema(description = "媒资名称关键字")
     private String name;
 }

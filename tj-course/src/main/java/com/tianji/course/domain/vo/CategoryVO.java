@@ -1,42 +1,50 @@
 package com.tianji.course.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @author wusongsong
- * @since 2022/7/10 11:32
- * @version 1.0.0
- **/
-@ApiModel(description = "课程分类信息")
+ * 课程分类信息
+ */
 @Data
+@Schema(description = "课程分类信息")
 public class CategoryVO {
-    @ApiModelProperty("课程分类id")
+    @Schema(description = "课程分类id", example = "1")
     private Long id;
-    @ApiModelProperty("课程分类名称")
+
+    @Schema(description = "课程分类名称", example = "编程")
     private String name;
-    @ApiModelProperty("三级分类数量")
+
+    @Schema(description = "三级分类数量", example = "5")
     private Integer thirdCategoryNum;
-    @ApiModelProperty("课程数量")
+
+    @Schema(description = "课程数量", example = "10")
     private Integer courseNum;
-    @ApiModelProperty("状态：1：正常，2：禁用")
+
+    @Schema(description = "状态：1：正常，2：禁用", example = "1")
     private Integer status;
-    @ApiModelProperty("状态描述")
+
+    @Schema(description = "状态描述", example = "正常")
     private String statusDesc;
-    @ApiModelProperty("创建时间")
+
+    @Schema(description = "创建时间", example = "2022-07-10T11:32:00")
     private LocalDateTime createTime;
-    @ApiModelProperty("更新时间")
+
+    @Schema(description = "更新时间", example = "2022-07-10T11:32:00")
     private LocalDateTime updateTime;
-    @ApiModelProperty("排序")
+
+    @Schema(description = "排序", example = "1")
     private Integer index;
-    @ApiModelProperty("父id")
+
+    @Schema(description = "父id", example = "0")
     private Long parentId;
-    @ApiModelProperty("级别")
+
+    @Schema(description = "级别", example = "1")
     private Integer level;
-    @ApiModelProperty("子分类列表")
+
+    @Schema(description = "子分类列表")
     private List<CategoryVO> children;
 }

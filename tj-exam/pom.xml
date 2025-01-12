@@ -12,8 +12,8 @@
     <artifactId>tj-exam</artifactId>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -37,6 +37,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+        </dependency>
         <!--redis-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -45,8 +49,7 @@
         <!-- mybatis plus 管理 -->
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>${mybatis-plus.version}</version>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -84,18 +87,6 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
-            <exclusions>
-                <!--版本较低，1.4.2，因此排除-->
-                <exclusion>
-                    <artifactId>seata-spring-boot-starter</artifactId>
-                    <groupId>io.seata</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <artifactId>seata-spring-boot-starter</artifactId>
-            <groupId>io.seata</groupId>
-            <version>${seata-version}</version>
         </dependency>
     </dependencies>
     <build>

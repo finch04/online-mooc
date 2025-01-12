@@ -229,7 +229,7 @@ public class UserCouponServiceImpl extends ServiceImpl<UserCouponMapper, UserCou
         Page<UserCoupon> page = lambdaQuery()
                 .eq(UserCoupon::getUserId, userId)
                 .eq(UserCoupon::getStatus, query.getStatus())
-                .page(query.toMpPage(new OrderItem("term_end_time", true)));
+                .page(query.toMpPage(OrderItem.asc("term_end_time")));
         List<UserCoupon> records = page.getRecords();
         if (CollUtils.isEmpty(records)) {
             return PageDTO.empty(page);
@@ -239,7 +239,7 @@ public class UserCouponServiceImpl extends ServiceImpl<UserCouponMapper, UserCou
         // 3.1.获取用户券关联的优惠券id
         Set<Long> couponIds = records.stream().map(UserCoupon::getCouponId).collect(Collectors.toSet());
         // 3.2.查询
-        List<Coupon> coupons = couponMapper.selectBatchIds(couponIds);
+        List<Coupon> coupons = couponMapper.selectByIds(couponIds);
 
         // 4.封装VO
         return PageDTO.of(page, BeanUtils.copyList(coupons, CouponVO.class));

@@ -1,7 +1,6 @@
 package com.tianji.api.dto.course;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,13 +11,13 @@ import lombok.NoArgsConstructor;
  * @since 2022/7/18 17:43
  * @version 1.0.0
  **/
-@ApiModel("媒资被引用情况")
 @Data
+@Schema(description = "媒资被引用情况")
 @AllArgsConstructor
 @NoArgsConstructor
 public class MediaQuoteDTO {
-    @ApiModelProperty("媒资id")
+    @Schema(description = "媒资id")
     private Long mediaId;
-    @ApiModelProperty("引用数")
+    @Schema(description = "引用数")
     private Integer quoteNum;
 }

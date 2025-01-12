@@ -34,12 +34,12 @@ import com.tianji.course.domain.vo.NameExistVO;
 import com.tianji.course.mapper.*;
 import com.tianji.course.service.*;
 import io.seata.spring.annotation.GlobalTransactional;
+import jakarta.validation.ValidatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ValidatorFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -620,7 +620,7 @@ public class CourseDraftServiceImpl extends ServiceImpl<CourseDraftMapper, Cours
                         .eq(CourseDraft::getName, name)
                         .last(id != null, " and id !=" + id);
         //2.统计同名课程数量
-        Integer num = baseMapper.selectCount(queryWrapper);
+        Long num = baseMapper.selectCount(queryWrapper);
         //3.返回同名课程VO
         return new NameExistVO(num > 0);
     }
@@ -628,7 +628,7 @@ public class CourseDraftServiceImpl extends ServiceImpl<CourseDraftMapper, Cours
     @Override
     public List<Long> queryExists(List<Long> idList) {
         //1.查询草稿课程基础信息列表
-        List<CourseDraft> courses = baseMapper.selectBatchIds(idList);
+        List<CourseDraft> courses = baseMapper.selectByIds(idList);
         //1.1.草稿课程信息列表判空
         if (CollUtils.isEmpty(courses)) {
             return null;

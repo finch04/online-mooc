@@ -30,13 +30,13 @@ import com.tianji.course.service.ICourseDraftService;
 import com.tianji.course.service.ICourseService;
 import com.tianji.course.utils.CategoryDataWrapper;
 import com.tianji.course.utils.CategoryDataWrapper2;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -390,7 +390,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Category::getLevel, 3)
                 .in(Category::getId, thirdCateIdList);
-        int thirdCateNum = baseMapper.selectCount(queryWrapper);
+        Long thirdCateNum = baseMapper.selectCount(queryWrapper);
         if (!NumberUtils.equals(thirdCateNum, thirdCateIdList.size())) {
             throw new BizIllegalException(ErrorInfo.Msg.REQUEST_PARAM_ILLEGAL);
         }

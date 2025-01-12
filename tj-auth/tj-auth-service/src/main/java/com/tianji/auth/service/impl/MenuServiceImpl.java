@@ -117,7 +117,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
             throw new CommonException(ROLE_NOT_FOUND);
         }
         // 2.判断菜单是否存在
-        Integer menuCount = lambdaQuery().in(Menu::getId, menuIds).count();
+        int menuCount = lambdaQuery().in(Menu::getId, menuIds).count().intValue();
         if (menuCount != menuIds.size()) {
             throw new CommonException(MENU_NOT_FOUND);
         }

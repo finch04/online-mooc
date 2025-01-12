@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient("auth-service")
+@FeignClient(contextId = "auth1111", value = "auth-service")
 public interface AuthClient {
 
     @GetMapping("/roles/{id}")

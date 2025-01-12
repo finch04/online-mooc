@@ -1,12 +1,12 @@
 package com.tianji.api.dto.sms;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.Map;
 
 @Data
-@ApiModel(description = "短信发送参数")
+@Schema(description = "短信发送参数")
 public class SmsInfoDTO {
     private String templateCode;
     private Iterable<String> phones;

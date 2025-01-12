@@ -24,7 +24,6 @@
         <module>tj-promotion</module>
         <module>tj-data</module>
         <module>tj-remark</module>
-        <module>tj-promotion</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -32,22 +31,22 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.2</version>
+        <version>3.3.3</version>
     </parent>
 
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <tjxt.version>1.0</tjxt.version>
-        <org.projectlombok.version>1.18.20</org.projectlombok.version>
-        <spring-cloud.version>2021.0.3</spring-cloud.version>
-        <spring-cloud-alibaba.version>2021.0.1.0</spring-cloud-alibaba.version>
-        <mybatis-plus.version>3.4.3</mybatis-plus.version>
+        <org.projectlombok.version>1.18.36</org.projectlombok.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.3.2</spring-cloud-alibaba.version>
+        <mybatis-plus.version>3.5.9</mybatis-plus.version>
         <hutool.version>5.7.17</hutool.version>
-        <swagger.version>3.0.3</swagger.version>
+        <swagger.version>2.2.19</swagger.version>
         <mysql.version>8.0.23</mysql.version>
         <ali.sdk.core.version>4.6.0</ali.sdk.core.version>
         <ali.sdk.kms.version>2.10.1</ali.sdk.kms.version>
@@ -56,6 +55,7 @@
         <tencent.cloud.version>3.1.515</tencent.cloud.version>
         <redisson.version>3.13.6</redisson.version>
         <elasticsearch.version>7.12.1</elasticsearch.version>
+        <!--<elasticsearch.version>8.13.4</elasticsearch.version>-->
         <tencent.sdk.cos.version>5.6.89</tencent.sdk.cos.version>
         <tencent.sdk.vod.version>2.1.5</tencent.sdk.vod.version>
         <xxl-job-version>2.3.1</xxl-job-version>
@@ -89,14 +89,15 @@
             <!-- mybatis plus 管理 -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <artifactId>mybatis-plus-bom</artifactId>
                 <version>${mybatis-plus.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-            <!--knife4j-->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-spring-boot-starter</artifactId>
-                <version>${swagger.version}</version>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <version>4.5.0</version>
             </dependency>
             <!--腾讯云-->
             <dependency>
@@ -156,6 +157,11 @@
                 <version>${xxl-job-version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -176,6 +182,14 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -184,10 +198,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.13.0</version>
                     <configuration>
-                        <source>11</source> <!-- depending on your project -->
-                        <target>11</target> <!-- depending on your project -->
+                        <source>17</source> <!-- depending on your project -->
+                        <target>17</target> <!-- depending on your project -->
                     </configuration>
                 </plugin>
             </plugins>

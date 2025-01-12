@@ -9,9 +9,9 @@ import com.tianji.auth.domain.vo.PrivilegeOptionVO;
 import com.tianji.auth.service.IPrivilegeService;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/privileges")
-@Api(tags = "权限管理接口")
+@Tag(name = "权限管理接口")
 @RequiredArgsConstructor
 public class PrivilegeController {
 
@@ -43,7 +43,7 @@ public class PrivilegeController {
      * @param pageQuery 分页查询条件
      * @return 分页结果
      */
-    @ApiOperation("分页查询所有权限")
+    @Operation(summary = "分页查询所有权限")
     @GetMapping
     public PageDTO<PrivilegeDTO> listAllPrivileges(PageQuery pageQuery) {
         // 1.分页查询
@@ -65,10 +65,10 @@ public class PrivilegeController {
      *
      * @return 分页结果
      */
-    @ApiOperation("查询菜单下的所有权限，作为下拉选框菜单")
+    @Operation(summary = "查询菜单下的所有权限，作为下拉选框菜单")
     @GetMapping("options/{menuId}")
     public List<PrivilegeOptionVO> listAllPrivilegesOptionsByMenuId(
-            @ApiParam(value = "菜单id", example = "1") @PathVariable("menuId") Long menuId
+            @Parameter(name = "菜单id", example = "1") @PathVariable("menuId") Long menuId
     ) {
         // 1.查询菜单下的权限
         List<Privilege> list = privilegesService.lambdaQuery()
@@ -90,11 +90,11 @@ public class PrivilegeController {
      *
      * @return 某个角色的权限列表
      */
-    @ApiOperation("查询菜单下的权限列表，某个角色的权限")
+    @Operation(summary = "查询菜单下的权限列表，某个角色的权限")
     @GetMapping("/roles/{roleId}/{menuId}")
     public List<PrivilegeOptionVO> listPrivilegeByRoleId(
-            @ApiParam(value = "角色id", required = true, example = "1") @PathVariable("roleId") Long roleId,
-            @ApiParam(value = "菜单id", required = true, example = "1") @PathVariable("menuId") Long menuId
+            @Parameter(name = "角色id", required = true, example = "1") @PathVariable("roleId") Long roleId,
+            @Parameter(name = "菜单id", required = true, example = "1") @PathVariable("menuId") Long menuId
     ) {
         // 1.查询角色对应的权限id
         Set<Long> privilegeIds = privilegesService.listPrivilegeByRoleId(roleId);
@@ -116,7 +116,7 @@ public class PrivilegeController {
      * @param privilegeDTO 权限数据
      * @return 新增成功的权限数据
      */
-    @ApiOperation("新增权限")
+    @Operation(summary = "新增权限")
     @PostMapping
     public PrivilegeDTO savePrivilege(@Validated @RequestBody PrivilegeDTO privilegeDTO) {
         // 域对象转换
@@ -134,11 +134,11 @@ public class PrivilegeController {
      * @param id           要修改的权限的id
      * @return 修改后的权限结果
      */
-    @ApiOperation("修改权限")
+    @Operation(summary = "修改权限")
     @PutMapping("{id}")
     public PrivilegeDTO updatePrivilege(
             @RequestBody PrivilegeDTO privilegeDTO,
-            @ApiParam(value = "要修改的权限id", required = true, example = "1") @PathVariable("id") Long id) {
+            @Parameter(name = "要修改的权限id", required = true, example = "1") @PathVariable("id") Long id) {
         // 域对象转换
         Privilege privilege = new Privilege(privilegeDTO);
         privilege.setId(id);
@@ -153,10 +153,10 @@ public class PrivilegeController {
      *
      * @param id 权限id
      */
-    @ApiOperation("删除权限")
+    @Operation(summary = "删除权限")
     @DeleteMapping("{id}")
     public void removePrivilegeById(
-            @ApiParam(value = "要删除的权限id", required = true, example = "1") @PathVariable("id") Long id) {
+            @Parameter(name = "要删除的权限id", required = true, example = "1") @PathVariable("id") Long id) {
         privilegesService.removePrivilegeById(id);
     }
 
@@ -167,10 +167,10 @@ public class PrivilegeController {
      * @param privilegeIds 权限id集合
      */
     @PostMapping("/role/{roleId}")
-    @ApiOperation("绑定角色与API权限")
+    @Operation(summary = "绑定角色与API权限")
     public void bindRolePrivileges(
-            @ApiParam(value = "角色id", example = "1") @PathVariable("roleId") Long roleId,
-            @ApiParam(value = "API权限的id集合") List<Long> privilegeIds) {
+            @Parameter(name = "角色id", example = "1") @PathVariable("roleId") Long roleId,
+            @Parameter(name = "API权限的id集合") List<Long> privilegeIds) {
         privilegesService.bindRolePrivileges(roleId, privilegeIds);
     }
 
@@ -181,10 +181,10 @@ public class PrivilegeController {
      * @param privilegeIds 权限id集合
      */
     @DeleteMapping("/role/{roleId}")
-    @ApiOperation("解除角色的API权限")
+    @Operation(summary = "解除角色的API权限")
     public void deleteRolePrivileges(
-            @ApiParam(value = "角色id", example = "1") @PathVariable("roleId") Long roleId,
-            @ApiParam(value = "API权限的id集合") List<Long> privilegeIds) {
+            @Parameter(name = "角色id", example = "1") @PathVariable("roleId") Long roleId,
+            @Parameter(name = "API权限的id集合") List<Long> privilegeIds) {
         privilegesService.deleteRolePrivileges(roleId, privilegeIds);
     }
 

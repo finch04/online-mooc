@@ -102,8 +102,8 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
                 .eq(InteractionReply::getAnswerId, isQueryAnswer ? 0L : answerId)
                 .eq(!forAdmin, InteractionReply::getHidden, false)
                 .page(query.toMpPage( // 先根据点赞数排序，点赞数相同，再按照创建时间排序
-                        new OrderItem(DATA_FIELD_NAME_LIKED_TIME, false),
-                        new OrderItem(DATA_FIELD_NAME_CREATE_TIME, true))
+                        OrderItem.desc(DATA_FIELD_NAME_LIKED_TIME),
+                        OrderItem.asc(DATA_FIELD_NAME_CREATE_TIME))
                 );
         List<InteractionReply> records = page.getRecords();
         if (CollUtils.isEmpty(records)) {

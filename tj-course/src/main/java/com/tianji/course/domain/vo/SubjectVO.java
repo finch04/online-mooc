@@ -1,53 +1,65 @@
 package com.tianji.course.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 题目数据
- * @author wusongsong
- * @since 2022/7/11 20:24
- * @version 1.0.0
- **/
+ * 题目分页数据
+ */
 @Data
-@ApiModel(description = "题目分页数据")
+@Schema(description = "题目分页数据")
 public class SubjectVO {
-    @ApiModelProperty("题目id")
+    @Schema(description = "题目id", example = "1")
     private Long id;
-    @ApiModelProperty("名称")
+
+    @Schema(description = "名称", example = "Java题")
     private String name;
-    @ApiModelProperty("所属分类,每一个分类三级分类中间使用/分开")
+
+    @Schema(description = "所属分类,每一个分类三级分类中间使用/分开", example = "计算机科学/软件开发/编程")
     private List<String> cates;
-    @ApiModelProperty("题目类型")
+
+    @Schema(description = "题目类型", example = "1")
     private Integer subjectType;
-    @ApiModelProperty("题目类型描述")
+
+    @Schema(description = "题目类型描述", example = "单选题")
     private String subjectTypeDesc;
-    @ApiModelProperty("题目难易度描述")
+
+    @Schema(description = "题目难易度描述", example = "简单")
     private String difficultDesc;
-    @ApiModelProperty("难易度,1：简单，2：中等，3：困难")
+
+    @Schema(description = "难易度,1：简单，2：中等，3：困难", example = "1")
     private String difficulty;
-    @ApiModelProperty("分值")
+
+    @Schema(description = "分值", example = "5")
     private Integer score;
-    @ApiModelProperty("使用次数")
+
+    @Schema(description = "使用次数", example = "10")
     private Integer useTimes;
-    @ApiModelProperty("作答次数")
+
+    @Schema(description = "作答次数", example = "50")
     private Integer answerTimes;
-    @ApiModelProperty("更新人")
+
+    @Schema(description = "更新人", example = "张三")
     private String updaterName;
-    @ApiModelProperty("更新时间")
+
+    @Schema(description = "更新时间", example = "2022-07-11T20:24:00")
     private LocalDateTime updateTime;
-    @ApiModelProperty("创建时间")
+
+    @Schema(description = "创建时间", example = "2022-07-11T20:24:00")
     private LocalDateTime createTime;
-    @ApiModelProperty("选项")
+
+    @Schema(description = "选项", example = "[\"选项1\", \"选项2\"]")
     private List<String> options;
-    @ApiModelProperty("答案,判断题，数组第一个如果是1，代表正确，其他代表错误")
+
+    @Schema(description = "答案,判断题，数组第一个如果是1，代表正确，其他代表错误", example = "[1, 2]")
     private List<Integer> answers;
-    @ApiModelProperty("解析")
+
+    @Schema(description = "解析", example = "这是答案解析")
     private String analysis;
-    @ApiModelProperty("正确率，百分号精确到小数点后一位")
+
+    @Schema(description = "正确率，百分号精确到小数点后一位", example = "85.0%")
     private String accuRate;
 }

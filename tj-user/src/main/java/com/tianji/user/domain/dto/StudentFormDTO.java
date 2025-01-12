@@ -1,19 +1,24 @@
 package com.tianji.user.domain.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@ApiModel(description = "学生注册和修改密码的表单实体")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "学生注册和修改密码的表单实体")
 public class StudentFormDTO {
 
-    @ApiModelProperty(value = "手机号", example = "13800010004")
+    @Schema(description = "手机号", example = "13800010004")
     private String cellPhone;
 
-    @ApiModelProperty(value = "密码", example = "123456")
+    @Schema(description = "密码", example = "123456")
     private String password;
 
-    @ApiModelProperty(value = "验证码", example = "645632")
+    @Schema(description = "验证码", example = "645632")
     private String code;
 }

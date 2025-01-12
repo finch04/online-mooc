@@ -83,7 +83,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     }
 
     private void checkCartsFull(Long userId) {
-        int count = lambdaQuery().eq(Cart::getUserId, userId).count();
+        Long count = lambdaQuery().eq(Cart::getUserId, userId).count();
         if (count >= tradeProperties.getMaxCourseAmount()) {
             throw new BizIllegalException(
                     StringUtils.format(CARTS_FULL, tradeProperties.getMaxCourseAmount()));
@@ -91,7 +91,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     }
 
     private boolean checkCourseExists(Long courseId, Long userId) {
-        int count = lambdaQuery()
+        Long count = lambdaQuery()
                 .eq(Cart::getUserId, userId)
                 .eq(Cart::getCourseId, courseId)
                 .count();

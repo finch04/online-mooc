@@ -1,7 +1,6 @@
 package com.tianji.api.dto.auth;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -19,7 +18,7 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(description = "角色实体")
+@Schema(description = "角色实体")
 public class RoleDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,18 +26,18 @@ public class RoleDTO implements Serializable {
     /**
      * 主键
      */
-    @ApiModelProperty(value = "主键", example = "1")
+    @Schema(description = "主键", example = "1")
     private Long id;
 
     /**
      * 角色代号，例如：admin
      */
-    @ApiModelProperty(value = "角色代号", example = "admin")
+    @Schema(description = "角色代号", example = "admin")
     private String code;
 
     /**
      * 角色描述
      */
-    @ApiModelProperty(value = "角色名称", example = "教师")
+    @Schema(description = "角色名称", example = "教师")
     private String name;
 }

@@ -1,5 +1,6 @@
 package com.tianji.course.service.impl;
 
+import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -364,7 +365,7 @@ public class CourseCatalogueDraftServiceImpl extends ServiceImpl<CourseCatalogue
         queryWrapper.eq(CourseCatalogueDraft::getCourseId, courseId)
                 .in(CourseCatalogueDraft::getType,
                         Arrays.asList(CourseConstants.CataType.SECTION, CourseConstants.CataType.PRATICE));
-        return count(queryWrapper);
+        return Convert.toInt(count(queryWrapper));
     }
 
     @Override

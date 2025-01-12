@@ -1,8 +1,8 @@
 package com.tianji.common.utils;
 
 import com.tianji.common.exceptions.BadRequestException;
+import jakarta.validation.ConstraintViolation;
 
-import javax.validation.ConstraintViolation;
 import java.util.Set;
 import java.util.stream.Collectors;
 

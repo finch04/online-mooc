@@ -1,18 +1,17 @@
 package com.tianji.common.domain.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@ApiModel(description = "id和name键值对")
+@Schema(description = "id和name键值对")
 @NoArgsConstructor
 @AllArgsConstructor
 public class IdNameDTO {
-    @ApiModelProperty("id")
+    @Schema(description = "id")
     private Long id;
-    @ApiModelProperty("name")
+    @Schema(description = "name")
     private String name;
 }

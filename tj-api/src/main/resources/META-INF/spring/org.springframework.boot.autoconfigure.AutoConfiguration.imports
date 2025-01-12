@@ -1,0 +1,4 @@
+com.tianji.api.config.RequestIdRelayConfiguration
+com.tianji.api.config.RoleCacheConfig
+com.tianji.api.config.FallbackConfig
+com.tianji.api.config.CategoryCacheConfig

@@ -4,9 +4,9 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -45,7 +45,8 @@ public class CookieBuilder {
         }else if (request != null) {
             String serverName = request.getServerName();
             serverName = StringUtils.subAfter(serverName, ".", false);
-            cookie.setDomain("." + serverName);
+            // cookie.setDomain("." + serverName);
+            cookie.setDomain(serverName);
         }
         cookie.setHttpOnly(httpOnly);
         cookie.setMaxAge(maxAge);

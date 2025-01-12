@@ -172,9 +172,9 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         }
         // 3.排序条件
         if (StringUtils.isNotBlank(query.getSortBy())) {
-            notePage.addOrder(new OrderItem(query.getSortBy(), query.getIsAsc()));
+            notePage.addOrder(new OrderItem().setColumn(query.getSortBy()).setAsc(query.getIsAsc()));
         } else {
-            notePage.addOrder(new OrderItem(Constant.DATA_FIELD_NAME_CREATE_TIME, false));
+            notePage.addOrder(OrderItem.desc(Constant.DATA_FIELD_NAME_CREATE_TIME));
         }
 
         // 4.搜索条件

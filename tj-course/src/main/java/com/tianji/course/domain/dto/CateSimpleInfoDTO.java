@@ -1,24 +1,20 @@
 package com.tianji.course.domain.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
  * 三级分类
- * @ClassName CateSimpleInfoVO
- * @Author wusongsong
- * @Date 2022/7/11 20:59
- * @Version
- **/
+ */
 @Data
-@ApiModel("分类")
+@Schema(description = "分类")
 public class CateSimpleInfoDTO {
-    @ApiModelProperty("一级分类")
+    @Schema(description = "一级分类id", example = "1")
     private Long firstCateId;
-    @ApiModelProperty("二级分类id")
-    private Long secondCateId;
-    @ApiModelProperty("三级分类id")
-    private Long thirdCateId;
 
+    @Schema(description = "二级分类id", example = "2")
+    private Long secondCateId;
+
+    @Schema(description = "三级分类id", example = "3")
+    private Long thirdCateId;
 }

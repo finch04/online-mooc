@@ -1,6 +1,6 @@
 package com.tianji.course.domain.vo;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +16,9 @@ import java.util.List;
  **/
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description = "所有课程分类数据")
+@AllArgsConstructor
+@Schema(description = "所有课程分类数据")
 public class SimpleCategoryVO {
     private Long id;
     private String name;

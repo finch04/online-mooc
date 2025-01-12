@@ -1,21 +1,20 @@
 package com.tianji.course.domain.dto;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
 
 /**
- * @author wusongsong
- * @since 2022/7/26 9:26
- * @version 1.0.0
- **/
+ * 课程简单信息列表查询条件
+ */
 @Data
+@Schema(description = "课程简单信息列表查询条件")
 public class CourseSimpleInfoListDTO {
 
-    @ApiModelProperty("三级分类id列表")
+    @Schema(description = "三级分类id列表", example = "[1, 2, 3]")
     private List<Long> thirdCataIds;
 
-    @ApiModelProperty("课程id列表")
+    @Schema(description = "课程id列表", example = "[101, 102, 103]")
     private List<Long> ids;
 }

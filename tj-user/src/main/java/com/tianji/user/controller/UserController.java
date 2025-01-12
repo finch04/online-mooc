@@ -14,19 +14,22 @@ import com.tianji.user.domain.vo.UserDetailVO;
 import com.tianji.user.enums.UserStatus;
 import com.tianji.user.service.IUserDetailService;
 import com.tianji.user.service.IUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
 import java.util.List;
+
+/**
+ * 用户管理接口
+ */
 
 @RestController
 @RequestMapping("users")
-@Api(tags = "用户管理接口")
+@Tag(name = "用户管理接口")
 public class UserController {
 
     @Autowired
@@ -34,37 +37,37 @@ public class UserController {
     @Autowired
     private IUserDetailService detailService;
 
-    @ApiOperation("新增用户，一般是员工或教师")
+    @Operation(summary = "新增用户，一般是员工或教师")
     @PostMapping
     public Long saveUser(@Valid @RequestBody UserDTO userDTO){
         userDTO.setId(null);
         return userService.saveUser(userDTO);
     }
 
-    @ApiOperation("更新用户信息")
+    @Operation(summary = "更新用户信息")
     @PutMapping("/{id}")
     public void updateUser(@RequestBody UserDTO userDTO){
         userService.updateUser(userDTO);
     }
 
-    @ApiOperation("更新当前登录用户信息，可修改密码")
+    @Operation(summary = "更新当前登录用户信息，可修改密码")
     @PutMapping
     public void updateCurrentUser(@Valid @RequestBody UserFormDTO userDTO){
         userService.updateUserWithPassword(userDTO);
     }
 
+    @Operation(summary = "重置密码")
     @PutMapping("/{id}/password/default")
-    @ApiOperation("重置密码")
     public void resetPassword(
-            @ApiParam(value = "要重置的用户的id", example = "1") @PathVariable("id") Long userId) {
+            @Parameter(description = "要重置的用户的id", example = "1") @PathVariable("id") Long userId) {
         userService.resetPassword(userId);
     }
 
+    @Operation(summary = "修改用户状态, status=0为禁用，status=1为正常")
     @PutMapping("/{id}/status/{status}")
-    @ApiOperation("修改用户状态, status=0为禁用，status=1为正常")
     public void updateUserStatus(
-            @ApiParam(value = "要重置的用户的id", example = "1") @PathVariable("id") Long userId,
-            @ApiParam(value = "状态", example = "1") @PathVariable("status") Integer status
+            @Parameter(description = "要重置的用户的id", example = "1") @PathVariable("id") Long userId,
+            @Parameter(description = "状态", example = "1") @PathVariable("status") Integer status
     ) {
         User user = new User();
         user.setId(userId);
@@ -72,16 +75,16 @@ public class UserController {
         userService.updateById(user);
     }
 
-    @ApiOperation("获取当前登录用户信息")
+    @Operation(summary = "获取当前登录用户信息")
     @GetMapping(value = "/me")
     public UserDetailVO me() {
         return userService.myInfo();
     }
 
-    @ApiOperation("根据id查询用户信息")
+    @Operation(summary = "根据id查询用户信息")
     @GetMapping("/{id}")
     public UserDTO queryUserById(
-            @ApiParam("用户id") @PathVariable("id") Long id) {
+            @Parameter(description = "用户id") @PathVariable("id") Long id) {
         UserDetail userDetail = detailService.queryById(id);
         return BeanUtils.copyBean(userDetail, UserDTO.class, (d, u) -> u.setType(d.getType().getValue()));
     }
@@ -92,7 +95,7 @@ public class UserController {
      * @param isStaff 是否是后台登录
      * @return 登录用户信息
      */
-    @ApiIgnore
+    @Operation(hidden = true)
     @PostMapping("/detail/{isStaff}")
     public LoginUserDTO queryUserDetail(
             @Valid @RequestBody LoginFormDTO loginDTO, @PathVariable("isStaff") boolean isStaff) {
@@ -100,15 +103,15 @@ public class UserController {
     }
 
     /**
-     * <h1>根据id批量查询用户信息</h1>
+     * 根据id批量查询用户信息
      *
      * @param ids 用户id集合
      * @return 用户集合
      */
-    @ApiIgnore
+    @Operation(hidden = true)
     @GetMapping("/list")
     public List<UserDTO> queryUserByIds(
-            @ApiParam("用户id的列表") @RequestParam("ids") List<Long> ids) {
+            @Parameter(description = "用户id的列表") @RequestParam("ids") List<Long> ids) {
         if(CollUtils.isEmpty(ids)){
             return CollUtils.emptyList();
         }
@@ -124,7 +127,7 @@ public class UserController {
      * @param id 用户id
      * @return 用户类型，0-普通学员，1-老师，2-其他员工
      */
-    @ApiIgnore
+    @Operation(hidden = true)
     @GetMapping("/{id}/type")
     public Integer queryUserType(@PathVariable("id") Long id) {
         User user = userService.getById(id);
@@ -134,7 +137,7 @@ public class UserController {
         return user.getType().getValue();
     }
 
-    @ApiIgnore
+    @Operation(hidden = true)
     @GetMapping("/ids")
     public Long exchangeUserIdWithPhone(@RequestParam("phone") String phone) {
         User user = userService
@@ -145,7 +148,7 @@ public class UserController {
         return user.getId();
     }
 
-    @ApiOperation("检查用户手机号是否存在")
+    @Operation(summary = "检查用户手机号是否存在")
     @GetMapping("checkCellphone")
     public Boolean checkCellPhone(@RequestParam("cellphone") String cellPhone){
         return userService.lambdaQuery()

@@ -2,10 +2,9 @@ package com.tianji.common.validate;
 
 import com.tianji.common.utils.ArrayUtils;
 import com.tianji.common.validate.annotations.EnumValid;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
 /**
  * 枚举校验器校验逻辑

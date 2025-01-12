@@ -8,8 +8,8 @@ import com.tianji.learning.domain.vo.PointsBoardSeasonVO;
 import com.tianji.learning.domain.vo.PointsBoardVO;
 import com.tianji.learning.service.IPointsBoardSeasonService;
 import com.tianji.learning.service.IPointsBoardService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,36 +19,32 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * <p>
  * 学霸天梯榜 控制器
- * </p>
- *
- * @author 虎哥
  */
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/boards")
-@Api(tags = "积分相关接口")
+@Tag(name = "积分相关接口")
+@RequiredArgsConstructor
 public class PointsBoardController {
 
     private final IPointsBoardService pointsBoardService;
 
     private final IPointsBoardSeasonService seasonService;
 
+    @Operation(summary = "分页查询指定赛季的积分排行榜")
     @GetMapping
-    @ApiOperation("分页查询指定赛季的积分排行榜")
-    public PointsBoardVO queryPointsBoardBySeason(PointsBoardQuery query){
+    public PointsBoardVO queryPointsBoardBySeason(PointsBoardQuery query) {
         return pointsBoardService.queryPointsBoardBySeason(query);
     }
 
-    @ApiOperation("查询赛季信息列表")
+    @Operation(summary = "查询赛季信息列表")
     @GetMapping("/seasons/list")
-    public List<PointsBoardSeasonVO> queryPointsBoardSeasons(){
+    public List<PointsBoardSeasonVO> queryPointsBoardSeasons() {
         // 1.获取时间
         LocalDateTime now = LocalDateTime.now();
 
         // 2.查询赛季列表，必须是当前赛季之前的（开始时间小于等于当前时间）
-        List<PointsBoardSeason> list =  seasonService.lambdaQuery()
+        List<PointsBoardSeason> list = seasonService.lambdaQuery()
                 .le(PointsBoardSeason::getBeginTime, now).list();
         if (CollUtils.isEmpty(list)) {
             return CollUtils.emptyList();

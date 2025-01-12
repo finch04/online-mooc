@@ -1,14 +1,19 @@
 package com.tianji.media.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@ApiModel(description = "视频播放的签名信息")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "视频播放的签名信息")
 public class VideoPlayVO {
-    @ApiModelProperty(value = "视频唯一标示", example = "12412534535143242")
+    @Schema(description = "视频唯一标示", example = "12412534535143242")
     private String fileId;
-    @ApiModelProperty(value = "视频封面", example = "xxx.xxx.xxx")
+    @Schema(description = "视频封面", example = "xxx.xxx.xxx")
     private String signature;
 }

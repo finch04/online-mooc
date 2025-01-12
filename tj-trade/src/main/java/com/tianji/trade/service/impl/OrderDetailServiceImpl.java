@@ -1,5 +1,6 @@
 package com.tianji.trade.service.impl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.db.DbRuntimeException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -325,18 +326,18 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
     @Override
     public CoursePurchaseInfoDTO getPurchaseInfoOfCourse(Long courseId) {
         // 1.统计报名人数
-        Integer enrollNum = lambdaQuery()
+        Long enrollNum = lambdaQuery()
                 .eq(OrderDetail::getCourseId, courseId)
                 .in(OrderDetail::getStatus, PAYED.getValue(), FINISHED.getValue(), ENROLLED.getValue())
                 .count();
         // 2.统计退款人数
-        Integer refundNum = lambdaQuery()
+        Long refundNum = lambdaQuery()
                 .eq(OrderDetail::getCourseId, courseId)
                 .eq(OrderDetail::getStatus, REFUNDED.getValue())
                 .count();
         // 3.统计销售额
         int realPayAmount = baseMapper.countRealPayAmountByCourseId(courseId);
 
-        return new CoursePurchaseInfoDTO(enrollNum, refundNum, realPayAmount);
+        return new CoursePurchaseInfoDTO(Convert.toInt(enrollNum), Convert.toInt(refundNum), realPayAmount);
     }
 }

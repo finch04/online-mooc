@@ -27,7 +27,7 @@ public class MybatisConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    // @ConditionalOnMissingBean
     public MybatisPlusInterceptor mybatisPlusInterceptor(@Autowired(required = false) DynamicTableNameInnerInterceptor innerInterceptor) {
         // 1.定义插件主体，注意顺序：表名 > 多租户 > 分页 > 乐观锁 > 字段填充
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();

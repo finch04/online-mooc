@@ -9,7 +9,7 @@ public class AliProperties {
     private String accessId;
     private String accessKey;
 
-    private OssProperties oos;
+    private OssProperties oss;
 
     @Data
     public static class OssProperties {

@@ -1,21 +1,26 @@
 package com.tianji.user.domain.dto;
 
 import com.tianji.api.dto.user.UserDTO;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-
-@EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel(description = "修改用户信息的表单，带有密码")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@Schema(description = "修改用户信息的表单，带有密码")
 public class UserFormDTO extends UserDTO {
-    @ApiModelProperty(value = "原始密码", example = "123321")
+    @Schema(description = "原始密码", example = "123321")
     @NotNull
     private String oldPassword;
-    @ApiModelProperty(value = "新密码", example = "123321")
+
+    @Schema(description = "新密码", example = "123321")
     @NotNull
     private String password;
 }

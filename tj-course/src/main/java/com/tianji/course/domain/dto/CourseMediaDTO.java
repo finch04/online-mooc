@@ -1,38 +1,37 @@
 package com.tianji.course.domain.dto;
 
 import com.tianji.course.constants.CourseErrorInfo;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * 课程视频模型
- *
- * @author wusongsong
- * @since 2022/7/11 17:12
- * @version 1.0.0
- **/
+ */
 @Data
-@ApiModel(description = "课程视频模型")
+@Schema(description = "课程视频模型")
 public class CourseMediaDTO {
-    @ApiModelProperty("目录id")
+    @Schema(description = "目录id", example = "1")
     @NotNull(message = CourseErrorInfo.Msg.COURSE_MEDIA_SAVE_MEDIA_NULL)
     private Long cataId;
-    @ApiModelProperty("媒资id")
+
+    @Schema(description = "媒资id", example = "101")
     @NotNull(message = CourseErrorInfo.Msg.COURSE_MEDIA_SAVE_MEDIA_NULL)
     private Long mediaId;
-    @ApiModelProperty("是否支持试看")
+
+    @Schema(description = "是否支持试看", example = "true")
     @NotNull(message = CourseErrorInfo.Msg.COURSE_MEDIA_SAVE_MEDIA_NULL)
     private Boolean trailer;
-    @ApiModelProperty("媒资名称")
+
+    @Schema(description = "媒资名称", example = "课程视频1")
     @NotNull(message = CourseErrorInfo.Msg.COURSE_MEDIA_SAVE_MEDIA_NULL)
     @Length(min = 1, message = CourseErrorInfo.Msg.COURSE_MEDIA_SAVE_MEDIA_NULL)
     private String videoName;
-    @ApiModelProperty("媒资时长，单位s")
+
+    @Schema(description = "媒资时长，单位s", example = "3600")
     @NotNull(message = CourseErrorInfo.Msg.COURSE_MEDIA_SAVE_MEDIA_NULL)
     @Min(value = 1, message = CourseErrorInfo.Msg.COURSE_MEDIA_SAVE_MEDIA_NULL)
     private Integer mediaDuration;

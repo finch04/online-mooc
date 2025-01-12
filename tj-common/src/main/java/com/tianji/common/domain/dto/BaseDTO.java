@@ -1,18 +1,17 @@
 package com.tianji.common.domain.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
-@ApiModel(description = "DTO基础属性")
+@Schema(description = "DTO基础属性")
 public class BaseDTO {
-    @ApiModelProperty("创建人id")
+    @Schema(description = "创建人id")
     private Long creater;
-    @ApiModelProperty("更新人id")
+    @Schema(description = "更新人id")
     private Long updater;
-    @ApiModelProperty("创建时间")
+    @Schema(description = "创建时间")
     private LocalDateTime createTime;
-    @ApiModelProperty("更新时间")
+    @Schema(description = "更新时间")
     private LocalDateTime updateTime;
 }

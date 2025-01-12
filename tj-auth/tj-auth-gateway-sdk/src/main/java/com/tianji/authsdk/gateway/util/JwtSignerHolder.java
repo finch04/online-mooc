@@ -9,12 +9,12 @@ import cn.hutool.jwt.signers.JWTSignerUtil;
 import com.tianji.auth.common.constants.JwtConstants;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.MarkedRunnable;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
-import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.List;

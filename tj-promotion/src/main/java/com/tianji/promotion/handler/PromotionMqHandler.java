@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 import static com.tianji.common.constants.MqConstants.Exchange.PROMOTION_EXCHANGE;
 import static com.tianji.common.constants.MqConstants.Key.COUPON_RECEIVE;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class PromotionMqHandler {
 
     private final IUserCouponService userCouponService;

@@ -1,5 +1,6 @@
 package com.tianji.learning.service.impl;
 
+import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -157,10 +158,10 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
         vo.setCourseCoverUrl(cInfo.getCoverUrl());
         vo.setSections(cInfo.getSectionNum());
         // 5.统计课表中的课程数量 select count(1) from xxx where user_id = #{userId}
-        Integer courseAmount = lambdaQuery()
+        Long courseAmount = lambdaQuery()
                 .eq(LearningLesson::getUserId, userId)
                 .count();
-        vo.setCourseAmount(courseAmount);
+        vo.setCourseAmount(Convert.toInt(courseAmount));
         // 6.查询小节信息
         List<CataSimpleInfoDTO> cataInfos =
                 catalogueClient.batchQueryCatalogue(CollUtils.singletonList(lesson.getLatestSectionId()));
@@ -204,7 +205,7 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
                         LessonStatus.NOT_BEGIN.getValue(),
                         LessonStatus.LEARNING.getValue(),
                         LessonStatus.FINISHED.getValue())
-                .count();
+                .count().intValue();
     }
 
     @Override
@@ -255,13 +256,13 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
         LocalDateTime end = DateUtils.getWeekEndTime(now);
         // 3.查询总的统计数据
         // 3.1.本周总的已学习小节数量
-        Integer weekFinished = recordMapper.selectCount(new LambdaQueryWrapper<LearningRecord>()
+        Long weekFinished = recordMapper.selectCount(new LambdaQueryWrapper<LearningRecord>()
                 .eq(LearningRecord::getUserId, userId)
                 .eq(LearningRecord::getFinished, true)
                 .gt(LearningRecord::getFinishTime, begin)
                 .lt(LearningRecord::getFinishTime, end)
         );
-        result.setWeekFinished(weekFinished);
+        result.setWeekFinished(Convert.toInt(weekFinished));
         // 3.2.本周总的计划学习小节数量
         Integer weekTotalPlan = getBaseMapper().queryTotalPlan(userId);
         result.setWeekTotalPlan(weekTotalPlan);

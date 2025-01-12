@@ -12,8 +12,8 @@
     <artifactId>tj-search</artifactId>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
         <!--api-->
@@ -33,7 +33,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+        </dependency>
         <!--Redis-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -43,11 +46,6 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-        </dependency>
-        <!--commons-pool2-->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
         </dependency>
         <!--discovery-->
         <dependency>
@@ -63,11 +61,12 @@
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>${elasticsearch.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -82,6 +81,17 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
+        <!--spring boot与es整合依赖-->
+        <!--<dependency>-->
+        <!--    <groupId>org.springframework.boot</groupId>-->
+        <!--    <artifactId>spring-boot-starter-data-elasticsearch</artifactId>-->
+        <!--</dependency>-->
+        <!--es的java客户端需要的jakarta.json依赖-->
+        <!--<dependency>-->
+        <!--    <groupId>jakarta.json</groupId>-->
+        <!--    <artifactId>jakarta.json-api</artifactId>-->
+        <!--    <version>2.0.1</version>-->
+        <!--</dependency>-->
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -97,7 +107,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.tianji.search.SearchApplication</mainClass>
+                    <mainClass>com.tianji.SearchApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

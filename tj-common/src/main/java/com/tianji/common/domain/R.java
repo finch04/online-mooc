@@ -1,8 +1,7 @@
 package com.tianji.common.domain;
 
 import com.tianji.common.constants.Constant;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.slf4j.MDC;
 
@@ -11,15 +10,15 @@ import static com.tianji.common.constants.ErrorInfo.Code.SUCCESS;
 import static com.tianji.common.constants.ErrorInfo.Msg.OK;
 
 @Data
-@ApiModel(description = "通用响应结果")
+@Schema(description = "通用响应结果")
 public class R<T> {
-    @ApiModelProperty(value = "业务状态码，200-成功，其它-失败")
+    @Schema(description = "业务状态码，200-成功，其它-失败")
     private int code;
-    @ApiModelProperty(value = "响应消息", example = "OK")
+    @Schema(description = "响应消息", example = "OK")
     private String msg;
-    @ApiModelProperty(value = "响应数据")
+    @Schema(description = "响应数据")
     private T data;
-    @ApiModelProperty(value = "请求id", example = "1af123c11412e")
+    @Schema(description = "请求id", example = "1af123c11412e")
     private String requestId;
 
     public static R<Void> ok() {

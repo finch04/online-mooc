@@ -23,11 +23,11 @@ import com.tianji.pay.service.IRefundOrderService;
 import com.tianji.pay.third.IPayService;
 import com.tianji.pay.third.model.RefundResponse;
 import com.tianji.pay.third.model.RefundStatus;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 import static com.tianji.pay.sdk.constants.PayErrorInfo.INVALID_PAY_CHANNEL;
@@ -207,7 +207,7 @@ public class RefundOrderServiceImpl extends ServiceImpl<RefundOrderMapper, Refun
     public PageDTO<RefundOrder> queryRefundingOrderByPage(int pageNo, int size) {
         // 1.分页和排序条件
         Page<RefundOrder> page = new Page<>(pageNo, size);
-        page.addOrder(new OrderItem("id", true));
+        page.addOrder(OrderItem.asc("id"));
         // 2.查询
         Page<RefundOrder> result = lambdaQuery()
                 .eq(RefundOrder::getStatus, RefundStatus.UN_KNOWN.getValue())

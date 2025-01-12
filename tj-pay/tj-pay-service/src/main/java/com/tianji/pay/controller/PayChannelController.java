@@ -4,13 +4,16 @@ package com.tianji.pay.controller;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.pay.sdk.dto.PayChannelDTO;
 import com.tianji.pay.service.IPayChannelService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -21,31 +24,34 @@ import java.util.List;
  * @author 虎哥
  * @since 2022-08-26
  */
-@Api(tags = "支付相关接口")
+@Tag(name = "支付相关接口")
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/pay-channels")
+@RequiredArgsConstructor
 public class PayChannelController {
 
     private final IPayChannelService channelService;
 
-    @ApiOperation("查询支付渠道列表")
+    @Operation(summary = "查询支付渠道列表")
     @GetMapping("/list")
+    @ApiResponse(responseCode = "200", description = "支付渠道列表", content = @Content(schema = @Schema(implementation = PayChannelDTO.class)))
     public List<PayChannelDTO> listAllPayChannels(){
         return BeanUtils.copyList(channelService.list(), PayChannelDTO.class);
     }
 
-    @ApiOperation("添加支付渠道")
+    @Operation(summary = "添加支付渠道")
     @PostMapping
-    public Long addPayChannel(@Valid @RequestBody PayChannelDTO channelDTO){
+    @ApiResponse(responseCode = "200", description = "支付渠道ID", content = @Content(schema = @Schema(implementation = Long.class)))
+    public Long addPayChannel(@Valid @RequestBody @Schema(description = "支付渠道信息") PayChannelDTO channelDTO){
         return channelService.addPayChannel(channelDTO);
     }
 
-    @ApiOperation("修改支付渠道")
+    @Operation(summary = "修改支付渠道")
     @PutMapping("/{id}")
+    @ApiResponse(responseCode = "200", description = "修改结果")
     public void updatePayChannel(
-            @ApiParam("支付渠道id") @PathVariable("id") Long id,
-            @RequestBody PayChannelDTO channelDTO){
+            @Parameter(description = "支付渠道id") @PathVariable("id") Long id,
+            @RequestBody @Schema(description = "支付渠道信息") PayChannelDTO channelDTO){
         channelDTO.setId(id);
         channelService.updatePayChannel(channelDTO);
     }

@@ -1,39 +1,43 @@
 package com.tianji.course.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 /**
  * 课程简单信息
- * @author wusongsong
- * @since 2022/7/11 20:56
- * @version 1.0.0
- **/
+ */
 @Data
-@ApiModel("课程简单信息")
+@Schema(description = "课程简单信息")
 public class CourseSimpleInfoVO {
-    @ApiModelProperty("课程id")
+    @Schema(description = "课程id", example = "1")
     private Long id;
-    @ApiModelProperty("课程名称")
+
+    @Schema(description = "课程名称", example = "Java编程基础")
     private String name;
-    @ApiModelProperty("封面url")
+
+    @Schema(description = "封面url", example = "http://example.com/cover.jpg")
     private String coverUrl;
-    @ApiModelProperty("价格")
+
+    @Schema(description = "价格", example = "199")
     private Integer price;
-    @ApiModelProperty("一级分类id")
+
+    @Schema(description = "一级分类id", example = "1")
     private Long firstCateId;
-    @ApiModelProperty("二级分类id")
+
+    @Schema(description = "二级分类id", example = "2")
     private Long secondCateId;
-    @ApiModelProperty("三级分类id")
+
+    @Schema(description = "三级分类id", example = "3")
     private Long thirdCateId;
 
-    @ApiModelProperty("章节数量")
+    @Schema(description = "章节数量", example = "25")
     private Integer sectionNum;
-    @ApiModelProperty("课程有效期")
+
+    @Schema(description = "课程有效期", example = "12")
     private Integer validDuration;
-    @ApiModelProperty("课程过期时间")
+
+    @Schema(description = "课程过期时间", example = "2023-07-11T11:59:00")
     private LocalDateTime purchaseEndTime;
 }

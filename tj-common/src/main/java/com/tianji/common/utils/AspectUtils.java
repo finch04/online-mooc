@@ -3,7 +3,7 @@ package com.tianji.common.utils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 
 import java.lang.reflect.Method;
 
@@ -35,7 +35,7 @@ public class AspectUtils {
      * @return
      */
     public static String parse(String formatter, Method method, Object[] args) {
-        LocalVariableTableParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
-        return SPELUtils.parse(formatter, nameDiscoverer.getParameterNames(method), args);
+        StandardReflectionParameterNameDiscoverer parameterNameDiscoverer = new StandardReflectionParameterNameDiscoverer();
+        return SPELUtils.parse(formatter, parameterNameDiscoverer.getParameterNames(method), args);
     }
 }

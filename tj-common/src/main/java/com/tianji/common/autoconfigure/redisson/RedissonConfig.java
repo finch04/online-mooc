@@ -27,7 +27,7 @@ public class RedissonConfig {
     private static final String REDISS_PROTOCOL_PREFIX = "rediss://";
 
     @Bean
-    @ConditionalOnMissingBean
+    // @ConditionalOnMissingBean
     public LockAspect lockAspect(RedissonClient redissonClient){
         return new LockAspect(redissonClient);
     }

@@ -79,7 +79,7 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
         }
         // 3.按照发布时间倒序，查看公告箱中的消息，最多加载200条
         Page<PublicNotice> page = new Page<PublicNotice>(1, 200)
-                .addOrder(new OrderItem("push_time", false));
+                .addOrder(OrderItem.desc("push_time"));
         page = publicNoticeService.lambdaQuery()
                 .ge(PublicNotice::getPushTime, minTime)
                 .page(page);

@@ -4,6 +4,7 @@ import com.tianji.common.constants.Constant;
 import com.tianji.common.domain.R;
 import com.tianji.common.utils.WebUtils;
 import org.slf4j.MDC;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 @RestControllerAdvice
+@ConditionalOnClass({ResponseBodyAdvice.class})
 public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public boolean supports(MethodParameter returnType, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {

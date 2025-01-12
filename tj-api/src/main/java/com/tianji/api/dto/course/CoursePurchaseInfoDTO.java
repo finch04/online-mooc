@@ -1,7 +1,6 @@
 package com.tianji.api.dto.course;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,14 +12,14 @@ import lombok.NoArgsConstructor;
  * @version 1.0.0
  **/
 @Data
-@ApiModel("课程购买信息")
+@Schema(description = "课程购买信息")
 @NoArgsConstructor
 @AllArgsConstructor
 public class CoursePurchaseInfoDTO {
-    @ApiModelProperty("报名人数")
+    @Schema(description = "报名人数")
     private Integer enrollNum;
-    @ApiModelProperty("退款人数")
+    @Schema(description = "退款人数")
     private Integer refundNum;
-    @ApiModelProperty("实付总金额")
+    @Schema(description = "实付总金额")
     private Integer realPayAmount;
 }

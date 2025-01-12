@@ -25,11 +25,11 @@ import com.tianji.pay.third.IPayService;
 import com.tianji.pay.third.model.PayStatus;
 import com.tianji.pay.third.model.PayStatusResponse;
 import com.tianji.pay.third.model.PrepayResponse;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -203,7 +203,7 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
     public PageDTO<PayOrder> queryPayingOrderByPage(int pageNo, int size) {
         // 1.分页和排序条件
         Page<PayOrder> page = new Page<>(pageNo, size);
-        page.addOrder(new OrderItem("id", true));
+        page.addOrder(OrderItem.asc("id"));
         // 2.查询
         Page<PayOrder> result = lambdaQuery()
                 .eq(PayOrder::getStatus, PayStatus.WAIT_BUYER_PAY.getValue())

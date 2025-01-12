@@ -1,16 +1,17 @@
 package com.tianji.common.filters;
 
-
 import com.tianji.common.constants.Constant;
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+@Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @WebFilter(filterName = "requestIdFilter", urlPatterns = "/**")
 public class RequestIdFilter implements Filter {
@@ -24,7 +25,9 @@ public class RequestIdFilter implements Filter {
             // 3.存入MDC
             MDC.put(Constant.REQUEST_ID_HEADER, requestId);
             filterChain.doFilter(request, servletResponse);
-        }finally {
+        } catch (Exception e) {
+            log.error("RequestIdFilter error.", e);
+        } finally {
             // 4.移除
             MDC.clear();
         }

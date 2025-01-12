@@ -1,30 +1,35 @@
 package com.tianji.trade.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Schema(description = "订单条目中的课程信息")
 @Data
-@ApiModel(description = "订单条目中的课程信息")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderDetailVO {
-    @ApiModelProperty("订单条目id")
+    @Schema(description = "订单条目id")
     private Long id;
-    @ApiModelProperty("总订单id")
+    @Schema(description = "总订单id")
     private Long orderId;
-    @ApiModelProperty("课程id")
+    @Schema(description = "课程id")
     private Long courseId;
-    @ApiModelProperty("课程名称")
+    @Schema(description = "课程名称")
     private String name;
-    @ApiModelProperty("封面")
+    @Schema(description = "封面")
     private String coverUrl;
-    @ApiModelProperty("课程价格")
+    @Schema(description = "课程价格")
     private Integer price;
-    @ApiModelProperty("实付金额")
+    @Schema(description = "实付金额")
     private Integer realPayAmount;
-    @ApiModelProperty("退款状态")
+    @Schema(description = "退款状态")
     private Integer refundStatus;
-    @ApiModelProperty("优惠券规则")
+    @Schema(description = "优惠券规则")
     private String couponDesc;
-    @ApiModelProperty("是否可以退款")
+    @Schema(description = "是否可以退款")
     private Boolean canRefund;
 }

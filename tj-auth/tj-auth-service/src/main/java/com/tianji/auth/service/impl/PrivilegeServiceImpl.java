@@ -53,7 +53,7 @@ public class PrivilegeServiceImpl extends ServiceImpl<PrivilegeMapper, Privilege
     public void savePrivilege(Privilege p) {
         p.setMethod(p.getMethod().toUpperCase());
         // 1.判断是否存在
-        Integer count = lambdaQuery()
+        Long count = lambdaQuery()
                 .eq(Privilege::getMethod, p.getMethod())
                 .eq(Privilege::getUri, p.getUri())
                 .count();
@@ -133,7 +133,7 @@ public class PrivilegeServiceImpl extends ServiceImpl<PrivilegeMapper, Privilege
             throw new CommonException(ROLE_NOT_FOUND);
         }
         // 2.判断权限是否存在
-        Integer privilegeCount = lambdaQuery().in(Privilege::getId, privilegeIds).count();
+        int privilegeCount = lambdaQuery().in(Privilege::getId, privilegeIds).count().intValue();
         if (privilegeCount != privilegeIds.size()) {
             throw new CommonException(PRIVILEGE_NOT_FOUND);
         }

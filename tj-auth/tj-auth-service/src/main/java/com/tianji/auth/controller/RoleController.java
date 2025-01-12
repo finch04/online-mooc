@@ -5,9 +5,9 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.tianji.api.dto.auth.RoleDTO;
 import com.tianji.auth.domain.po.Role;
 import com.tianji.auth.service.IRoleService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author 虎哥
  * @since 2022-06-16
  */
-@Api(tags = "角色管理")
+@Tag(name = "角色管理")
 @RestController
 @RequestMapping("/roles")
 @RequiredArgsConstructor
@@ -28,9 +28,9 @@ public class RoleController {
 
     private final IRoleService roleService;
 
-    @ApiOperation("查询员工角色列表")
+    @Operation(summary = "查询员工角色列表")
     @GetMapping("/list")
-    public List<RoleDTO> listAllRoles(){
+    public List<RoleDTO> listAllRoles() {
         // 1.查询
         List<Role> list = roleService.list();
         if (CollectionUtil.isEmpty(list)) {
@@ -40,9 +40,9 @@ public class RoleController {
         return list.stream().map(Role::toDTO).collect(Collectors.toList());
     }
 
-    @ApiOperation("查询员工角色列表")
+    @Operation(summary = "查询员工角色列表")
     @GetMapping
-    public List<RoleDTO> listStaffRoles(){
+    public List<RoleDTO> listStaffRoles() {
         // 1.查询
         List<Role> list = roleService.lambdaQuery().eq(Role::getType, Role.RoleType.CUSTOM).list();
         if (CollectionUtil.isEmpty(list)) {
@@ -52,9 +52,9 @@ public class RoleController {
         return list.stream().map(Role::toDTO).collect(Collectors.toList());
     }
 
-    @ApiOperation("根据id查询角色")
+    @Operation(summary = "根据id查询角色")
     @GetMapping("/{id}")
-    public RoleDTO queryRoleById(@PathVariable("id") Long id){
+    public RoleDTO queryRoleById(@PathVariable("id") Long id) {
         // 1.查询
         Role role = roleService.getById(id);
         if (role == null) {
@@ -65,8 +65,7 @@ public class RoleController {
     }
 
 
-
-    @ApiOperation("新增角色")
+    @Operation(summary = "新增角色")
     @PostMapping
     public RoleDTO saveRole(@RequestBody RoleDTO roleDTO) {
         Role role = new Role(roleDTO);
@@ -78,11 +77,11 @@ public class RoleController {
         return roleDTO;
     }
 
-    @ApiOperation("修改角色信息")
+    @Operation(summary = "修改角色信息")
     @PutMapping("{id}")
     public void updateRole(
             @RequestBody RoleDTO roleDTO,
-            @ApiParam(value = "角色id", example = "1") @PathVariable("id") Long id
+            @Parameter(name = "角色id", example = "1") @PathVariable("id") Long id
     ) {
         // 1.数据转换
         Role role = new Role(roleDTO);
@@ -91,9 +90,9 @@ public class RoleController {
         roleService.updateById(role);
     }
 
-    @ApiOperation("删除角色信息")
+    @Operation(summary = "删除角色信息")
     @DeleteMapping("{id}")
-    public void deleteRole(@ApiParam(value = "角色id", example = "1") @PathVariable("id") Long id) {
+    public void deleteRole(@Parameter(name = "角色id", example = "1") @PathVariable("id") Long id) {
         roleService.deleteRole(id);
     }
 }

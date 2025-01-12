@@ -2,12 +2,6 @@ package com.tianji.data.model.po;
 
 import lombok.Data;
 
-/**
- * @ClassName TodayDataVO
- * @Author wusongsong
- * @Date 2022/10/13 9:23
- * @Version
- **/
 @Data
 public class TodayDataInfo {
     //访问量，万次单位

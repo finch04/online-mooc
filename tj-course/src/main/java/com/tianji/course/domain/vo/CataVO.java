@@ -1,46 +1,55 @@
 package com.tianji.course.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
 
 /**
- * @ClassName CataVO
- * @Author wusongsong
- * @Date 2022/7/11 16:42
- * @Version
- **/
+ * 课程目录
+ */
 @Data
-@ApiModel("课程目录")
+@Schema(description = "课程目录")
 public class CataVO {
-    @ApiModelProperty("章、节、练习id")
+    @Schema(description = "章、节、练习id", example = "1")
     private Long id;
-    @ApiModelProperty("序号")
+
+    @Schema(description = "序号", example = "1")
     private Integer index;
-    @ApiModelProperty("章节练习名称")
+
+    @Schema(description = "章节练习名称", example = "第一章")
     private String name;
-    @ApiModelProperty("课程总时长,单位秒")
+
+    @Schema(description = "课程总时长,单位秒", example = "3600")
     private Integer mediaDuration;
-    @ApiModelProperty("是否支持免费试看")
+
+    @Schema(description = "是否支持免费试看", example = "true")
     private Boolean trailer;
-    @ApiModelProperty("媒资名称")
+
+    @Schema(description = "媒资名称", example = "课程视频1")
     private String mediaName;
-    @ApiModelProperty("媒资id")
+
+    @Schema(description = "媒资id", example = "101")
     private Long mediaId;
-    @ApiModelProperty("目录类型1：章，2：节，3：测试")
+
+    @Schema(description = "目录类型1：章，2：节，3：测试", example = "1")
     private Integer type;
-    @ApiModelProperty("题目数量")
+
+    @Schema(description = "题目数量", example = "5")
     private Integer subjectNum;
-    @ApiModelProperty("题目总分")
+
+    @Schema(description = "题目总分", example = "25")
     private Integer totalScore;
-    @ApiModelProperty("是否可以修改,默认不能修改")
+
+    @Schema(description = "是否可以修改,默认不能修改", example = "false")
     private Boolean canUpdate = false;
-    @ApiModelProperty("该章的所有小节和练习")
+
+    @Schema(description = "该章的所有小节和练习")
     private List<CataVO> sections;
-    @ApiModelProperty("已上架最大序号，查看时值为空，编辑查看时小节必有值")
+
+    @Schema(description = "已上架最大序号，查看时值为空，编辑查看时小节必有值", example = "1")
     private Integer maxIndexOnShelf;
-    @ApiModelProperty("已上架小节最大序号，查看时，值为空，编辑查看时小节必有字段")
+
+    @Schema(description = "已上架小节最大序号，查看时，值为空，编辑查看时小节必有字段", example = "1")
     private Integer maxSectionIndexOnShelf;
 }

@@ -34,7 +34,8 @@ public class AccountAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 1.获取请求request信息
         ServerHttpRequest request = exchange.getRequest();
-        String method = request.getMethodValue();
+        // String method = request.getMethodValue();
+        String method = request.getMethod().name();
         String path = request.getPath().toString();
         String antPath = method + ":" + path;
 

@@ -1,7 +1,7 @@
 package com.tianji.api.dto.course;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,33 +13,35 @@ import java.util.List;
  * @version 1.0.0
  **/
 @Data
+@Schema(description = "课程简单信息")
 public class CourseSimpleInfoDTO {
-    @ApiModelProperty("课程id")
+    @Schema(description = "课程id")
     private Long id;
-    @ApiModelProperty("课程名称")
+    @Schema(description = "课程名称")
     private String name;
-    @ApiModelProperty("封面url")
+    @Schema(description = "封面url")
     private String coverUrl;
-    @ApiModelProperty("价格")
+    @Schema(description = "价格")
     private Integer price;
-    @ApiModelProperty("课程状态")
+    @Schema(description = "课程状态")
     private Integer status;
-    @ApiModelProperty("是否是免费课程")
+    @Schema(description = "是否是免费课程")
     private Boolean free;
-    @ApiModelProperty("一级分类id")
+    @Schema(description = "一级分类id")
     private Long firstCateId;
-    @ApiModelProperty("二级分类id")
+    @Schema(description = "二级分类id")
     private Long secondCateId;
-    @ApiModelProperty("三级分类id")
+    @Schema(description = "三级分类id")
     private Long thirdCateId;
-    @ApiModelProperty("小节数量")
+    @Schema(description = "小节数量")
     private Integer sectionNum;
-    @ApiModelProperty("课程购买有效期结束时间")
+    @Schema(description = "课程购买有效期结束时间")
     private LocalDateTime purchaseEndTime;
-    @ApiModelProperty("课程学习有效期，单位：月")
+    @Schema(description = "课程学习有效期，单位：月")
     private Integer validDuration;
+
     @JsonIgnore
-    public List<Long> getCategoryIds(){
+    public List<Long> getCategoryIds() {
         return List.of(firstCateId, secondCateId, thirdCateId);
     }
 }

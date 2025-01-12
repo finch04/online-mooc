@@ -2,9 +2,9 @@ package com.tianji.common.validate.annotations;
 
 import com.tianji.common.validate.EnumValidator;
 import com.tianji.common.validate.EnumValueValidator;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
 import java.lang.annotation.*;
 
 /**

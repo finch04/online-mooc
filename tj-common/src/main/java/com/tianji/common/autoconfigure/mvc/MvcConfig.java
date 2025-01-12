@@ -5,6 +5,7 @@ import com.tianji.common.autoconfigure.mvc.advice.CommonExceptionAdvice;
 import com.tianji.common.autoconfigure.mvc.advice.WrapperResponseBodyAdvice;
 import com.tianji.common.autoconfigure.mvc.converter.WrapperResponseMessageConverter;
 import com.tianji.common.filters.RequestIdFilter;
+import jakarta.servlet.Filter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.context.annotation.Bean;
@@ -12,9 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.servlet.Filter;
 
-@ConditionalOnClass({CommonExceptionAdvice.class, Filter.class})
+@ConditionalOnClass({CommonExceptionAdvice.class, Filter.class, WebMvcConfigurer.class})
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
 

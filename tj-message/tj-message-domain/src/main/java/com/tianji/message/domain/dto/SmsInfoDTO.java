@@ -1,18 +1,23 @@
 package com.tianji.message.domain.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.Map;
 
 @Data
-@ApiModel(description = "短信发送参数")
+@Schema(description = "短信发送参数")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SmsInfoDTO {
-    @ApiModelProperty("模板代号")
+    @Schema(description = "模板代号")
     private String templateCode;
-    @ApiModelProperty("手机号码")
+    @Schema(description = "手机号码")
     private Iterable<String> phones;
-    @ApiModelProperty("模板参数")
+    @Schema(description = "模板参数")
     private Map<String, String> templateParams;
 }

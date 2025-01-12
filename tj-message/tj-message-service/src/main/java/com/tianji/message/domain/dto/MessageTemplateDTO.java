@@ -1,10 +1,12 @@
 package com.tianji.message.domain.dto;
 
 import com.tianji.common.domain.dto.BaseDTO;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 /**
  * <p>
@@ -16,30 +18,33 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel(description = "短信模板")
+@Schema(description = "短信模板")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageTemplateDTO extends BaseDTO {
 
-    @ApiModelProperty("信发送模板id，新增时无需填写")
+    @Schema(description = "信发送模板id，新增时无需填写")
     private Long id;
 
-    @ApiModelProperty("第三方短信推送渠道id")
+    @Schema(description = "第三方短信推送渠道id")
     private Long platformCode;
 
-    @ApiModelProperty("第三方短信推送渠道名称")
+    @Schema(description = "第三方短信推送渠道名称")
     private String platformName;
 
-    @ApiModelProperty("短信模板名称")
+    @Schema(description = "短信模板名称")
     private String name;
 
-    @ApiModelProperty("短信模板预览内容")
+    @Schema(description = "短信模板预览内容")
     private String content;
 
-    @ApiModelProperty("第三方平台短信签名")
+    @Schema(description = "第三方平台短信签名")
     private String signName;
 
-    @ApiModelProperty("第三方平台短信模板code")
+    @Schema(description = "第三方平台短信模板code")
     private String thirdTemplateCode;
 
-    @ApiModelProperty("模板状态:  0-草稿，1-使用中，2-停用")
+    @Schema(description = "模板状态:  0-草稿，1-使用中，2-停用")
     private Integer status;
 }

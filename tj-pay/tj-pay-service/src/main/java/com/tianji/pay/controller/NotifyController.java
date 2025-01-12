@@ -4,6 +4,8 @@ import com.tianji.common.utils.StringUtils;
 import com.tianji.pay.sdk.constants.PayConstants;
 import com.tianji.pay.service.INotifyService;
 import com.wechat.pay.contrib.apache.httpclient.notification.NotificationRequest;
+import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,13 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ApiIgnore
+@Hidden
 @RestController
 @RequestMapping("notify")
 @RequiredArgsConstructor

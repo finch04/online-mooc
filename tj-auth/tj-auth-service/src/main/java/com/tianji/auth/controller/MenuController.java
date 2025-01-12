@@ -6,9 +6,9 @@ import com.tianji.auth.domain.dto.MenuDTO;
 import com.tianji.auth.domain.po.Menu;
 import com.tianji.auth.domain.vo.MenuOptionVO;
 import com.tianji.auth.service.IMenuService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/menus")
-@Api(tags = "菜单管理")
+@Tag(name = "菜单管理")
 @RequiredArgsConstructor
 public class MenuController {
 
@@ -40,9 +40,9 @@ public class MenuController {
      * @return 菜单集合
      */
     @GetMapping("/parent/{pid}")
-    @ApiOperation("根据父菜单id查询子菜单")
+    @Operation(summary = "根据父菜单id查询子菜单")
     public List<MenuOptionVO> listMenusByParent(
-            @ApiParam(value = "父菜单id", example = "0") @PathVariable("pid") Long pid){
+            @Parameter(name = "父菜单id", example = "0") @PathVariable("pid") Long pid){
         // 1.根据父id查询
         List<Menu> list = menuService.lambdaQuery().eq(Menu::getParentId, pid).list();
         // 2.非空判断
@@ -54,8 +54,8 @@ public class MenuController {
     }
 
     @GetMapping("{id}")
-    @ApiOperation("根据id查询菜单")
-    public MenuOptionVO getMenuById(@ApiParam(value = "菜单id", example = "1") @PathVariable("id") Long id) {
+    @Operation(summary ="根据id查询菜单")
+    public MenuOptionVO getMenuById(@Parameter(name = "菜单id", example = "1") @PathVariable("id") Long id) {
         Menu menu = menuService.getById(id);
         if (menu == null) {
             return null;
@@ -68,7 +68,7 @@ public class MenuController {
      * @return 菜单列表，组成树结构
      */
     @GetMapping
-    @ApiOperation("查询菜单，按照多级菜单组成树结构")
+    @Operation(summary = "查询菜单，按照多级菜单组成树结构")
     public List<MenuOptionVO> listMenuTree(){
         // 1.查询所有菜单
         List<Menu> menus = menuService.list();
@@ -102,7 +102,7 @@ public class MenuController {
      * @return 菜单列表，组成树结构
      */
     @GetMapping("me")
-    @ApiOperation("查询我的菜单，按照多级菜单组成树结构")
+    @Operation(summary = "查询我的菜单，按照多级菜单组成树结构")
     public List<MenuOptionVO> listMenuTreeByUser(){
         // 1.查询所有菜单
         List<Menu> menus = menuService.listMenuByUser();
@@ -110,7 +110,7 @@ public class MenuController {
     }
 
     @PostMapping
-    @ApiOperation("新增菜单")
+    @Operation(summary = "新增菜单")
     public void saveMenu(@RequestBody MenuDTO menuDTO){
         // 1.数据转换
         Menu menu = new Menu(menuDTO);
@@ -119,34 +119,34 @@ public class MenuController {
     }
 
     @PutMapping("{id}")
-    @ApiOperation("更新菜单")
+    @Operation(summary = "更新菜单")
     public void updateMenu(
             @RequestBody MenuDTO menuDTO,
-            @ApiParam(value = "菜单id", example = "1")@PathVariable("id") Long id) {
+            @Parameter(name = "菜单id", example = "1")@PathVariable("id") Long id) {
         menuDTO.setId(id);
         menuService.updateById(new Menu(menuDTO));
     }
 
     @DeleteMapping("{id}")
-    @ApiOperation("根据id删除菜单")
+    @Operation(summary = "根据id删除菜单")
     public void deleteMenu(
-            @ApiParam(value = "菜单id", example = "1") @PathVariable("id") Long id) {
+            @Parameter(name = "菜单id", example = "1") @PathVariable("id") Long id) {
         menuService.deleteMenu(id);
     }
 
     @PostMapping("/role/{roleId}")
-    @ApiOperation("绑定角色与菜单权限")
+    @Operation(summary = "绑定角色与菜单权限")
     public void bindRoleMenus(
-            @ApiParam(value = "角色id", example = "1") @PathVariable("roleId") Long roleId,
-            @ApiParam(value = "菜单id集合") List<Long> menuIds){
+            @Parameter(name = "角色id", example = "1") @PathVariable("roleId") Long roleId,
+            @Parameter(name = "菜单id集合") List<Long> menuIds){
         menuService.bindRoleMenus(roleId, menuIds);
     }
 
     @DeleteMapping("/role/{roleId}")
-    @ApiOperation("解除角色的菜单权限")
+    @Operation(summary = "解除角色的菜单权限")
     public void deleteRoleMenus(
-            @ApiParam(value = "角色id", example = "1") @PathVariable("roleId") Long roleId,
-            @ApiParam(value = "菜单id集合") List<Long> menuIds){
+            @Parameter(name = "角色id", example = "1") @PathVariable("roleId") Long roleId,
+            @Parameter(name = "菜单id集合") List<Long> menuIds){
         menuService.deleteRoleMenus(roleId, menuIds);
     }
 }

@@ -1,38 +1,43 @@
 package com.tianji.trade.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "退款信息")
 @Data
-@ApiModel(description = "退款信息")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RefundApplyPageVO {
-    @ApiModelProperty("退款id")
+    @Schema(description = "退款id")
     private Long id;
-    @ApiModelProperty("订单明细id")
+    @Schema(description = "订单明细id")
     private Long orderDetailId;
-    @ApiModelProperty("订单id")
+    @Schema(description = "订单id")
     private Long orderId;
-    @ApiModelProperty("退款金额")
+    @Schema(description = "退款金额")
     private Integer refundAmount;
-    @ApiModelProperty("申请人")
+    @Schema(description = "申请人")
     private String proposerName;
-    @ApiModelProperty("申请人手机号")
+    @Schema(description = "申请人手机号")
     private String proposerMobile;
-    @ApiModelProperty("退款申请状态")
+    @Schema(description = "退款申请状态")
     private Integer status;
-    @ApiModelProperty("退款申请状态描述")
+    @Schema(description = "退款申请状态描述")
     private String refundStatusDesc;
-    @ApiModelProperty("退款申请时间")
+    @Schema(description = "退款申请时间")
     private LocalDateTime createTime;
 
-    @ApiModelProperty("审批人")
+    @Schema(description = "审批人")
     private String approverName;
-    @ApiModelProperty("审批时间")
+    @Schema(description = "审批时间")
     private String approveTime;
 
-    @ApiModelProperty("退款成功时间")
+    @Schema(description = "退款成功时间")
     private LocalDateTime refundSuccessTime;
 }

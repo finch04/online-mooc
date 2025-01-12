@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.Convert;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,13 +18,13 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "分页结果")
+@Schema(description = "分页结果")
 public class PageDTO<T> {
-    @ApiModelProperty("总条数")
+    @Schema(description = "总条数")
     protected Long total;
-    @ApiModelProperty("总页码数")
+    @Schema(description = "总页码数")
     protected Long pages;
-    @ApiModelProperty("当前页数据")
+    @Schema(description = "当前页数据")
     protected List<T> list;
 
     public static <T> PageDTO<T> empty(Long total, Long pages) {
@@ -66,7 +65,7 @@ public class PageDTO<T> {
         return new PageDTO<>(page.getTotal(), page.getPages(), BeanUtils.copyList(page.getRecords(), clazz, convert));
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @JsonIgnore
     public boolean isEmpty(){
         return list == null || list.size() == 0;

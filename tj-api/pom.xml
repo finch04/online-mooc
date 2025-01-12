@@ -12,8 +12,8 @@
     <artifactId>tj-api</artifactId>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -21,15 +21,19 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
         <!--httpClient的依赖 -->
-        <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-httpclient</artifactId>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>io.github.openfeign</groupId>-->
+        <!--    <artifactId>feign-httpclient</artifactId>-->
+        <!--</dependency>-->
         <!--common-->
         <dependency>
             <groupId>com.tianji</groupId>
             <artifactId>tj-common</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
 		<dependency>
             <groupId>org.hibernate.validator</groupId>

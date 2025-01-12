@@ -1,5 +1,6 @@
 package com.tianji.remark.service.impl;
 
+import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.dto.remark.LikedTimesDTO;
@@ -41,14 +42,14 @@ public class LikedRecordServiceImpl extends ServiceImpl<LikedRecordMapper, Liked
             return;
         }
         // 3.如果执行成功，统计点赞总数
-        Integer likedTimes = lambdaQuery()
+        Long likedTimes = lambdaQuery()
                 .eq(LikedRecord::getBizId, recordDTO.getBizId())
                 .count();
         // 4.发送MQ通知
         mqHelper.send(
                 LIKE_RECORD_EXCHANGE,
                 StringUtils.format(LIKED_TIMES_KEY_TEMPLATE, recordDTO.getBizType()),
-                LikedTimesDTO.of(recordDTO.getBizId(), likedTimes));
+                LikedTimesDTO.of(recordDTO.getBizId(), Convert.toInt(likedTimes)));
     }
 
     @Override
@@ -78,7 +79,7 @@ public class LikedRecordServiceImpl extends ServiceImpl<LikedRecordMapper, Liked
     private boolean like(LikeRecordFormDTO recordDTO) {
         Long userId = UserContext.getUser();
         // 1.查询点赞记录
-        Integer count = lambdaQuery()
+        Long count = lambdaQuery()
                 .eq(LikedRecord::getUserId, userId)
                 .eq(LikedRecord::getBizId, recordDTO.getBizId())
                 .count();

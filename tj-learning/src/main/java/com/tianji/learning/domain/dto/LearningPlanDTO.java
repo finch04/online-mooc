@@ -1,22 +1,25 @@
 package com.tianji.learning.domain.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
+/**
+ * 学习计划表单实体
+ */
 @Data
-@ApiModel(description = "学习计划表单实体")
+@Schema(description = "学习计划表单实体")
 public class LearningPlanDTO {
     @NotNull
-    @ApiModelProperty("课程表id")
+    @Schema(description = "课程表id")
     @Min(1)
     private Long courseId;
+
     @NotNull
     @Range(min = 1, max = 50)
-    @ApiModelProperty("每周学习频率")
+    @Schema(description = "每周学习频率")
     private Integer freq;
 }

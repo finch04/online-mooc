@@ -12,9 +12,9 @@ import com.tianji.common.utils.StringUtils;
 import com.tianji.message.domain.po.SmsThirdPlatform;
 import com.tianji.message.mapper.SmsThirdPlatformMapper;
 import com.tianji.message.service.ISmsThirdPlatformService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**

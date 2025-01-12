@@ -1,22 +1,28 @@
 package com.tianji.course.domain.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
 
+/**
+ * 章信息
+ */
 @Data
-@ApiModel(description = "章信息")
+@Schema(description = "章信息")
 public class ChapterVO {
-    @ApiModelProperty("章id")
+    @Schema(description = "章id", example = "1")
     private Long id;
-    @ApiModelProperty("章索引")
+
+    @Schema(description = "章索引", example = "1")
     private Integer index;
-    @ApiModelProperty("章名称")
+
+    @Schema(description = "章名称", example = "第一章")
     private String name;
-    @ApiModelProperty("本章视频总时长")
+
+    @Schema(description = "本章视频总时长", example = "3600")
     private Integer mediaDuration;
 
+    @Schema(description = "小节列表")
     private List<SectionVO> sections;
 }
