@@ -24,6 +24,7 @@
         <module>tj-promotion</module>
         <module>tj-data</module>
         <module>tj-remark</module>
+        <module>tj-aigc</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -44,6 +45,7 @@
         <org.projectlombok.version>1.18.36</org.projectlombok.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.2</spring-cloud-alibaba.version>
+        <spring-ai.version>1.0.0-M4</spring-ai.version>
         <mybatis-plus.version>3.5.9</mybatis-plus.version>
         <hutool.version>5.7.17</hutool.version>
         <swagger.version>2.2.19</swagger.version>

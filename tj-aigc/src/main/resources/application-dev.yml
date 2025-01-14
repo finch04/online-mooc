@@ -10,7 +10,6 @@ spring:
         ip: 192.168.150.101
   config:
     import:
-      - nacos:${spring.application.name}.yaml # 导入本服务的配置
       - nacos:shared-spring.yaml # 共享spring配置
       - nacos:shared-redis.yaml # 共享redis配置
       - nacos:shared-mybatis.yaml # 共享mybatis配置

@@ -1,0 +1,38 @@
+server:
+  port: 8094  #端口
+  tomcat:
+    uri-encoding: UTF-8   #服务编码
+spring:
+  profiles:
+    active: local
+  application:
+    name: aigc-service
+  main:
+    allow-circular-references: true
+tj:
+  swagger:
+    enable: true
+    package-path: com.tianji.aigc.controller
+    title: 天机学堂 - AIGC接口文档
+    description: 该服务包含AI相关功能
+    contact-name: 传智教育·研究院
+    contact-url: http://www.itcast.cn/
+    contact-email: zhangzhijun@itcast.cn
+    version: v1.0
+    enableResponseWrap: true
+  auth:
+    resource:
+      enable: true
+  ai:
+    session:
+      title: Hello，我是天机AI助理
+      describe: 我是由天机学堂倾力打造的智能助理，我不仅能推荐课程、答疑解惑，还能为您激发创意、畅聊心事。
+      examples:
+        - title: "课程推荐"
+          describe: "能帮我推荐一个合适的课吗？"
+        - title: "课程推荐"
+          describe: "最近有什么新课吗？"
+        - title: "学习安排"
+          describe: "根据我的学习时长、习惯、课程，帮我制定下一个阶段的学习计划。"
+        - title: "功能介绍"
+          describe: "天机AI助理能为我做什么？"
