@@ -60,6 +60,7 @@ if [ "$DEBUG_PORT" = "0" ]; then
    -e JAVA_OPTS="${JAVA_OPTS}" \
    -e SERVER_PORT=8080 \
    -e SPRING_PROFILES_ACTIVE=test \
+   -e SPRING_CLOUD_NACOS_DISCOVERY_PORT=${PORT} \
    --memory 300m --memory-swap -1 \
    --network heima-net ${IMAGE_NAME} \
   || exit 1
@@ -71,6 +72,7 @@ else
    -e JAVA_OPTS="${JAVA_OPTS}" \
    -e SERVER_PORT=8080 \
    -e SPRING_PROFILES_ACTIVE=test \
+   -e SPRING_CLOUD_NACOS_DISCOVERY_PORT=${PORT} \
    --network heima-net ${IMAGE_NAME} \
   || exit 1
 fi
