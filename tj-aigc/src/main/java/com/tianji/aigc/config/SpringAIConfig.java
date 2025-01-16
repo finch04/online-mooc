@@ -20,12 +20,12 @@ public class SpringAIConfig {
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder, ChatMemory chatMemory, VectorStore vectorStore) {
         return builder
-                .defaultSystem(systemResource)
+                // .defaultSystem(systemResource)
                 .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory),//会话记忆
                         new SimpleLoggerAdvisor() //输出日志
                         //         new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults())
                 )
-                // .defaultFunctions("orderFunction")
+                // .defaultFunctions("courseFunction")
                 .build();
     }
 

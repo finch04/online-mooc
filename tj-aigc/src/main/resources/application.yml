@@ -23,16 +23,3 @@ tj:
   auth:
     resource:
       enable: true
-  ai:
-    session:
-      title: Hello，我是天机AI助理
-      describe: 我是由天机学堂倾力打造的智能助理，我不仅能推荐课程、答疑解惑，还能为您激发创意、畅聊心事。
-      examples:
-        - title: "课程推荐"
-          describe: "能帮我推荐一个合适的课吗？"
-        - title: "课程推荐"
-          describe: "最近有什么新课吗？"
-        - title: "学习安排"
-          describe: "根据我的学习时长、习惯、课程，帮我制定下一个阶段的学习计划。"
-        - title: "功能介绍"
-          describe: "天机AI助理能为我做什么？"

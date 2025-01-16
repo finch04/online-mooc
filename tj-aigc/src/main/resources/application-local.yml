@@ -20,10 +20,10 @@ spring:
   ai:
     openai:
       base-url: https://api.chatanywhere.tech
-      api-key: ${OPENAI_API_KEY}
+      api-key: ${tj.ai.openai.key}
       chat:
         options:
-          model: "gpt-3.5-turbo"
+          model: "gpt-3.5-turbo-ca"
         enabled: true
       embedding:
         options:
