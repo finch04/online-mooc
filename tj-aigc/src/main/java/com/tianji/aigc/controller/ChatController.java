@@ -23,4 +23,9 @@ public class ChatController {
         log.info("+++++++++++" + question+"   ++++ " + sessionId);
         return this.chatService.chat(question, sessionId);
     }
+
+    @PostMapping("/chat/stop")
+    public void stop(@RequestParam("sessionId") String sessionId) {
+        this.chatService.stop(sessionId);
+    }
 }

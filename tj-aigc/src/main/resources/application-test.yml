@@ -45,3 +45,9 @@ spring:
 logging:
   level:
     com.tianji: debug
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG

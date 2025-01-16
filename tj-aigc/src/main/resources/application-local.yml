@@ -18,17 +18,26 @@ spring:
   elasticsearch:
     uris: http://192.168.150.101:19200
   ai:
+    dashscope:
+      api-key: ${tj.ai.dashscope.key}
+      chat:
+        options:
+          model: qwen2.5-3b-instruct
+        enabled: true
+      embedding:
+        enabled: true
     openai:
       base-url: https://api.chatanywhere.tech
       api-key: ${tj.ai.openai.key}
       chat:
         options:
           model: "gpt-3.5-turbo-ca"
-        enabled: true
+        #          model: "gpt-3.5-turbo"
+        enabled: false
       embedding:
         options:
           model: text-embedding-3-small
-        enabled: true
+        enabled: false
     vectorstore:
       elasticsearch:
         initialize-schema: true
@@ -36,3 +45,9 @@ spring:
 logging:
   level:
     com.tianji: debug
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG

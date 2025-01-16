@@ -24,4 +24,5 @@ public interface ChatService {
         return UserContext.getUser() + "_" + sessionId;
     }
 
+    void stop(String sessionId);
 }
