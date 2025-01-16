@@ -20,7 +20,6 @@ public class ChatController {
     @NoWrapper // 自定义注解，记过不进行包装
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chat(@RequestParam("q") String question, @RequestParam("sessionId") String sessionId) {
-        log.info("+++++++++++" + question+"   ++++ " + sessionId);
         return this.chatService.chat(question, sessionId);
     }
 

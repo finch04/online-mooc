@@ -42,19 +42,19 @@ spring:
       elasticsearch:
         initialize-schema: true
         dimensions: 1536
-logging:
-  level:
-#    com.tianji: debug
-    com:
-      alibaba: debug
-    org:
-      springframework:
-        ai:
-          chat:
-            client:
-              advisor: DEBUG
-      apache:
-        hc:
-          client5:
-            http:
-              wire: debug
+#logging:
+#  level:
+##    com.tianji: debug
+#    com:
+#      alibaba: debug
+#    org:
+#      springframework:
+#        ai:
+#          chat:
+#            client:
+#              advisor: DEBUG
+#      apache:
+#        hc:
+#          client5:
+#            http:
+#              wire: debug
