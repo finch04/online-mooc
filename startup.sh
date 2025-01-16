@@ -59,7 +59,6 @@ if [ "$DEBUG_PORT" = "0" ]; then
    -p "${PORT}:${PORT}" \
    -e JAVA_OPTS="${JAVA_OPTS}" \
    -e SPRING_PROFILES_ACTIVE=test \
-   --memory 300m --memory-swap -1 \
    --network heima-net ${IMAGE_NAME} \
   || exit 1
 else
