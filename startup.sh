@@ -56,23 +56,19 @@ echo "begin to create container ${CONTAINER_NAME}，port: ${PORT} ！！"
 if [ "$DEBUG_PORT" = "0" ]; then
   echo "run in normal mode"
   docker run -d --name ${CONTAINER_NAME} \
-   -p "${PORT}:8080" \
+   -p "${PORT}:${PORT}" \
    -e JAVA_OPTS="${JAVA_OPTS}" \
-   -e SERVER_PORT=8080 \
    -e SPRING_PROFILES_ACTIVE=test \
-   -e SPRING_CLOUD_NACOS_DISCOVERY_PORT=${PORT} \
    --memory 300m --memory-swap -1 \
    --network heima-net ${IMAGE_NAME} \
   || exit 1
 else
   echo "run in debug mode"
   docker run -d --name ${CONTAINER_NAME} \
-   -p "${PORT}:8080" \
+   -p "${PORT}:${PORT}" \
    -p ${DEBUG_PORT}:5005 \
    -e JAVA_OPTS="${JAVA_OPTS}" \
-   -e SERVER_PORT=8080 \
    -e SPRING_PROFILES_ACTIVE=test \
-   -e SPRING_CLOUD_NACOS_DISCOVERY_PORT=${PORT} \
    --network heima-net ${IMAGE_NAME} \
   || exit 1
 fi
