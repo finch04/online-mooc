@@ -26,6 +26,7 @@ spring:
         enabled: true
       embedding:
         enabled: true
+      read-timeout: 20000
     openai:
       base-url: https://api.chatanywhere.tech
       api-key: ${tj.ai.openai.key}
@@ -44,10 +45,17 @@ spring:
         dimensions: 1536
 logging:
   level:
-    com.tianji: debug
+    #    com.tianji: debug
+    com:
+      alibaba: debug
     org:
       springframework:
         ai:
           chat:
             client:
               advisor: DEBUG
+      apache:
+        hc:
+          client5:
+            http:
+              wire: debug

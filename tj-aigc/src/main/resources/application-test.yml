@@ -23,9 +23,9 @@ spring:
       chat:
         options:
           model: qwen2.5-3b-instruct
-        enabled: true
+        enabled: false
       embedding:
-        enabled: true
+        enabled: false
     openai:
       base-url: https://api.chatanywhere.tech
       api-key: ${tj.ai.openai.key}
@@ -33,21 +33,28 @@ spring:
         options:
           model: "gpt-3.5-turbo-ca"
 #          model: "gpt-3.5-turbo"
-        enabled: false
+        enabled: true
       embedding:
         options:
           model: text-embedding-3-small
-        enabled: false
+        enabled: true
     vectorstore:
       elasticsearch:
         initialize-schema: true
         dimensions: 1536
 logging:
   level:
-    com.tianji: debug
+#    com.tianji: debug
+    com:
+      alibaba: debug
     org:
       springframework:
         ai:
           chat:
             client:
               advisor: DEBUG
+      apache:
+        hc:
+          client5:
+            http:
+              wire: debug
