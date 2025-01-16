@@ -23,7 +23,7 @@ public class ChatServiceImpl implements ChatService {
                 .user(question)
                 .stream()
                 .content()
-                // .doOnNext(System.out::println) // 打印输出
+                .doOnNext(System.out::println) // 打印输出
                 .concatWith(Flux.just("&complete&"));
     }
 }
