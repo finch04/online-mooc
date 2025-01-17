@@ -36,9 +36,9 @@ tj:
       endpoint: "*******"
       bucket: "*******"
   tencent:
-    appId: 1312394356
-    secretId: AKIDDG3arrZ0B42sXzEOM8h182jDVbVDiAPS
-    secretKey: uc7RaXIqDPOAk9MAnAG5duvf8LHvIODl
+    appId: 1259405500
+    secretId: AKIDTqzwf5UfdNs79weDetuhGkwAE3hFdnlV
+    secretKey: X4SdZ6Xs1vc9RTItHSRDl6FD0c0BKGyT
     vod:
       enable: true
       vodValidSeconds: 7776000
@@ -48,7 +48,7 @@ tj:
       pfcg: "basicDrmPreset"
     cos:
       enable: true
-      region: "ap-shanghai"
-      bucket: wisehub
+      region: "ap-nanjing"
+      bucket: tianji
       multipartUploadThreshold: 5242880 # 5mb，触发分片上传的阈值
       minimumUploadPartSize: 1048576 # 1mb，分片的最小大小

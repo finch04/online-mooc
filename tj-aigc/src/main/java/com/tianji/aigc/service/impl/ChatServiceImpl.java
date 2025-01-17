@@ -1,6 +1,7 @@
 package com.tianji.aigc.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import com.tianji.aigc.functions.CourseFunction;
 import com.tianji.aigc.service.ChatService;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
@@ -25,6 +26,7 @@ public class ChatServiceImpl implements ChatService {
         return this.chatClient.prompt()
                 .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
                 .system(promptSystem -> promptSystem.param("now", DateUtil.now()))
+                // .functions("courseFunction")
                 .user(question)
                 .stream()
                 .content()
@@ -34,8 +36,8 @@ public class ChatServiceImpl implements ChatService {
                 .doOnComplete(() -> {
                     GENERATE_STATUS.remove(sessionId);
                 }) //输出结束，清除标记
-                .doOnNext(System.out::println) // 打印输出
-                .takeWhile(s -> GENERATE_STATUS.containsKey(sessionId))
+                // .doOnNext(System.out::println) // 打印输出
+                .takeWhile(s -> GENERATE_STATUS.get(sessionId))
                 .concatWith(Flux.just("&complete&"));
     }
 

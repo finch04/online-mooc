@@ -1,8 +1,11 @@
 package com.tianji.aigc.functions;
 
+import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.tianji.api.dto.course.CourseBaseInfoDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Optional;
 
 public class Response {
 
@@ -25,7 +28,8 @@ public class Response {
         public static CourseInfo of(CourseBaseInfoDTO courseBaseInfoDTO) {
             return new CourseInfo(courseBaseInfoDTO.getId(),
                     courseBaseInfoDTO.getName(),
-                    courseBaseInfoDTO.getPrice() / 100,
+                    Optional.ofNullable(courseBaseInfoDTO.getPrice())
+                            .map(num -> num / 100).orElse(0),
                     courseBaseInfoDTO.getStatus(),
                     courseBaseInfoDTO.getUsePeople(),
                     courseBaseInfoDTO.getDetail(),

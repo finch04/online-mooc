@@ -22,10 +22,13 @@ spring:
       api-key: ${tj.ai.dashscope.key}
       chat:
         options:
-          model: qwen2.5-3b-instruct
-        enabled: true
+          model: qwen-max
+#          model: qwen2.5-3b-instruct
+        enabled: false
       embedding:
-        enabled: true
+        enabled: false
+        options:
+          model: text-embedding-v1
       read-timeout: 20000
     openai:
       base-url: https://api.chatanywhere.tech
@@ -34,11 +37,11 @@ spring:
         options:
           model: "gpt-3.5-turbo-ca"
         #          model: "gpt-3.5-turbo"
-        enabled: false
+        enabled: true
       embedding:
         options:
           model: text-embedding-3-small
-        enabled: false
+        enabled: true
     vectorstore:
       elasticsearch:
         initialize-schema: true
