@@ -28,7 +28,8 @@ public class PullEventTask {
     private final VodClient vodClient;
     private final IMediaService mediaService;
 
-    @Scheduled(fixedDelay = 10000)
+    // TODO 暂时注释掉，因为没有配置好
+    // @Scheduled(fixedDelay = 10000)
     public void pullEvent() {
         // 1.准备请求参数
         PullEventsRequest req = new PullEventsRequest();
