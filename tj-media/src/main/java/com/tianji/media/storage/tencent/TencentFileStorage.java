@@ -1,5 +1,6 @@
 package com.tianji.media.storage.tencent;
 
+import cn.hutool.core.util.StrUtil;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.AssertUtils;
@@ -25,11 +26,13 @@ public class TencentFileStorage implements IFileStorage {
     private final COSClient cosClient;
     private final TransferManager transferManager;
     private final String bucketName;
+    private final String region;
 
     public TencentFileStorage(COSClient tencentCosClient, TransferManager transferManager, TencentProperties properties) {
         this.cosClient = tencentCosClient;
         this.transferManager = transferManager;
         this.bucketName = properties.getCos().getBucket() + "-" + properties.getAppId();
+        this.region = properties.getCos().getRegion();
     }
 
     @Override
@@ -51,8 +54,13 @@ public class TencentFileStorage implements IFileStorage {
             Upload upload = transferManager.upload(putObjectRequest);
             // 5.等待结果
             UploadResult result = upload.waitForUploadResult();
-            // 6.返回信息
-            return result.getRequestId();
+            // 6.返回信息 TODO 改变原有的返回值，返回文件访问路径，不再返回requestId
+            // return result.getRequestId();
+            // https://tianji-1259405500.cos.ap-nanjing.myqcloud.com/f00076a59de6410d8262ca48c1c64ec9.png
+            return StrUtil.format("https://{}.cos.{}.myqcloud.com/{}",
+                    this.bucketName,
+                    this.region,
+                    key);
         } catch (Exception e) {
             log.error("上传文件[{}]时发生异常：", key, e);
             throw new CommonException("文件上传异常。", e);
@@ -94,11 +102,11 @@ public class TencentFileStorage implements IFileStorage {
     @Override
     public void deleteFiles(List<String> keys) {
         // 1.数据校验
-        if(CollUtils.isEmpty(keys)){
+        if (CollUtils.isEmpty(keys)) {
             return;
         }
         AssertUtils.isNotBlank(bucketName, BUCKET_NAME_IS_NULL);
-        if(keys.size() > 1000){
+        if (keys.size() > 1000) {
             throw new BadRequestException(FILE_KEY_TOO_MANY);
         }
         // 2.准备request

@@ -59,7 +59,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
             fileInfo.setFilename(originalFilename);
             fileInfo.setKey(filename);
             fileInfo.setStatus(FileStatus.UPLOADED);
-            fileInfo.setRequestId(requestId);
+            // TODO 不再保存请求id
+            // fileInfo.setRequestId(requestId);
             fileInfo.setPlatform(properties.getFile());
             save(fileInfo);
         } catch (Exception e) {
@@ -70,7 +71,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         // 6.返回
         FileDTO fileDTO = new FileDTO();
         fileDTO.setId(fileInfo.getId());
-        fileDTO.setPath(fileInfo.getPlatform().getPath() + filename);
+        // fileDTO.setPath(fileInfo.getPlatform().getPath() + filename);
+        fileDTO.setPath(requestId);
         fileDTO.setFilename(originalFilename);
         return fileDTO;
     }
