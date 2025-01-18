@@ -2,7 +2,7 @@ package com.tianji.aigc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.IdUtil;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.aigc.config.SessionProperties;
 import com.tianji.aigc.entity.ChatSession;
@@ -42,7 +42,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     public void updateTitle(String sessionId, String title) {
         //更新数据
         super.lambdaUpdate()
-                .set(ChatSession::getTitle, title)
+                // 设置更新条件, 更新字段为title(最多设置前100个字符)，更新条件为sessionId和userId
+                .set(ChatSession::getTitle, StrUtil.sub(title, 0, 100))
                 .eq(ChatSession::getSessionId, sessionId)
                 .eq(ChatSession::getUserId, UserContext.getUser())
                 .isNull(ChatSession::getTitle)
