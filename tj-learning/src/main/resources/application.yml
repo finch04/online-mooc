@@ -22,4 +22,4 @@ tj:
     database: tj_learning
   auth:
     resource:
-      enable: true
+      enable: false
