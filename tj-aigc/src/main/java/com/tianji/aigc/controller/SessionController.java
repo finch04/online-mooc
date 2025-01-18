@@ -1,25 +1,42 @@
 package com.tianji.aigc.controller;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.IdUtil;
-import com.tianji.aigc.config.SessionProperties;
+import com.tianji.aigc.service.ChatSessionService;
+import com.tianji.aigc.vo.ChatSessionVO;
 import com.tianji.aigc.vo.SessionVO;
-import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
+@RequestMapping("/session")
+@RequiredArgsConstructor
 public class SessionController {
 
-    @Resource
-    private SessionProperties sessionProperties;
+    private final ChatSessionService chatSessionService;
 
-    @PostMapping("/session")
+    /**
+     * 新建会话
+     */
+    @PostMapping
     public SessionVO createSession() {
-        SessionVO sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
-        // 随机生成sessionId
-        sessionVO.setSessionId(IdUtil.fastSimpleUUID());
-        return sessionVO;
+        return this.chatSessionService.createSession();
     }
 
+    /**
+     * 第一次对话时，需要保存标题数据
+     */
+    @PutMapping
+    public void updateTitle(@RequestParam("sessionId") String sessionId,
+                            @RequestParam("title") String title) {
+        this.chatSessionService.updateTitle(sessionId, title);
+    }
+
+    /**
+     * 查询历史会话列表
+     */
+    @GetMapping("/history")
+    public List<ChatSessionVO> queryHistorySession() {
+        return this.chatSessionService.queryHistorySession();
+    }
 }

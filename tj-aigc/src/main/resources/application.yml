@@ -23,3 +23,5 @@ tj:
   auth:
     resource:
       enable: true
+  jdbc:
+    database: tj_aigc
