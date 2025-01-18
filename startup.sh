@@ -59,7 +59,7 @@ if [ "$DEBUG_PORT" = "0" ]; then
    -p "${PORT}:${PORT}" \
    -e JAVA_OPTS="${JAVA_OPTS}" \
    -e SPRING_PROFILES_ACTIVE=test \
-   --network heima-net ${IMAGE_NAME} \
+   ${IMAGE_NAME} \
   || exit 1
 else
   echo "run in debug mode"
@@ -68,7 +68,7 @@ else
    -p ${DEBUG_PORT}:5005 \
    -e JAVA_OPTS="${JAVA_OPTS}" \
    -e SPRING_PROFILES_ACTIVE=test \
-   --network heima-net ${IMAGE_NAME} \
+   ${IMAGE_NAME} \
   || exit 1
 fi
 echo "container is running now !! ^_^"
