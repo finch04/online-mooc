@@ -57,6 +57,7 @@ if [ "$DEBUG_PORT" = "0" ]; then
   echo "run in normal mode"
   docker run -d --name ${CONTAINER_NAME} \
    -p "${PORT}:${PORT}" \
+   --restart=always \
    -e JAVA_OPTS="${JAVA_OPTS}" \
    -e SPRING_PROFILES_ACTIVE=test \
    ${IMAGE_NAME} \
@@ -65,6 +66,7 @@ else
   echo "run in debug mode"
   docker run -d --name ${CONTAINER_NAME} \
    -p "${PORT}:${PORT}" \
+   --restart=always \
    -p ${DEBUG_PORT}:5005 \
    -e JAVA_OPTS="${JAVA_OPTS}" \
    -e SPRING_PROFILES_ACTIVE=test \
