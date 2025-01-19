@@ -1,5 +1,7 @@
 package com.tianji.aigc.controller;
 
+import cn.hutool.core.collection.CollStreamUtil;
+import com.tianji.common.constants.ErrorInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -24,13 +26,13 @@ public class EmbeddingController {
     }
 
     @PostMapping
-    public void saveVectorStore(@RequestParam("message") String message) {
+    public void saveVectorStore(@RequestParam("messages") List<String> messages) {
         //构建文档
-        Document document = Document.builder()
-                .withContent(message)
-                .build();
+        List<Document> documents = CollStreamUtil.toList(messages, message -> Document.builder()
+                .text(message)
+                .build());
         //存储到向量数据库中
-        this.vectorStore.add(List.of(document));
+        this.vectorStore.add(documents);
     }
 
     @DeleteMapping
@@ -46,6 +48,6 @@ public class EmbeddingController {
 
     @GetMapping("/search/all")
     public List<Document> searchAll() {
-        return this.vectorStore.similaritySearch(SearchRequest.query("*"));
+        return this.vectorStore.similaritySearch(SearchRequest.builder().query("").build());
     }
 }

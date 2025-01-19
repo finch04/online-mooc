@@ -25,9 +25,9 @@ spring:
         options:
           model: qwen-max
 #          model: qwen2.5-3b-instruct
-        enabled: false
+        enabled: true
       embedding:
-        enabled: false
+        enabled: true
         options:
           model: text-embedding-v1
       read-timeout: 20000
@@ -38,11 +38,11 @@ spring:
         options:
           model: "gpt-3.5-turbo-ca"
         #          model: "gpt-3.5-turbo"
-        enabled: true
+        enabled: false
       embedding:
         options:
           model: text-embedding-3-small
-        enabled: true
+        enabled: false
     vectorstore:
       elasticsearch:
         initialize-schema: true

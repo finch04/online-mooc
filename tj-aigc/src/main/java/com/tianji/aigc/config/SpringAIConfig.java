@@ -4,7 +4,6 @@ import com.tianji.aigc.memory.RedisChatMemory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -25,7 +24,7 @@ public class SpringAIConfig {
                 .defaultSystem(systemResource)
                 .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory),//会话记忆
                         // new SimpleLoggerAdvisor(), //输出日志
-                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults())
+                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").build())
                 )
                 .defaultFunctions("courseFunction")
                 .build();
