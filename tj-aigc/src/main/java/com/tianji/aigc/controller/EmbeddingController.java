@@ -48,6 +48,6 @@ public class EmbeddingController {
 
     @GetMapping("/search/all")
     public List<Document> searchAll() {
-        return this.vectorStore.similaritySearch(SearchRequest.builder().query("").build());
+        return this.vectorStore.similaritySearch("");
     }
 }
