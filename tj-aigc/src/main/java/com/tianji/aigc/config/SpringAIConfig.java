@@ -26,7 +26,7 @@ public class SpringAIConfig {
                 .defaultSystem(systemResource)
                 .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory),//会话记忆
                         // new SimpleLoggerAdvisor(), //输出日志
-                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").build())
+                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build())
                 )
                 .defaultFunctions("courseFunction")
                 .build();
