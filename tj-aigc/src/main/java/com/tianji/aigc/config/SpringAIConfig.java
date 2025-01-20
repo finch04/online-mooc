@@ -15,6 +15,8 @@ import org.springframework.core.io.Resource;
 @Configuration
 public class SpringAIConfig {
 
+    // @Value("classpath:/prompts/system-message.txt")
+    // @Value("${system-chat-message.txt}")
     @Value("classpath:/prompts/system-message.txt")
     private Resource systemResource;
 

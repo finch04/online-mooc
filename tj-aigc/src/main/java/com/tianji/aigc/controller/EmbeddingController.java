@@ -48,6 +48,7 @@ public class EmbeddingController {
 
     @GetMapping("/search/all")
     public List<Document> searchAll() {
-        return this.vectorStore.similaritySearch("");
+        // 搜索全部数据
+        return this.vectorStore.similaritySearch(SearchRequest.builder().query("").topK(99999).build());
     }
 }
