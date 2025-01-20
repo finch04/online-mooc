@@ -15,7 +15,7 @@ public class Response {
             @JsonPropertyDescription("课程名称")
             String name,
             @JsonPropertyDescription("课程价格，单位为元，货币为人民币")
-            float price,
+            double price,
             @JsonPropertyDescription("课程学习有效期，单位：月")
             Integer validDuration,
             @JsonPropertyDescription("适用人群，例如：初学者")
@@ -29,9 +29,9 @@ public class Response {
             return new CourseInfo(courseBaseInfoDTO.getId(),
                     courseBaseInfoDTO.getName(),
                     Optional.ofNullable(courseBaseInfoDTO.getPrice())
-                            .map(num -> num / 100)
-                            .map(num -> NumberUtil.round(num, 2).floatValue())
-                            .orElse(0.0f),
+                            .map(num -> num.doubleValue() / 100d)
+                            .map(num -> NumberUtil.round(num, 2).doubleValue())
+                            .orElse(0.0d),
                     courseBaseInfoDTO.getValidDuration(),
                     courseBaseInfoDTO.getUsePeople(),
                     courseBaseInfoDTO.getDetail(),
