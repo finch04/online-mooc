@@ -1,11 +1,14 @@
 package com.tianji.aigc.service.impl;
 
 import cn.hutool.core.date.DateUtil;
-import com.tianji.aigc.functions.CourseFunction;
+import com.tianji.aigc.config.SystemPromptConfig;
 import com.tianji.aigc.service.ChatService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -13,9 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
-    @Resource
-    private ChatClient chatClient;
+
+    private final ChatClient chatClient;
+    private final SystemPromptConfig systemPromptConfig;
+    private final VectorStore vectorStore;
 
     private static final Map<String, Boolean> GENERATE_STATUS = new HashMap<>();
 
@@ -24,9 +30,11 @@ public class ChatServiceImpl implements ChatService {
         // 获取对话id
         String conversationId = ChatService.getConversationId(sessionId);
         return this.chatClient.prompt()
-                .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
+                .system(this.systemPromptConfig.getSystemChatMessage())
                 .system(promptSystem -> promptSystem.param("now", DateUtil.now()))
-                // .functions("courseFunction")
+                .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
+                .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
+                .functions("courseFunction")
                 .user(question)
                 .stream()
                 .content()

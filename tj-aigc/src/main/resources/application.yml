@@ -25,3 +25,8 @@ tj:
       enable: true
   jdbc:
     database: tj_aigc
+  ai:
+    prompt:
+      system:
+        chat:
+          data-id: system-chat-message.txt
