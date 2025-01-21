@@ -17,50 +17,19 @@ spring:
       - nacos:shared-feign.yaml # 共享feign配置
       - nacos:shared-mybatis.yaml # 共享mybatis配置
       - nacos:system-chat-message.txt # 聊天系统提示词
-  elasticsearch:
-    uris: http://192.168.150.101:19200
-  ai:
-    dashscope:
-      api-key: ${tj.ai.dashscope.key}
-      chat:
-        options:
-          model: qwen-max
-#          model: qwen2.5-3b-instruct
-        enabled: true
-      embedding:
-        enabled: true
-        options:
-          model: text-embedding-v1
-      read-timeout: 20000
-    openai:
-      base-url: https://api.chatanywhere.tech
-      api-key: ${tj.ai.openai.key}
-      chat:
-        options:
-          model: "gpt-3.5-turbo-ca"
-        #          model: "gpt-3.5-turbo"
-        enabled: false
-      embedding:
-        options:
-          model: text-embedding-3-small
-        enabled: false
-    vectorstore:
-      elasticsearch:
-        initialize-schema: true
-        dimensions: 1536
 logging:
   level:
-    #    com.tianji: debug
     com:
-      alibaba: debug
-    org:
-      springframework:
-        ai:
-          chat:
-            client:
-              advisor: DEBUG
-      apache:
-        hc:
-          client5:
-            http:
-              wire: debug
+#      alibaba: debug
+      tianji: debug
+#    org:
+#      springframework:
+#        ai:
+#          chat:
+#            client:
+#              advisor: DEBUG
+#      apache:
+#        hc:
+#          client5:
+#            http:
+#              wire: debug
