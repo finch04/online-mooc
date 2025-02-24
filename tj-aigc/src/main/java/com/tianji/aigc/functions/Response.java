@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.tianji.api.dto.course.CourseBaseInfoDTO;
 import com.tianji.api.dto.promotion.CouponDiscountDTO;
+import com.tianji.api.dto.promotion.OrderCourseDTO;
 import com.tianji.api.dto.trade.OrderConfirmVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -62,8 +63,14 @@ public class Response {
             @JsonPropertyDescription("实付金额")
             double payAmount,
 
-            @JsonPropertyDescription("课程的url列表，相对路径")
-            List<String> urls
+            @JsonPropertyDescription("课程id列表")
+            List<Long> courseIds,
+
+            @JsonPropertyDescription("订单id")
+            Long orderId,
+
+            @JsonPropertyDescription("优惠券id")
+            Long couponId
     ) {
         public static PrePlaceOrderResult of(OrderConfirmVO orderConfirmVO) {
             // 订单总金额
@@ -93,16 +100,23 @@ public class Response {
             // 实付金额
             double payAmount = totalAmount - discountAmount;
 
-            // 课程的url列表，相对路径
-            List<String> urls = CollStreamUtil
-                    .toList(orderConfirmVO.getCourses(), orderCourseDTO -> "/#/details/index?id=" + orderCourseDTO.getId());
+            // 课程id列表
+            List<Long> courseIds = CollStreamUtil.toList(orderConfirmVO.getCourses(), OrderCourseDTO::getId);
+
+            // 优惠券id
+            Long couponId = Optional.ofNullable(CollUtil.getFirst(orderConfirmVO.getDiscounts()))
+                    .map(CouponDiscountDTO::getIds)
+                    .map(CollUtil::getFirst)
+                    .orElse(null);
 
             return new PrePlaceOrderResult(CollUtil.size(orderConfirmVO.getCourses()),
                     totalAmount,
                     discountAmount,
                     couponName,
                     payAmount,
-                    urls
+                    courseIds,
+                    orderConfirmVO.getOrderId(),
+                    couponId
             );
         }
     }
