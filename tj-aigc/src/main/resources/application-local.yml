@@ -16,7 +16,6 @@ spring:
       - nacos:shared-logs.yaml # 共享日志配置
       - nacos:shared-feign.yaml # 共享feign配置
       - nacos:shared-mybatis.yaml # 共享mybatis配置
-      - nacos:system-chat-message.txt # 聊天系统提示词
 logging:
   level:
     com:

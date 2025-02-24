@@ -44,7 +44,7 @@ public class HistoryServiceImpl implements HistoryService {
                 .filter(message -> message.getMessageType() == MessageType.ASSISTANT || message.getMessageType() == MessageType.USER)
                 // 转换为MessageVO对象
                 .map(message -> MessageVO.builder()
-                        .content(message.getContent())
+                        .content(message.getText())
                         .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
                         .build())
                 .toList();

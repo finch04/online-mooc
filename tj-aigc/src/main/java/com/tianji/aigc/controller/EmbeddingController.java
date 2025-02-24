@@ -43,7 +43,7 @@ public class EmbeddingController {
 
     @GetMapping("/search")
     public List<Document> search(@RequestParam("message") String message) {
-        return this.vectorStore.similaritySearch(SearchRequest.query(message).withTopK(5));
+        return this.vectorStore.similaritySearch(SearchRequest.builder().query(message).topK(5).build());
     }
 
     @GetMapping("/search/all")

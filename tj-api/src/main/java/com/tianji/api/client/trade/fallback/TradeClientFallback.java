@@ -2,6 +2,7 @@ package com.tianji.api.client.trade.fallback;
 
 import com.tianji.api.client.trade.TradeClient;
 import com.tianji.api.dto.course.CoursePurchaseInfoDTO;
+import com.tianji.api.dto.trade.OrderConfirmVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 
@@ -35,6 +36,11 @@ public class TradeClientFallback implements FallbackFactory<TradeClient> {
             @Override
             public CoursePurchaseInfoDTO getPurchaseInfoOfCourse(Long courseId) {
                 return new CoursePurchaseInfoDTO();
+            }
+
+            @Override
+            public OrderConfirmVO prePlaceOrder(List<Long> courseIds) {
+                return new OrderConfirmVO();
             }
         };
     }

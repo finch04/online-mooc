@@ -13,7 +13,7 @@ public class MessageUtil {
 
     public static String toJson(Message message) {
         var redisMessage = BeanUtil.toBean(message, RedisMessage.class);
-        redisMessage.setTextContent(message.getContent());
+        redisMessage.setTextContent(message.getText());
         if (message instanceof AssistantMessage assistantMessage) {
             redisMessage.setToolCalls(assistantMessage.getToolCalls());
         }

@@ -2,7 +2,9 @@ package com.tianji.aigc.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.tianji.aigc.config.SystemPromptConfig;
+import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.service.ChatService;
+import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
@@ -30,11 +32,18 @@ public class ChatServiceImpl implements ChatService {
         // 获取对话id
         String conversationId = ChatService.getConversationId(sessionId);
         return this.chatClient.prompt()
-                .system(this.systemPromptConfig.getSystemChatMessage())
-                .system(promptSystem -> promptSystem.param("now", DateUtil.now()))
-                .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
-                .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
-                .functions("courseFunction")
+                .system(promptSystem -> promptSystem
+                        .text(this.systemPromptConfig.getSystemChatMessage()) // 设置系统提示语
+                        .param("now", DateUtil.now()) // 设置当前时间的参数
+                        .param("userId", UserContext.getUser()) // 设置用户id参数
+                )
+                .advisors(advisor -> advisor
+                        .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
+                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
+                )
+                .functions(Constant.Functions.COURSE_FUNCTION,
+                        // Constant.Functions.CART_ADD_FUNCTION,
+                        Constant.Functions.PRE_PLACE_ORDER_FUNCTION)
                 .user(question)
                 .stream()
                 .content()
