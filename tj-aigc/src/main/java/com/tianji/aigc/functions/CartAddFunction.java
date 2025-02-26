@@ -1,16 +1,19 @@
 package com.tianji.aigc.functions;
 
+import cn.hutool.core.convert.Convert;
+import com.tianji.aigc.constants.Constant;
 import com.tianji.api.client.trade.CartClient;
 import com.tianji.api.dto.trade.CartsAddDTO;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.stereotype.Component;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 @Component
 @RequiredArgsConstructor
-public class CartAddFunction implements Function<Request.AddCourseToCart, Response.AddCourseToCartResult> {
+public class CartAddFunction implements BiFunction<Request.AddCourseToCart, ToolContext, Response.AddCourseToCartResult> {
 
     private final CartClient cartClient;
 
@@ -23,10 +26,10 @@ public class CartAddFunction implements Function<Request.AddCourseToCart, Respon
      * @return 返回添加课程到购物车的结果，成功或失败
      */
     @Override
-    public Response.AddCourseToCartResult apply(Request.AddCourseToCart addCourseToCart) {
+    public Response.AddCourseToCartResult apply(Request.AddCourseToCart addCourseToCart, ToolContext toolContext) {
         try {
             // 设置用户ID，用于身份验证，否在在Feign调用时会出现401错误
-            UserContext.setUser(addCourseToCart.userId());
+            UserContext.setUser(Convert.toLong(toolContext.getContext().get(Constant.USER_ID)));
             // 构建添加课程到购物车所需的数据对象，并调用客户端方法执行添加操作
             this.cartClient.addCourse2Cart(CartsAddDTO.builder().courseId(addCourseToCart.id()).build());
             // 如果操作成功，返回成功结果

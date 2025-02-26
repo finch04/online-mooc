@@ -8,7 +8,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "tj.ai.prompt")
 public class AIProperties {
-    private System system;
+    private System system; // 系统提示语，用于课程推荐、购买业务
+
+    // 文本提示语，用于问答回复、润色等文本类型的业务
+    private System textSystem;
 
     @Data
     public static class System {

@@ -17,11 +17,6 @@ public class Request {
 
     @JsonClassDescription(Constant.Requests.PRE_PLACE_ORDER)
     public record PrePlaceOrder(
-
-            @JsonProperty(value = "userId")
-            @JsonPropertyDescription("当前用户id")
-            Long userId,
-
             @JsonProperty(value = "ids")
             @JsonPropertyDescription("课程id")
             Long[] ids
@@ -32,11 +27,7 @@ public class Request {
     public record AddCourseToCart(
             @JsonProperty(value = "id")
             @JsonPropertyDescription("课程id")
-            Long id,
-
-            @JsonProperty(value = "userId")
-            @JsonPropertyDescription("当前用户id")
-            Long userId
+            Long id
     ) {
     }
 

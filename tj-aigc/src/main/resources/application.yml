@@ -30,3 +30,6 @@ tj:
       system:
         chat:
           data-id: system-chat-message.txt
+      text-system:
+        chat:
+          data-id: text-system-chat-message.txt

@@ -21,18 +21,17 @@ public class SystemPromptConfig {
     private final AIProperties aiProperties;
 
     private String systemChatMessage;
+    private String textSystemChatMessage;
 
     @PostConstruct
     public void getSystemPrompt() throws NacosException {
         // 从配置属性中获取Nacos配置的数据ID和组名
         String dataId = aiProperties.getSystem().getChat().getDataId();
         String group = aiProperties.getSystem().getChat().getGroup();
+        long timeoutMs = this.aiProperties.getSystem().getChat().getTimeoutMs();
 
         // 从Nacos读取系统聊天提示配置
-        this.systemChatMessage = nacosConfigManager.getConfigService()
-                .getConfig(dataId,
-                        group,
-                        this.aiProperties.getSystem().getChat().getTimeoutMs());
+        this.systemChatMessage = nacosConfigManager.getConfigService().getConfig(dataId, group, timeoutMs);
         log.info("读取systemChatMessage成功，内容为：{}", this.systemChatMessage);
 
         // 添加监听器，当Nacos中的配置发生变化时更新本地配置
@@ -47,6 +46,33 @@ public class SystemPromptConfig {
                 // 当Nacos配置发生变化时，更新systemChatMessage变量
                 systemChatMessage = configInfo;
                 log.info("更新systemChatMessage成功，内容为：{}", systemChatMessage);
+            }
+        });
+    }
+
+    @PostConstruct
+    public void getTextSystemPrompt() throws NacosException {
+        // 从配置属性中获取Nacos配置的数据ID和组名
+        String dataId = aiProperties.getTextSystem().getChat().getDataId();
+        String group = aiProperties.getTextSystem().getChat().getGroup();
+        long timeoutMs = this.aiProperties.getTextSystem().getChat().getTimeoutMs();
+
+        // 从Nacos读取系统聊天提示配置
+        this.textSystemChatMessage = nacosConfigManager.getConfigService().getConfig(dataId, group, timeoutMs);
+        log.info("读取textSystemChatMessage成功，内容为：{}", this.textSystemChatMessage);
+
+        // 添加监听器，当Nacos中的配置发生变化时更新本地配置
+        nacosConfigManager.getConfigService().addListener(dataId, group, new Listener() {
+            @Override
+            public Executor getExecutor() {
+                return null;
+            }
+
+            @Override
+            public void receiveConfigInfo(String configInfo) {
+                // 当Nacos配置发生变化时，更新systemChatMessage变量
+                textSystemChatMessage = configInfo;
+                log.info("更新textSystemChatMessage成功，内容为：{}", textSystemChatMessage);
             }
         });
     }

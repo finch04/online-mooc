@@ -1,6 +1,7 @@
 package com.tianji.aigc.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import com.tianji.aigc.config.SystemPromptConfig;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.service.ChatService;
@@ -21,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
-    private final ChatClient chatClient;
+    private final ChatClient dashScopeChatClient;
     private final SystemPromptConfig systemPromptConfig;
     private final VectorStore vectorStore;
 
@@ -31,11 +32,10 @@ public class ChatServiceImpl implements ChatService {
     public Flux<String> chat(String question, String sessionId) {
         // 获取对话id
         String conversationId = ChatService.getConversationId(sessionId);
-        return this.chatClient.prompt()
+        return this.dashScopeChatClient.prompt()
                 .system(promptSystem -> promptSystem
                         .text(this.systemPromptConfig.getSystemChatMessage()) // 设置系统提示语
                         .param("now", DateUtil.now()) // 设置当前时间的参数
-                        .param("userId", UserContext.getUser()) // 设置用户id参数
                 )
                 .advisors(advisor -> advisor
                         .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
@@ -44,6 +44,7 @@ public class ChatServiceImpl implements ChatService {
                 .functions(Constant.Functions.COURSE_FUNCTION,
                         // Constant.Functions.CART_ADD_FUNCTION,
                         Constant.Functions.PRE_PLACE_ORDER_FUNCTION)
+                .toolContext(MapUtil.of(Constant.USER_ID, UserContext.getUser())) // 设置用户id参数
                 .user(question)
                 .stream()
                 .content()
