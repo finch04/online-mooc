@@ -25,9 +25,9 @@ public class SessionController {
     }
 
     /**
-     * 第一次对话时，需要保存标题数据
+     * 更新历史会话标题
      */
-    @PutMapping
+    @PutMapping("/history")
     public void updateTitle(@RequestParam("sessionId") String sessionId,
                             @RequestParam("title") String title) {
         this.chatSessionService.updateTitle(sessionId, title);
@@ -39,5 +39,13 @@ public class SessionController {
     @GetMapping("/history")
     public Map<String, List<ChatSessionVO>> queryHistorySession() {
         return this.chatSessionService.queryHistorySession();
+    }
+
+    /**
+     * 删除历史会话列表
+     */
+    @DeleteMapping("/history")
+    public void deleteHistorySession(@RequestParam("sessionId") String sessionId) {
+        this.chatSessionService.deleteHistorySession(sessionId);
     }
 }
