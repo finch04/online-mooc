@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/session")
@@ -36,7 +37,7 @@ public class SessionController {
      * 查询历史会话列表
      */
     @GetMapping("/history")
-    public List<ChatSessionVO> queryHistorySession() {
+    public Map<String, List<ChatSessionVO>> queryHistorySession() {
         return this.chatSessionService.queryHistorySession();
     }
 }

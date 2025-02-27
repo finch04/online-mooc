@@ -6,6 +6,7 @@ import com.tianji.aigc.vo.ChatSessionVO;
 import com.tianji.aigc.vo.SessionVO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ChatSessionService extends IService<ChatSession> {
 
@@ -27,5 +28,5 @@ public interface ChatSessionService extends IService<ChatSession> {
     /**
      * 查询历史会话列表
      */
-    List<ChatSessionVO> queryHistorySession();
+    Map<String, List<ChatSessionVO>> queryHistorySession();
 }
