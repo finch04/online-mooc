@@ -23,6 +23,12 @@ public class ChatController {
         return this.chatService.chat(question, sessionId);
     }
 
+    @PostMapping("/chat/text")
+    public String chatText(@RequestParam("q") String question) {
+        return this.chatService.chatText(question);
+    }
+
+
     @PostMapping("/chat/stop")
     public void stop(@RequestParam("sessionId") String sessionId) {
         this.chatService.stop(sessionId);

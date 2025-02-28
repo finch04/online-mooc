@@ -23,6 +23,8 @@ tj:
   auth:
     resource:
       enable: true
+      excludeLoginPaths:
+        - /chat/text
   jdbc:
     database: tj_aigc
   ai:

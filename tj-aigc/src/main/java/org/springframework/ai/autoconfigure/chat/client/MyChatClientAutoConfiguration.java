@@ -16,21 +16,20 @@
 
 package org.springframework.ai.autoconfigure.chat.client;
 
+import com.alibaba.cloud.ai.autoconfigure.dashscope.DashScopeChatProperties;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import io.micrometer.observation.ObservationRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientCustomizer;
 import org.springframework.ai.chat.client.observation.ChatClientInputContentObservationFilter;
 import org.springframework.ai.chat.client.observation.ChatClientObservationConvention;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -70,7 +69,7 @@ public class MyChatClientAutoConfiguration {
 
     @Bean
     @Scope("prototype")
-    @ConditionalOnBean(DashScopeChatModel.class)
+    @ConditionalOnProperty(prefix = DashScopeChatProperties.CONFIG_PREFIX, name = "enabled", havingValue = "true")
     ChatClient.Builder dashScopeChatClientBuilder(ChatClientBuilderConfigurer chatClientBuilderConfigurer,
                                                   DashScopeChatModel dashScopeChatModel,
                                                   ObjectProvider<ObservationRegistry> observationRegistry,
@@ -83,7 +82,7 @@ public class MyChatClientAutoConfiguration {
 
     @Bean
     @Scope("prototype")
-    @ConditionalOnBean(OpenAiChatModel.class)
+    @ConditionalOnProperty(prefix = OpenAiChatProperties.CONFIG_PREFIX, name = "enabled", havingValue = "true")
     ChatClient.Builder openAiChatClientBuilder(ChatClientBuilderConfigurer chatClientBuilderConfigurer,
                                                OpenAiChatModel openAiChatModel,
                                                ObjectProvider<ObservationRegistry> observationRegistry,

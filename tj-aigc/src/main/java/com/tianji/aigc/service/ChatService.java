@@ -25,4 +25,7 @@ public interface ChatService {
     }
 
     void stop(String sessionId);
+
+
+    String chatText(String question);
 }

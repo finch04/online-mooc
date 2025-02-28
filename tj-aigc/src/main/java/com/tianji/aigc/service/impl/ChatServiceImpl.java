@@ -24,6 +24,7 @@ import java.util.Map;
 public class ChatServiceImpl implements ChatService {
 
     private final ChatClient dashScopeChatClient;
+    private final ChatClient openAiChatClient;
     private final SystemPromptConfig systemPromptConfig;
     private final VectorStore vectorStore;
     private final ChatSessionService chatSessionService;
@@ -70,5 +71,14 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void stop(String sessionId) {
         GENERATE_STATUS.remove(sessionId);
+    }
+
+    @Override
+    public String chatText(String question) {
+        return this.openAiChatClient.prompt()
+                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemChatMessage()))
+                .user(question)
+                .call()
+                .content();
     }
 }
