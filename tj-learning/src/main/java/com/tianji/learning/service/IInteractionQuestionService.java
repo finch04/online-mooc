@@ -18,7 +18,7 @@ import com.tianji.learning.domain.vo.QuestionVO;
  */
 public interface IInteractionQuestionService extends IService<InteractionQuestion> {
 
-    void saveQuestion(QuestionFormDTO questionDTO);
+    InteractionQuestion saveQuestion(QuestionFormDTO questionDTO);
 
     PageDTO<QuestionVO> queryQuestionPage(QuestionPageQuery query);
 

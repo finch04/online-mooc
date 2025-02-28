@@ -53,7 +53,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
     @Transactional
     public void saveReply(ReplyDTO replyDTO) {
         // 1.获取登录用户
-        Long userId = UserContext.getUser();
+        Long userId = Optional.ofNullable(replyDTO.getUserId()).orElse(UserContext.getUser());
         // 2.新增回答
         InteractionReply reply = BeanUtils.toBean(replyDTO, InteractionReply.class);
         reply.setUserId(userId);
@@ -77,7 +77,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
                 .update();
 
         // 4.尝试累加积分
-        if(replyDTO.getIsStudent()) {
+        if (replyDTO.getIsStudent()) {
             // 学生才需要累加积分
             mqHelper.send(
                     MqConstants.Exchange.LEARNING_EXCHANGE,
@@ -115,7 +115,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
         Set<Long> targetReplyIds = new HashSet<>();
         // 3.1.获取提问者id 、回复的目标id、当前回答或评论id（统计点赞信息）
         for (InteractionReply r : records) {
-            if(!r.getAnonymity() || forAdmin) {
+            if (!r.getAnonymity() || forAdmin) {
                 // 非匿名
                 userIds.add(r.getUserId());
             }
@@ -125,7 +125,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
         // 3.2.查询目标回复，如果目标回复不是匿名，则需要查询出目标回复的用户信息
         targetReplyIds.remove(0L);
         targetReplyIds.remove(null);
-        if(targetReplyIds.size() > 0) {
+        if (targetReplyIds.size() > 0) {
             List<InteractionReply> targetReplies = listByIds(targetReplyIds);
             Set<Long> targetUserIds = targetReplies.stream()
                     .filter(Predicate.not(InteractionReply::getAnonymity).or(r -> forAdmin))
@@ -135,7 +135,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
         }
         // 3.3.查询用户
         Map<Long, UserDTO> userMap = new HashMap<>(userIds.size());
-        if(userIds.size() > 0) {
+        if (userIds.size() > 0) {
             List<UserDTO> users = userClient.queryUserByIds(userIds);
             userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, u -> u));
         }
@@ -148,7 +148,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
             ReplyVO v = BeanUtils.toBean(r, ReplyVO.class);
             list.add(v);
             // 4.2.回复人信息
-            if(!r.getAnonymity() || forAdmin){
+            if (!r.getAnonymity() || forAdmin) {
                 UserDTO userDTO = userMap.get(r.getUserId());
                 if (userDTO != null) {
                     v.setUserIcon(userDTO.getIcon());
@@ -157,7 +157,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
                 }
             }
             // 4.3.如果存在评论的目标，则需要设置目标用户信息
-            if(r.getTargetReplyId() != null){
+            if (r.getTargetReplyId() != null) {
                 UserDTO targetUser = userMap.get(r.getTargetUserId());
                 if (targetUser != null) {
                     v.setTargetUserName(targetUser.getName());
@@ -205,15 +205,15 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
         // 2.1.获取用户 id
         userIds.add(r.getUserId());
         // 2.2.查询评论目标，如果评论目标不是匿名，则需要查询出目标回复的用户id
-        if(r.getTargetReplyId() != null && r.getTargetReplyId() != 0) {
+        if (r.getTargetReplyId() != null && r.getTargetReplyId() != 0) {
             InteractionReply target = getById(r.getTargetReplyId());
-            if(!target.getAnonymity()) {
+            if (!target.getAnonymity()) {
                 userIds.add(target.getUserId());
             }
         }
         // 2.3.查询用户详细
         Map<Long, UserDTO> userMap = new HashMap<>(userIds.size());
-        if(userIds.size() > 0) {
+        if (userIds.size() > 0) {
             List<UserDTO> users = userClient.queryUserByIds(userIds);
             userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, u -> u));
         }

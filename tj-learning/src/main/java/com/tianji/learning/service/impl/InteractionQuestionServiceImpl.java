@@ -56,7 +56,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
     private final CategoryCache categoryCache;
 
     @Override
-    public void saveQuestion(QuestionFormDTO questionDTO) {
+    public InteractionQuestion saveQuestion(QuestionFormDTO questionDTO) {
         // 1.获取当前登录的用户id
         Long userId = UserContext.getUser();
         // 2.数据封装
@@ -64,6 +64,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         question.setUserId(userId);
         // 3.写入数据库
         save(question);
+        return question;
     }
 
     @Override

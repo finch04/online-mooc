@@ -23,3 +23,5 @@ tj:
   auth:
     resource:
       enable: false
+  ai:
+    user-id: 9999
