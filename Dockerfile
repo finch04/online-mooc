@@ -5,16 +5,19 @@ ENV JAVA_OPTS=""
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# 安装 Alpine 的社区仓库依赖
-RUN apk add --no-cache --upgrade apk-tools
-
-# 安装核心依赖
-RUN apk add --no-cache \
+# 安装 glibc 兼容层
+RUN apk add --no-cache --upgrade apk-tools && \
+    apk add --no-cache --virtual .glibc \
+    --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing \
     gcompat \
+    glibc \
+    glibc-dev \
     libstdc++ \
     libuuid \
-    libgcc \
-    musl-dev
+    libgcc
+
+# 设置 glibc 库路径（关键！）
+ENV LD_LIBRARY_PATH=/lib:/usr/glibc/compat/lib
 
 WORKDIR /app
 ADD app.jar /app/app.jar
