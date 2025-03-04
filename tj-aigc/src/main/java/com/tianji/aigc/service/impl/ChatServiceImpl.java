@@ -76,7 +76,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public String chatText(String question) {
         return this.openAiChatClient.prompt()
-                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemChatMessage()))
+                // .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemChatMessage()))
                 .user(question)
                 .call()
                 .content();
