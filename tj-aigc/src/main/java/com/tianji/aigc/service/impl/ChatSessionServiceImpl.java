@@ -3,8 +3,10 @@ package com.tianji.aigc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -38,8 +40,11 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     private final ChatMemory chatMemory;
 
     @Override
-    public SessionVO createSession() {
+    public SessionVO createSession(Integer num) {
         SessionVO sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
+        // 随机获取examples
+        sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(), num));
+
         // 随机生成sessionId
         sessionVO.setSessionId(IdUtil.fastSimpleUUID());
 
@@ -51,6 +56,11 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         super.save(chatSession);
 
         return sessionVO;
+    }
+
+    @Override
+    public List<SessionVO.Example> hotExamples(Integer num) {
+        return RandomUtil.randomEleList(sessionProperties.getExamples(), num);
     }
 
     @Override

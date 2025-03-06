@@ -32,7 +32,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.5</version>
     </parent>
 
 
@@ -46,6 +46,7 @@
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.2</spring-cloud-alibaba.version>
         <spring-ai.version>1.0.0-M5</spring-ai.version>
+        <!--<spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>-->
         <mybatis-plus.version>3.5.9</mybatis-plus.version>
         <hutool.version>5.7.17</hutool.version>
         <swagger.version>2.2.19</swagger.version>

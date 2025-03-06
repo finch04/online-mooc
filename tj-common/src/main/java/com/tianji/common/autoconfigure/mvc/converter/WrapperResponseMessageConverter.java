@@ -1,6 +1,9 @@
 package com.tianji.common.autoconfigure.mvc.converter;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.tianji.common.utils.WebUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -9,6 +12,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.NonNull;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +33,11 @@ public class WrapperResponseMessageConverter implements HttpMessageConverter<Obj
 
     @Override
     public boolean canWrite(@NonNull Class<?> clazz, MediaType mediaType) {
+        // 获取请求头中的标识，如果存在，则表示该请求是由SpringAI发起的请求，不需要进行包装处理
+        Object springAIIdentification = WebUtils.getAttribute("SpringAI");
+        if (ObjectUtil.isNotEmpty(springAIIdentification)) {
+            return false;
+        }
         return WebUtils.isGatewayRequest() && delegate.canWrite(clazz, mediaType);
     }
 
@@ -40,12 +49,12 @@ public class WrapperResponseMessageConverter implements HttpMessageConverter<Obj
 
     @Override
     @NonNull
-    public Object read(@NonNull Class<?> clazz,@NonNull HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+    public Object read(@NonNull Class<?> clazz, @NonNull HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
         return delegate.read(clazz, inputMessage);
     }
 
     @Override
-    public void write(@NonNull Object o, MediaType contentType,@NonNull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+    public void write(@NonNull Object o, MediaType contentType, @NonNull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         delegate.write(o, contentType, outputMessage);
     }
 }

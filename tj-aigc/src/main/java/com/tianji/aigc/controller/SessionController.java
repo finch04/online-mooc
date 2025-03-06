@@ -20,8 +20,13 @@ public class SessionController {
      * 新建会话
      */
     @PostMapping
-    public SessionVO createSession() {
-        return this.chatSessionService.createSession();
+    public SessionVO createSession(@RequestParam(value = "n", defaultValue = "3") Integer num) {
+        return this.chatSessionService.createSession(num);
+    }
+
+    @GetMapping("/hot")
+    public List<SessionVO.Example> hotExamples(@RequestParam(value = "n", defaultValue = "3") Integer num) {
+        return this.chatSessionService.hotExamples(num);
     }
 
     /**

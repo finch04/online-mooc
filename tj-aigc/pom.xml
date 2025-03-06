@@ -106,7 +106,19 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-elasticsearch-store-spring-boot-starter</artifactId>
+            <!--<exclusions>-->
+            <!--    <exclusion>-->
+            <!--        <groupId>co.elastic.clients</groupId>-->
+            <!--        <artifactId>elasticsearch-java</artifactId>-->
+            <!--    </exclusion>-->
+            <!--</exclusions>-->
         </dependency>
+
+        <!--<dependency>-->
+        <!--    <groupId>co.elastic.clients</groupId>-->
+        <!--    <artifactId>elasticsearch-java</artifactId>-->
+        <!--    <version>8.15.5</version>-->
+        <!--</dependency>-->
 
         <!--<dependency>-->
         <!--    <groupId>com.github.victools</groupId>-->
@@ -126,10 +138,11 @@
         </dependency>
 
         <dependency>
-            <groupId>com.microsoft.cognitiveservices.speech</groupId>
-            <artifactId>client-sdk</artifactId>
-            <version>1.42.0</version>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>opencc4j</artifactId>
+            <version>1.8.0</version>
         </dependency>
+
     </dependencies>
 
     <repositories>

@@ -15,7 +15,7 @@ public interface ChatSessionService extends IService<ChatSession> {
      *
      * @return 会话信息
      */
-    SessionVO createSession();
+    SessionVO createSession(Integer num);
 
     /**
      * 更新历史会话标题
@@ -45,4 +45,11 @@ public interface ChatSessionService extends IService<ChatSession> {
      * @param sessionId 会话id
      */
     void deleteHistorySession(String sessionId);
+
+    /**
+     * 获取热门会话
+     *
+     * @return 热门会话列表
+     */
+    List<SessionVO.Example> hotExamples(Integer num);
 }

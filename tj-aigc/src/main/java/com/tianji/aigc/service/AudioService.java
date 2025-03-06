@@ -1,14 +1,15 @@
 package com.tianji.aigc.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 
-public interface AzureService {
+public interface AudioService {
     /**
      * 语音转文字（STT）
-     * @param audioFileData WAV格式的音频文件字节数组
+     * @param audioFile 音频文件
      * @return 识别结果文本
      */
-    String stt(byte[] audioFileData);
+    String stt(MultipartFile audioFile);
 
     /**
      * 文字转语音（TTS）
