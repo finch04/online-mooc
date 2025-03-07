@@ -1,36 +1,45 @@
 package com.tianji.aigc.controller;
 
 import com.tianji.aigc.service.ChatService;
+import com.tianji.aigc.vo.TemplateVO;
 import com.tianji.common.annotations.NoWrapper;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 @Slf4j
 @RestController
+@RequestMapping("/chat")
+@RequiredArgsConstructor
 public class ChatController {
 
-    @Resource
-    private ChatService chatService;
+    private final ChatService chatService;
+    private static final TemplateVO TEMPLATE_VO = new TemplateVO();
 
     @NoWrapper // 自定义注解，记过不进行包装
-    @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chat(@RequestParam("q") String question, @RequestParam("sessionId") String sessionId) {
         return this.chatService.chat(question, sessionId);
     }
 
-    @PostMapping("/chat/text")
-    public String chatText(@RequestParam("q") String question) {
+    @PostMapping("/text")
+    public String chatText(@RequestBody String question) {
         return this.chatService.chatText(question);
     }
 
 
-    @PostMapping("/chat/stop")
+    @PostMapping("/stop")
     public void stop(@RequestParam("sessionId") String sessionId) {
         this.chatService.stop(sessionId);
+    }
+
+    @GetMapping("/templates")
+    public TemplateVO getTemplates() {
+        return TEMPLATE_VO;
     }
 }
