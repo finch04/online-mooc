@@ -14,6 +14,8 @@ import org.springframework.ai.openai.audio.speech.SpeechResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -56,5 +58,29 @@ public class OpenAIAudioServiceImpl implements AudioService {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Override
+    public ResponseBodyEmitter ttsStream(String text) {
+        ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+        log.info("开始语音合成, 文本内容：{}", text);
+        SpeechPrompt speechPrompt = new SpeechPrompt(text);
+        Flux<SpeechResponse> responseStream = openAiAudioSpeechModel.stream(speechPrompt);
+        // 订阅响应流并发送数据
+        responseStream.subscribe(
+                speechResponse -> {
+                    try {
+                        // 假设SpeechResponse有获取音频字节的方法
+                        byte[] audioBytes = speechResponse.getResult().getOutput();
+                        emitter.send(audioBytes);
+                    } catch (IOException e) {
+                        emitter.completeWithError(e);
+                    }
+                },
+                emitter::completeWithError,
+                emitter::complete
+        );
+
+        return emitter;
     }
 }

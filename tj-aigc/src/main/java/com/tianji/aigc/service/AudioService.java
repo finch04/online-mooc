@@ -2,6 +2,7 @@ package com.tianji.aigc.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 public interface AudioService {
     /**
@@ -17,4 +18,6 @@ public interface AudioService {
      * @param response HTTP响应对象，用于直接输出音频流
      */
     void tts(String text, HttpServletResponse response);
+
+    ResponseBodyEmitter ttsStream(String text);
 }
