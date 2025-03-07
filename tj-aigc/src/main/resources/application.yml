@@ -25,7 +25,6 @@ tj:
       enable: true
       excludeLoginPaths:
         - /chat/text
-        - /audio/tts-stream
   jdbc:
     database: tj_aigc
   ai:
