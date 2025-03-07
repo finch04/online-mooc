@@ -1,9 +1,11 @@
 package com.tianji.aigc.config;
 
 import com.tianji.aigc.memory.RedisChatMemory;
+import com.tianji.common.constants.Constant;
 import com.tianji.common.utils.WebUtils;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +22,7 @@ public class SpringAIConfig {
      *
      * @param retryTemplate Spring Retry模板对象，用于注册重试监听器
      * @return RetryListener 已注册到模板的重试监听器实例，将由Spring容器管理
-     *
+     * <p>
      * 实现说明：
      * 1. 创建匿名RetryListener实现，在重试操作期间管理Web属性
      * 2. 将监听器注册到提供的RetryTemplate实例
@@ -33,13 +35,13 @@ public class SpringAIConfig {
         RetryListener retryListener = new RetryListener() {
             @Override
             public <T, E extends Throwable> boolean open(RetryContext context, RetryCallback<T, E> callback) {
-                WebUtils.setAttribute("SpringAI", "yes");
+                WebUtils.setAttribute(Constant.SPRING_AI_ATTR, Constant.SPRING_AI_FLAG);
                 return true;
             }
 
             @Override
             public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
-                WebUtils.removeAttribute("SpringAI");
+                WebUtils.removeAttribute(Constant.SPRING_AI_ATTR);
             }
         };
 
@@ -51,8 +53,13 @@ public class SpringAIConfig {
 
     @Bean
     public ChatClient dashScopeChatClient(ChatClient.Builder dashScopeChatClientBuilder, ChatMemory chatMemory) {
+        // 日志记录器
+        SimpleLoggerAdvisor loggerAdvisor = new SimpleLoggerAdvisor();
+        // 会话记忆
+        PromptChatMemoryAdvisor promptChatMemoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
+
         return dashScopeChatClientBuilder
-                .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory))//会话记忆
+                .defaultAdvisors(loggerAdvisor, promptChatMemoryAdvisor) //添加 Advisor 功能增强
                 .build();
     }
 

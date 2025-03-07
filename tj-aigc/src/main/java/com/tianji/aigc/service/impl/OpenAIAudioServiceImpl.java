@@ -4,13 +4,13 @@ import com.github.houbb.opencc4j.util.ZhConverterUtil;
 import com.tianji.aigc.service.AudioService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt;
 import org.springframework.ai.audio.transcription.AudioTranscriptionResponse;
 import org.springframework.ai.openai.OpenAiAudioSpeechModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.audio.speech.SpeechPrompt;
 import org.springframework.ai.openai.audio.speech.SpeechResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OpenAIAudioServiceImpl implements AudioService {
@@ -25,9 +26,6 @@ public class OpenAIAudioServiceImpl implements AudioService {
 
     private final OpenAiAudioTranscriptionModel openAiAudioTranscriptionModel;
     private final OpenAiAudioSpeechModel openAiAudioSpeechModel;
-
-    @Value("classpath:/speech/jfk.flac")
-    private Resource audioFile;
 
     @Override
     public String stt(MultipartFile multipartFile) {
@@ -45,6 +43,7 @@ public class OpenAIAudioServiceImpl implements AudioService {
 
     @Override
     public void tts(String text, HttpServletResponse response) {
+        log.info("开始语音合成, 文本内容：{}", text);
         SpeechPrompt speechPrompt = new SpeechPrompt(text);
         SpeechResponse speechResponse = openAiAudioSpeechModel.call(speechPrompt);
         byte[] output = speechResponse.getResult().getOutput();
