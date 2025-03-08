@@ -19,13 +19,13 @@ public class SpringAIConfig {
 
     /**
      * 创建并配置自定义重试监听器Bean
-     *
-     * @param retryTemplate Spring Retry模板对象，用于注册重试监听器
-     * @return RetryListener 已注册到模板的重试监听器实例，将由Spring容器管理
      * <p>
      * 实现说明：
      * 1. 创建匿名RetryListener实现，在重试操作期间管理Web属性
      * 2. 将监听器注册到提供的RetryTemplate实例
+     *
+     * @param retryTemplate Spring Retry模板对象，用于注册重试监听器
+     * @return RetryListener 已注册到模板的重试监听器实例，将由Spring容器管理
      */
     @Bean
     public RetryListener customizeRetryTemplate(RetryTemplate retryTemplate) {
@@ -71,7 +71,6 @@ public class SpringAIConfig {
     @Bean
     public ChatMemory chatMemory() {
         //基于内存存储会话
-        // return new InMemoryChatMemory();
         return new RedisChatMemory();
     }
 
