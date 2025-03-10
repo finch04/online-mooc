@@ -7,10 +7,9 @@ import com.tianji.common.constants.Constant;
 import com.tianji.common.utils.WebUtils;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.RetryCallback;
@@ -57,30 +56,47 @@ public class SpringAIConfig {
 
     @Bean
     public ChatClient dashScopeChatClient(ChatClient.Builder dashScopeChatClientBuilder,
-                                          ChatMemory chatMemory,
-                                          CourseTools courseTools,
-                                          OrderTools orderTools) {
-        // 日志记录器
-        SimpleLoggerAdvisor loggerAdvisor = new SimpleLoggerAdvisor();
-        // 会话记忆
-        MessageChatMemoryAdvisor promptChatMemoryAdvisor = new MessageChatMemoryAdvisor(chatMemory);
-        // PromptChatMemoryAdvisor promptChatMemoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
-
+                                          Advisor loggerAdvisor,  // 日志记录器
+                                          Advisor messageChatMemoryAdvisor, // 会话记忆
+                                          CourseTools courseTools, // 课程工具
+                                          OrderTools orderTools) { // 订单工具
         return dashScopeChatClientBuilder
-                .defaultAdvisors(loggerAdvisor, promptChatMemoryAdvisor) //添加 Advisor 功能增强
+                .defaultAdvisors(loggerAdvisor, messageChatMemoryAdvisor) //添加 Advisor 功能增强
                 .defaultTools(courseTools, orderTools) // 全局添加默认工具
                 .build();
     }
 
     @Bean
-    public ChatClient openAiChatClient(ChatClient.Builder openAiChatClientBuilder) {
-        return openAiChatClientBuilder.build();
+    public ChatClient openAiChatClient(ChatClient.Builder openAiChatClientBuilder,
+                                       Advisor loggerAdvisor  // 日志记录器
+    ) {
+        return openAiChatClientBuilder
+                .defaultAdvisors(loggerAdvisor)
+                .build();
     }
 
+    /**
+     * 日志记录器
+     */
+    @Bean
+    public Advisor loggerAdvisor() {
+        return new SimpleLoggerAdvisor();
+    }
+
+    /**
+     * 基于Redis的会话存储
+     */
     @Bean
     public ChatMemory chatMemory() {
-        //基于内存存储会话
         return new RedisChatMemory();
+    }
+
+    /**
+     * 基于Redis的会话记忆，聊天记忆整合到messages中实现多轮对话
+     */
+    @Bean
+    public Advisor messageChatMemoryAdvisor(ChatMemory chatMemory) {
+        return new MessageChatMemoryAdvisor(chatMemory);
     }
 
 }
