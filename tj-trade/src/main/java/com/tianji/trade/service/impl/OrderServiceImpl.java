@@ -1,5 +1,6 @@
 package com.tianji.trade.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -81,6 +82,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .map(CourseSimpleInfoDTO::getPrice).reduce(Integer::sum).orElse(0);
         // 2.2.计算优惠金额
         order.setDiscountAmount(0);
+        // 删除null的优惠券id，如果存在的话
+        CollUtil.removeNull(placeOrderDTO.getCouponIds());
         List<Long> couponIds = placeOrderDTO.getCouponIds();
         CouponDiscountDTO discount = null;
         if (CollUtils.isNotEmpty(couponIds)) {
@@ -88,7 +91,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     .map(c -> new OrderCourseDTO().setId(c.getId()).setCateId(c.getThirdCateId()).setPrice(c.getPrice()))
                     .collect(Collectors.toList());
             discount = promotionClient.queryDiscountDetailByOrder(new OrderCouponDTO(couponIds, orderCourses));
-            if(discount != null) {
+            if (discount != null) {
                 order.setDiscountAmount(discount.getDiscountAmount());
                 order.setCouponIds(discount.getIds());
             }
@@ -119,7 +122,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         cartService.deleteCartByUserAndCourseIds(userId, placeOrderDTO.getCourseIds());
 
         // 6.核销优惠券
-        promotionClient.writeOffCoupon(couponIds);
+        if (CollUtil.isNotEmpty(couponIds)) {
+            promotionClient.writeOffCoupon(couponIds);
+        }
 
         // 7.构建下单结果
         return PlaceOrderResultVO.builder()
@@ -137,11 +142,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 2.判断状态
         for (CourseSimpleInfoDTO courseInfo : courseInfos) {
             // 2.1.检查课程是否上架
-            if(!CourseStatus.SHELF.equalsValue(courseInfo.getStatus())){
+            if (!CourseStatus.SHELF.equalsValue(courseInfo.getStatus())) {
                 throw new BizIllegalException(TradeErrorInfo.COURSE_NOT_FOR_SALE);
             }
             // 2.2.检查课程是否过期
-            if(courseInfo.getPurchaseEndTime().isBefore(now)){
+            if (courseInfo.getPurchaseEndTime().isBefore(now)) {
                 throw new BizIllegalException(TradeErrorInfo.COURSE_EXPIRED);
             }
         }
@@ -161,7 +166,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new BizIllegalException(TradeErrorInfo.COURSE_NOT_EXISTS);
         }
         CourseSimpleInfoDTO courseInfo = courseInfos.get(0);
-        if(!courseInfo.getFree()){
+        if (!courseInfo.getFree()) {
             // 非免费课程，直接报错
             throw new BizIllegalException(TradeErrorInfo.COURSE_NOT_FREE);
         }
@@ -254,9 +259,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new DbException(TradeErrorInfo.PLACE_ORDER_FAILED);
         }
         // 4.2.写订单详情
-        if(orderDetails.size() == 1){
+        if (orderDetails.size() == 1) {
             success = detailService.save(orderDetails.get(0));
-        }else {
+        } else {
             success = detailService.saveBatch(orderDetails);
         }
         if (!success) {
@@ -274,12 +279,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new BadRequestException(ORDER_NOT_EXISTS);
         }
         // 2.判断订单状态是否已经取消，幂等判断
-        if(OrderStatus.CLOSED.equalsValue(order.getStatus())){
-           // 订单已经取消，无需重复操作
-           return;
+        if (OrderStatus.CLOSED.equalsValue(order.getStatus())) {
+            // 订单已经取消，无需重复操作
+            return;
         }
         // 3.判断订单是否未支付，只有未支付订单才可以取消
-        if(!OrderStatus.NO_PAY.equalsValue(order.getStatus())){
+        if (!OrderStatus.NO_PAY.equalsValue(order.getStatus())) {
             throw new BizIllegalException(ORDER_ALREADY_FINISH);
         }
         // 4.可以更新订单状态为取消了
@@ -310,7 +315,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return;
         }
         // 3.判断订单所属用户与当前登录用户是否一致
-        if(!order.getUserId().equals(userId)){
+        if (!order.getUserId().equals(userId)) {
             // 不一致，说明不是当前用户的订单，结束
             throw new BadRequestException("不能删除他人订单");
         }
@@ -394,7 +399,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         // 2.计算超时时间
         LocalDateTime outTime = null;
-        if(OrderStatus.NO_PAY.equalsValue(order.getStatus())){
+        if (OrderStatus.NO_PAY.equalsValue(order.getStatus())) {
             outTime = order.getCreateTime().plusMinutes(tradeProperties.getPayOrderTTLMinutes());
         }
         // 3.封装结果

@@ -67,7 +67,7 @@ public class PrePlaceOrder {
                     int size = CollUtil.size(rules);
                     return size >= 2
                             ? StrUtil.format("叠加{}券：【优惠{}元】", size, discountAmount)
-                            : StrUtil.format("单券：【】", CollUtil.getFirst(rules));
+                            : StrUtil.format("单券：【{}】", CollUtil.getFirst(rules));
                 })
                 .orElse("");
 
