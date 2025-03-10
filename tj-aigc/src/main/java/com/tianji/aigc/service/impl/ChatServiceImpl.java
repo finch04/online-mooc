@@ -23,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
-    private final ChatClient dashScopeChatClient;
+    private final ChatClient zhiPuAiChatClient;
     private final ChatClient openAiChatClient;
     private final SystemPromptConfig systemPromptConfig;
     private final VectorStore vectorStore;
@@ -37,7 +37,7 @@ public class ChatServiceImpl implements ChatService {
         Long userId = UserContext.getUser();
         // 获取对话id
         String conversationId = ChatService.getConversationId(sessionId);
-        return this.dashScopeChatClient.prompt()
+        return this.zhiPuAiChatClient.prompt()
                 .system(promptSystem -> promptSystem
                         .text(this.systemPromptConfig.getSystemChatMessage()) // 设置系统提示语
                         .param("now", DateUtil.now()) // 设置当前时间的参数
@@ -46,9 +46,9 @@ public class ChatServiceImpl implements ChatService {
                         .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
                         .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
                 )
-                .functions(Constant.Functions.COURSE_FUNCTION,
-                        // Constant.Functions.CART_ADD_FUNCTION,
-                        Constant.Functions.PRE_PLACE_ORDER_FUNCTION)
+                // .functions(Constant.Functions.COURSE_FUNCTION,
+                //         // Constant.Functions.CART_ADD_FUNCTION,
+                //         Constant.Functions.PRE_PLACE_ORDER_FUNCTION)
                 .toolContext(MapUtil.of(Constant.USER_ID, userId)) // 设置用户id参数
                 .user(question)
                 .stream()

@@ -1,12 +1,16 @@
 package com.tianji.aigc.config;
 
 import com.tianji.aigc.memory.RedisChatMemory;
+import com.tianji.aigc.tools.CourseTools;
+import com.tianji.aigc.tools.OrderTools;
 import com.tianji.common.constants.Constant;
 import com.tianji.common.utils.WebUtils;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.RetryCallback;
@@ -52,14 +56,19 @@ public class SpringAIConfig {
 
 
     @Bean
-    public ChatClient dashScopeChatClient(ChatClient.Builder dashScopeChatClientBuilder, ChatMemory chatMemory) {
+    public ChatClient zhiPuAiChatClient(ChatClient.Builder zhiPuAiChatClientBuilder,
+                                          ChatMemory chatMemory,
+                                          CourseTools courseTools,
+                                          OrderTools orderTools) {
         // 日志记录器
         SimpleLoggerAdvisor loggerAdvisor = new SimpleLoggerAdvisor();
         // 会话记忆
-        PromptChatMemoryAdvisor promptChatMemoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
+        MessageChatMemoryAdvisor promptChatMemoryAdvisor = new MessageChatMemoryAdvisor(chatMemory);
+        // PromptChatMemoryAdvisor promptChatMemoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
 
-        return dashScopeChatClientBuilder
+        return zhiPuAiChatClientBuilder
                 .defaultAdvisors(loggerAdvisor, promptChatMemoryAdvisor) //添加 Advisor 功能增强
+                .defaultTools(courseTools, orderTools) // 全局添加默认工具
                 .build();
     }
 
