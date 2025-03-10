@@ -22,13 +22,11 @@ import io.micrometer.observation.ObservationRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
-import org.springframework.ai.autoconfigure.zhipuai.ZhiPuAiChatProperties;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientCustomizer;
 import org.springframework.ai.chat.client.observation.ChatClientInputContentObservationFilter;
 import org.springframework.ai.chat.client.observation.ChatClientObservationConvention;
 import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.zhipuai.ZhiPuAiChatModel;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -77,19 +75,6 @@ public class MyChatClientAutoConfiguration {
                                                   ObjectProvider<ObservationRegistry> observationRegistry,
                                                   ObjectProvider<ChatClientObservationConvention> observationConvention) {
         ChatClient.Builder builder = ChatClient.builder(dashScopeChatModel,
-                observationRegistry.getIfUnique(() -> ObservationRegistry.NOOP),
-                observationConvention.getIfUnique(() -> null));
-        return chatClientBuilderConfigurer.configure(builder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    @ConditionalOnProperty(prefix = ZhiPuAiChatProperties.CONFIG_PREFIX, name = "enabled", havingValue = "true")
-    ChatClient.Builder zhiPuAiChatClientBuilder(ChatClientBuilderConfigurer chatClientBuilderConfigurer,
-                                                  ZhiPuAiChatModel zhiPuAiChatModel,
-                                                  ObjectProvider<ObservationRegistry> observationRegistry,
-                                                  ObjectProvider<ChatClientObservationConvention> observationConvention) {
-        ChatClient.Builder builder = ChatClient.builder(zhiPuAiChatModel,
                 observationRegistry.getIfUnique(() -> ObservationRegistry.NOOP),
                 observationConvention.getIfUnique(() -> null));
         return chatClientBuilderConfigurer.configure(builder);
