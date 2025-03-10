@@ -23,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
-    private final ChatClient zhiPuAiChatClient;
+    private final ChatClient dashScopeChatClient;
     private final ChatClient openAiChatClient;
     private final SystemPromptConfig systemPromptConfig;
     private final VectorStore vectorStore;
@@ -37,7 +37,7 @@ public class ChatServiceImpl implements ChatService {
         Long userId = UserContext.getUser();
         // 获取对话id
         String conversationId = ChatService.getConversationId(sessionId);
-        return this.zhiPuAiChatClient.prompt()
+        return this.dashScopeChatClient.prompt()
                 .system(promptSystem -> promptSystem
                         .text(this.systemPromptConfig.getSystemChatMessage()) // 设置系统提示语
                         .param("now", DateUtil.now()) // 设置当前时间的参数

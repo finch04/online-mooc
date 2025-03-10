@@ -56,7 +56,7 @@ public class SpringAIConfig {
 
 
     @Bean
-    public ChatClient zhiPuAiChatClient(ChatClient.Builder zhiPuAiChatClientBuilder,
+    public ChatClient dashScopeChatClient(ChatClient.Builder dashScopeChatClientBuilder,
                                           ChatMemory chatMemory,
                                           CourseTools courseTools,
                                           OrderTools orderTools) {
@@ -66,7 +66,7 @@ public class SpringAIConfig {
         MessageChatMemoryAdvisor promptChatMemoryAdvisor = new MessageChatMemoryAdvisor(chatMemory);
         // PromptChatMemoryAdvisor promptChatMemoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
 
-        return zhiPuAiChatClientBuilder
+        return dashScopeChatClientBuilder
                 .defaultAdvisors(loggerAdvisor, promptChatMemoryAdvisor) //添加 Advisor 功能增强
                 .defaultTools(courseTools, orderTools) // 全局添加默认工具
                 .build();
