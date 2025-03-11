@@ -1,7 +1,11 @@
 package com.tianji.aigc.memory;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import com.tianji.aigc.config.ToolResultHandler;
+import com.tianji.aigc.constants.Constant;
 import lombok.Data;
 import org.springframework.ai.chat.messages.*;
 import org.springframework.ai.model.Media;
@@ -16,6 +20,16 @@ public class MessageUtil {
         redisMessage.setTextContent(message.getText());
         if (message instanceof AssistantMessage assistantMessage) {
             redisMessage.setToolCalls(assistantMessage.getToolCalls());
+
+            // 通过 messageId 获取 requestId，再通过 requestId 获取参数列表，如果有，就存储起来
+            // 最后，删除 messageId 对应的数据
+            String messageId = Convert.toStr(assistantMessage.getMetadata().get(Constant.ID));
+            String requestId = Convert.toStr(ToolResultHandler.get(messageId, Constant.REQUEST_ID));
+            Map<String, Object> params = ToolResultHandler.get(requestId);
+            if (ObjectUtil.isNotEmpty(params)) {
+                redisMessage.setParams(params);
+            }
+            ToolResultHandler.remove(messageId);
         }
 
         if (message instanceof ToolResponseMessage toolResponseMessage) {
@@ -36,7 +50,9 @@ public class MessageUtil {
                 return new UserMessage(redisMessage.getTextContent(), redisMessage.getMedia(), redisMessage.getMetadata());
             }
             case ASSISTANT -> {
-                return new AssistantMessage(redisMessage.getTextContent(), redisMessage.getProperties(), redisMessage.getToolCalls());
+                // 这里使用了 properties 字段来存储 额外的参数信息，如果以后properties有用，需要该这个逻辑
+                return new MyAssistantMessage(redisMessage.getTextContent(), redisMessage.getProperties(),
+                        redisMessage.getToolCalls(), redisMessage.getParams());
             }
             case TOOL -> {
                 return new ToolResponseMessage(redisMessage.getToolResponses(), redisMessage.getMetadata());
@@ -57,4 +73,5 @@ class RedisMessage {
     private String textContent;
     private List<ToolResponseMessage.ToolResponse> toolResponses = List.of();
     private Map<String, Object> properties = Map.of();
+    private Map<String, Object> params = Map.of();
 }

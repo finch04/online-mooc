@@ -6,7 +6,6 @@ import com.tianji.aigc.tools.OrderTools;
 import com.tianji.common.constants.Constant;
 import com.tianji.common.utils.WebUtils;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;

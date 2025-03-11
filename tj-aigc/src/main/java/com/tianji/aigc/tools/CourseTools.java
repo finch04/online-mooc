@@ -1,5 +1,7 @@
 package com.tianji.aigc.tools;
 
+import cn.hutool.core.convert.Convert;
+import com.tianji.aigc.config.ToolResultHandler;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.tools.result.CourseInfo;
 import com.tianji.api.client.course.CourseClient;
@@ -20,7 +22,8 @@ public class CourseTools {
     @Tool(description = Constant.Tools.QUERY_COURSE_BY_ID)
     public CourseInfo queryCourseById(@ToolParam(description = Constant.ToolParams.COURSE_ID) Long courseId,
                                       ToolContext toolContext) {
-        return Optional
+
+        CourseInfo courseInfo = Optional
                 .ofNullable(courseId)
                 // 根据课程ID获取课程基础信息，如果ID为空，则不执行此步骤
                 .flatMap(id -> Optional.ofNullable(this.courseClient.baseInfo(id, true)))
@@ -28,6 +31,14 @@ public class CourseTools {
                 .map(CourseInfo::of)
                 // 如果上述任何步骤中没有获取到数据，则最终返回null
                 .orElse(null);
+        String requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
+        ToolResultHandler.put(requestId, CourseInfo.class.getSimpleName(), courseInfo);
+
+        return courseInfo;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(CourseInfo.class.getSimpleName());
     }
 
 }

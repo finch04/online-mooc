@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,5 +22,10 @@ public class MessageVO {
      * 消息内容
      */
     private String content;
+
+    /**
+     * 附加参数
+     */
+    private Map<String, Object> params;
 
 }

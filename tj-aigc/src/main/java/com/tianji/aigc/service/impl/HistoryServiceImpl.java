@@ -3,6 +3,7 @@ package com.tianji.aigc.service.impl;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.stream.StreamUtil;
 import com.tianji.aigc.enums.MessageTypeEnum;
+import com.tianji.aigc.memory.MyAssistantMessage;
 import com.tianji.aigc.memory.RedisChatMemory;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.HistoryService;
@@ -43,10 +44,19 @@ public class HistoryServiceImpl implements HistoryService {
                 // 过滤掉非用户消息和助手消息
                 .filter(message -> message.getMessageType() == MessageType.ASSISTANT || message.getMessageType() == MessageType.USER)
                 // 转换为MessageVO对象
-                .map(message -> MessageVO.builder()
-                        .content(message.getText())
-                        .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
-                        .build())
+                .map(message -> {
+                    if (message instanceof MyAssistantMessage) {
+                        return MessageVO.builder()
+                                .content(message.getText())
+                                .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
+                                .params(((MyAssistantMessage) message).getParams())
+                                .build();
+                    }
+                    return MessageVO.builder()
+                            .content(message.getText())
+                            .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
+                            .build();
+                })
                 .toList();
     }
 }
