@@ -9,6 +9,8 @@ public interface TradeErrorInfo {
     String COURSE_NOT_FREE = "课程不是免费课程";
 
     String PLACE_ORDER_FAILED = "下单失败";
+
+    String DUPLICATE_ORDER_FAILED = "不能重复下单";
     String ORDER_NOT_EXISTS = "订单不存在";
     String ORDER_ALREADY_FINISH = "订单已经支付或退款";
     String ORDER_OVER_TIME = "订单已经超时";

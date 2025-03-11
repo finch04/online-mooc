@@ -37,6 +37,7 @@ import com.tianji.trade.service.ICartService;
 import com.tianji.trade.service.IOrderDetailService;
 import com.tianji.trade.service.IOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -188,7 +189,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         OrderDetail detail = packageOrderDetail(courseInfo, order, 0);
 
         // 4.写入数据库
-        saveOrderAndDetails(order, CollUtils.singletonList(detail));
+        try {
+            saveOrderAndDetails(order, CollUtils.singletonList(detail));
+        } catch (DuplicateKeyException e) {
+            throw new DbException(TradeErrorInfo.DUPLICATE_ORDER_FAILED);
+        }
 
         // 5.发送MQ消息，通知报名成功
         rabbitMqHelper.send(
