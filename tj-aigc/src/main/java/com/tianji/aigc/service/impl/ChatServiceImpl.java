@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +78,7 @@ public class ChatServiceImpl implements ChatService {
                     GENERATE_STATUS.remove(sessionId);
                 })
                 // .doOnNext(System.out::println) // 打印输出
-                .takeWhile(s -> GENERATE_STATUS.get(sessionId))
+                .takeWhile(s -> Optional.ofNullable(GENERATE_STATUS.get(sessionId)).orElse(false))
                 // .concatWith(Flux.just("&complete&"));
                 .map(chatResponse -> {
                     // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
