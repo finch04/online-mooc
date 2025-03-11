@@ -16,8 +16,10 @@ import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -39,10 +41,10 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Flux<String> chat(String question, String sessionId) {
         // 获取用户id
-        Long userId = UserContext.getUser();
+        var userId = UserContext.getUser();
         // 获取对话id
-        String conversationId = ChatService.getConversationId(sessionId);
-        String requestId = IdUtil.fastSimpleUUID();
+        var conversationId = ChatService.getConversationId(sessionId);
+        var requestId = IdUtil.fastSimpleUUID();
 
         //更新会话时间
         this.chatSessionService.update(sessionId, question, userId);
@@ -53,7 +55,7 @@ public class ChatServiceImpl implements ChatService {
                         .param("now", DateUtil.now()) // 设置当前时间的参数
                 )
                 .advisors(advisor -> advisor
-                        // .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
+                        .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
                         .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
                 )
                 // .functions(Constant.Functions.COURSE_FUNCTION,
@@ -81,9 +83,9 @@ public class ChatServiceImpl implements ChatService {
                     // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
                     // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
                     // 从而解决，在历史聊天记录中没有外参数的问题
-                    String finishReason = chatResponse.getResult().getMetadata().getFinishReason();
+                    var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
                     if (StrUtil.equals(Constant.STOP, finishReason)) {
-                        String messageId = ((ChatResponseMetadata) ReflectUtil.getFieldValue(chatResponse, Constant.Chats.CHAT_RESPONSE_METADATA)).getId();
+                        var messageId = ((ChatResponseMetadata) ReflectUtil.getFieldValue(chatResponse, Constant.Chats.CHAT_RESPONSE_METADATA)).getId();
                         ToolResultHandler.put(messageId, Constant.REQUEST_ID, requestId);
                     }
                     //不做额外处理，直接返回原本的数据
@@ -91,9 +93,9 @@ public class ChatServiceImpl implements ChatService {
                 })
                 .concatWith(Flux.defer(() -> {
                     // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
-                    Map<String, Object> map = ToolResultHandler.get(requestId);
+                    var map = ToolResultHandler.get(requestId);
                     if (CollUtil.isNotEmpty(map)) {
-                        String result = StrUtil.format(Constant.Chats.PARAM_TAG, JSONUtil.toJsonStr(map));
+                        var result = StrUtil.format(Constant.Chats.PARAM_TAG, JSONUtil.toJsonStr(map));
                         ToolResultHandler.remove(requestId); // 清除参数列表
 
                         return Flux.just(result, Constant.Chats.COMPLETE_TAG);

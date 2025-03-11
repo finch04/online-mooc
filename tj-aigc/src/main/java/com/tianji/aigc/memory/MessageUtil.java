@@ -23,9 +23,9 @@ public class MessageUtil {
 
             // 通过 messageId 获取 requestId，再通过 requestId 获取参数列表，如果有，就存储起来
             // 最后，删除 messageId 对应的数据
-            String messageId = Convert.toStr(assistantMessage.getMetadata().get(Constant.ID));
-            String requestId = Convert.toStr(ToolResultHandler.get(messageId, Constant.REQUEST_ID));
-            Map<String, Object> params = ToolResultHandler.get(requestId);
+            var messageId = Convert.toStr(assistantMessage.getMetadata().get(Constant.ID));
+            var requestId = Convert.toStr(ToolResultHandler.get(messageId, Constant.REQUEST_ID));
+            var params = ToolResultHandler.get(requestId);
             if (ObjectUtil.isNotEmpty(params)) {
                 redisMessage.setParams(params);
             }

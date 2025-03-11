@@ -29,12 +29,12 @@ public class OrderTools {
 
         // 设置用户ID，用于身份验证，否在在Feign调用时会出现401错误
         UserContext.setUser(Convert.toLong(toolContext.getContext().get(Constant.USER_ID)));
-        OrderConfirmVO orderConfirmVO = this.tradeClient.prePlaceOrder(ids);
-        PrePlaceOrder prePlaceOrder = Optional.ofNullable(orderConfirmVO)
+        var orderConfirmVO = this.tradeClient.prePlaceOrder(ids);
+        var prePlaceOrder = Optional.ofNullable(orderConfirmVO)
                 .map(PrePlaceOrder::of)
                 .orElse(null);
 
-        String requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
+        var requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
         ToolResultHandler.put(requestId, PrePlaceOrder.class.getSimpleName(), prePlaceOrder);
 
         return prePlaceOrder;

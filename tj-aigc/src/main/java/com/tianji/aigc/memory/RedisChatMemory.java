@@ -5,7 +5,6 @@ import cn.hutool.core.collection.CollUtil;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
@@ -35,8 +34,8 @@ public class RedisChatMemory implements ChatMemory {
         if (CollUtil.isEmpty(messages)) {
             return;
         }
-        String redisKey = this.getKey(conversationId);
-        BoundListOperations<String, String> listOps = this.stringRedisTemplate.boundListOps(redisKey);
+        var redisKey = this.getKey(conversationId);
+        var listOps = this.stringRedisTemplate.boundListOps(redisKey);
         messages.forEach(message -> {
             listOps.rightPush(MessageUtil.toJson(message));
         });
@@ -47,16 +46,16 @@ public class RedisChatMemory implements ChatMemory {
         if (lastN <= 0) {
             return List.of();
         }
-        String redisKey = this.getKey(conversationId);
-        BoundListOperations<String, String> listOps = this.stringRedisTemplate.boundListOps(redisKey);
+        var redisKey = this.getKey(conversationId);
+        var listOps = this.stringRedisTemplate.boundListOps(redisKey);
 
-        List<String> messages = listOps.range(0, lastN);
+        var messages = listOps.range(0, lastN);
         return CollStreamUtil.toList(messages, MessageUtil::toMessage);
     }
 
     @Override
     public void clear(String conversationId) {
-        String redisKey = this.getKey(conversationId);
+        var redisKey = this.getKey(conversationId);
         this.stringRedisTemplate.delete(redisKey);
     }
 
