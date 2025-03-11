@@ -37,6 +37,10 @@ public class ChatServiceImpl implements ChatService {
         Long userId = UserContext.getUser();
         // 获取对话id
         String conversationId = ChatService.getConversationId(sessionId);
+
+        //更新会话时间
+        this.chatSessionService.update(sessionId, question, userId);
+
         return this.dashScopeChatClient.prompt()
                 .system(promptSystem -> promptSystem
                         .text(this.systemPromptConfig.getSystemChatMessage()) // 设置系统提示语
@@ -58,10 +62,6 @@ public class ChatServiceImpl implements ChatService {
                 }) //输出开始，标记正在输出
                 .doOnComplete(() -> {
                     GENERATE_STATUS.remove(sessionId);
-
-                    //更新会话时间
-                    this.chatSessionService.update(sessionId, question, userId);
-
                 }) //输出结束，清除标记
                 // .doOnNext(System.out::println) // 打印输出
                 .takeWhile(s -> GENERATE_STATUS.get(sessionId))
