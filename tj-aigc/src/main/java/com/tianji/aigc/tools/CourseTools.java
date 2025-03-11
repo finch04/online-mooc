@@ -1,6 +1,7 @@
 package com.tianji.aigc.tools;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import com.tianji.aigc.config.ToolResultHandler;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.tools.result.CourseInfo;
@@ -31,8 +32,13 @@ public class CourseTools {
                 .map(CourseInfo::of)
                 // 如果上述任何步骤中没有获取到数据，则最终返回null
                 .orElse(null);
+        if (courseInfo == null) {
+            return null;
+        }
+
         var requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
-        ToolResultHandler.put(requestId, CourseInfo.class.getSimpleName(), courseInfo);
+        var field = StrUtil.format("{}_{}", StrUtil.lowerFirst(CourseInfo.class.getSimpleName()), courseInfo.getId());
+        ToolResultHandler.put(requestId, field, courseInfo);
 
         return courseInfo;
     }

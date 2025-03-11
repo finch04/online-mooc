@@ -1,12 +1,11 @@
 package com.tianji.aigc.tools;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import com.tianji.aigc.config.ToolResultHandler;
 import com.tianji.aigc.constants.Constant;
-import com.tianji.aigc.tools.result.CourseInfo;
 import com.tianji.aigc.tools.result.PrePlaceOrder;
 import com.tianji.api.client.trade.TradeClient;
-import com.tianji.api.dto.trade.OrderConfirmVO;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ToolContext;
@@ -35,7 +34,8 @@ public class OrderTools {
                 .orElse(null);
 
         var requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
-        ToolResultHandler.put(requestId, PrePlaceOrder.class.getSimpleName(), prePlaceOrder);
+        var field = StrUtil.lowerFirst(PrePlaceOrder.class.getSimpleName());
+        ToolResultHandler.put(requestId, field, prePlaceOrder);
 
         return prePlaceOrder;
     }
