@@ -117,7 +117,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
 
         // 4.写入数据库
-        saveOrderAndDetails(order, orderDetails);
+        try {
+            saveOrderAndDetails(order, orderDetails);
+        } catch (DuplicateKeyException e) {
+            throw new DbException(TradeErrorInfo.DUPLICATE_ORDER_FAILED);
+        }
 
         // 5.删除购物车数据
         cartService.deleteCartByUserAndCourseIds(userId, placeOrderDTO.getCourseIds());
