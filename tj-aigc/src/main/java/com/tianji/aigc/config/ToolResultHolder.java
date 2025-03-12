@@ -3,15 +3,17 @@ package com.tianji.aigc.config;
 import java.util.*;
 
 /**
+ * 工具结果保持器，用来存储tools中得到的结果，请求id 作为key， value为键值对数据
+ *
  * @author zzj
  * @version 1.0
  */
-public class ToolResultHandler {
+public class ToolResultHolder {
 
     private static final Map<String, Map<String, Object>> HANDLER_MAP = new HashMap<>();
 
 
-    private ToolResultHandler() {
+    private ToolResultHolder() {
     }
 
     public static void put(String key, String field, Object result) {

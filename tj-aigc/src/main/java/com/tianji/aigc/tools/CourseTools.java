@@ -2,7 +2,7 @@ package com.tianji.aigc.tools;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import com.tianji.aigc.config.ToolResultHandler;
+import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.tools.result.CourseInfo;
 import com.tianji.api.client.course.CourseClient;
@@ -38,7 +38,7 @@ public class CourseTools {
 
         var requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
         var field = StrUtil.format("{}_{}", StrUtil.lowerFirst(CourseInfo.class.getSimpleName()), courseInfo.getId());
-        ToolResultHandler.put(requestId, field, courseInfo);
+        ToolResultHolder.put(requestId, field, courseInfo);
 
         return courseInfo;
     }

@@ -6,20 +6,22 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tianji.aigc.config.SystemPromptConfig;
-import com.tianji.aigc.config.ToolResultHandler;
+import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -27,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
@@ -36,6 +39,7 @@ public class ChatServiceImpl implements ChatService {
     private final SystemPromptConfig systemPromptConfig;
     private final VectorStore vectorStore;
     private final ChatSessionService chatSessionService;
+    private final ObjectMapper objectMapper;
 
     private static final Map<String, Boolean> GENERATE_STATUS = new HashMap<>();
 
@@ -59,9 +63,6 @@ public class ChatServiceImpl implements ChatService {
                         .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
                         .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
                 )
-                // .functions(Constant.Functions.COURSE_FUNCTION,
-                //         // Constant.Functions.CART_ADD_FUNCTION,
-                //         Constant.Functions.PRE_PLACE_ORDER_FUNCTION)
                 .toolContext(MapUtil.<String, Object>builder()
                         .put(Constant.USER_ID, userId)
                         .put(Constant.REQUEST_ID, requestId)
@@ -87,23 +88,25 @@ public class ChatServiceImpl implements ChatService {
                     var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
                     if (StrUtil.equals(Constant.STOP, finishReason)) {
                         var messageId = ((ChatResponseMetadata) ReflectUtil.getFieldValue(chatResponse, Constant.Chats.CHAT_RESPONSE_METADATA)).getId();
-                        ToolResultHandler.put(messageId, Constant.REQUEST_ID, requestId);
+                        ToolResultHolder.put(messageId, Constant.REQUEST_ID, requestId);
                     }
                     //不做额外处理，直接返回原本的数据
                     return chatResponse.getResult().getOutput().getText();
                 })
                 .concatWith(Flux.defer(() -> {
                     // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
-                    var map = ToolResultHandler.get(requestId);
+                    var map = ToolResultHolder.get(requestId);
                     if (CollUtil.isNotEmpty(map)) {
-                        var result = StrUtil.format(Constant.Chats.PARAM_TAG, JSONUtil.toJsonStr(map));
-                        ToolResultHandler.remove(requestId); // 清除参数列表
-
-                        return Flux.just(result, Constant.Chats.COMPLETE_TAG);
+                        try {
+                            var result = StrUtil.format(Constant.Chats.PARAM_TAG, objectMapper.writeValueAsString(map));
+                            ToolResultHolder.remove(requestId); // 清除参数列表
+                            return Flux.just(result, Constant.Chats.COMPLETE_TAG);
+                        } catch (JsonProcessingException e) {
+                            log.error("json序列化出错。", e);
+                        }
                     }
                     return Flux.just(Constant.Chats.COMPLETE_TAG);
                 }));
-
     }
 
     @Override

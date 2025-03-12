@@ -2,7 +2,7 @@ package com.tianji.aigc.tools;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import com.tianji.aigc.config.ToolResultHandler;
+import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.tools.result.PrePlaceOrder;
 import com.tianji.api.client.trade.TradeClient;
@@ -35,7 +35,7 @@ public class OrderTools {
 
         var requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
         var field = StrUtil.lowerFirst(PrePlaceOrder.class.getSimpleName());
-        ToolResultHandler.put(requestId, field, prePlaceOrder);
+        ToolResultHolder.put(requestId, field, prePlaceOrder);
 
         return prePlaceOrder;
     }
