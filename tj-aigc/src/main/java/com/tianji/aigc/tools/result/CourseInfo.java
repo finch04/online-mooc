@@ -39,6 +39,9 @@ public class CourseInfo {
      * @return 转换后的课程信息实体对象（包含格式化后的价格和详情页URL）
      */
     public static CourseInfo of(CourseBaseInfoDTO courseBaseInfoDTO) {
+        if (null == courseBaseInfoDTO) {
+            return null;
+        }
         // 基础对象属性拷贝（忽略转换错误）
         CourseInfo courseInfo = BeanUtil.toBeanIgnoreError(courseBaseInfoDTO, CourseInfo.class);
 

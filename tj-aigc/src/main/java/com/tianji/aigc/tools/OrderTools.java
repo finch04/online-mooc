@@ -1,8 +1,6 @@
 package com.tianji.aigc.tools;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.StrUtil;
-import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.tools.result.PrePlaceOrder;
 import com.tianji.api.client.trade.TradeClient;
@@ -18,7 +16,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class OrderTools {
+public class OrderTools extends BaseTools {
 
     private final TradeClient tradeClient;
 
@@ -29,14 +27,10 @@ public class OrderTools {
         // 设置用户ID，用于身份验证，否在在Feign调用时会出现401错误
         UserContext.setUser(Convert.toLong(toolContext.getContext().get(Constant.USER_ID)));
         var orderConfirmVO = this.tradeClient.prePlaceOrder(ids);
-        var prePlaceOrder = Optional.ofNullable(orderConfirmVO)
+
+        return Optional.ofNullable(orderConfirmVO)
                 .map(PrePlaceOrder::of)
+                .map(prePlaceOrder -> super.saveResult(toolContext, prePlaceOrder))
                 .orElse(null);
-
-        var requestId = Convert.toStr(toolContext.getContext().get(Constant.REQUEST_ID));
-        var field = StrUtil.lowerFirst(PrePlaceOrder.class.getSimpleName());
-        ToolResultHolder.put(requestId, field, prePlaceOrder);
-
-        return prePlaceOrder;
     }
 }
