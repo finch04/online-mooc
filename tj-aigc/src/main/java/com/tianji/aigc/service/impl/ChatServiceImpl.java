@@ -60,7 +60,7 @@ public class ChatServiceImpl implements ChatService {
                         .param("now", DateUtil.now()) // 设置当前时间的参数
                 )
                 .advisors(advisor -> advisor
-                        // .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
+                        .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
                         .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
                 )
                 .toolContext(MapUtil.<String, Object>builder()
@@ -69,7 +69,6 @@ public class ChatServiceImpl implements ChatService {
                         .build()) // 设置用户id参数
                 .user(question)
                 .stream()
-                // .content()
                 .chatResponse()
                 .doFirst(() -> {
                     GENERATE_STATUS.put(sessionId, true);
@@ -78,7 +77,6 @@ public class ChatServiceImpl implements ChatService {
                     //输出结束，清除标记
                     GENERATE_STATUS.remove(sessionId);
                 })
-                // .doOnNext(System.out::println) // 打印输出
                 .takeWhile(s -> Optional.ofNullable(GENERATE_STATUS.get(sessionId)).orElse(false))
                 // .concatWith(Flux.just("&complete&"));
                 .map(chatResponse -> {
