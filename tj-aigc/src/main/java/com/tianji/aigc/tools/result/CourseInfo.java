@@ -29,8 +29,8 @@ public class CourseInfo {
     private String usePeople;
     @JsonPropertyDescription("课程详细介绍")
     private String detail;
-    @JsonPropertyDescription("课程的url，相对路径")
-    private String url;
+    // @JsonPropertyDescription("课程的url，相对路径")
+    // private String url;
 
     /**
      * 将CourseBaseInfoDTO转换为CourseInfo对象
@@ -52,7 +52,7 @@ public class CourseInfo {
                 .orElse(0.0d));
 
         // 构建前端详情页访问路径（拼接课程ID参数）
-        courseInfo.setUrl("/#/details/index?id=" + courseBaseInfoDTO.getId());
+        // courseInfo.setUrl("/#/details/index?id=" + courseBaseInfoDTO.getId());
 
         return courseInfo;
     }

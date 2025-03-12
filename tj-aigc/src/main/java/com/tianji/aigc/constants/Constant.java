@@ -15,8 +15,8 @@ public interface Constant {
     }
 
     interface Tools {
-        String QUERY_COURSE_BY_ID = "根据课程id查询";
-        String PRE_PLACE_ORDER = "购买课程预下单操作，入参为多个课程id";
+        String QUERY_COURSE_BY_ID = "根据课程id查询课程详细信息";
+        String PRE_PLACE_ORDER = "购买课程预下单操作";
     }
 
     interface ToolParams {
