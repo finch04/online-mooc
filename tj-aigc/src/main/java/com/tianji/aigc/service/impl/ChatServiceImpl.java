@@ -166,7 +166,7 @@ public class ChatServiceImpl implements ChatService {
                 {"eventData":"具体的实现细节，","eventType":1001}
                 {"eventData":"我可以为您提供更详","eventType":1001}
                 {"eventData":"尽的指导。","eventType":1001}
-                {"eventData":"","eventType":1001}
+                {"eventData":{"courseInfo_1589905661084430337":{"id":"1589905661084430337","name":"可能是史上最全的微服务技术栈课程","price":199.0,"validDuration":9999,"usePeople":"有一定的Java开发基础，熟练使用了SpringBoot、MyBatis等基础框架","detail":"可能是史上最全的微服务技术栈课程，由黑马名师授课，你值的拥有"}},"eventType":1003}
                 {"eventType":1002}
                 """;
 
