@@ -2,6 +2,7 @@ package com.tianji.aigc.controller;
 
 import com.tianji.aigc.dto.ChatDTO;
 import com.tianji.aigc.service.ChatService;
+import com.tianji.aigc.vo.ChatEventVO;
 import com.tianji.aigc.vo.TemplateVO;
 import com.tianji.common.annotations.NoWrapper;
 import jakarta.annotation.Resource;
@@ -26,6 +27,12 @@ public class ChatController {
     @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chat(@RequestBody ChatDTO chatDTO) {
         return this.chatService.chat(chatDTO.getQuestion(), chatDTO.getSessionId());
+    }
+
+    @NoWrapper // 自定义注解，记过不进行包装
+    @PostMapping(value = "/mock",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatEventVO> chatMock(@RequestBody ChatDTO chatDTO) {
+        return this.chatService.chatMock2(chatDTO.getQuestion(), chatDTO.getSessionId());
     }
 
     @PostMapping("/text")

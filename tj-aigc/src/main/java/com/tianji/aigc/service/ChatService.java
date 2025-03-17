@@ -1,5 +1,6 @@
 package com.tianji.aigc.service;
 
+import com.tianji.aigc.vo.ChatEventVO;
 import com.tianji.common.utils.UserContext;
 import reactor.core.publisher.Flux;
 
@@ -28,4 +29,7 @@ public interface ChatService {
 
 
     String chatText(String question);
+
+    Flux<ChatEventVO> chatMock(String question, String sessionId);
+    Flux<ChatEventVO> chatMock2(String question, String sessionId);
 }
