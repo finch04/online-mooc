@@ -7,7 +7,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tianji.aigc.config.SystemPromptConfig;
 import com.tianji.aigc.config.ToolResultHolder;
@@ -49,7 +48,7 @@ public class ChatServiceImpl implements ChatService {
     private static final Map<String, Boolean> GENERATE_STATUS = new HashMap<>();
 
     @Override
-    public Flux<String> chat(String question, String sessionId) {
+    public Flux<ChatEventVO> chat(String question, String sessionId) {
         // 获取用户id
         var userId = UserContext.getUser();
         // 获取对话id
@@ -94,21 +93,31 @@ public class ChatServiceImpl implements ChatService {
                         ToolResultHolder.put(messageId, Constant.REQUEST_ID, requestId);
                     }
                     //不做额外处理，直接返回原本的数据
-                    return chatResponse.getResult().getOutput().getText();
+                    return ChatEventVO.builder()
+                            .eventData(chatResponse.getResult().getOutput().getText())
+                            .eventType(ChatEventTypeEnum.DATA.getValue())
+                            .build();
                 })
                 .concatWith(Flux.defer(() -> {
+                    // 输出结束，清除标记
+                    ChatEventVO stopEvent = ChatEventVO.builder()
+                            .eventType(ChatEventTypeEnum.STOP.getValue())
+                            .build();
+
                     // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
                     var map = ToolResultHolder.get(requestId);
                     if (CollUtil.isNotEmpty(map)) {
-                        try {
-                            var result = StrUtil.format(Constant.Chats.PARAM_TAG, objectMapper.writeValueAsString(map));
-                            ToolResultHolder.remove(requestId); // 清除参数列表
-                            return Flux.just(result, Constant.Chats.COMPLETE_TAG);
-                        } catch (JsonProcessingException e) {
-                            log.error("json序列化出错。", e);
-                        }
+                        ToolResultHolder.remove(requestId); // 清除参数列表
+
+                        // 响应给前端的参数数据
+                        ChatEventVO chatEventVO = ChatEventVO.builder()
+                                .eventData(map)
+                                .eventType(ChatEventTypeEnum.PARAM.getValue())
+                                .build();
+
+                        return Flux.just(chatEventVO, stopEvent);
                     }
-                    return Flux.just(Constant.Chats.COMPLETE_TAG);
+                    return Flux.just(stopEvent);
                 }));
     }
 
@@ -126,7 +135,6 @@ public class ChatServiceImpl implements ChatService {
                 .content();
     }
 
-    @Override
     public Flux<ChatEventVO> chatMock2(String question, String sessionId) {
         String data = """
                 {"eventData":"根据","eventType":1001}
@@ -178,72 +186,4 @@ public class ChatServiceImpl implements ChatService {
                 .delayElements(Duration.ofMillis(300));
     }
 
-    @Override
-    public Flux<ChatEventVO> chatMock(String question, String sessionId) {
-        // 获取用户id
-        var userId = UserContext.getUser();
-        // 获取对话id
-        var conversationId = ChatService.getConversationId(sessionId);
-        var requestId = IdUtil.fastSimpleUUID();
-
-        //更新会话时间
-        this.chatSessionService.update(sessionId, question, userId);
-
-        return this.dashScopeChatClient.prompt()
-                .system(promptSystem -> promptSystem
-                        .text(this.systemPromptConfig.getSystemChatMessage()) // 设置系统提示语
-                        .param("now", DateUtil.now()) // 设置当前时间的参数
-                )
-                .advisors(advisor -> advisor
-                        .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
-                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
-                )
-                .toolContext(MapUtil.<String, Object>builder()
-                        .put(Constant.USER_ID, userId)
-                        .put(Constant.REQUEST_ID, requestId)
-                        .build()) // 设置用户id参数
-                .user(question)
-                .stream()
-                .chatResponse()
-                .doFirst(() -> {
-                    GENERATE_STATUS.put(sessionId, true);
-                }) //输出开始，标记正在输出
-                .doOnComplete(() -> {
-                    //输出结束，清除标记
-                    GENERATE_STATUS.remove(sessionId);
-                })
-                .takeWhile(s -> Optional.ofNullable(GENERATE_STATUS.get(sessionId)).orElse(false))
-                // .concatWith(Flux.just("&complete&"));
-                .map(chatResponse -> {
-                    // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
-                    // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
-                    // 从而解决，在历史聊天记录中没有外参数的问题
-                    var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
-                    if (StrUtil.equals(Constant.STOP, finishReason)) {
-                        var messageId = ((ChatResponseMetadata) ReflectUtil.getFieldValue(chatResponse, Constant.Chats.CHAT_RESPONSE_METADATA)).getId();
-                        ToolResultHolder.put(messageId, Constant.REQUEST_ID, requestId);
-                    }
-                    //不做额外处理，直接返回原本的数据
-                    return ChatEventVO.builder()
-                            .eventData(chatResponse.getResult().getOutput().getText())
-                            .eventType(ChatEventTypeEnum.DATA.getValue())
-                            .build();
-                })
-                .concatWith(Flux.defer(() -> {
-                    ChatEventVO stopEvent = ChatEventVO.builder()
-                            .eventType(ChatEventTypeEnum.STOP.getValue())
-                            .build();
-
-                    // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
-                    var map = ToolResultHolder.get(requestId);
-                    if (CollUtil.isNotEmpty(map)) {
-                        ToolResultHolder.remove(requestId); // 清除参数列表
-                        return Flux.just(ChatEventVO.builder()
-                                .eventData(map)
-                                .eventType(ChatEventTypeEnum.PARAM.getValue())
-                                .build(), stopEvent);
-                    }
-                    return Flux.just(stopEvent);
-                }));
-    }
 }

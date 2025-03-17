@@ -13,7 +13,7 @@ public interface ChatService {
      * @param sessionId 会话id
      * @return 回答内容
      */
-    Flux<String> chat(String question, String sessionId);
+    Flux<ChatEventVO> chat(String question, String sessionId);
 
     /**
      * 获取对话id，规则：用户id_会话id
@@ -30,6 +30,4 @@ public interface ChatService {
 
     String chatText(String question);
 
-    Flux<ChatEventVO> chatMock(String question, String sessionId);
-    Flux<ChatEventVO> chatMock2(String question, String sessionId);
 }

@@ -25,15 +25,15 @@ public class ChatController {
 
     @NoWrapper // 自定义注解，记过不进行包装
     @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> chat(@RequestBody ChatDTO chatDTO) {
+    public Flux<ChatEventVO> chat(@RequestBody ChatDTO chatDTO) {
         return this.chatService.chat(chatDTO.getQuestion(), chatDTO.getSessionId());
     }
 
-    @NoWrapper // 自定义注解，记过不进行包装
-    @PostMapping(value = "/mock",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ChatEventVO> chatMock(@RequestBody ChatDTO chatDTO) {
-        return this.chatService.chatMock2(chatDTO.getQuestion(), chatDTO.getSessionId());
-    }
+    // @NoWrapper // 自定义注解，记过不进行包装
+    // @PostMapping(value = "/mock",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    // public Flux<ChatEventVO> chatMock(@RequestBody ChatDTO chatDTO) {
+    //     return this.chatService.chatMock2(chatDTO.getQuestion(), chatDTO.getSessionId());
+    // }
 
     @PostMapping("/text")
     public String chatText(@RequestBody String question) {
