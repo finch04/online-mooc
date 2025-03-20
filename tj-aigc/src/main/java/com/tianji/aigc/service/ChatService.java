@@ -29,5 +29,4 @@ public interface ChatService {
 
 
     String chatText(String question);
-
 }

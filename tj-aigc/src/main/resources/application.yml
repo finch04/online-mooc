@@ -32,6 +32,15 @@ tj:
       system:
         chat:
           data-id: system-chat-message.txt
-      text-system:
-        chat:
+        text:
           data-id: text-system-chat-message.txt
+        route-agent:
+          data-id: route-agent-system-message.txt
+        recommend-agent:
+          data-id: recommend-agent-system-message.txt
+        consult-agent:
+          data-id: consult-agent-system-message.txt
+        buy-agent:
+          data-id: buy-agent-system-message.txt
+        knowledge-agent:
+          data-id: knowledge-agent-system-message.txt

@@ -1,13 +1,9 @@
-package com.tianji.aigc.service.impl;
+package com.tianji.aigc.agent;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.tianji.aigc.agent.ConsultAgent;
-import com.tianji.aigc.config.SystemPromptConfig;
 import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.enums.ChatEventTypeEnum;
@@ -15,75 +11,73 @@ import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
 import com.tianji.aigc.vo.ChatEventVO;
 import com.tianji.common.utils.UserContext;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
 import reactor.core.publisher.Flux;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-// @Service
-@RequiredArgsConstructor
-public class ChatServiceImpl implements ChatService {
+public abstract class AbstractAgent implements Agent {
 
-    private final ChatClient dashScopeChatClient;
-    private final ChatClient openAiChatClient;
-    private final SystemPromptConfig systemPromptConfig;
-    private final VectorStore vectorStore;
-    private final ChatSessionService chatSessionService;
-    private final ConsultAgent consultAgent;
+    @Resource
+    private ChatSessionService chatSessionService;
+    @Resource
+    private ChatClient dashScopeChatClient;
 
-    private static final Map<String, Boolean> GENERATE_STATUS = new HashMap<>();
-
-    // 输出结束，清除标记
-    private static final ChatEventVO STOP_EVENT = ChatEventVO.builder().eventType(ChatEventTypeEnum.STOP.getValue()).build();
+    public static final Map<String, Boolean> GENERATE_STATUS = new ConcurrentHashMap<>();
 
     @Override
-    public Flux<ChatEventVO> chat(String question, String sessionId) {
+    public String process(String question, String sessionId) {
         // 获取用户id
         var userId = UserContext.getUser();
-        // 获取对话id
-        var conversationId = ChatService.getConversationId(sessionId);
-        var requestId = IdUtil.fastSimpleUUID();
+        var requestId = this.generateRequestId();
 
         //更新会话时间
         this.chatSessionService.update(sessionId, question, userId);
 
+        return this.getChatClientRequest(userId, sessionId, requestId, question)
+                .call()
+                .content();
+    }
+
+    private ChatClient.ChatClientRequestSpec getChatClientRequest(Long userId, String sessionId, String requestId, String question) {
         return this.dashScopeChatClient.prompt()
-                .system(promptSystem -> promptSystem
-                        .text(this.systemPromptConfig.getChatSystemMessage().get()) // 设置系统提示语
-                        .param("now", DateUtil.now()) // 设置当前时间的参数
-                )
-                .advisors(advisor -> advisor
-                        .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query("").topK(999).build()))
-                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
-                )
-                .toolContext(MapUtil.<String, Object>builder() // 设置tool列表
-                        .put(Constant.USER_ID, userId) // 设置用户id参数
-                        .put(Constant.REQUEST_ID, requestId) // 设置请求id参数
-                        .build()
-                )
-                .user(question)
+                .system(promptSystem -> promptSystem.text(this.systemMessage()).params(this.systemMessageParams()))
+                .advisors(advisor -> advisor.advisors(this.advisors()).params(this.advisorParams(sessionId)))
+                .tools(this.tools())
+                .toolContext(this.toolContext(userId, requestId))
+                .user(question);
+    }
+
+    public Flux<ChatEventVO> processStream(String question, String sessionId) {
+        // 获取用户id
+        var userId = UserContext.getUser();
+        var requestId = this.generateRequestId();
+
+        //更新会话时间
+        this.chatSessionService.update(sessionId, question, userId);
+
+        return this.getChatClientRequest(userId, sessionId, requestId, question)
                 .stream()
                 .chatResponse()
                 .doFirst(() -> {
+                    //输出开始，标记正在输出
                     GENERATE_STATUS.put(sessionId, true);
-                }) //输出开始，标记正在输出
+                })
                 .doOnComplete(() -> {
                     //输出结束，清除标记
                     GENERATE_STATUS.remove(sessionId);
                 })
                 .doOnError(throwable -> GENERATE_STATUS.remove(sessionId)) // 错误时清除标记
-                .takeWhile(s -> Optional.ofNullable(GENERATE_STATUS.get(sessionId)).orElse(false))
-                // .concatWith(Flux.just("&complete&"));
+                .takeWhile(s -> Optional.ofNullable(GENERATE_STATUS.get(sessionId)).orElse(false)) // 只输出标记为true的流
                 .map(chatResponse -> {
                     // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
                     // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
@@ -104,7 +98,6 @@ public class ChatServiceImpl implements ChatService {
                     var map = ToolResultHolder.get(requestId);
                     if (CollUtil.isNotEmpty(map)) {
                         ToolResultHolder.remove(requestId); // 清除参数列表
-
                         // 响应给前端的参数数据
                         ChatEventVO chatEventVO = ChatEventVO.builder()
                                 .eventData(map)
@@ -116,18 +109,44 @@ public class ChatServiceImpl implements ChatService {
                 }));
     }
 
+    private String generateRequestId() {
+        return IdUtil.fastSimpleUUID();
+    }
+
+    /**
+     * 获取系统提示信息模板，子类必须实现以定义具体的系统提示内容。
+     *
+     * @return 系统提示的文本模板
+     */
+    public abstract String systemMessage();
+
+
+    public List<Advisor> advisors() {
+        return List.of();
+    }
+
+    public Map<String, Object> systemMessageParams() {
+        return Map.of();
+    }
+
+    public Map<String, Object> advisorParams(String sessionId) {
+        String conversationId = ChatService.getConversationId(sessionId);
+        return Map.of(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId);
+    }
+
+    public Map<String, Object> toolContext(Long userId, String requestId) {
+        return Map.of();
+    }
+
+    /**
+     * 获取工具列表，默认返回空数组。子类需根据需求覆盖此方法。
+     */
+    public Object[] tools() {
+        return EMPTY_OBJECTS;
+    }
+
     @Override
     public void stop(String sessionId) {
         GENERATE_STATUS.remove(sessionId);
     }
-
-    @Override
-    public String chatText(String question) {
-        return this.openAiChatClient.prompt()
-                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemMessage().get()))
-                .user(question)
-                .call()
-                .content();
-    }
-
 }

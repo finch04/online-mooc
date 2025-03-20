@@ -48,7 +48,7 @@
         <spring-ai.version>1.0.0-M6</spring-ai.version>
         <!--<spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>-->
         <mybatis-plus.version>3.5.9</mybatis-plus.version>
-        <hutool.version>5.7.17</hutool.version>
+        <hutool.version>5.8.36</hutool.version>
         <swagger.version>2.2.19</swagger.version>
         <mysql.version>8.0.23</mysql.version>
         <ali.sdk.core.version>4.6.0</ali.sdk.core.version>

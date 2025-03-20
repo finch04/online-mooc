@@ -71,8 +71,8 @@ public class PrePlaceOrder {
                 })
                 .orElse("");
 
-        // 实付金额
-        double payAmount = totalAmount - discountAmount;
+        // 实付金额，保留小数点后两位
+        double payAmount = NumberUtil.round(totalAmount - discountAmount, 2).doubleValue();
 
         // 课程id列表
         List<Long> courseIds = CollStreamUtil.toList(orderConfirmVO.getCourses(), OrderCourseDTO::getId);
