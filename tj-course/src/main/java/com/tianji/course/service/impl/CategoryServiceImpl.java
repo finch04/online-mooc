@@ -1,6 +1,8 @@
 package com.tianji.course.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -322,9 +324,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     public List<SimpleCategoryVO> all(Boolean admin) {
         // 1.查询有课程的课程分类id列表
         List<Long> categoryIdList = admin ?
-                null :courseService.getCategoryIdListWithCourse();
+                null : courseService.getCategoryIdListWithCourse();
         // 1.1.判空
-        if(!admin && CollUtils.isEmpty(categoryIdList)){
+        if (!admin && CollUtils.isEmpty(categoryIdList)) {
             return new ArrayList<>();
         }
 
@@ -391,7 +393,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         queryWrapper.eq(Category::getLevel, 3)
                 .in(Category::getId, thirdCateIdList);
         Long thirdCateNum = baseMapper.selectCount(queryWrapper);
-        if (!NumberUtils.equals(thirdCateNum, thirdCateIdList.size())) {
+        if (!NumberUtil.equals(thirdCateNum, Convert.toLong(thirdCateIdList.size()))) {
             throw new BizIllegalException(ErrorInfo.Msg.REQUEST_PARAM_ILLEGAL);
         }
         //2.查询所有分类，并将分类转化成map
@@ -451,13 +453,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     /**
      * 获取一级二级没有下一级分类的分类id列表
+     *
      * @return
      */
-    private List<Long> getCateIdsWithoutChildCateId(){
+    private List<Long> getCateIdsWithoutChildCateId() {
         // 1.查询数据
         List<Category> list = list();
         // 1.1.判空
-        if(CollUtils.isEmpty(list)){
+        if (CollUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
         // 2.list转map
@@ -498,9 +501,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         }
     }
 
-    private void setThirdCategoryNum(List<CategoryVO> categoryVOList){
+    private void setThirdCategoryNum(List<CategoryVO> categoryVOList) {
         // 1.判空
-        if(CollUtils.isEmpty(categoryVOList)){
+        if (CollUtils.isEmpty(categoryVOList)) {
             return;
         }
         // 2.
@@ -516,7 +519,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         // 1.查询所有数据
         List<Category> categories = baseMapper.selectList(null);
         // 1.1.判空
-        if(CollUtils.isEmpty(categories)){
+        if (CollUtils.isEmpty(categories)) {
             return result;
         }
 
@@ -530,7 +533,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 .filter(category -> category.getLevel() == 2)
                 .collect(Collectors.groupingBy(Category::getParentId));
         // 3.1.遍历category2Map
-        for (Map.Entry<Long, List<Category>> entry : category2Map.entrySet()){
+        for (Map.Entry<Long, List<Category>> entry : category2Map.entrySet()) {
             long sum = entry.getValue()
                     .stream()
                     .map(category -> NumberUtils.null2Zero(result.get(category.getId())))
@@ -625,21 +628,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     /**
      * 过滤掉没有三级课程分类的
+     *
      * @param simpleCategoryVOS
      */
-    private void filter(List<SimpleCategoryVO> simpleCategoryVOS){
+    private void filter(List<SimpleCategoryVO> simpleCategoryVOS) {
         // 1.判空
-        if(CollUtils.isEmpty(simpleCategoryVOS)){
+        if (CollUtils.isEmpty(simpleCategoryVOS)) {
             return;
         }
         // 2.遍历分类列表
-        for (int count = simpleCategoryVOS.size() -1; count >= 0; count--) {
+        for (int count = simpleCategoryVOS.size() - 1; count >= 0; count--) {
             SimpleCategoryVO simpleCategoryVO = simpleCategoryVOS.get(count);
-            if(simpleCategoryVO.getLevel() == 3){
+            if (simpleCategoryVO.getLevel() == 3) {
                 continue;
             }
             filter(simpleCategoryVO.getChildren());
-            if(CollUtils.isEmpty(simpleCategoryVO.getChildren())){
+            if (CollUtils.isEmpty(simpleCategoryVO.getChildren())) {
                 simpleCategoryVOS.remove(count);
             }
         }
