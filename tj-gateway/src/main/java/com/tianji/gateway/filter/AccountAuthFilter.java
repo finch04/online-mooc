@@ -15,8 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static com.tianji.auth.common.constants.JwtConstants.AUTHORIZATION_HEADER;
-import static com.tianji.auth.common.constants.JwtConstants.USER_HEADER;
+import static com.tianji.auth.common.constants.JwtConstants.*;
 
 @Component
 public class AccountAuthFilter implements GlobalFilter, Ordered {
@@ -51,9 +50,12 @@ public class AccountAuthFilter implements GlobalFilter, Ordered {
         R<LoginUserDTO> r = authUtil.parseToken(token);
 
         // 4.如果用户是登录状态，尝试更新请求头，传递用户信息
-        if(r.success()){
+        if (r.success()) {
             exchange.mutate()
-                    .request(builder -> builder.header(USER_HEADER, r.getData().getUserId().toString()))
+                    .request(builder -> builder
+                            .header(USER_HEADER, r.getData().getUserId().toString())
+                            .header(TOKEN_HEADER, token)
+                    )
                     .build();
         }
 

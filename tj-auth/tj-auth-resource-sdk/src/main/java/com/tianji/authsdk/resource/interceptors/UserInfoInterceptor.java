@@ -1,6 +1,7 @@
 package com.tianji.authsdk.resource.interceptors;
 
 import com.tianji.auth.common.constants.JwtConstants;
+import com.tianji.common.utils.TokenContext;
 import com.tianji.common.utils.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -20,6 +21,7 @@ public class UserInfoInterceptor implements HandlerInterceptor {
         try {
             Long userId = Long.valueOf(authorization);
             UserContext.setUser(userId);
+            TokenContext.setToken(request.getHeader(JwtConstants.TOKEN_HEADER));
             return true;
         } catch (NumberFormatException e) {
             log.error("用户身份信息格式不正确，{}, 原因：{}", authorization, e.getMessage());
