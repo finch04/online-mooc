@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.tianji.learning.constants.LearningConstants.POINTS_BOARD_TABLE_PREFIX;
+
 /**
  * <p>
  *  服务实现类
@@ -24,20 +26,10 @@ import java.util.List;
 @Service
 public class PointsBoardSeasonServiceImpl extends ServiceImpl<PointsBoardSeasonMapper, PointsBoardSeason> implements IPointsBoardSeasonService {
 
-    //查询赛季列表
     @Override
-    public List<PointsBoardSeasonVO> querySeasonByTime() {
-        List<PointsBoardSeasonVO> voList=new ArrayList<>();
-        List<PointsBoardSeason> list = this.lambdaQuery().list();
-        for (PointsBoardSeason pointsBoardSeason : list) {
-            PointsBoardSeasonVO vo=new PointsBoardSeasonVO();
-            vo.setName(pointsBoardSeason.getName());
-            vo.setBeginTime(pointsBoardSeason.getBeginTime());
-            vo.setEndTime(pointsBoardSeason.getEndTime());
-            vo.setId(pointsBoardSeason.getId());
-            voList.add(vo);
-        }
-        return voList;
+    public void createPointsBoardLatestTable(Integer id) {
+        getBaseMapper().createPointsBoardTable(POINTS_BOARD_TABLE_PREFIX + id);
     }
+
 }
 

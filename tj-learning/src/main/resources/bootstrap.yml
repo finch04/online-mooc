@@ -24,6 +24,8 @@ spring:
             refresh: false
           - data-id: shared-mq.yaml # 共享mq配置
             refresh: false
+          - data-id: shared-xxljob.yaml # 共享xxl-job配置
+            refresh: false
 tj:
   swagger:
     enable: true

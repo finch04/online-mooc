@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.common.utils.UserContext;
+import com.tianji.learning.constants.RedisConstants;
 import com.tianji.learning.domain.po.PointsRecord;
 import com.tianji.learning.domain.vo.PointsStatisticsVO;
 import com.tianji.learning.enums.PointsRecordType;
@@ -11,12 +12,15 @@ import com.tianji.learning.mapper.PointsRecordMapper;
 import com.tianji.learning.mq.msg.SignInMessage;
 import com.tianji.learning.service.IPointsRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +34,10 @@ import java.util.Map;
  * @since 2023-10-26
  */
 @Service
+@RequiredArgsConstructor
 public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, PointsRecord> implements IPointsRecordService {
+
+    private final StringRedisTemplate redisTemplate;
 
     //增加积分
     @Override
@@ -48,7 +55,7 @@ public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, Poi
             LocalDateTime dayStartTime = DateUtils.getDayStartTime(now);
             LocalDateTime dayEndTime = DateUtils.getDayEndTime(now);
             QueryWrapper<PointsRecord> wrapper=new QueryWrapper<>();
-            wrapper.select("sum(points) as totalPoints");
+            wrapper.select("sum(points) as totalPoints");//用此字段暂存一下  结果
             wrapper.eq("user_id",msg.getUserId());
             wrapper.eq("type",type);
             wrapper.between("create_time",dayStartTime,dayEndTime);
@@ -78,6 +85,12 @@ public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, Poi
         record.setPoints(realPoints);
         record.setType(type);
         this.save(record);
+
+        //累加并保存总积分值到redis 使用zset
+        LocalDateTime now =LocalDateTime.now();
+        String format =now.format(DateTimeFormatter.ofPattern("yyyyMM"));
+        String key = RedisConstants.POINTS_BOARD_KEY_PREFIX+format;
+        redisTemplate.opsForZSet().incrementScore(key,msg.getUserId().toString(),realPoints);
 
     }
 

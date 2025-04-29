@@ -2,6 +2,7 @@ package com.tianji.trade.controller;
 
 
 import com.tianji.common.domain.dto.PageDTO;
+import com.tianji.trade.constants.OrderCancelReason;
 import com.tianji.trade.domain.dto.PlaceOrderDTO;
 import com.tianji.trade.domain.query.OrderPageQuery;
 import com.tianji.trade.domain.vo.OrderConfirmVO;
@@ -73,7 +74,7 @@ public class OrderController {
     @ApiOperation("取消订单接口")
     @PutMapping("/{id}/cancel")
     public void cancelOrder(@ApiParam("要取消订单的id") @PathVariable("id") Long orderId){
-        orderService.cancelOrder(orderId);
+        orderService.cancelOrder(orderId, OrderCancelReason.USER_CANCEL);
     }
 
     @ApiOperation("删除订单接口")

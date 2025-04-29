@@ -2,6 +2,7 @@ package com.tianji.trade.service;
 
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.pay.sdk.dto.PayResultDTO;
+import com.tianji.trade.constants.OrderCancelReason;
 import com.tianji.trade.domain.dto.PlaceOrderDTO;
 import com.tianji.trade.domain.po.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -30,7 +31,7 @@ public interface IOrderService extends IService<Order> {
     @Transactional
     void saveOrderAndDetails(Order order, List<OrderDetail> orderDetails);
 
-    void cancelOrder(Long orderId);
+    void cancelOrder(Long orderId, OrderCancelReason cancelReason);
 
     void deleteOrder(Long id);
 

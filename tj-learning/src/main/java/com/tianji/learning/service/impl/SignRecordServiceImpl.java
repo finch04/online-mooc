@@ -105,7 +105,6 @@ public class SignRecordServiceImpl implements ISignRecordsService {
             num=num>>>1;
         }
         return counter;
-
     }
 
     //查询签到记录

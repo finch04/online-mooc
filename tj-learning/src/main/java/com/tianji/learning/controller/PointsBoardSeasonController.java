@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * <p>
+ *    赛季管理
  *  前端控制器
  * </p>
  *
@@ -32,8 +33,8 @@ public class PointsBoardSeasonController {
 
     @ApiOperation("查询赛季列表")
     @GetMapping("/list")
-    public List<PointsBoardSeasonVO> querySeasonByTime(){
-        return seasonService.querySeasonByTime();
+    public List<PointsBoardSeason> querySeasonByTime(){
+        return seasonService.list();
     }
 
 }

@@ -39,12 +39,6 @@ public class LearningRecordDelayTaskHandler {
             TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(10));
 
-
-
-
-
-
-
     @PostConstruct //项目启动后， 当前类实例化后，方法注入后 方法就会运行 一般用来做初始化工作
     public void init(){
         log.info("LearningRecordDelayTaskHandler  init 方法执行了");
@@ -55,6 +49,7 @@ public class LearningRecordDelayTaskHandler {
         log.debug("关闭学习记录处理的延迟任务");
         begin = false;
     }
+
     private void handleDelayTask(){
         while (begin){
             try {
