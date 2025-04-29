@@ -1,8 +1,9 @@
-package com.tianji.learning.domain.po;
+package com.tianji.exam.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.tianji.exam.enums.ExamType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -12,33 +13,37 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 学习记录表
+ * 考试记录表
  * </p>
  *
  * @author 虎哥
- * @since 2022-12-10
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("learning_record")
-public class LearningRecord implements Serializable {
+@TableName("exam_record")
+public class ExamRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 学习记录的id
+     * id
      */
-    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /**
-     * 对应课表的id
+     * 类型：1-考试、2-练习
      */
-    private Long lessonId;
+    private ExamType type;
 
     /**
-     * 对应小节的id
+     * 课程id
+     */
+    private Long courseId;
+
+    /**
+     * 小节id
      */
     private Long sectionId;
 
@@ -48,27 +53,36 @@ public class LearningRecord implements Serializable {
     private Long userId;
 
     /**
-     * 视频的当前观看时间点，单位秒
+     * 实际得分
      */
-    private Integer moment;
+    private Integer score;
 
     /**
-     * 是否完成学习，默认false
+     * 正确答题数
+     */
+    private Integer correctQuestions;
+
+    /**
+     * 考试用时
+     */
+    private Integer duration;
+    /**
+     * 是否完成
      */
     private Boolean finished;
 
     /**
-     * 第一次观看时间
+     * 开始时间
      */
     private LocalDateTime createTime;
 
     /**
-     * 完成学习的时间
+     * 交卷时间
      */
     private LocalDateTime finishTime;
 
     /**
-     * 更新时间（最近一次观看时间）
+     * 更新时间
      */
     private LocalDateTime updateTime;
 

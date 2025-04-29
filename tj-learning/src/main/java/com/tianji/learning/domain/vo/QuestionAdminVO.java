@@ -1,6 +1,5 @@
 package com.tianji.learning.domain.vo;
 
-import com.tianji.learning.enums.QuestionStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -24,6 +23,7 @@ public class QuestionAdminVO {
     private Integer status;
     @ApiModelProperty("是否被隐藏")
     private Boolean hidden;
+
     @ApiModelProperty("提问者昵称")
     private String userName;
     @ApiModelProperty("提问者头像")

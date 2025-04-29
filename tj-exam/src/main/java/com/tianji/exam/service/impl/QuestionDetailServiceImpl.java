@@ -1,9 +1,9 @@
 package com.tianji.exam.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.exam.domain.po.QuestionDetail;
 import com.tianji.exam.mapper.QuestionDetailMapper;
 import com.tianji.exam.service.IQuestionDetailService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

@@ -13,6 +13,8 @@ public class QuestionVO {
     private Long id;
     @ApiModelProperty("互动问题名称")
     private String title;
+    @ApiModelProperty("互动问题描述")
+    private String description;
     @ApiModelProperty("回答数量，0表示没有回答")
     private Integer answerTimes;
     @ApiModelProperty(value = "创建时间", example = "2022-7-18 19:52:36")
@@ -29,7 +31,4 @@ public class QuestionVO {
     private String latestReplyContent;
     @ApiModelProperty("最新的回答者昵称")
     private String latestReplyUser;
-
-    @ApiModelProperty("问题描述信息")
-    private String description;
 }

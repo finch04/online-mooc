@@ -8,13 +8,13 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel(description = "互动问题分页查询条件")
-public class QuestionPageQuery extends PageQuery {
+@ApiModel(description = "学习笔记分页查询条件")
+public class NotePageQuery extends PageQuery {
     // 用户端查询条件
     @ApiModelProperty(value = "课程id")
     private Long courseId;
     @ApiModelProperty(value = "小节id", example = "1")
     private Long sectionId;
-    @ApiModelProperty(value = "是否只查询我的问题", example = "1")
+    @ApiModelProperty(value = "是否只查询我的笔记", example = "1")
     private Boolean onlyMine = false;
 }

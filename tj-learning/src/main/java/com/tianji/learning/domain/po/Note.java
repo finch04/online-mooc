@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 互动问题的回答或评论
+ * 
  * </p>
  *
  * @author 虎哥
@@ -20,66 +20,76 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("interaction_reply")
-public class InteractionReply implements Serializable {
+@TableName("note")
+public class Note implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 互动问题的回答id
+     * 笔记id
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
-     * 互动问题问题id
-     */
-    private Long questionId;
-
-    /**
-     * 回复的上级回答id
-     */
-    private Long answerId;
-
-    /**
-     * 回答者id
+     * 用户id
      */
     private Long userId;
 
     /**
-     * 回答内容
+     * 课程id
+     */
+    private Long courseId;
+
+    /**
+     * 章id
+     */
+    private Long chapterId;
+
+    /**
+     * 小节id
+     */
+    private Long sectionId;
+
+    /**
+     * 记录笔记时的视频播放时间，单位秒
+     */
+    private Integer noteMoment;
+
+    /**
+     * 笔记内容
      */
     private String content;
 
     /**
-     * 回复的目标用户id
+     * 是否是隐私笔记，默认false
      */
-    private Long targetUserId;
+    private Boolean isPrivate;
 
     /**
-     * 回复的目标回复id
-     */
-    private Long targetReplyId;
-
-    /**
-     * 评论数量
-     */
-    private Integer replyTimes;
-
-    /**
-     * 点赞数量
-     */
-    private Integer likedTimes;
-
-    /**
-     * 是否被隐藏，默认false
+     * 是否被折叠（隐藏）默认false
      */
     private Boolean hidden;
 
     /**
-     * 是否匿名，默认false
+     * 被隐藏的原因
      */
-    private Boolean anonymity;
+    private String hiddenReason;
+
+    /**
+     * 笔记作者id
+     */
+    private Long authorId;
+
+    /**
+     * 被采集笔记的id
+     */
+    private Long gatheredNoteId;
+
+    /**
+     * 是否是采集他人的笔记，默认false
+     */
+    private Boolean isGathered;
 
     /**
      * 创建时间

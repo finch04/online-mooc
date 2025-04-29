@@ -18,7 +18,7 @@ public enum PointsRecordType implements BaseEnum {
     @JsonValue
     int value;
     String desc;
-    int maxPoints;//积分上限
+    int maxPoints;
 
     PointsRecordType(int value, String desc, int maxPoints) {
         this.value = value;

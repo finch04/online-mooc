@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -20,31 +20,36 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("points_board_season")
-public class PointsBoardSeason implements Serializable {
+@TableName("note_user")
+public class NoteUser implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 自增长id，season标示
+     * 主键
      */
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
     /**
-     * 赛季名称，例如：第1赛季
+     * 引用的笔记id
      */
-    private String name;
+    private Long noteId;
 
     /**
-     * 赛季开始时间
+     * 引用者id
      */
-    private LocalDate beginTime;
+    private Long userId;
 
     /**
-     * 赛季结束时间
+     * 是否是采集他人的笔记，默认false
      */
-    private LocalDate endTime;
+    private Boolean isGathered;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
 
 
 }

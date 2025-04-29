@@ -21,7 +21,7 @@ public class ReplyDTO {
     private Long questionId;
 
     @ApiModelProperty("回复的上级回答id，没有可不填")
-    private Long answerId; //该字段如果为空，则代表本次提交是回答，不为空则是针对某个回答的评论
+    private Long answerId;
 
     @ApiModelProperty("回复的目标回复id，没有可不填")
     private Long targetReplyId;
