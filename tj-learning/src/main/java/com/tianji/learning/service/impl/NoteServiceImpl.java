@@ -203,8 +203,12 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         Set<Long> uIds = new HashSet<>();
         for (Note r : records) {
             courseIds.add(r.getCourseId());
-            if (r.getChapterId() != null) csIds.add(r.getChapterId());
-            if (r.getSectionId() != null) csIds.add(r.getSectionId());
+            if (r.getChapterId() != null) {
+                csIds.add(r.getChapterId());
+            }
+            if (r.getSectionId() != null) {
+                csIds.add(r.getSectionId());
+            }
             uIds.add(r.getUserId());
         }
         // 6.1.获取课程信息
