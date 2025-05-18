@@ -46,7 +46,7 @@ public class QuestionBizController {
         return bizService.queryQuestionIdsByBizIds(bizIds);
     }
 
-    @ApiOperation("查询业务下的题目分数和")
+    @ApiOperation("查询业务下的题目分数")
     @GetMapping("/scores")
     public Map<Long, Integer> queryQuestionScoresByBizIds(@RequestParam("ids") List<Long> bizIds){
         return bizService.queryQuestionScoresByBizIds(bizIds);

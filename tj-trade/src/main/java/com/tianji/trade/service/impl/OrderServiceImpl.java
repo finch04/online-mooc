@@ -119,7 +119,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         cartService.deleteCartByUserAndCourseIds(userId, placeOrderDTO.getCourseIds());
 
         // 6.核销优惠券
-//        promotionClient.writeOffCoupon(couponIds);
+        promotionClient.writeOffCoupon(couponIds);
 
         // 7.构建下单结果
         return PlaceOrderResultVO.builder()
@@ -297,7 +297,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         detailService.updateStatusByOrderId(orderId, OrderStatus.CLOSED.getValue());
 
         // 6.退还优惠券
-//        promotionClient.refundCoupon(order.getCouponIds());
+        promotionClient.refundCoupon(order.getCouponIds());
     }
 
     @Override

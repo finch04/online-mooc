@@ -39,10 +39,10 @@ public class RefundOrderController {
         return refundOrderService.queryRefundResult(bizRefundOrderId);
     }
 
-/*    @GetMapping("{bizRefundOrderId}/detail")
+    @GetMapping("{bizRefundOrderId}/detail")
     @ApiOperation("查询退款详情")
     public RefundResultDTO queryRefundDetail(
             @ApiParam("业务端退款的子订单id") @PathVariable("bizRefundOrderId") Long bizRefundOrderId) {
         return refundOrderService.queryRefundDetail(bizRefundOrderId);
-    }*/
+    }
 }
