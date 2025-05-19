@@ -5,8 +5,8 @@ import com.tianji.data.model.dto.Top10DataSetDTO;
 import com.tianji.data.model.vo.Top10DataVO;
 
 /**
- * @author wusongsong
- * @since 2022/10/10 19:39
+ * @author fsq
+ * @since 2025-5-18 19:06:26
  **/
 public interface Top10Service {
 

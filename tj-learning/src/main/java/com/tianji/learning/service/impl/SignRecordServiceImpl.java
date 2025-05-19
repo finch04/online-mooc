@@ -1,11 +1,13 @@
 package com.tianji.learning.service.impl;
 
+import com.mysql.cj.Constants;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.common.utils.UserContext;
+import com.tianji.learning.constants.LearningConstants;
 import com.tianji.learning.constants.RedisConstants;
 import com.tianji.learning.domain.vo.SignResultVO;
 import com.tianji.learning.mq.msg.SignInMessage;
@@ -70,7 +72,7 @@ public class SignRecordServiceImpl implements ISignRecordsService {
         //保存积分
         mqHelper.send(MqConstants.Exchange.LEARNING_EXCHANGE,
                 MqConstants.Key.SIGN_IN,
-                SignInMessage.of(userId,rewardPoints+1)
+                SignInMessage.of(userId,rewardPoints+ LearningConstants.REWARD_SIGN_IN)
         );
 
         //封装vo返回

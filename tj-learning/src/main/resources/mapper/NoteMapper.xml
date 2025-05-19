@@ -3,7 +3,7 @@
 <mapper namespace="com.tianji.learning.mapper.NoteMapper">
 
     <select id="queryNotePageBySectionId" resultType="com.tianji.learning.domain.po.Note">
-        SELECT n.id, n.user_id, n.course_id, n.chapter_id, n.section_id, n.note_moment, n.content,
+        SELECT n.id, n.user_id, n.course_id, n.chapter_id, n.section_id, n.note_moment, n.content, n.liked_times, n.gathered_times,
         n.is_private, n.hidden, n.hidden_reason,n.author_id, n.create_time, n.update_time, n2.is_gathered
         FROM note n
             LEFT JOIN note n2 ON n2.gathered_note_id = n.id
@@ -25,6 +25,8 @@
                n.chapter_id,
                n.section_id,
                n.note_moment,
+               n.liked_times,
+               n.gathered_times,
                n.content,
                n.is_private,
                n.hidden,

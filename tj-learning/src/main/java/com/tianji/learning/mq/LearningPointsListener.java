@@ -37,7 +37,6 @@ public class LearningPointsListener {
         recordService.addPointsRecord(msg, PointsRecordType.SIGN);
     }
 
-
     /**
      * 问答增加的积分
      * @param msg
@@ -52,8 +51,6 @@ public class LearningPointsListener {
         recordService.addPointsRecord(msg, PointsRecordType.QA);
     }
 
-
-
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = "learning.points.queue", durable = "true"),
             exchange = @Exchange(name = MqConstants.Exchange.LEARNING_EXCHANGE, type = ExchangeTypes.TOPIC),
@@ -64,22 +61,31 @@ public class LearningPointsListener {
         recordService.addPointsRecord(msg,  PointsRecordType.LEARNING);
     }
 
-//    @RabbitListener(bindings = @QueueBinding(
-//            value = @Queue(name = "note.new.points.queue", durable = "true"),
-//            exchange = @Exchange(name = MqConstants.Exchange.LEARNING_EXCHANGE, type = ExchangeTypes.TOPIC),
-//            key = MqConstants.Key.WRITE_NOTE
-//    ))
-//    public void listenWriteNodeMessage(Long userId){
-//        recordService.addPointsRecord(userId, 3, PointsRecordType.NOTE);
-//    }
-//
-//    @RabbitListener(bindings = @QueueBinding(
-//            value = @Queue(name = "note.gathered.points.queue", durable = "true"),
-//            exchange = @Exchange(name = MqConstants.Exchange.LEARNING_EXCHANGE, type = ExchangeTypes.TOPIC),
-//            key = MqConstants.Key.NOTE_GATHERED
-//    ))
-//    public void listenNodeGatheredMessage(Long userId){
-//        recordService.addPointsRecord(userId, 2, PointsRecordType.NOTE);
-//    }
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(name = "note.new.points.queue", durable = "true"),
+            exchange = @Exchange(name = MqConstants.Exchange.LEARNING_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = MqConstants.Key.WRITE_NOTE
+    ))
+    public void listenWriteNoteMessage(SignInMessage msg){
+        recordService.addPointsRecord(msg, PointsRecordType.NOTE);
+    }
+
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(name = "note.gathered.points.queue", durable = "true"),
+            exchange = @Exchange(name = MqConstants.Exchange.LEARNING_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = MqConstants.Key.NOTE_GATHERED
+    ))
+    public void listenNoteGatheredMessage(SignInMessage msg){
+        recordService.addPointsRecord(msg,  PointsRecordType.NOTE);
+    }
+
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(name = "course.comment.points.queue", durable = "true"),
+            exchange = @Exchange(name = MqConstants.Exchange.LEARNING_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = MqConstants.Key.COURSE_COMMENT
+    ))
+    public void listenCourseCommentMessage(SignInMessage msg){
+        recordService.addPointsRecord(msg,  PointsRecordType.NOTE);
+    }
 
 }

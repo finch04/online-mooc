@@ -244,6 +244,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         uIds.remove(null);
         List<UserDTO> userDTOS = userClient.queryUserByIds(uIds);
         if (userDTOS.size() != uIds.size()) {
+            //这里是因为用户可能信息被删除了，导致id在数据库中查不到，粗暴的抛异常会导致整页无法显示，感觉不应该这样
             throw new BizIllegalException("用户数据有误");
         }
         return userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, u -> u));

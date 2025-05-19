@@ -13,6 +13,7 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.UserContext;
+import com.tianji.learning.constants.LearningConstants;
 import com.tianji.learning.domain.dto.ReplyDTO;
 import com.tianji.learning.domain.po.InteractionQuestion;
 import com.tianji.learning.domain.po.InteractionReply;
@@ -81,10 +82,10 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
         if(dto.getIsStudent()){
             question.setStatus(QuestionStatus.UN_CHECK);
             // 学生才需要累加积分
-            mqHelper.send(
-                    MqConstants.Exchange.LEARNING_EXCHANGE,
+            mqHelper.send(MqConstants.Exchange.LEARNING_EXCHANGE,
                     MqConstants.Key.WRITE_REPLY,
-                    5);
+                    SignInMessage.of(userId,LearningConstants.REWARD_WRITE_REPLY)
+            );
         }
 
         questionMapper.updateById(question);

@@ -62,6 +62,17 @@ public class Note implements Serializable {
     private String content;
 
     /**
+     * 笔记被采集数量
+     */
+    private Integer gatheredTimes;
+
+
+    /**
+     * 点赞数量
+     */
+    private Integer likedTimes;
+
+    /**
      * 是否是隐私笔记，默认false
      */
     private Boolean isPrivate;

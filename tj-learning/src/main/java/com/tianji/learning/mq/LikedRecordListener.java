@@ -3,7 +3,9 @@ package com.tianji.learning.mq;
 import com.tianji.api.dto.msg.LikedTimesDTO;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.learning.domain.po.InteractionReply;
+import com.tianji.learning.domain.po.Note;
 import com.tianji.learning.service.IInteractionReplyService;
+import com.tianji.learning.service.INoteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -22,6 +24,7 @@ import java.util.List;
 public class LikedRecordListener {
 
     private final IInteractionReplyService replyService;
+    private final INoteService noteService;
 
     /**
      * QA问答系统 消费者
@@ -32,8 +35,8 @@ public class LikedRecordListener {
             exchange = @Exchange(value = MqConstants.Exchange.LIKE_RECORD_EXCHANGE,type = ExchangeTypes.TOPIC),
             key=MqConstants.Key.QA_LIKED_TIMES_KEY
     ))
-    public void onMsg(List<LikedTimesDTO>  list){
-        log.info("LikedRecordListener监听到消息：{}",list);
+    public void onQAMsg(List<LikedTimesDTO>  list){
+        log.info("QA-LikedRecordListener监听到消息：{}",list);
         List<InteractionReply> replyList =new ArrayList<>();
         for (LikedTimesDTO dto : list) {
             InteractionReply reply =new InteractionReply();
@@ -45,14 +48,27 @@ public class LikedRecordListener {
         replyService.updateBatchById(replyList);
     }
 
-//    public void onMsg(LikedTimesDTO dto){
-//        log.info("LikedRecordListener监听到消息：{}",dto);
-//        InteractionReply reply = replyService.getById(dto.getBizId());
-//        if(reply==null){
-//            return ;//rabbitmq不能抛异常否则会重试
-//        }
-//        reply.setLikedTimes(dto.getLikedTimes());
-//        replyService.updateById(reply);
-//    }
+
+    /**
+     * NOTE 笔记系统 消费者
+     * @param
+     */
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = "note.liked.times.queue",durable = "true"),
+            exchange = @Exchange(value = MqConstants.Exchange.LIKE_RECORD_EXCHANGE,type = ExchangeTypes.TOPIC),
+            key=MqConstants.Key.NOTE_LIKED_TIMES_KEY
+    ))
+    public void onNoteMsg(List<LikedTimesDTO>  list){
+        log.info("NOTE-LikedRecordListener监听到消息：{}",list);
+        List<Note> noteList = new ArrayList<>();
+        for (LikedTimesDTO dto : list) {
+            Note note =new Note();
+            note.setLikedTimes(dto.getLikedTimes());
+            note.setId(dto.getBizId());
+
+            noteList.add(note);
+        }
+        noteService.updateBatchById(noteList);
+    }
 
 }

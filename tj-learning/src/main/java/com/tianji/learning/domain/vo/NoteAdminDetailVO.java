@@ -25,7 +25,9 @@ public class NoteAdminDetailVO {
     @ApiModelProperty("记录笔记时的视频播放时间，单位秒")
     private Integer noteMoment;
     @ApiModelProperty("被采集次数")
-    private Integer usedTimes;
+    private Integer gatheredTimes;
+    @ApiModelProperty("点赞次数")
+    private Integer likedTimes;
     @ApiModelProperty("用户端是否被隐藏")
     private Boolean hidden;
     @ApiModelProperty("作者名称")

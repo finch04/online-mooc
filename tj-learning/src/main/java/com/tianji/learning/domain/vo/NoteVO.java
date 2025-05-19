@@ -19,6 +19,12 @@ public class NoteVO {
     private Boolean isPrivate;
     @ApiModelProperty("是否是采集的笔记")
     private Boolean isGathered;
+    @ApiModelProperty("是否点过赞")
+    private Boolean liked;
+    @ApiModelProperty("点赞数量")
+    private Integer likedTimes;
+    @ApiModelProperty("被采集数量")
+    private Integer gatheredTimes;
     @ApiModelProperty("作者id")
     private Long authorId;
     @ApiModelProperty("作者名字")

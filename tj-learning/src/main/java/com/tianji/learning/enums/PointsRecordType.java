@@ -12,7 +12,7 @@ public enum PointsRecordType implements BaseEnum {
     SIGN(2, "每日签到", 0),
     QA(3, "课程问答", 20),
     NOTE(4, "课程笔记", 20),
-    COMMENT(5, "课程评价", 0),
+    COMMENT(5, "课程评价", 999),
     ;
     @EnumValue
     @JsonValue

@@ -11,12 +11,14 @@ import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.exceptions.DbException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.UserContext;
+import com.tianji.learning.constants.LearningConstants;
 import com.tianji.learning.domain.dto.LearningRecordFormDTO;
 import com.tianji.learning.domain.po.LearningLesson;
 import com.tianji.learning.domain.po.LearningRecord;
 import com.tianji.learning.enums.LessonStatus;
 import com.tianji.learning.enums.SectionType;
 import com.tianji.learning.mapper.LearningRecordMapper;
+import com.tianji.learning.mq.msg.SignInMessage;
 import com.tianji.learning.service.ILearningLessonService;
 import com.tianji.learning.service.ILearningRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -185,10 +187,10 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
         //清理redis缓存
         taskHandler.cleanRecordCache(dto.getLessonId(),dto.getSectionId());
         // 学完一节累加积分
-        mqHelper.send(
-                MqConstants.Exchange.LEARNING_EXCHANGE,
+        mqHelper.send(MqConstants.Exchange.LEARNING_EXCHANGE,
                 MqConstants.Key.LEARN_SECTION,
-                10);
+                SignInMessage.of(userId, LearningConstants.REWARD_LEARN_SECTION)
+        );
 
         return true;
     }

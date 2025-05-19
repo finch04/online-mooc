@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.cache.CategoryCache;
 import com.tianji.api.client.course.CatalogueClient;
 import com.tianji.api.client.course.CourseClient;
+import com.tianji.api.client.remark.RemarkClient;
 import com.tianji.api.client.search.SearchClient;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.course.CataSimpleInfoDTO;
@@ -17,17 +18,22 @@ import com.tianji.api.dto.course.CourseSimpleInfoDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
 import com.tianji.common.constants.Constant;
+import com.tianji.common.constants.MqConstants;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.*;
+import com.tianji.learning.constants.LearningConstants;
 import com.tianji.learning.domain.dto.NoteFormDTO;
+import com.tianji.learning.domain.po.InteractionReply;
 import com.tianji.learning.domain.po.Note;
 import com.tianji.learning.domain.query.NoteAdminPageQuery;
 import com.tianji.learning.domain.query.NotePageQuery;
 import com.tianji.learning.domain.vo.NoteAdminDetailVO;
 import com.tianji.learning.domain.vo.NoteAdminVO;
 import com.tianji.learning.domain.vo.NoteVO;
+import com.tianji.learning.domain.vo.ReplyVO;
 import com.tianji.learning.mapper.NoteMapper;
+import com.tianji.learning.mq.msg.SignInMessage;
 import com.tianji.learning.service.INoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,6 +64,7 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
     private final UserClient userClient;
     private final RabbitMqHelper mqHelper;
     private final CategoryCache categoryCache;
+    private final RemarkClient remarkClient;
 
     @Override
     @Transactional
@@ -70,8 +77,11 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         note.setAuthorId(userId);
         // 3.保存
         save(note);
-        // 4.发送mq消息
-        mqHelper.send(LEARNING_EXCHANGE, WRITE_NOTE, userId);
+        // 4.发送mq消息 增加积分
+        mqHelper.send(MqConstants.Exchange.LEARNING_EXCHANGE,
+                WRITE_NOTE,
+                SignInMessage.of(userId, LearningConstants.REWARD_WRITE_NOTE)
+        );
     }
 
     @Override
@@ -81,6 +91,7 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         Long userId = UserContext.getUser();
         // 2.判断笔记是否存在
         Note note = getById(id);
+        Long originUserId = note.getUserId();
         if (note == null || note.getIsPrivate() || note.getHidden()) {
             throw new BadRequestException("笔记不存在");
         }
@@ -91,12 +102,22 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         note.setUserId(userId);
         note.setId(null);
         save(note);
-        // 4.发送mq消息
-        mqHelper.send(LEARNING_EXCHANGE, NOTE_GATHERED, userId);
+        updateOriginGatheredNote(id,1);
+        // 4.发送mq消息 增加积分
+        mqHelper.send(MqConstants.Exchange.LEARNING_EXCHANGE,
+                NOTE_GATHERED,
+                SignInMessage.of(originUserId, LearningConstants.REWARD_NOTE_GATHERED)
+        );
     }
 
     @Override
     public void removeGatherNote(Long id) {
+        Long gatheredNoteId = baseMapper.selectById(id).getGatheredNoteId();
+        if(gatheredNoteId != null){
+            //说明是传入的id不是原始笔记id，是自己的id,所以我们需要将他变为原采集笔记id
+            id =  gatheredNoteId;
+        }
+        updateOriginGatheredNote(id,-1);
         // 1.笔记删除条件
         LambdaUpdateWrapper<Note> queryWrapper =
                 Wrappers.lambdaUpdate(Note.class)
@@ -104,6 +125,12 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
                         .eq(Note::getGatheredNoteId, id);
         // 2.删除笔记
         baseMapper.delete(queryWrapper);
+    }
+
+    public void updateOriginGatheredNote(Long id,Integer count){
+        Note note = getById(id);
+        note.setGatheredTimes(note.getGatheredTimes()+count);
+        updateById(note);
     }
 
     @Override
@@ -120,7 +147,7 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         Note n = new Note();
         n.setId(noteDTO.getId());
         // 采集笔记不能设置公开
-        if (noteDTO.getIsPrivate() != null) {
+        if (noteDTO.getIsPrivate()) {
             n.setIsPrivate(note.getIsGathered() || noteDTO.getIsPrivate());
         }
         n.setContent(noteDTO.getContent());
@@ -330,6 +357,9 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
 
         // 3.处理VO
         List<NoteVO> list = new ArrayList<>(records.size());
+
+        // 4. 查询用户点赞状态
+        Set<Long> bizLiked = remarkClient.getLikesStatusByBizIds(records.stream().map(i->i.getId()).collect(Collectors.toSet()));
         for (Note r : records) {
             NoteVO v = BeanUtils.toBean(r, NoteVO.class);
             UserDTO author = sMap.get(r.getAuthorId());
@@ -339,6 +369,7 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
                 v.setAuthorIcon(author.getIcon());
             }
             v.setIsGathered(BooleanUtils.isTrue(r.getIsGathered()));
+            v.setLiked(bizLiked.contains(r.getId()));
             list.add(v);
         }
         return new PageDTO<>(page.getTotal(), page.getPages(), list);

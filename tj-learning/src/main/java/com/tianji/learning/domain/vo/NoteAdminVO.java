@@ -21,6 +21,10 @@ public class NoteAdminVO {
     private String content;
     @ApiModelProperty("是否被隐藏")
     private Boolean hidden;
+    @ApiModelProperty("被采集次数")
+    private Integer gatheredTimes;
+    @ApiModelProperty("点赞次数")
+    private Integer likedTimes;
     @ApiModelProperty("作者名称")
     private String authorName;
     @ApiModelProperty(value = "笔记发布时间", example = "2022-7-18 19:52:36")

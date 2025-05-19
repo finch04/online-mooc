@@ -13,4 +13,6 @@ public class RedisConstants {
     public static final String KEY_TOP10 = "DATA:TOP10:";
 
     public static final String KEY_TODAY = "DATA:TODAY:";
+
+    public static final String KEY_TODO = "DATA:TODO:";
 }
