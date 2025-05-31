@@ -22,4 +22,23 @@ public interface IPointsRecordService extends IService<PointsRecord> {
 
     //查询我的今日积分情况
     List<PointsStatisticsVO> queryMyTodayPoints();
+
+    /**
+     * 获取用户当前可用积分
+     */
+    Integer getUserCurrentPoints(Long userId);
+
+    /**
+     * 消费积分
+     */
+    void consumePoints(Long userId, Integer points, String description);
+
+    /**
+     * 计算用户某个月的积分（获取/使用）
+     * @param userId 用户ID
+     * @param yearMonth 年月（YYYYMM）
+     * @param isEarn 是否为获取积分（true-获取，false-使用）
+     */
+    Integer calculatePointsByUserAndMonth(Long userId, String yearMonth, boolean isEarn);
+
 }

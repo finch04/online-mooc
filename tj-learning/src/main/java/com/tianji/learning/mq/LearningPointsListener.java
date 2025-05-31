@@ -85,7 +85,7 @@ public class LearningPointsListener {
             key = MqConstants.Key.COURSE_COMMENT
     ))
     public void listenCourseCommentMessage(SignInMessage msg){
-        recordService.addPointsRecord(msg,  PointsRecordType.NOTE);
+        recordService.addPointsRecord(msg,  PointsRecordType.COMMENT);
     }
 
 }

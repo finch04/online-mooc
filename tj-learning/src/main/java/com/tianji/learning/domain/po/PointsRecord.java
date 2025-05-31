@@ -38,7 +38,7 @@ public class PointsRecord implements Serializable {
     private Long userId;
 
     /**
-     * 积分方式：1-课程学习，2-每日签到，3-课程问答， 4-课程笔记，5-课程评价
+     * 积分使用方式：1-课程学习，2-每日签到，3-课程问答， 4-课程笔记，5-课程评价 6-商城消费
      */
     private PointsRecordType type;
 

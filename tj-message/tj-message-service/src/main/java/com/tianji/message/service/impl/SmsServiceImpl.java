@@ -54,6 +54,7 @@ public class SmsServiceImpl implements ISmsService {
     public void sendMessage(SmsInfoDTO smsInfoDTO) {
         // 1.获取通知模板信息
         String code = smsInfoDTO.getTemplateCode();
+        //这里查的通知模板表notice_template中的code字段 VERIFY_CODE
         NoticeTemplate noticeTemplate = noticeTemplateService.queryByCode(code);
         AssertUtils.isNotNull(noticeTemplate, MessageErrorInfo.NOTICE_TEMPLATE_NOT_EXISTS);
         AssertUtils.isTrue(noticeTemplate.getIsSmsTemplate(), MessageErrorInfo.NOTICE_NOT_MESSAGE_TEMPLATE);
@@ -70,7 +71,9 @@ public class SmsServiceImpl implements ISmsService {
         for (MessageTemplate template : sortedTemplates) {
             try {
                 ISmsHandler smsHandler = smsHandlers.get(template.getPlatformCode());
-                smsHandler.send(smsInfoDTO, template);
+                //短信发送核心方法
+                log.info("验证码已发送：{}",smsInfoDTO.getTemplateParams().get("code"));
+//                smsHandler.send(smsInfoDTO, template);
                 return;
             } catch (Exception e) {
                 log.error("短信发送异常，平台{}, 原因{}, 稍后重试", template.getPlatformCode(), e.getMessage(), e);

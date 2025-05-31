@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tianji.message.mapper.ChatGroupMapper">
+    <select id="selectUserGroups" resultType="com.tianji.message.domain.po.ChatGroup">
+        SELECT cg.*
+        FROM chat_groups cg
+        JOIN group_members gm ON cg.id = gm.group_id
+        WHERE gm.user_id = #{userId}
+        <if test="query.name != null and query.name != ''">
+            AND cg.name LIKE CONCAT('%', #{query.name}, '%')
+        </if>
+        <if test="query.status != null">
+            AND cg.status = #{query.status}
+        </if>
+        ORDER BY cg.updated_at DESC
+    </select>
+</mapper>

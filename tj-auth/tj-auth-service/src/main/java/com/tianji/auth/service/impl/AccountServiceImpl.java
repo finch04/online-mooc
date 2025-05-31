@@ -43,7 +43,6 @@ public class AccountServiceImpl implements IAccountService{
         detail.setRememberMe(loginDTO.getRememberMe());
         // 2.2.生成token
         String token = generateToken(detail);
-
         // 3.计入登录信息表
         loginRecordService.loginSuccess(loginDTO.getCellPhone(), detail.getUserId());
         // 4.返回结果

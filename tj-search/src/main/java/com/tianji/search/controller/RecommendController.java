@@ -19,6 +19,12 @@ public class RecommendController {
 
     private final ISearchService searchService;
 
+    @ApiOperation("猜你喜欢接口")
+    @GetMapping("/like")
+    public List<CourseVO> queryLikeTopN(){
+        return searchService.queryLikeTopN();
+    }
+
     @ApiOperation("精品好课接口")
     @GetMapping("/best")
     public List<CourseVO> queryBestTopN(){

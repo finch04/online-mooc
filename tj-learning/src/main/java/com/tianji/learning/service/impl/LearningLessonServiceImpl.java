@@ -329,4 +329,18 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
         vo.setPages(page.getPages());
         return vo;
     }
+
+    @Override
+    public void deleteMyLessons(Long id) {
+        Long userId = UserContext.getUser();
+        LearningLesson lesson = getById(id);
+        if(!lesson.getUserId().equals(userId)){
+            throw new BizIllegalException("只能删除自己的课程！");
+        }
+        if(lesson.getStatus()!=LessonStatus.EXPIRED){
+            throw new BizIllegalException("只能删除状态为已过期的课程!");
+        }
+
+        baseMapper.deleteById(id);
+    }
 }

@@ -45,7 +45,7 @@ public class LearningLessonVO {
     @ApiModelProperty("计划的学习频率")
     private Integer weekFreq;
 
-    @ApiModelProperty("习计划状态，0-没有计划，1-计划进行中")
+    @ApiModelProperty("学习计划状态，0-没有计划，1-计划进行中")
     private PlanStatus planStatus;
 
     @ApiModelProperty("最近学习的小节名")

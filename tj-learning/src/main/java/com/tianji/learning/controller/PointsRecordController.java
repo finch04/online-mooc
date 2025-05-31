@@ -1,6 +1,7 @@
 package com.tianji.learning.controller;
 
 
+import com.tianji.common.utils.UserContext;
 import com.tianji.learning.domain.vo.PointsStatisticsVO;
 import com.tianji.learning.service.IPointsRecordService;
 import io.swagger.annotations.Api;
@@ -34,6 +35,14 @@ public class PointsRecordController {
     public List<PointsStatisticsVO> queryMyTodayPoints(){
         return recordService.queryMyTodayPoints();
     }
+
+    @ApiOperation("查询我的可用积分")
+    @GetMapping("")
+    public Integer getUserCurrentPoints(){
+        Long userId = UserContext.getUser();
+        return recordService.getUserCurrentPoints(userId);
+    }
+
 
 
 }

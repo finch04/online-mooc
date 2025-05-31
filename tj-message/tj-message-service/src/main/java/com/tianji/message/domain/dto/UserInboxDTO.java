@@ -21,7 +21,7 @@ public class UserInboxDTO{
     @ApiModelProperty("收件箱消息id")
     private Long id;
 
-    @ApiModelProperty("通知类型：0-系统通知，1-笔记通知，2-问答通知，3-其它通知，4-私信")
+    @ApiModelProperty("通知类型：0-系统通知，1-笔记通知，2-问答通知，3-其它通知")
     private Integer type;
 
     @ApiModelProperty("通知标题")
@@ -35,6 +35,12 @@ public class UserInboxDTO{
 
     @ApiModelProperty("消息发送者id")
     private Long publisher;
+
+    @ApiModelProperty("消息发送者名字")
+    private String publisherName;
+
+    @ApiModelProperty("消息发送者头像")
+    private String publisherIcon;
 
     @ApiModelProperty("收件箱消息id")
     private LocalDateTime pushTime;

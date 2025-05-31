@@ -3,6 +3,7 @@ package com.tianji.api.client.user;
 
 import com.tianji.api.client.user.fallback.UserClientFallback;
 import com.tianji.api.dto.user.LoginFormDTO;
+import com.tianji.api.dto.user.StudentFormDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(value = "user-service", fallbackFactory = UserClientFallback.class)
+@FeignClient(contextId = "user",value = "user-service", fallbackFactory = UserClientFallback.class)
 public interface UserClient {
 
     /**
@@ -54,4 +55,7 @@ public interface UserClient {
      */
     @GetMapping("/users/{id}")
     UserDTO queryUserById(@PathVariable("id") Long id);
+
+
+
 }

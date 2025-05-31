@@ -10,7 +10,6 @@ public enum NoticeType {
     NOTE(1, "笔记通知"),
     QA(2, "问答通知"),
     OTHER(3, "其它通知"),
-    PRIVATE_MESSAGE(4, "私信"),
     ;
 
     private final int value;

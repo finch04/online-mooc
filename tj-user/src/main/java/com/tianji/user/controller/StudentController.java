@@ -1,15 +1,21 @@
 package com.tianji.user.controller;
 
 
+import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.user.domain.dto.StudentFormDTO;
+import com.tianji.user.domain.dto.StudentUpdateDTO;
+import com.tianji.user.domain.dto.StudentUpdatePasswordDTO;
 import com.tianji.user.domain.query.UserPageQuery;
 import com.tianji.user.domain.vo.StudentPageVo;
+import com.tianji.user.service.ICodeService;
 import com.tianji.user.service.IStudentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 /**
  * <p>
@@ -21,11 +27,13 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/students")
-@Api(tags = "用户管理接口")
+@Api(tags = "学员管理接口")
 public class StudentController {
 
     @Autowired
     private IStudentService studentService;
+    @Autowired
+    private ICodeService codeService;
 
     @ApiOperation("分页查询学生信息")
     @GetMapping("/page")
@@ -39,9 +47,34 @@ public class StudentController {
         studentService.saveStudent(studentFormDTO);
     }
 
-    @ApiOperation("修改学员密码")
+    @ApiOperation("学员找回密码")
     @PutMapping("/password")
     public void updateMyPassword(@RequestBody StudentFormDTO studentFormDTO) {
         studentService.updateMyPassword(studentFormDTO);
     }
+
+    @ApiOperation("学员更新个人信息")
+    @PutMapping("")
+    public void updateStudent(@RequestBody @Valid StudentUpdateDTO studentUpdateDTO){
+        studentService.updateStudent(studentUpdateDTO);
+    }
+
+    @ApiOperation("解绑手机号 发送验证码")
+    @PostMapping("/sendSms")
+    public void sendVerifyCode(@RequestParam String cellPhone){
+        codeService.sendVerifyCode(cellPhone);
+    }
+
+    @ApiOperation("更新绑定手机号")
+    @PostMapping("/updateBindPhone")
+    public void updateBindPhone(@RequestParam String cellPhone,@RequestParam String code){
+        studentService.updateBindPhone(cellPhone,code);
+    }
+
+    @ApiOperation("学员修改密码")
+    @PutMapping("/updatePassword")
+    public void updatePassword(@RequestBody StudentUpdatePasswordDTO dto) {
+        studentService.updatePassword(dto);
+    }
+
 }

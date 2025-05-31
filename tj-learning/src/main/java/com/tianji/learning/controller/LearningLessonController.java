@@ -78,6 +78,15 @@ public class LearningLessonController {
         learningLessonService.createLearningPlan(dto);
     }
 
+
+    //刪除我的课程
+    @ApiOperation("刪除我的课程")
+    @DeleteMapping("/{id}")
+    public void deleteMyLessons(@PathVariable("id") Long id){
+        learningLessonService.deleteMyLessons(id);
+    }
+
+
     @ApiOperation("分页查询我的课程计划")
     @GetMapping("/plans")
     public LearningPlanPageVO queryMyPlans(PageQuery query){

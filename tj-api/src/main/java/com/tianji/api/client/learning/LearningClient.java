@@ -1,6 +1,7 @@
 package com.tianji.api.client.learning;
 
 import com.tianji.api.client.learning.fallback.LearningClientFallback;
+import com.tianji.api.dto.leanring.EvaluationScoreDTO;
 import com.tianji.api.dto.leanring.LearningLessonDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

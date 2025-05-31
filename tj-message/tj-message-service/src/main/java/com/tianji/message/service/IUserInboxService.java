@@ -1,7 +1,6 @@
 package com.tianji.message.service;
 
 import com.tianji.message.domain.dto.UserInboxDTO;
-import com.tianji.message.domain.dto.UserInboxFormDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.message.domain.query.UserInboxQuery;
 import com.tianji.common.domain.dto.PageDTO;
@@ -25,5 +24,11 @@ public interface IUserInboxService extends IService<UserInbox> {
 
     PageDTO<UserInboxDTO> queryUserInBoxesPage(UserInboxQuery query);
 
-    Long sentMessageToUser(UserInboxFormDTO userInboxFormDTO);
+    Integer getUnReadCountByType(Integer type);
+
+    Integer getUnReadCount();
+
+    Boolean markMessageAsRead(Long id);
+
+    Boolean markAllMessagesAsRead();
 }

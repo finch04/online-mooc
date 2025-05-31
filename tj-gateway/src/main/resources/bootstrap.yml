@@ -38,6 +38,12 @@ spring:
           uri: lb://message-service
           predicates:
             - Path=/sms/**
+        - id: sms
+          uri: lb:ws://message-service  # 使用 ws 协议进行转发--私信websocket
+          predicates:
+            - Path=/sms/**
+          filters:
+            - StripPrefix=1
         - id: us
           uri: lb://user-service
           predicates:

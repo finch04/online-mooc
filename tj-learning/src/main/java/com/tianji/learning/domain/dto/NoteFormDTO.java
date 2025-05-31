@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @ApiModel(description = "笔记信息")
 public class NoteFormDTO {
-    @ApiModelProperty("笔记内容")
+    @ApiModelProperty("笔记id")
     private Long id;
     @NotNull(message = "笔记内容不能为空")
     @ApiModelProperty("笔记内容")

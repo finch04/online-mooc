@@ -14,6 +14,7 @@ import com.tianji.trade.domain.vo.OrderVO;
 import com.tianji.trade.domain.vo.PlaceOrderResultVO;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -40,6 +41,8 @@ public interface IOrderService extends IService<Order> {
     OrderVO queryOrderById(Long id);
 
     PlaceOrderResultVO queryOrderStatus(Long orderId);
+
+    List<Order> queryOrderBetweenTime(LocalDateTime date1, LocalDateTime date2);
 
     void handlePaySuccess(PayResultDTO payResult);
 

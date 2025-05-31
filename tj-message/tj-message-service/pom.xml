@@ -16,6 +16,42 @@
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
+<!--        AI-->
+
+<!--        <dependency>-->
+<!--            <groupId>dev.langchain4j</groupId>-->
+<!--            <artifactId>langchain4j-community-dashscope-spring-boot-starter</artifactId>-->
+<!--            <version>1.0.0-beta3</version>-->
+<!--        </dependency>-->
+
+        <!-- https://mvnrepository.com/artifact/com.alibaba/dashscope-sdk-java -->
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>dashscope-sdk-java</artifactId>-->
+<!--            <version>2.16.5</version>-->
+<!--        </dependency>-->
+
+        <!-- websocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tianji</groupId>
+            <artifactId>tj-auth-gateway-sdk</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <!-- Spring Messaging -->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-messaging</artifactId>-->
+<!--            <version>2.7.2</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.tianji</groupId>
+            <artifactId>tj-auth-resource-sdk</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -54,6 +90,11 @@
             <artifactId>tj-api</artifactId>
             <version>1.0.0</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.tianji</groupId>-->
+<!--            <artifactId>tj-common</artifactId>-->
+<!--            <version>1.0.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.tianji</groupId>
             <artifactId>tj-message-domain</artifactId>
@@ -79,6 +120,11 @@
             <groupId>com.aliyun</groupId>
             <artifactId>alibabacloud-dysmsapi20170525</artifactId>
             <version>1.0.1</version>
+        </dependency>
+        <!--loadbalancer-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
     </dependencies>
     <build>

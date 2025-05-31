@@ -88,7 +88,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         }
         //用户只能修改自己的问题
         Long userId =UserContext.getUser();
-        if(!id.equals(userId)){
+        if(!question.getUserId().equals(userId)){
             throw new BadRequestException("只能修改自己的互动问题！");
         }
 

@@ -50,4 +50,6 @@ public interface IOrderDetailService extends IService<OrderDetail> {
     Map<Long, Integer> countEnrollCourseOfStudent(List<Long> studentIds);
 
     CoursePurchaseInfoDTO getPurchaseInfoOfCourse(Long courseId);
+
+    List<OrderDetail> queryOrderDetailBetweenTime(LocalDateTime localDateTime, LocalDateTime now);
 }

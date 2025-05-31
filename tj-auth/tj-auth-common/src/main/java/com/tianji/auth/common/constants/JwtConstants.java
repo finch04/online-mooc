@@ -27,4 +27,5 @@ public class JwtConstants {
     public static final String LOCK_AUTH_PRIVILEGE_KEY = "lock:auth:privileges";
     /* 权限缓存 KEY  end */
 
+
 }

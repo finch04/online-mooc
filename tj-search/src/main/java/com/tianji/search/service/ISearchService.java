@@ -19,4 +19,6 @@ public interface ISearchService {
     PageDTO<CourseVO> queryCoursesForPortal(CoursePageQuery query);
 
     List<Long> queryCoursesIdByName(String keyword);
+
+    List<CourseVO> queryLikeTopN();
 }

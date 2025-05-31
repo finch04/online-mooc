@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.core.env.Environment;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -19,6 +20,7 @@ import java.net.UnknownHostException;
 @SpringBootApplication
 @MapperScan("com.tianji.message.mapper")
 @Slf4j
+//@EnableWebSocketMessageBroker
 public class MessageApplication {
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplicationBuilder(MessageApplication.class).build(args);

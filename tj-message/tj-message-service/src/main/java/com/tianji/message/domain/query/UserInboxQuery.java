@@ -6,9 +6,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(description = "通知模板查询对象")
+@ApiModel(description = "用户收件箱查询对象")
 @Data
 public class UserInboxQuery extends PageQuery {
-    private Boolean isRead;
     private Integer type;
+    private Boolean isRead;
 }

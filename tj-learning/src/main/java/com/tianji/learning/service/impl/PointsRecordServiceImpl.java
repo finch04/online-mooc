@@ -1,6 +1,8 @@
 package com.tianji.learning.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.common.utils.UserContext;
@@ -16,14 +18,17 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -127,8 +132,59 @@ public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, Poi
             voList.add(vo);
         }
 
-
         return voList;
+    }
+
+
+    @Override
+    public Integer getUserCurrentPoints(Long userId) {
+        // 获取当前年月
+        String currentMonth = YearMonth.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
+        String key = RedisConstants.POINTS_BOARD_KEY_PREFIX + currentMonth;
+
+        // 从 Redis 中获取用户积分
+        Double score = redisTemplate.opsForZSet().score(key, userId.toString());
+        return score != null ? score.intValue() : 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void consumePoints(Long userId, Integer points, String description) {
+        if (points <= 0) {
+            throw new BizIllegalException("积分数量必须大于0");
+        }
+
+        // 获取当前年月
+        String currentMonth = YearMonth.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
+        String key = RedisConstants.POINTS_BOARD_KEY_PREFIX + currentMonth;
+
+        // 检查用户当前积分是否足够
+        Integer currentPoints = getUserCurrentPoints(userId);
+        if (currentPoints < points) {
+            throw new BizIllegalException("积分不足，当前可用积分为：" + currentPoints);
+        }
+
+        // 扣减 Redis 中的积分
+        redisTemplate.opsForZSet().incrementScore(key, userId.toString(), -points);
+
+        // 记录积分使用记录（积分值为负数表示使用）
+        PointsRecord record = new PointsRecord();
+        record.setUserId(userId);
+        record.setType(PointsRecordType.SHOP); // 假设类型5为积分商城消费
+        record.setPoints(-points); // 使用积分为负值
+//        record.setDescription(description);
+        // 保存积分记录到数据库
+        // pointsRecordMapper.insert(record); // 需要启用此代码
+    }
+
+    @Override
+    public Integer calculatePointsByUserAndMonth(Long userId, String yearMonth, boolean isEarn) {
+        // 从 Redis 中获取指定月份的积分
+        String key = RedisConstants.POINTS_BOARD_KEY_PREFIX + yearMonth;
+
+        // 获取用户积分
+        Double score = redisTemplate.opsForZSet().score(key, userId.toString());
+        return score != null ? score.intValue() : 0;
     }
 
 

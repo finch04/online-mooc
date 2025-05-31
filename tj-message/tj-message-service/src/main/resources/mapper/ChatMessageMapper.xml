@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tianji.message.mapper.ChatMessageMapper">
+    <select id="selectHistoryMessages" resultType="com.tianji.message.domain.po.ChatMessage">
+        SELECT *
+        FROM chat_messages
+        WHERE target_id = #{chatId}
+        AND message_type = #{type}
+        <if test="before != null">
+            AND id &lt; #{before}
+        </if>
+        ORDER BY id DESC
+        LIMIT #{size}
+    </select>
+</mapper>

@@ -12,7 +12,7 @@ public interface MessageClient {
      * 同步发送短信
      * @param smsInfoDTO 短信相关信息
      */
-    @PostMapping("message")
+    @PostMapping("/sms/message")
     void sendMessage(@RequestBody SmsInfoDTO smsInfoDTO);
 
 }

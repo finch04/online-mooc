@@ -18,6 +18,11 @@
     <dependencies>
         <dependency>
             <groupId>com.tianji</groupId>
+            <artifactId>tj-message-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tianji</groupId>
             <artifactId>tj-api</artifactId>
             <version>1.0.0</version>
         </dependency>

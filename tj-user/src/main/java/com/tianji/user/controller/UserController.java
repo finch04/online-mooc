@@ -7,6 +7,7 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.user.constants.UserErrorInfo;
+import com.tianji.user.domain.dto.StudentFormDTO;
 import com.tianji.user.domain.dto.UserFormDTO;
 import com.tianji.user.domain.po.User;
 import com.tianji.user.domain.po.UserDetail;
@@ -148,9 +149,8 @@ public class UserController {
     @ApiOperation("检查用户手机号是否存在")
     @GetMapping("checkCellphone")
     public Boolean checkCellPhone(@RequestParam("cellphone") String cellPhone){
-        return userService.lambdaQuery()
-                .eq(User::getCellPhone, cellPhone)
-                // .in(User::getType, UserType.STAFF, UserType.TEACHER)
-                .count() <= 0;
+        return userService.checkCellPhone(cellPhone);
     }
+
+
 }

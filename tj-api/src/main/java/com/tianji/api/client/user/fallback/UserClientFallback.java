@@ -2,6 +2,7 @@ package com.tianji.api.client.user.fallback;
 
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.LoginFormDTO;
+import com.tianji.api.dto.user.StudentFormDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
 import lombok.extern.slf4j.Slf4j;

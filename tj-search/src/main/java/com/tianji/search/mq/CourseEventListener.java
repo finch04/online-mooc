@@ -46,6 +46,7 @@ public class CourseEventListener {
             key = COURSE_EXPIRE_KEY
     ))
     public void listenCourseExpire(Long courseId){
+        log.debug("监听到课程过期");
         courseService.handleCourseDelete(courseId);
     }
 }

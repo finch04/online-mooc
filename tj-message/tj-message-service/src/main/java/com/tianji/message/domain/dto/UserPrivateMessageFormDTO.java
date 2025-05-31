@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel(description = "用户私信表单实体")
-public class UserInboxFormDTO {
+public class UserPrivateMessageFormDTO {
 
     @ApiModelProperty("目标用户id")
     private Long userId;

@@ -118,8 +118,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 5.删除购物车数据
         cartService.deleteCartByUserAndCourseIds(userId, placeOrderDTO.getCourseIds());
 
-        // 6.核销优惠券
-        promotionClient.writeOffCoupon(couponIds);
+        if(couponIds!=null){
+            // 6.核销优惠券
+            promotionClient.writeOffCoupon(couponIds);
+        }
+
 
         // 7.构建下单结果
         return PlaceOrderResultVO.builder()
@@ -406,6 +409,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .status(order.getStatus())
                 .payOutTime(outTime)
                 .build();
+    }
+
+    @Override
+    public List<Order> queryOrderBetweenTime(LocalDateTime date1, LocalDateTime date2) {
+        return lambdaQuery()
+                .ge(Order::getCreateTime, date1)
+                .le(Order::getCreateTime, date2)
+                .list();
     }
 
     @Override

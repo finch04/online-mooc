@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.tianji.api.dto.user.LoginFormDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
+import com.tianji.user.domain.dto.StudentFormDTO;
 import com.tianji.user.domain.dto.UserFormDTO;
 import com.tianji.user.domain.po.User;
 import com.tianji.user.domain.vo.UserDetailVO;
@@ -32,4 +33,7 @@ public interface IUserService extends IService<User> {
     void updateUser(UserDTO userDTO);
 
     void updateUserWithPassword(UserFormDTO userDTO);
+
+    Boolean checkCellPhone(String cellPhone);
+
 }

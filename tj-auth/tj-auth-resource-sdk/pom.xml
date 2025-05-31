@@ -16,6 +16,11 @@
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
+<!--        &lt;!&ndash; websocket &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-websocket</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>

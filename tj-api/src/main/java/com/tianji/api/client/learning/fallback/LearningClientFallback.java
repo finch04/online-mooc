@@ -1,6 +1,7 @@
 package com.tianji.api.client.learning.fallback;
 
 import com.tianji.api.client.learning.LearningClient;
+import com.tianji.api.dto.leanring.EvaluationScoreDTO;
 import com.tianji.api.dto.leanring.LearningLessonDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
@@ -26,6 +27,7 @@ public class LearningClientFallback implements FallbackFactory<LearningClient> {
             public LearningLessonDTO queryLearningRecordByCourse(Long courseId) {
                 return null;
             }
+
         };
     }
 }

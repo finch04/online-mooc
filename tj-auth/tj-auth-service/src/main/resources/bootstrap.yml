@@ -20,6 +20,8 @@ spring:
             refresh: false
           - data-id: shared-logs.yaml # 共享日志配置
             refresh: false
+          - data-id: shared-mq.yaml # 共享mq配置
+            refresh: false
 encrypt:
   key-store:
     alias: tjxt  #别名

@@ -206,9 +206,5 @@ public class LikedRecordRedisServiceImpl extends ServiceImpl<LikedRecordMapper, 
                     list
             );
         }
-
-
-
-
     }
 }

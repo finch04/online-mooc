@@ -1,7 +1,10 @@
 package com.tianji.common.constants;
 
 public interface MqConstants {
+
+
     interface Exchange{
+
         /*课程有关的交换机*/
         String COURSE_EXCHANGE = "course.topic";
 
@@ -27,21 +30,26 @@ public interface MqConstants {
 
         /*促销服务的交换机*/
         String PROMOTION_EXCHANGE ="promotion.topic";
+
     }
     interface Queue {
         String ERROR_QUEUE_TEMPLATE = "error.{}.queue";
     }
     interface Key{
+
         /*课程有关的 RoutingKey*/
         String COURSE_NEW_KEY = "course.new";
         String COURSE_UP_KEY = "course.up";
         String COURSE_DOWN_KEY = "course.down";
         String COURSE_EXPIRE_KEY = "course.expire";
         String COURSE_DELETE_KEY = "course.delete";
+        String COURSE_COMMENT_KEY = "course.comment";
 
         /*订单有关的RoutingKey*/
         String ORDER_PAY_KEY = "order.pay";
         String ORDER_REFUND_KEY = "order.refund";
+        String ORDER_ANALYSIS_KEY = "order.analysis";
+        String ORDER_DETAIL_ANALYSIS_KEY = "order.detail.analysis";
 
         /*积分相关RoutingKey*/
         /* 写回答 */
@@ -63,6 +71,8 @@ public interface MqConstants {
         String QA_LIKED_TIMES_KEY = "QA.times.changed";
         /*笔记*/
         String NOTE_LIKED_TIMES_KEY = "NOTE.times.changed";
+        /*评价*/
+        String COMMENT_HELPED_TIMES_KEY = "COMMENT.times.changed";
 
         /*短信系统发送短信*/
         String SMS_MESSAGE = "sms.message";

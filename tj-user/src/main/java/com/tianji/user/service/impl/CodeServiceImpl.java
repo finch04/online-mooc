@@ -61,5 +61,6 @@ public class CodeServiceImpl implements ICodeService {
             // 验证码错误
             throw new BadRequestException(INVALID_VERIFY_CODE);
         }
+        stringRedisTemplate.delete(USER_VERIFY_CODE_KEY + phone);
     }
 }

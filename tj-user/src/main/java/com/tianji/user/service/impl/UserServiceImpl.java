@@ -9,6 +9,7 @@ import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
 import com.tianji.common.enums.UserType;
 import com.tianji.common.exceptions.BadRequestException;
+import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.exceptions.ForbiddenException;
 import com.tianji.common.exceptions.UnauthorizedException;
 import com.tianji.common.utils.AssertUtils;
@@ -149,7 +150,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         // 2.修改密码
         User user = new User();
-        user.setId(user.getId());
+        user.setId(oldUser.getId());
         user.setPassword(passwordEncoder.encode(password));
         updateById(user);
     }
@@ -298,4 +299,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         return user;
     }
+
+    @Override
+    public Boolean checkCellPhone(String cellPhone) {
+        return this.lambdaQuery()
+                .eq(User::getCellPhone, cellPhone)
+                // .in(User::getType, UserType.STAFF, UserType.TEACHER)
+                .count() <= 0;
+    }
+
+
+
+
 }

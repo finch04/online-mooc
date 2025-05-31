@@ -339,4 +339,12 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
 
         return new CoursePurchaseInfoDTO(enrollNum, refundNum, realPayAmount);
     }
+
+    @Override
+    public List<OrderDetail> queryOrderDetailBetweenTime(LocalDateTime localDateTime, LocalDateTime now) {
+        return lambdaQuery()
+                .ge(OrderDetail::getCreateTime, localDateTime)
+                .le(OrderDetail::getCreateTime, now)
+                .list();
+    }
 }

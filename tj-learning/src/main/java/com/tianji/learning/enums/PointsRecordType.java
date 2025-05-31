@@ -13,7 +13,9 @@ public enum PointsRecordType implements BaseEnum {
     QA(3, "课程问答", 20),
     NOTE(4, "课程笔记", 20),
     COMMENT(5, "课程评价", 999),
-    ;
+
+
+    SHOP(10,"商城消费" ,1000 );
     @EnumValue
     @JsonValue
     int value;
