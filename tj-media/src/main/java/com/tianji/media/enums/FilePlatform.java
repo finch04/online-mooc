@@ -7,6 +7,7 @@ import lombok.Getter;
 public enum FilePlatform {
     TENCENT(1, "/img-tx/"),
     ALI(2, "/img-ali/"),
+    MINIO(3, "")
     ;
     @EnumValue
     int value;

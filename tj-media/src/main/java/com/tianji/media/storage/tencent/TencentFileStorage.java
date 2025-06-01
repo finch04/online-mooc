@@ -60,6 +60,12 @@ public class TencentFileStorage implements IFileStorage {
     }
 
     @Override
+    public String getFileUrl(String key) {
+        //根据唯一key获取文件访问url
+         return cosClient.getObject(bucketName, key).toString();
+    }
+
+    @Override
     public InputStream downloadFile(String key) {
         // 1.数据校验
         AssertUtils.isNotBlank(bucketName, BUCKET_NAME_IS_NULL);

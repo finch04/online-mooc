@@ -41,7 +41,7 @@ tj:
   jdbc:
     database: tj_media
   platform:
-    file: TENCENT
+    file: MINIO
     media: TENCENT
   tencent:
     appId: 1312394356
@@ -54,9 +54,14 @@ tj:
       procedure: "wisehub-base"
       urlKey: "HZFlxjPYoOm5AfShupOx"
       pfcg: "basicDrmPreset"
-    cos:
-      enable: true
-      region: "ap-shanghai"
-      bucket: wisehub
-      multipartUploadThreshold: 5242880 # 5mb，触发分片上传的阈值
-      minimumUploadPartSize: 1048576 # 1mb，分片的最小大小
+#    cos:
+#      enable: true
+#      region: "ap-shanghai"
+#      bucket: wisehub
+#      multipartUploadThreshold: 5242880 # 5mb，触发分片上传的阈值
+#      minimumUploadPartSize: 1048576 # 1mb，分片的最小大小
+minio:
+  endpoint: http://192.168.150.101:9000
+  accessKey: admin
+  secretKey: admin123456
+  bucketName: tianji

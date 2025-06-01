@@ -56,7 +56,7 @@ public class File implements Serializable {
      */
     private FileStatus status;
     /**
-     * 状态：1-腾讯 2-阿里
+     * 状态：1-腾讯 2-阿里 3-Minio
      */
     private Platform platform;
     /**

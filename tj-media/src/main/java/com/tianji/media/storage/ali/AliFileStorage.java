@@ -53,6 +53,11 @@ public class AliFileStorage implements IFileStorage {
     }
 
     @Override
+    public String getFileUrl(String key) {
+         return ossClient.generatePresignedUrl(bucketName, key, null).toString();
+    }
+
+    @Override
     public InputStream downloadFile(String key) {
         // 1.数据校验
         AssertUtils.isNotBlank(bucketName, BUCKET_NAME_IS_NULL);

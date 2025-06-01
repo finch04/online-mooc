@@ -70,7 +70,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         // 6.返回
         FileDTO fileDTO = new FileDTO();
         fileDTO.setId(fileInfo.getId());
-        fileDTO.setPath(fileInfo.getPlatform().getPath() + filename);
+//        fileDTO.setPath(fileInfo.getPlatform().getPath() + filename);
+        fileDTO.setPath(fileStorage.getFileUrl(filename));
         fileDTO.setFilename(originalFilename);
         return fileDTO;
     }
@@ -81,7 +82,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         if (file == null) {
             return null;
         }
-        return FileDTO.of(file.getId(), file.getFilename(), file.getPlatform().getPath() + file.getKey());
+        return FileDTO.of(file.getId(), file.getFilename(), fileStorage.getFileUrl(file.getKey()));
     }
 
     private String generateNewFileName(String originalFilename) {

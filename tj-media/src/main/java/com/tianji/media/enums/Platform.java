@@ -8,6 +8,7 @@ public enum Platform {
     TENCENT(1, "腾讯云", "/img-tx/"),
     ALI(2, "阿里云", "/img-ali/"),
     QI_NIU(3, "七牛云", "/img-qn/"),
+    MINIO(4, "Minio", ""),
     ;
     @EnumValue
     private final int value;

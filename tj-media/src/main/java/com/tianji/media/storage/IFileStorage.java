@@ -14,6 +14,13 @@ public interface IFileStorage {
     String uploadFile(String key, InputStream inputStream, long contentLength);
 
     /**
+     *  获取文件访问路径
+     * @param key
+     * @return
+     */
+    String getFileUrl(String key);
+
+    /**
      * 下载文件
      * @param key 文件唯一标识（a.jpg)
      * @return 文件流
@@ -31,4 +38,6 @@ public interface IFileStorage {
      * @param keys 文件唯一标识（a.jpg)的集合
      */
     void deleteFiles(List<String> keys);
+
+
 }
