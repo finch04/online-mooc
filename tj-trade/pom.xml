@@ -17,6 +17,38 @@
     </properties>
 
     <dependencies>
+
+        <!-- redis持久化状态机 -->
+        <dependency>
+            <groupId>org.springframework.statemachine</groupId>
+            <artifactId>spring-statemachine-redis</artifactId>
+            <version>1.2.9.RELEASE</version>
+        </dependency>
+        <!--状态机-->
+        <dependency>
+            <groupId>org.springframework.statemachine</groupId>
+            <artifactId>spring-statemachine-starter</artifactId>
+            <version>2.0.1.RELEASE</version>
+        </dependency>
+
+        <!--seata-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+            <exclusions>
+                <!--版本较低，1.4.2，因此排除-->
+                <exclusion>
+                    <artifactId>seata-spring-boot-starter</artifactId>
+                    <groupId>io.seata</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <artifactId>seata-spring-boot-starter</artifactId>
+            <groupId>io.seata</groupId>
+            <version>${seata-version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.tianji</groupId>
             <artifactId>tj-pay-api</artifactId>

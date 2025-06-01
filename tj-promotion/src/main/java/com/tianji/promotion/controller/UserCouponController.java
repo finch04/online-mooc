@@ -1,15 +1,20 @@
 package com.tianji.promotion.controller;
 
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.promotion.domain.dto.CouponDiscountDTO;
+import com.tianji.promotion.domain.dto.CouponFormDTO;
 import com.tianji.promotion.domain.dto.OrderCouponDTO;
 import com.tianji.promotion.domain.dto.OrderCourseDTO;
 import com.tianji.promotion.domain.query.UserCouponQuery;
 import com.tianji.promotion.domain.vo.CouponPageVO;
 import com.tianji.promotion.domain.vo.CouponVO;
+import com.tianji.promotion.enums.DiscountType;
+import com.tianji.promotion.enums.ObtainType;
 import com.tianji.promotion.service.IDiscountService;
 import com.tianji.promotion.service.IUserCouponService;
+import io.seata.spring.annotation.GlobalTransactional;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
@@ -89,5 +94,49 @@ public class UserCouponController {
         return userCouponService.queryDiscountRules(userCouponIds);
     }
 
+
+
+
+
+//    测试接口-以下均为测试
+
+    /**
+     * 测试dubbo
+     */
+//    @GetMapping("/hello")
+//    public void sayhello() throws InterruptedException {
+//        String ans = learningClient.sayHello("hello");
+//        System.out.println("ans = " + ans);
+//    }
+//
+    /**
+     * 测试senta分布式事务
+     */
+//    @PostMapping("/seata")
+//    @GlobalTransactional(rollbackFor = Exception.class)
+//    public void seata() {
+//        CouponFormDTO dto = new CouponFormDTO();
+//        dto.setId(1799677743084539999L);
+//        dto.setName("测试优惠券");
+//        dto.setDiscountType(DiscountType.PRICE_DISCOUNT);
+//        dto.setSpecific(false);
+//        dto.setDiscountValue(1000);
+//        dto.setThresholdAmount(100000);
+//        dto.setMaxDiscountAmount(0);
+//        dto.setObtainWay(ObtainType.PUBLIC);
+//        couponService.saveCoupon(dto);
+//        learningClient.testSeata();
+//    }
+
+    /**
+     * 测试sentinel限流
+     *
+     * @return
+     */
+    @GetMapping("/limit")
+    @SentinelResource(value = "QUEUE-DATA-FLOW")
+    public String limit() {
+        return "hello";
+    }
 
 }

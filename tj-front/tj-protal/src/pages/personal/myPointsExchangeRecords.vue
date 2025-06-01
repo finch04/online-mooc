@@ -3,11 +3,11 @@
     <BreadCrumb />
     <div class="header">
       <h2>我的兑换记录</h2>
-      <div class="btn" style="width: 20%;">
+      <!-- <div class="btn" style="width: 20%;">
         <span class="bt bt-round" @click="() => $router.push({path: 'myIntegralShop'})">
           返回积分商城
         </span>
-      </div>
+      </div> -->
     </div>
 
     <el-table :data="records" stripe v-loading="loading" empty-text="暂无兑换记录">

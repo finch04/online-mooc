@@ -1,9 +1,15 @@
 package com.tianji.common.autoconfigure.mvc.advice;
 
+import com.alibaba.csp.sentinel.slots.block.authority.AuthorityException;
+import com.alibaba.csp.sentinel.slots.block.degrade.DegradeException;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
+import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException;
+import com.alibaba.csp.sentinel.slots.system.SystemBlockException;
 import com.tianji.common.constants.Constant;
 import com.tianji.common.domain.R;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.exceptions.DbException;
+import com.tianji.common.exceptions.SentinelException;
 import com.tianji.common.utils.WebUtils;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +25,36 @@ import org.springframework.web.util.NestedServletException;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.stream.Collectors;
+
+import static com.tianji.common.enums.SentinelExceptionType.*;
 
 @RestControllerAdvice
 @Slf4j
 public class CommonExceptionAdvice {
+
+    /**
+     * sentinel限流、熔断灯异常处理
+     */
+    @ExceptionHandler(UndeclaredThrowableException.class)
+    public Object handleUndeclaredThrowableException(UndeclaredThrowableException e) {
+        SentinelException se = null;
+        if (e.getUndeclaredThrowable() instanceof FlowException) {
+            se = new SentinelException(SENTINEL_FLOW.getValue(), SENTINEL_FLOW.getDesc());
+        } else if (e.getUndeclaredThrowable() instanceof DegradeException) {
+            se = new SentinelException(SENTINEL_DEGRADE.getValue(), SENTINEL_DEGRADE.getDesc());
+        } else if (e.getUndeclaredThrowable() instanceof ParamFlowException) {
+            se = new SentinelException(SENTINEL_PARAMAS.getValue(), SENTINEL_PARAMAS.getDesc());
+        } else if (e.getUndeclaredThrowable() instanceof SystemBlockException) {
+            se = new SentinelException(SENTINEL_SYSTEM.getValue(), SENTINEL_SYSTEM.getDesc());
+        } else if (e.getUndeclaredThrowable() instanceof AuthorityException) {
+            se = new SentinelException(SENTINEL_AUTHORITY.getValue(), SENTINEL_AUTHORITY.getDesc());
+        } else {
+            se = new SentinelException(SENTINEL_FLOW.getValue(), SENTINEL_FLOW.getDesc());
+        }
+        return processResponse(se.getStatus(), se.getCode(), se.getMessage());
+    }
 
     @ExceptionHandler(DbException.class)
     public Object handleDbException(DbException e) {

@@ -22,10 +22,7 @@ import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.pay.sdk.dto.PayResultDTO;
 import com.tianji.trade.config.TradeProperties;
-import com.tianji.trade.constants.OrderCancelReason;
-import com.tianji.trade.constants.OrderStatus;
-import com.tianji.trade.constants.RefundStatus;
-import com.tianji.trade.constants.TradeErrorInfo;
+import com.tianji.trade.constants.*;
 import com.tianji.trade.domain.dto.PlaceOrderDTO;
 import com.tianji.trade.domain.po.Order;
 import com.tianji.trade.domain.po.OrderDetail;
@@ -35,10 +32,17 @@ import com.tianji.trade.mapper.OrderMapper;
 import com.tianji.trade.service.ICartService;
 import com.tianji.trade.service.IOrderDetailService;
 import com.tianji.trade.service.IOrderService;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.persist.StateMachinePersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +63,7 @@ import static com.tianji.trade.constants.TradeErrorInfo.ORDER_NOT_EXISTS;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements IOrderService {
 
     private final CourseClient courseClient;
@@ -67,9 +72,39 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final TradeProperties tradeProperties;
     private final RabbitMqHelper rabbitMqHelper;
     private final PromotionClient promotionClient;
+    //订单状态机类
+    private final  StateMachine<OrderStatus, OrderStatusChangeEvent> orderStateMachine;
+    private final  StateMachinePersister<OrderStatus, OrderStatusChangeEvent, String> stateMachineMemPersister;
+
+    /**
+     * 发送订单状态转换事件
+     * synchronized修饰保证这个方法是线程安全的
+     *
+     * @param changeEvent
+     * @param order
+     * @return
+     */
+    private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order) {
+        boolean result = false;
+        try {
+            //启动状态机
+            orderStateMachine.start();
+            //尝试恢复状态机状态
+            stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+            Message message = MessageBuilder.withPayload(changeEvent).setHeader("order", order).build();
+            result = orderStateMachine.sendEvent(message);
+            //持久化状态机状态
+            stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+        } catch (Exception e) {
+            log.error("订单操作失败:{}", e);
+        } finally {
+            orderStateMachine.stop();
+        }
+        return result;
+    }
 
     @Override
-    @Transactional
+    @GlobalTransactional
     public PlaceOrderResultVO placeOrder(PlaceOrderDTO placeOrderDTO) {
         Long userId = UserContext.getUser();
         // 1.查询课程费用信息，如果不可购买，这里直接报错
@@ -267,8 +302,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
     }
 
+    //取消订单
     @Override
-    @Transactional
+    @GlobalTransactional
     public void cancelOrder(Long orderId, OrderCancelReason cancelReason) {
         Long userId = UserContext.getUser();
         // 1.查询订单
@@ -276,32 +312,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order == null || !userId.equals(order.getUserId())) {
             throw new BadRequestException(ORDER_NOT_EXISTS);
         }
-        // 2.判断订单状态是否已经取消，幂等判断
-        if(OrderStatus.CLOSED.equalsValue(order.getStatus())){
-            // 订单已经取消，无需重复操作
+        order.setMessage(cancelReason.getMsg());
+        //状态机简化判断流程
+        if (!sendEvent(OrderStatusChangeEvent.CLOSED, order)) {
+            log.error("线程名称：{},取消订单失败, 状态异常，订单信息：{}", Thread.currentThread().getName(), order);
+            throw new RuntimeException("取消订单流程流转失败, 订单状态异常");
+        }
+    }
+    //支付成功处理
+    @Override
+    @Transactional
+    public void handlePaySuccess(PayResultDTO payResult) {
+        // 1.查询订单
+        Order order = getById(payResult.getBizOrderId());
+        if (order == null) {
             return;
         }
-        // 3.判断订单是否未支付，只有未支付订单才可以取消
-        if(!OrderStatus.NO_PAY.equalsValue(order.getStatus())){
-            throw new BizIllegalException(ORDER_ALREADY_FINISH);
-        }
-        // 4.可以更新订单状态为取消了
-        boolean success = lambdaUpdate()
-                .set(Order::getStatus, OrderStatus.CLOSED.getValue())
-                .set(Order::getMessage, cancelReason.getMsg())
-                .set(Order::getCloseTime, LocalDateTime.now())
-                .eq(Order::getStatus, OrderStatus.NO_PAY.getValue())
-                .eq(Order::getId, orderId)
-                .update();
-        if (!success) {
-            return;
-        }
-        // 5.更新订单条目的状态
-        detailService.updateStatusByOrderId(orderId, OrderStatus.CLOSED.getValue());
+        order.setPayTime(payResult.getSuccessTime());
+        order.setPayChannel(payResult.getPayChannel());
+        order.setPayOrderNo(payResult.getPayOrderNo());
 
-        // 6.退还优惠券
-        if(CollUtils.isNotEmpty(order.getCouponIds())){
-            promotionClient.refundCoupon(order.getCouponIds());
+        if (!sendEvent(OrderStatusChangeEvent.PAYED, order)) {
+            log.error("线程名称：{},支付失败, 状态异常，订单信息：{}", Thread.currentThread().getName(), order);
+            throw new RuntimeException("支付流程流转失败, 订单状态异常");
         }
     }
 
@@ -384,9 +417,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 3.3.订单进度
         vo.setProgressNodes(detailService.packageProgressNodes(order, null));
 
-        // 3.4.优惠明细
-        List<String> rules = promotionClient.queryDiscountRules(order.getCouponIds());
-        vo.setCouponDesc(String.join("/", rules));
+        if(order.getCouponIds()!=null){
+            // 3.4.优惠明细
+            List<String> rules = promotionClient.queryDiscountRules(order.getCouponIds());
+            vo.setCouponDesc(String.join("/", rules));
+        }
         return vo;
     }
 
@@ -417,38 +452,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .ge(Order::getCreateTime, date1)
                 .le(Order::getCreateTime, date2)
                 .list();
-    }
-
-    @Override
-    @Transactional
-    public void handlePaySuccess(PayResultDTO payResult) {
-        // 1.查询订单
-        Order order = getById(payResult.getBizOrderId());
-        if (order == null) {
-            return;
-        }
-        // 2.更新订单状态
-        Order o = new Order();
-        o.setId(order.getId());
-        o.setStatus(OrderStatus.PAYED.getValue());
-        o.setPayTime(payResult.getSuccessTime());
-        o.setPayChannel(payResult.getPayChannel());
-        o.setPayOrderNo(payResult.getPayOrderNo());
-        o.setMessage("用户支付成功");
-        updateById(o);
-        // 3.更新订单条目
-        detailService.markDetailSuccessByOrderId(o.getId(), payResult.getPayChannel(), payResult.getSuccessTime());
-        // 4.查询订单包含的课程信息
-        List<Long> cIds = detailService.queryCourseIdsByOrderId(o.getId());
-        // 5.发送MQ消息，通知报名成功
-        rabbitMqHelper.send(
-                MqConstants.Exchange.ORDER_EXCHANGE,
-                MqConstants.Key.ORDER_PAY_KEY,
-                OrderBasicDTO.builder()
-                        .orderId(o.getId()).userId(order.getUserId()).courseIds(cIds)
-                        .finishTime(o.getPayTime())
-                        .build()
-        );
     }
 
 }

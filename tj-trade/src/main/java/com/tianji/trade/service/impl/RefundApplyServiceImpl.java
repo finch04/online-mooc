@@ -22,6 +22,7 @@ import com.tianji.pay.sdk.constants.RefundChannelEnum;
 import com.tianji.pay.sdk.dto.RefundApplyDTO;
 import com.tianji.pay.sdk.dto.RefundResultDTO;
 import com.tianji.trade.constants.OrderStatus;
+import com.tianji.trade.constants.OrderStatusChangeEvent;
 import com.tianji.trade.constants.RefundStatus;
 import com.tianji.trade.constants.TradeErrorInfo;
 import com.tianji.trade.domain.dto.ApproveFormDTO;
@@ -36,9 +37,15 @@ import com.tianji.trade.domain.vo.RefundApplyVO;
 import com.tianji.trade.mapper.OrderMapper;
 import com.tianji.trade.mapper.RefundApplyMapper;
 import com.tianji.trade.service.IOrderDetailService;
+import com.tianji.trade.service.IOrderService;
 import com.tianji.trade.service.IRefundApplyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.persist.StateMachinePersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +66,7 @@ import static com.tianji.trade.constants.RefundStatus.REJECT;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, RefundApply> implements IRefundApplyService {
 
     private final OrderMapper orderMapper;
@@ -68,6 +76,38 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
     private final RoleCache roleCache;
     private final ThreadPoolTaskExecutor sendRefundRequestExecutor;
     private final RabbitMqHelper rabbitMqHelper;
+    private final IOrderService orderService;
+    //订单状态机类
+    private final StateMachine<OrderStatus, OrderStatusChangeEvent> orderStateMachine;
+    private final StateMachinePersister<OrderStatus, OrderStatusChangeEvent, String> stateMachineMemPersister;
+
+    /**
+     * 发送订单状态转换事件
+     * synchronized修饰保证这个方法是线程安全的
+     *
+     * @param changeEvent
+     * @param order
+     * @return
+     */
+    private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order) {
+        boolean result = false;
+        try {
+            //启动状态机
+            orderStateMachine.start();
+            //尝试恢复状态机状态
+            stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+            Message message = MessageBuilder.withPayload(changeEvent).setHeader("order", order).build();
+            result = orderStateMachine.sendEvent(message);
+            //持久化状态机状态
+            stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+        } catch (Exception e) {
+            log.error("订单操作失败:{}", e);
+        } finally {
+            orderStateMachine.stop();
+        }
+        return result;
+    }
+
 
     @Override
     public List<RefundApply> queryByDetailId(Long id) {
@@ -80,6 +120,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         return list;
     }
 
+    //订单退款
     @Override
     @Transactional
     public void applyRefund(RefundFormDTO refundFormDTO) {
@@ -95,14 +136,18 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         }
         // 2.查询订单
         Order order = orderMapper.getById(detail.getOrderId());
-        if(order == null){
-            throw new BadRequestException(TradeErrorInfo.ORDER_NOT_EXISTS);
+//        if(order == null){
+//            throw new BadRequestException(TradeErrorInfo.ORDER_NOT_EXISTS);
+//        }
+//        if(!(OrderStatus.PAYED.equalsValue(order.getStatus()) || OrderStatus.REFUNDED.equalsValue(order.getStatus()))){
+//            // 订单状态未支付或已经完结，不能退款
+//            throw new BizIllegalException(TradeErrorInfo.ORDER_CANNOT_REFUND);
+//        }
+        //状态机简化判断流程
+        if (!sendEvent(OrderStatusChangeEvent.REFUNDED, order)) {
+            log.error("线程名称：{},订单退款失败, 状态异常，订单信息：{}", Thread.currentThread().getName(), order);
+            throw new RuntimeException("订单退款流程流转失败, 订单状态异常");
         }
-        if(!(OrderStatus.PAYED.equalsValue(order.getStatus()) || OrderStatus.REFUNDED.equalsValue(order.getStatus()))){
-            // 订单状态未支付或已经完结，不能退款
-            throw new BizIllegalException(TradeErrorInfo.ORDER_CANNOT_REFUND);
-        }
-
         // 3.查询申请人信息
         UserDTO userDTO = userClient.queryUserById(userId);
         AssertUtils.isNotNull(userDTO, ErrorInfo.Msg.USER_NOT_EXISTS);
@@ -114,7 +159,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
 
         // 4.查询已经申请的退款次数
         List<RefundApply> refundApplies = queryByDetailId(refundFormDTO.getOrderDetailId());
-        if (isStudent && refundApplies.size() >= 2) {
+        if (isStudent && refundApplies.size() >= 5) {
             throw new BizIllegalException(TradeErrorInfo.REFUND_TOO_MANY_TIMES);
         }
         // 5.判断最近一次退款的状态，如果退款在进行中，直接返回

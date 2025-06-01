@@ -26,6 +26,10 @@ spring:
             refresh: false
           - data-id: shared-mq.yaml # 共享mq配置
             refresh: false
+          - data-id: shared-seata.yaml # 共享sentinel配置
+            refresh: false
+          - data-id: shared-sentinel.yaml # 共享sentinel配置
+            refresh: false
 tj:
   swagger:
     enable: true
