@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -86,12 +88,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
             createIds.add(m.getCreater());
         }
         createIds.remove(0L);
-        // 4.TODO 查询引用次数
-//        List<MediaQuoteDTO> mediaQuoteDTOS = courseClient.mediaUserInfo(ids);
-//        AssertUtils.isNotEmpty(mediaQuoteDTOS, com.tianji.media.constants.FileErrorInfo.MEDIA_QUOTE_NOT_EXISTS);
-//        Map<Long, Integer> quoteMap = mediaQuoteDTOS
-//                .stream()
-//                .collect(Collectors.toMap(MediaQuoteDTO::getMediaId, MediaQuoteDTO::getQuoteNum));
+
 
         // 5.查询创建者信息
         Map<Long, String> userMap = null;
@@ -105,9 +102,6 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         for (File m : records) {
             FileVO v = BeanUtils.toBean(m, FileVO.class);
             v.setStatus(m.getStatus().getValue());
-            //TODO 引用次数
-            v.setUseTimes(0);
-//            v.setPath( fileStorage.getFileUrl(m.getKey()));
             if(userMap != null) {
                 v.setCreater(userMap.get(m.getCreater()));
             }
@@ -127,8 +121,6 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         fileDetailVO.setPath(fileStorage.getFileUrl(file.getKey()));
         fileDetailVO.setCreater(userClient.queryUserById(file.getCreater()).getName());
         fileDetailVO.setStatus(file.getStatus().getValue());
-        //TODO 引用次数
-        fileDetailVO.setUseTimes(0);
         return fileDetailVO;
     }
 
@@ -191,7 +183,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
     public Boolean checkFile(String fileMd5) {
         //查询文件信息
         File file = checkFileExistsByHash(fileMd5);
-        if ( file!= null){
+        if (file!= null){
             //桶
             String bucket = file.getBucketName();
             //存储目录
@@ -202,6 +194,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
                 stream = fileStorage.checkFileByPath(filePath);
                 if (stream != null) {
                     //文件已存在
+                    log.info("秒传成功，文件路径：{}", filePath);
                     return true;
                 }
             } catch (Exception e) {
@@ -279,32 +272,44 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
 
 
     private String generateNewFileName(String originalFilename) {
-        // 1.获取后缀
-        String suffix = StringUtils.subAfter(originalFilename, ".", true);
-        // 2.生成新文件名
-        return UUID.randomUUID().toString(true) + "." + suffix;
+        // 1. 获取文件后缀
+        String suffix = "";
+        int lastDotIndex = originalFilename.lastIndexOf('.');
+        if (lastDotIndex != -1) {
+            suffix = originalFilename.substring(lastDotIndex);
+        }
+
+        // 2. 生成唯一的文件名
+        String uniqueFileName = UUID.randomUUID().toString().replace("-", "") + suffix;
+
+        // 3. 获取当前日期，格式为 yyyy/MM/dd
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String datePath = currentDate.format(formatter);
+
+        // 4. 拼接日期路径和新文件名
+        return datePath + "/" + uniqueFileName;
     }
 
 
     private File checkFileExistsByHash(String fileHash) {
-        return lambdaQuery().eq(File::getFileHash, fileHash).one();
+        if(this.lambdaQuery().eq(File::getFileHash, fileHash).count()>1){
+            //可能数据库表中已经有hash值一样的，不过这些是脏数据，无伤大雅
+            return lambdaQuery().eq( File::getFileHash, fileHash).list().get(0);
+        }else{
+            return lambdaQuery().eq(File::getFileHash, fileHash).one();
+        }
     }
 
-    //得到分块文件的目录
+    // 得到分块文件的目录
     private String getChunkFileFolderPath(String fileMd5) {
-        return fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 + "/" + "chunk" + "/";
+        // 获取当前日期，格式为 yyyy/MM/dd
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String datePath = currentDate.format(formatter);
+
+        // 拼接日期路径和原有的 MD5 相关路径
+        return datePath + "/" + fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 + "/" + "chunk" + "/";
     }
-
-    /**
-     * 得到合并后的文件的地址
-     * @param fileMd5 文件id即md5值
-     * @param fileExt 文件扩展名
-     * @return
-     */
-    private String getFilePathByMd5(String fileMd5,String fileExt){
-        return   fileMd5.substring(0,1) + "/" + fileMd5.substring(1,2) + "/" + fileMd5 + "/" +fileMd5 +fileExt;
-    }
-
-
 
 }

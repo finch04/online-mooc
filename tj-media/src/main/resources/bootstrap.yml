@@ -3,6 +3,11 @@ server:
   tomcat:
     uri-encoding: UTF-8   #服务编码
 spring:
+  servlet:
+    multipart:
+      # 文件存储能一次性发多大文件
+      max-file-size: 200MB
+      max-request-size: 200MB
   profiles:
     active: dev
   application:

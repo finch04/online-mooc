@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 上传对话框 -->
-    <el-dialog title="上传文件" v-model="dialogVisible" width="80%" @closed="handleCloseDialog">
+    <el-dialog title="上传文件" v-model="dialogVisible" width="90%" @closed="handleCloseDialog">
       <el-table :data="uploadingFiles" border style="width: 100%" :header-cell-style="{ textAlign: 'center' }">
         <el-table-column prop="name" label="文件名" align="center"></el-table-column>
         <el-table-column prop="size" label="大小(KB)" align="center"  width="100">
@@ -45,7 +45,7 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <el-upload action="#" :auto-upload="false" :show-file-list="false" :on-change="handleFileChange"
+          <el-upload   ref="uploadRef" action="#" :auto-upload="false" :show-file-list="false" :on-change="handleFileChange"
             :before-upload="beforeUpload" multiple>
             <el-button type="primary">添加文件</el-button>
           </el-upload>
@@ -72,6 +72,7 @@ const dialogVisible = ref(false);
 const uploadingFiles = ref([]);
 const isUploadingAll = ref(false);
 
+const uploadRef = ref(null); // 添加对el-upload组件的引用
 // 计算属性
 const hasFilesToUpload = computed(() => {
   return uploadingFiles.value.some(
@@ -99,6 +100,7 @@ const openDialog = () => {
 // 关闭对话框
 const handleCloseDialog = () => {
   uploadingFiles.value = [];
+  uploadRef.value.clearFiles();
 };
 
 // 文件选择变化
@@ -316,6 +318,11 @@ const uploadByPieces = async ({ file, pieceSize = 5, signal, success, error }) =
     console.log("注册结果:", registerRes);
     if (registerRes.code !== 200) {
       throw new Error(registerRes.message || "文件注册失败");
+    }
+    if(registerRes.data === true){
+      ElMessage.success ("文件秒传成功，无需分片上传");
+        success({ num: chunkCount, chunkCount, state: 'success' });
+      return;
     }
     
     // 3. 开始上传分片

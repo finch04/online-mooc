@@ -297,13 +297,11 @@ const handlePreviewClose = () => {
 const getStatusText = (status) => {
   switch (status) {
     case 1:
-      return '待上传';
+      return '上传中';
     case 2:
-      return '已上传未使用';
+      return '已上传';
     case 3:
-      return '已使用';
-    default:
-      return '未知状态';
+      return '已处理';
   }
 }
 </script>

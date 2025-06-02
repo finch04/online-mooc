@@ -3,6 +3,7 @@ package com.tianji.media.domain.po;
 import com.baomidou.mybatisplus.annotation.*;
 import com.tianji.media.enums.FileStatus;
 import com.tianji.media.enums.Platform;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -78,6 +79,10 @@ public class File implements Serializable {
      */
     private Platform platform;
 
+    /**
+     * 被引用次数
+     */
+    private Integer useTimes;
 
     /**
      * 创建时间

@@ -21,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -60,6 +62,7 @@ public class MinioFileStorage implements IFileStorage {
             throw new RuntimeException("文件上传失败", e);
         }
     }
+
 
     @Override
     public InputStream downloadFile(String key) {
@@ -238,7 +241,6 @@ public class MinioFileStorage implements IFileStorage {
                 fileInfo = new com.tianji.media.domain.po.File();
                 fileInfo.setFilename(fileName);
                 fileInfo.setKey(objectName);
-                fileInfo.setFileType( FileUtils.getFileType(file));
                 fileInfo.setStatus(FileStatus.UPLOADED);
                 fileInfo.setPlatform(Platform.MINIO);
                 fileInfo.setFileHash(FileUtils.getFileHash(file));
@@ -295,6 +297,23 @@ public class MinioFileStorage implements IFileStorage {
         }
     }
 
+    public String getPreviewUrl(String fileName, String bucketName) {
+        if (StringUtils.isNotBlank(fileName)) {
+            bucketName = StringUtils.isNotBlank(bucketName) ? bucketName : minioProperties.getBucketName();
+            try {
+                minioClient.statObject(StatObjectArgs.builder().bucket(bucketName).object(fileName).build());
+                if (null != minioProperties.getPreviewExpiry()) {
+                    return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket(bucketName).object(fileName).expiry(minioProperties.getPreviewExpiry(), TimeUnit.HOURS).build());
+                } else {
+                    return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket(bucketName).object(fileName).build());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
 
     /**
      * 得到合并后的文件的地址
@@ -302,8 +321,13 @@ public class MinioFileStorage implements IFileStorage {
      * @param fileExt 文件扩展名
      * @return
      */
-    private String getFilePathByMd5(String fileMd5,String fileExt){
-        return   fileMd5.substring(0,1) + "/" + fileMd5.substring(1,2) + "/" + fileMd5 + "/" +fileMd5 +fileExt;
-    }
+    private String getFilePathByMd5(String fileMd5, String fileExt) {
+        // 获取当前日期，格式为 yyyy/MM/dd
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String datePath = currentDate.format(formatter);
 
+        // 拼接日期路径和 MD5 相关路径
+        return datePath + "/" + fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 + "/" + fileMd5 + fileExt;
+    }
 }
