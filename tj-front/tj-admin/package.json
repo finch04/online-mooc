@@ -16,6 +16,7 @@
     "@tinymce/tinymce-vue": "^5.0.0",
     "@vitejs/plugin-vue-jsx": "^1.3.10",
     "axios": "^0.27.2",
+    "crypto-js": "^4.2.0",
     "echarts": "^5.4.0",
     "element-plus": "^2.2.9",
     "install": "^0.13.0",

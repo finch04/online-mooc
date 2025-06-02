@@ -43,6 +43,12 @@ export default [
         name: "media",
         component: () => import("@/pages/curriculum/media/index.vue"),
         meta: { title: "媒资管理" },
+      },
+      {
+        path: "file",
+        name: "file",
+        component: () => import("@/pages/curriculum/file/index.vue"),
+        meta: { title: "文件管理" },
       }
     ],
   },

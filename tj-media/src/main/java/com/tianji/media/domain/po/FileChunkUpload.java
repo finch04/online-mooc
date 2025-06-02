@@ -15,8 +15,8 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("media_chunk_upload")
-public class MediaChunkUpload {
+@TableName("file_chunk_upload")
+public class FileChunkUpload {
     @TableId(type = IdType.AUTO)
     private Long id;
     

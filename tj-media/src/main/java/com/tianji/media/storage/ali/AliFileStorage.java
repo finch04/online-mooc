@@ -7,6 +7,7 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.AssertUtils;
 import com.tianji.common.utils.CollUtils;
+import com.tianji.media.domain.po.File;
 import com.tianji.media.storage.IFileStorage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -104,5 +105,26 @@ public class AliFileStorage implements IFileStorage {
             log.error("批量删除文件[{}]时发生异常：", keys, e);
             throw new CommonException("删除异常。", e);
         }
+    }
+
+
+    @Override
+    public InputStream checkFileByPath(String path) {
+        return null;
+    }
+
+    @Override
+    public Boolean addFileByPath(String localFilePath, String objectName) {
+        return null;
+    }
+
+    @Override
+    public File mergeChunks(String fileMd5, int chunkTotal, String fileName, String chunkFileFolderPath) {
+        return null;
+    }
+
+    @Override
+    public void clearChunkFiles(String chunkFileFolderPath, int chunkTotal) {
+
     }
 }

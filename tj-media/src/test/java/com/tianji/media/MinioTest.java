@@ -3,10 +3,18 @@ package com.tianji.media;/**
  * @date 2025/6/1 18:23
  */
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.tianji.media.domain.po.File;
+import com.tianji.media.service.IFileService;
 import com.tianji.media.storage.minio.MinioFileStorage;
+import com.tianji.media.utils.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * @Author: fsq
@@ -18,6 +26,8 @@ public class MinioTest {
 
      @Autowired
      private MinioFileStorage minioFileStorage;
+     @Autowired
+     private IFileService fileService;
 
     @Test
      public void PreviewTest() {
@@ -29,5 +39,17 @@ public class MinioTest {
     public void getUrlTest() {
         String tianji = minioFileStorage.getFileUrl("00deb122e45b4a0e94454fd0a9f6aa79.jpg");
         System.out.println(tianji);
+    }
+
+    public void putFileInfo(){
+        List<File> files = fileService.getBaseMapper().selectList(new LambdaQueryWrapper<>());
+        for (File file : files) {
+            InputStream inputStream = minioFileStorage.downloadFile(file.getKey());
+//
+//            file.setFileHash(FileUtils.getFileHash(file));
+//            file.setFileSize(FileUtils.getFileSize(file));
+//            file.setFileType(FileUtils.getFileType(file));
+            fileService.getBaseMapper().updateById(file);
+        }
     }
 }

@@ -9,6 +9,8 @@ import com.tianji.auth.domain.po.Menu;
 import com.tianji.auth.domain.vo.MenuOptionVO;
 import com.tianji.auth.service.ICodeService;
 import com.tianji.auth.service.IMenuService;
+import com.tianji.common.ratelimiter.annotation.TjRateLimiter;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.security.KeyPair;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("code")
 @RequiredArgsConstructor
-@ApiIgnore
+@Api(tags = "发送短信验证码")
 public class CodeController {
 
     private final ICodeService codeService;

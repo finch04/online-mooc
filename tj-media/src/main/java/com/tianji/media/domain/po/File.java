@@ -1,9 +1,6 @@
 package com.tianji.media.domain.po;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.tianji.media.enums.FileStatus;
 import com.tianji.media.enums.Platform;
 import lombok.Data;
@@ -52,13 +49,36 @@ public class File implements Serializable {
     private String requestId;
 
     /**
-     * 状态：1-待上传 2-已上传,未使用 3-已使用
+     * 文件内容哈希值（用于秒传）
+     */
+    private String fileHash;
+
+    /**
+     * 文件大小（字节）
+     */
+    private Long fileSize;
+
+    /**
+     * 文件类型/MIME类型
+     */
+    private String fileType;
+
+    /**
+     * 存储桶名称
+     */
+    private String bucketName = "tianji";
+
+    /**
+     * 状态：1-待上传 2-上传中 3-已上传,未使用 4-已使用 5-上传失败
      */
     private FileStatus status;
+
     /**
-     * 状态：1-腾讯 2-阿里 3-Minio
+     * 平台：1-腾讯 2-阿里 3-Minio
      */
     private Platform platform;
+
+
     /**
      * 创建时间
      */
@@ -72,17 +92,23 @@ public class File implements Serializable {
     /**
      * 创建者
      */
-
+    @TableField(fill = FieldFill.INSERT)
     private Long creater;
 
     /**
      * 更新者
      */
-
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
 
     /**
-     * 逻辑删除
+     * 部门id
      */
+    private Long depId;
+
+    /**
+     * 逻辑删除，默认0
+     */
+    @TableLogic
     private Integer deleted;
 }

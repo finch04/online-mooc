@@ -34,6 +34,14 @@ export default defineConfig((mode) => {
           //   return path.replace(/^\/img-tx/, '')
           // }
         },
+        '/img-minio': {
+          // target:  'https://tjxt-dev.itheima.net/', // 'http://172.17.2.134',
+          target:  'http://192.168.150.101:9000/',
+          changeOrigin: true,
+          // rewrite: (path) => {
+          //   return path.replace(/^\/img-tx/, '')
+          // }
+        },
         // '/mock/3359':{
         //   target: 'http://172.17.0.137:8321/mock/3359',
         //   changeOrigin: true,

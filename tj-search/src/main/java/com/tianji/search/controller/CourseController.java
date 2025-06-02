@@ -2,6 +2,7 @@ package com.tianji.search.controller;
 
 import com.tianji.api.client.search.SearchClient;
 import com.tianji.common.domain.dto.PageDTO;
+import com.tianji.common.ratelimiter.annotation.TjRateLimiter;
 import com.tianji.search.domain.query.CoursePageQuery;
 import com.tianji.search.domain.vo.CourseVO;
 import com.tianji.search.service.ICourseService;
@@ -26,6 +27,7 @@ public class CourseController {
 
 
     @ApiOperation("用户端课程搜索接口")
+    @TjRateLimiter(name= "search",permitsPerSecond = 1)
     @GetMapping("/portal")
     public PageDTO<CourseVO> queryCoursesForPortal(CoursePageQuery query){
         return searchService.queryCoursesForPortal(query);
