@@ -90,7 +90,7 @@ public class FileUtils {
     }
 
     /**
-     * 获取文件MIME类型
+     * 获取文件类型，直接根据最后的.字符串截断即可
      * @param file 文件对象
      * @return MIME类型字符串，无法判断时返回null
      */
@@ -98,12 +98,20 @@ public class FileUtils {
         if (file == null || !file.exists()) {
             return null;
         }
-        try {
-            return Files.probeContentType(file.toPath());
-        } catch (IOException e) {
+        return file.getName().substring(file.getName().lastIndexOf(".") + 1);
+    }
+    /**
+     * 获取文件类型，直接根据最后的.字符串截断即可
+     * @param file 文件对象
+     * @return MIME类型字符串，无法判断时返回null
+     */
+    public static String getFileType(String file) {
+        if (file == null ) {
             return null;
         }
+        return file.substring(file.lastIndexOf(".") + 1);
     }
+
 
     public static String getFileHash(File file) {
         return getFileHash(file,"MD5");

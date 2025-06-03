@@ -61,7 +61,7 @@ public class FileController {
     @DeleteMapping("/{id}")
     public void deleteFileById(
             @ApiParam(value = "文件id", example = "1") @PathVariable("id") Long id) {
-        fileService.removeById(id);
+        fileService.deleteFileById(id);
     }
 
     @ApiOperation(value = "文件上传前先检查文件")

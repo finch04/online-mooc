@@ -179,7 +179,7 @@ public class MinioFileStorage implements IFileStorage {
                              .object(path)
                              .build());
         } catch (Exception e) {
-            log.error("检查文件路径是否存在出错！");
+            log.error("检查文件路径是否存在出错！：{}",path);
         }
         return null;
     }
@@ -245,7 +245,7 @@ public class MinioFileStorage implements IFileStorage {
                 fileInfo.setPlatform(Platform.MINIO);
                 fileInfo.setFileHash(FileUtils.getFileHash(file));
                 fileInfo.setFileSize(FileUtils.getFileSize(file));
-                fileInfo.setFileType(FileUtils.getFileType(file));
+                fileInfo.setFileType(FileUtils.getFileType(objectName));
                 return  fileInfo;
         }catch (Exception e) {
         }

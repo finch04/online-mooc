@@ -34,4 +34,6 @@ public interface IFileService extends IService<File> {
     FileDTO mergechunks(String fileMd5, int chunkTotal, String fileName);
 
     PageDTO<FileVO> queryFilePage(FileQuery query);
+
+    void deleteFileById(Long id);
 }

@@ -15,8 +15,8 @@ public class FileVO {
     private String filename;
     @ApiModelProperty(value = "文件key")
     private String key;
-//    @ApiModelProperty(value = "文件路径", example = "")
-//    private String path;
+    @ApiModelProperty(value = "文件路径", example = "")
+    private String path;
     @ApiModelProperty(value = "文件大小，单位字节", example = "1024")
     private Long fileSize;
     @ApiModelProperty(value = "被引用次数", example = "10")

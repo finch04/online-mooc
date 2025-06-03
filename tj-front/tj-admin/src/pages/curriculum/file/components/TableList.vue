@@ -4,22 +4,16 @@
     <!-- 表格 -->
     <el-table :data="baseData" border stripe v-loading="loading" :sort-change="handleSortChange">
       <el-table-column type="index" align="center" width="100" label="序号" />
-      <!-- <el-table-column prop="" label="文件预览" min-width="250" class-name="textLeft">
+      <el-table-column prop="path" label="文件预览" min-width="350" class-name="textLeft">
         <template #default="scope">
-          <div>
-            <el-image
-              style="width: 80px; height: 80px"
-              :src="scope.row.path"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              show-progress
-              :initial-index="0"
-              fit="cover"
-            />
+          <div class="head">
+            <span @click="handleMagnify(scope.row.path)">
+              <img :src="scope.row.path" />
+              <span class="shade"><i></i></span>
+            </span>
           </div>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column prop="" label="文件名称" min-width="250" class-name="textLeft">
         <template #default="scope">
           <div>
@@ -103,21 +97,17 @@
     ></Delete>
     <!-- end -->
     <!-- 预览弹层 -->
-    <el-dialog v-model="dialogFormVisible" title="文件详情" custom-class="file-detail-dialog" >
+    <el-dialog v-model="dialogFormVisible" title="文件详情" custom-class="file-detail-dialog" width="90%">
         <div v-if="fileInfo" class="file-detail-content">
           <!-- <div class="image-preview">
            
           </div> -->
           <div class="info-details">
             <table>
-              <tr>
-                <td class="label">文件ID:</td>
-                <td>{{ fileInfo.id }}</td>
-              </tr>
-              <tr>
-                <td class="label">文件预览:</td>
+              <!-- <tr>
+                <td class="label">文件预览</td>
                 <td> <el-image
-              style="width: 80px; height: 80px"
+              style="max-width: 80px; max-height: 80px; width: auto; height: auto"
               :src="fileInfo.path"
               :zoom-rate="1.2"
               :max-scale="7"
@@ -126,7 +116,7 @@
               :initial-index="0"
               fit="cover"
             /></td>
-              </tr>
+              </tr> -->
               <tr>
                 <td class="label">文件名称:</td>
                 <td>{{ fileInfo.filename }}</td>
@@ -178,6 +168,13 @@
         <el-button @click="dialogFormVisible = false">关闭</el-button>
       </template>
     </el-dialog>
+
+      <!-- 放大图片弹层 -->
+      <ImageMagnify
+      :dialogPicVisible="dialogPicVisible"
+      :pic="pic"
+      @handleMagnifyClose="handleMagnifyClose"
+    ></ImageMagnify>
     <!-- end -->
   </div>
 </template>
@@ -187,7 +184,8 @@ import { ElMessage } from "element-plus"
 import { formatSeconds } from '@/utils/index'
 import { formatTime, ellipsis } from "@/utils/index"
 // 接口api
-import { deleteFile, getFileInfo } from "@/api/media"
+import { deleteFile, getFileInfo } from "@/api/media"// 图片放大弹层
+import ImageMagnify from "@/components/ImageMagnify/index.vue";
 // 导入组件
 // 删除弹出层
 import Delete from "@/components/Delete/index.vue"
@@ -226,9 +224,11 @@ const emit = defineEmits() //子组件获取父组件事件传值
 const deleteText = ref("此操作将删除该文件，是否继续？") //需要删除的提示内容
 let dialogDeleteVisible = ref(false) //控制删除弹层
 let dialogFormVisible = ref(false) //弹层隐藏显示
+let dialogPicVisible = ref(false); //控制放大图片弹层显示隐藏
+let pic = ref(""); //要放大的图片
 let fileId = ref("")//文件id
 let fileInfo = ref(null)
-
+const srcList = []
 // ------定义方法------
 // 确定删除
 const handleDelete = async () => {
@@ -242,6 +242,12 @@ const handleDelete = async () => {
         })
         emit("getList")
         handleClose()
+      }else{
+         ElMessage({
+          message: res.msg,
+          type: "error",
+          showClose: false,
+        })
       }
     })
     .catch((err) => { })
@@ -274,6 +280,7 @@ const handlePreview = async (id) => {
     const res = await getFileInfo(id)
     if (res.code === 200) {
       fileInfo.value = res.data
+      srcList.push(fileInfo.value.path)
       dialogFormVisible.value = true
     } else {
       ElMessage({
@@ -304,6 +311,26 @@ const getStatusText = (status) => {
       return '已处理';
   }
 }
+
+// 按esc关闭弹层
+const handleEsc = (e) => {
+  if (e.keyCode === 27) {
+    dialogPicVisible.value = false;
+    dialogResetVisible.value = false;
+    dialogStatusVisible.value = false;
+    pic.value = ""
+  }
+};
+//打开放大图弹层
+const handleMagnify = (val) => {
+  dialogPicVisible.value = true;
+  pic.value = val;
+};
+// 关闭放大图弹层
+const handleMagnifyClose = () => {
+  dialogPicVisible.value = false;
+  pic.value = "";
+};
 </script>
 <style lang="scss" scoped>
 :deep(.el-table th.el-table__cell>.cell) {

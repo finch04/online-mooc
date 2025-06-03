@@ -102,6 +102,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         for (File m : records) {
             FileVO v = BeanUtils.toBean(m, FileVO.class);
             v.setStatus(m.getStatus().getValue());
+            v.setPath( fileStorage.getFileUrl(m.getKey()));
             if(userMap != null) {
                 v.setCreater(userMap.get(m.getCreater()));
             }
@@ -124,6 +125,20 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         return fileDetailVO;
     }
 
+    @Override
+    public void deleteFileById(Long id) {
+        File file = getById(id);
+        if(file==null){
+            throw new CommonException("文件不存在");
+        }
+        if(file.getUseTimes()!=0){
+             throw new CommonException("文件正在被使用中");
+        }
+        boolean b = removeById(id);
+        if(b){
+             fileStorage.deleteFile(file.getKey());
+        }
+    }
 
     @Override
     public FileDTO uploadFile(MultipartFile file) {
@@ -133,6 +148,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
         File existingFile = checkFileExistsByHash(fileHash);
         if (existingFile != null) {
             log.info("文件秒传成功！文件Key：{}",existingFile.getKey());
+            existingFile.setUseTimes(existingFile.getUseTimes() + 1);
+            this.baseMapper.updateById(existingFile);
             return FileDTO.of(existingFile.getId(), existingFile.getFilename(), fileStorage.getFileUrl(existingFile.getKey()));
         }
 
@@ -194,6 +211,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
                 stream = fileStorage.checkFileByPath(filePath);
                 if (stream != null) {
                     //文件已存在
+                    file.setUseTimes(file.getUseTimes() + 1);
+                     this.baseMapper.updateById(file);
                     log.info("秒传成功，文件路径：{}", filePath);
                     return true;
                 }
@@ -254,6 +273,9 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
             }
         }catch (Exception e) {
             throw new  CommonException("合并文件失败", e);
+        }finally{
+            //==========清理分块文件=========
+            fileStorage.clearChunkFiles(chunkFileFolderPath,chunkTotal);
         }
         //==============将文件信息入库============
         try {
@@ -264,8 +286,6 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
             throw new DbException(FileErrorInfo.Msg.FILE_UPLOAD_ERROR);
         }
 
-        //==========清理分块文件=========
-        fileStorage.clearChunkFiles(chunkFileFolderPath,chunkTotal);
 
         return FileDTO.of(fileInfo.getId(), fileInfo.getFilename(), fileStorage.getFileUrl(fileInfo.getKey()));
     }
