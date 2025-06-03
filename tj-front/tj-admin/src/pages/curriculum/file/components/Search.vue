@@ -16,7 +16,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="4">
             <div class="btn pd-tp-0">
               <el-button class="button primary" @click="handleSearch"
                 >搜索</el-button

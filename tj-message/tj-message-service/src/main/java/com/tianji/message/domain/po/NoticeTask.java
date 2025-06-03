@@ -58,6 +58,7 @@ public class NoticeTask implements Serializable {
     /**
      * 任务延迟执行时间间隔，单位是分钟
      */
+    @TableField("`interval`")
     private Integer interval;
 
     /**

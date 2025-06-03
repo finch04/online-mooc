@@ -24,8 +24,8 @@
                   </div>
                 </el-form-item>
               </el-col>
-              <el-col :span="12">
-                <div class="btn">
+              <el-col :span="6">
+                <div class="btn" >
                   <el-button class="button primary" @click="handleSearch"
                     >搜索</el-button
                   >
@@ -195,7 +195,7 @@
   // 重置搜索表单
   const handleReset = (ruleForm) => {
     ruleForm.resetFields();
-    searchData.reconciliationStatus = null;
+    searchData.status = null;
     isSearch.value = false;
     getList(); //刷新列表
   };

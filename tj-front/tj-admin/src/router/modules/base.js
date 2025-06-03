@@ -7,7 +7,7 @@ export default [
     component: Layout,
     redirect: "/main/index",
     name: "main",
-    meta: { title: "工作台", icon: '&#xe60c;', hidden: true },
+    meta: { title: "工作台", icon: '', hidden: true },
     children: [
       {
         path: "index",
