@@ -52,7 +52,7 @@
         fixed="right"
         label="操作"
         align="center"
-        min-width="110"
+        min-width="210"
         class-name="popperClass"
       >
         <template #default="scope">
@@ -60,6 +60,7 @@
             <span class="textDefault" @click="handlePreview(scope.row.id)"
               >查看</span
             >
+            <span class="textDefault" @click="handleDownload(scope.row.path)">下载</span>
             <span
               @click="handleOpenDelete(scope.row)"  class="textDefault"
               :class="scope.row.useTimes > 0 ? 'textForbidden' : 'textWarning'"
@@ -330,6 +331,40 @@ const handleMagnify = (val) => {
 const handleMagnifyClose = () => {
   dialogPicVisible.value = false;
   pic.value = "";
+};
+
+const handleDownload = async (path) => {
+  if (!path) {
+    ElMessage.error('文件路径不存在');
+    return;
+  }
+  
+  try {
+    // 先检查文件是否存在
+    const response = await fetch(path, { method: 'HEAD' });
+    
+    if (!response.ok) {
+      throw new Error(`文件不存在或无法访问: ${response.statusText}`);
+    }
+    
+    // 创建一个隐藏的a标签用于下载
+    const link = document.createElement('a');
+    link.href = path;
+    link.download = path.split('/').pop() || 'file';
+    
+    // 添加错误监听
+    link.onerror = () => {
+      ElMessage.error('文件下载失败，请检查文件路径是否有效');
+    };
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+  } catch (error) {
+    console.error('下载失败:', error);
+    ElMessage.error(`下载失败: ${error.message}`);
+  }
 };
 </script>
 <style lang="scss" scoped>
