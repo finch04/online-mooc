@@ -143,7 +143,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
 //            // 订单状态未支付或已经完结，不能退款
 //            throw new BizIllegalException(TradeErrorInfo.ORDER_CANNOT_REFUND);
 //        }
-        //状态机简化判断流程
+        //状态机简化判断流程 TODO 因为退款流程比较复杂，就不专门拆到状态机里进行流程简化了
         if (!sendEvent(OrderStatusChangeEvent.REFUNDED, order)) {
             log.error("线程名称：{},订单退款失败, 状态异常，订单信息：{}", Thread.currentThread().getName(), order);
             throw new RuntimeException("订单退款流程流转失败, 订单状态异常");
@@ -441,7 +441,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         vo.setOrderTime(order.getCreateTime());
         vo.setPaySuccessTime(order.getPayTime());
 
-        vo.setPayChannel(PayChannel.desc(order.getPayChannel()));
+        vo.setPayChannel(order.getPayChannel());
         vo.setRefundChannel(RefundChannelEnum.desc(apply.getRefundChannel()));
         vo.setRefundOrderNo(apply.getRefundOrderNo());
         return vo;

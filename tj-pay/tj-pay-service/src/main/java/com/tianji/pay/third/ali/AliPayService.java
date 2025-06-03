@@ -153,9 +153,18 @@ public class AliPayService implements IPayService {
     public static int transferStringAmount2Int(String totalAmount) {
         return new BigDecimal(totalAmount).multiply(BigDecimal.valueOf(100)).intValue();
     }
+//    public static String transferAmount2String(Integer amount) {
+//        BigDecimal b = new BigDecimal(amount);
+//        BigDecimal result = b.divide(new BigDecimal(100), new MathContext(2, RoundingMode.HALF_UP));
+//        return result.toString();
+//    }
     public static String transferAmount2String(Integer amount) {
-        BigDecimal b = new BigDecimal(amount);
-        BigDecimal result = b.divide(new BigDecimal(100), new MathContext(2, RoundingMode.HALF_UP));
-        return result.toString();
+        if (amount == null) {
+            return "0.00";
+        }
+        // 使用 BigDecimal 并指定两位小数
+        return BigDecimal.valueOf(amount)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                .toString();
     }
 }

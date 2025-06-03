@@ -43,4 +43,10 @@ public class WxPayTest {
         RefundResponse refundResponse = payService.queryRefundStatus(orderNo, refundOrderNo1);
         System.out.println("refundResponse = " + refundResponse);
     }
+
+    @Test
+    void testDownloadBill() {
+        byte[] bytes = payService.downloadMerchantBill("ALL", "2025-04-01");
+        System.out.println("bytes = " + bytes);
+    }
 }

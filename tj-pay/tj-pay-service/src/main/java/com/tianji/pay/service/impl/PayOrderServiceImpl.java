@@ -16,6 +16,7 @@ import com.tianji.common.utils.StringUtils;
 import com.tianji.pay.constants.NotifyStatus;
 import com.tianji.pay.domain.po.PayOrder;
 import com.tianji.pay.mapper.PayOrderMapper;
+import com.tianji.pay.sdk.constants.PayChannel;
 import com.tianji.pay.sdk.constants.PayConstants;
 import com.tianji.pay.sdk.constants.PayErrorInfo;
 import com.tianji.pay.sdk.dto.PayApplyDTO;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
 import static com.tianji.pay.sdk.constants.PayErrorInfo.*;
@@ -75,7 +77,7 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
                 payApplyDTO.getOrderInfo(), payOrder.getPayOrderNo().toString(), payOrder.getAmount());
 
         // 4.更新支付链接等信息到数据库
-        updatePayResult2DB(prepayResponse, payOrder.getId());
+        updatePayResult2DB(prepayResponse, payOrder.getId(), PayChannel.valueOf(payApplyDTO.getPayChannelCode()));
 
         if (!prepayResponse.isSuccess()) {
             log.error("预创建支付单失败，详情：{}", prepayResponse.getDetail());
@@ -86,11 +88,13 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
         return prepayResponse.getPayUrl();
     }
 
-    private void updatePayResult2DB(PrepayResponse prepayResponse, Long payOrderId) {
+    private void updatePayResult2DB(PrepayResponse prepayResponse, Long payOrderId, PayChannel payChannel) {
         try {
             lambdaUpdate()
                     .set(prepayResponse.isSuccess(), PayOrder::getQrCodeUrl, prepayResponse.getPayUrl())
                     .set(prepayResponse.isSuccess(), PayOrder::getStatus, PayStatus.WAIT_BUYER_PAY.getValue())
+                    .set(prepayResponse.isSuccess(), PayOrder::getPayChannelCode, payChannel)
+                    .set(prepayResponse.isSuccess(), PayOrder::getPaySuccessTime, new Date())
                     .set(!prepayResponse.isSuccess(), PayOrder::getResultCode, prepayResponse.getCode())
                     .set(!prepayResponse.isSuccess(), PayOrder::getResultMsg, prepayResponse.getMsg())
                     .eq(PayOrder::getId, payOrderId)

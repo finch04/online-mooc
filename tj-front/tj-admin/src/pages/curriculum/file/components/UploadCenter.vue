@@ -219,7 +219,7 @@ const handleFileChange = async (file, fileList) => {
 
 // 上传前校验
 const beforeUpload = (file) => {
-  const MAX_SIZE = 10 * 1024 * 1024 * 1024; // 10GB
+  const MAX_SIZE = 200 * 1024 * 1024; // 200MB
   if (file.size > MAX_SIZE) {
     ElMessage.error(`文件大小不能超过 ${MAX_SIZE / 1024 / 1024}MB`);
     return false;

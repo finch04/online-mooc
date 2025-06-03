@@ -198,6 +198,12 @@ export default [
         meta: { title: "退款管理" },
       },
       {
+        path: "reconciliation",
+        name: "reconciliation",
+        component: () => import("@/pages/reconciliation/index.vue"),
+        meta: { title: "对账管理" },
+      },
+      {
         path: "details/:id",
         name: "orderDetails",
         component: () => import("@/pages/order/details.vue"),
@@ -208,6 +214,12 @@ export default [
         name: "refundDetails",
         component: () => import("@/pages/refund/details.vue"),
         meta: { title: "退款详情", hidden: true ,fmeta: {path: '/order/refund', title: '退款管理'} },
+      },
+      {
+        path: "reconciliationDetails/:id",
+        name: "reconciliationDetails",
+        component: () => import("@/pages/reconciliation/details.vue"),
+        meta: { title: "对账详情", hidden: true ,fmeta: {path: '/order/reconciliation', title: '订单管理'} },
       },
     ],
   },

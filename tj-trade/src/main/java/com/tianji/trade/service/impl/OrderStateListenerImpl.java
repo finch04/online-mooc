@@ -4,6 +4,7 @@ import com.tianji.api.client.promotion.PromotionClient;
 import com.tianji.api.dto.trade.OrderBasicDTO;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
 import com.tianji.common.constants.MqConstants;
+import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.trade.constants.OrderStatus;
 import com.tianji.trade.constants.OrderStatusChangeEvent;
@@ -49,11 +50,9 @@ public class OrderStateListenerImpl {
         log.info("支付，状态机反馈信息：{}",  message.getHeaders().toString());
 
         // 2.更新订单状态
-        Order o = new Order();
-        o.setId(order.getId());
-        o.setStatus(OrderStatus.PAYED.getValue());
-        o.setMessage("用户支付成功");
-        orderService.updateById(o);
+        order.setStatus(OrderStatus.PAYED.getValue());
+        order.setMessage("用户支付成功");
+        orderService.updateById(order);
 
         // 3.更新订单条目
         detailService.markDetailSuccessByOrderId(order.getId(), order.getPayChannel(), order.getPayTime());

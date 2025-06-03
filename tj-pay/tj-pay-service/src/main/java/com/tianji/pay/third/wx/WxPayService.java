@@ -2,6 +2,7 @@ package com.tianji.pay.third.wx;
 
 import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.JsonUtils;
 import com.tianji.common.utils.StringUtils;
 import com.tianji.pay.sdk.constants.PayConstants;
@@ -11,9 +12,24 @@ import com.tianji.pay.third.model.PrepayResponse;
 import com.tianji.pay.third.model.RefundResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service(PayConstants.WX_CHANNEL_CODE)
@@ -167,4 +183,56 @@ public class WxPayService implements IPayService {
         }
     }
 
+
+
+    /**
+     * 下载微信商户订单账单
+     * @param billType 账单类型，如 ALL、SUCCESS、REFUND 等
+     * @param billDate 账单日期，格式为 yyyy-MM-dd
+     * @return 下载的账单文件内容（字节数组形式）
+     */
+    public byte[] downloadMerchantBill(String billType, String billDate) {
+        // 1. 构建申请账单的请求URL
+        String requestPath = "https://api.mch.weixin.qq.com/v3/bill/tradebill";
+
+        // 2. 准备请求参数
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("bill_type", billType));
+        params.add(new BasicNameValuePair("bill_date", billDate));
+
+        // 3. 发送申请账单请求
+        String responseJson = wxPayClient.doGetJson(requestPath, true, params.toArray(new NameValuePair[0]));
+
+        // 4. 解析响应，获取下载URL
+        JSONObject result = JsonUtils.parseObj(responseJson);
+        String code = result.getStr("code");
+        String message = result.getStr("message");
+
+        // 4.1. 请求异常处理
+        if (StringUtils.isNotBlank(code)) {
+            throw new CommonException("申请账单失败，错误码：" + code + "，错误信息：" + message);
+        }
+
+        // 4.2. 获取下载URL
+        String downloadUrl = result.getStr("download_url");
+        if (StringUtils.isBlank(downloadUrl)) {
+            throw new CommonException("申请账单成功，但未获取到下载URL");
+        }
+
+        // 5. 下载账单文件
+        try {
+            // 5.1. 构建HTTP请求
+            HttpGet httpGet = new HttpGet(downloadUrl);
+            httpGet.addHeader("Accept", "application/json");
+
+            // 5.2. 执行请求并获取响应
+            String downloadResponse = wxPayClient.doGetJson(downloadUrl, false);
+
+            // 5.3. 这里假设响应是二进制数据，直接返回字节数组
+            return downloadResponse.getBytes();
+        } catch (Exception e) {
+            log.error("下载微信商户账单异常，下载URL：{}", downloadUrl, e);
+            throw new CommonException("下载微信商户账单异常", e);
+        }
+    }
 }

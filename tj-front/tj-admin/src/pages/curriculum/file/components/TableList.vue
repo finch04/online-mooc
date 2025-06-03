@@ -52,7 +52,7 @@
         fixed="right"
         label="操作"
         align="center"
-        min-width="210"
+        min-width="200"
         class-name="popperClass"
       >
         <template #default="scope">
