@@ -158,7 +158,7 @@ const handleCurrentChange = (val) => {
 // 打开新增弹层
 const handleAdd = () => {
   router.push({
-    path: "/title/add/null",
+    path: "/exam/title/add/null",
   })
 }
 // 打开编辑弹层

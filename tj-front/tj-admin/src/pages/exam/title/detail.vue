@@ -204,7 +204,7 @@ const gettitleDetail = async () => {
 }
 // 返回
 const handleGetback = () => {
-  router.push({ path: "/title" })
+  router.push({ path: "/exam/title" })
 };
   </script>
   <style lang="scss" scoped>

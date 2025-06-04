@@ -464,7 +464,7 @@ onMounted(() => {
 // 保存并继续时返回到重新添加页面，这时候会有残余的数据，所以要强制刷新加载页面
 // 值发生改变时说明不是同一个组件，将会进行重新加载和渲染
 watchEffect(() => {
-  if (route.path === "/title/details/null") {
+  if (route.path === "/exam/title/details/null") {
     keyTime.value = new Date().getTime();
     isClear.value = false;
   }
@@ -718,7 +718,7 @@ const handleSubmit = async (str) => {
             // 用来控制保存后清除富文本内容
             isClear.value = true;
             router.push({
-              path: "/title/add/null",
+              path: "/exam/title/add/null",
             });
           }
         } else {
@@ -838,7 +838,7 @@ const handleCourse = (val) => {
 // 清空表单
 const handleGo = () => {
   router.push({
-    path: "/title/index",
+    path: "/exam/title/",
   });
 };
 const getFlag = (val) => {

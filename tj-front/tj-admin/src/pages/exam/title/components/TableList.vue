@@ -226,19 +226,19 @@ const handleDelete = async () => {
 // 查看
 const handleChck = (row) => {
   router.push({
-    path: "/title/details/" + row.id,
+    path: "/exam/title/details/" + row.id,
   });
 };
 // 编辑
 const handleEdit = (row) => {
   router.push({
-    path: "/title/add/" + row.id,
+    path: "/exam/title/add/" + row.id,
   });
 };
 // 跳转到详情页
 const handleCheck = (row) => {
   router.push({
-    path: "/title/detail/"+row.id ,
+    path: "/exam/title/detail/"+row.id ,
   });
 };
 // 设置每页条数

@@ -2,44 +2,46 @@
 <template>
   <div class="LeftSider fx-fd-col">
     <div  @click="() => $router.push('/')" class="logo cursor fx-ct"><img src="@/assets/newlogo.png" alt="" srcset="" /></div>
-    <div class="nav">
-      <el-menu
-        :default-active="activeIndex"
-        :default-openeds="defaultOpeneds"
-        class="el-menu-vertical-demo"
-        :unique-opened="true"
-        @open="handleOpen"
-        @close="handleClose"
-        @select="handleSelect"
-      > 
-        <!-- <div class="first-menu">
-          <el-menu-item index="99" :key="99" @click="goPath(`/`)">
-            <i class="iconfont" v-html="basePath[0].meta.icon"></i>
-            <span>工作台</span>
-          </el-menu-item>
-        </div>  -->
-        <el-sub-menu>
-          <template #title>
-            <i class="iconfont" v-html="workbench"></i>
-            <span>工作台</span>
-          </template>
-          <el-menu-item index="99" :key="99" @click="goPath(`/`)">
-            <span>工作台</span>
-          </el-menu-item>
-          <el-menu-item index="100" :key="100" @click="goPath(`/main/dashboard`)">
-            <span>数据大屏</span>
-          </el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu v-for="(item, index) in basePath"  :key="index"  :index="index.toString()" >
-          <template #title>
-            <i class="iconfont" v-html="item.meta.icon"></i>
-            <span>{{item.meta.title}}</span>
-          </template>
-          <el-menu-item v-for="(it, ind) in item.children" :key="ind" :index="`${index}-${ind}`" @click="goPath(`${it.path}`)">
-            {{it.meta.title}}
-          </el-menu-item>
-        </el-sub-menu>
-      </el-menu>
+    <div class="nav-wrapper"> <!-- 新增包裹层 -->
+      <div class="nav">
+        <el-menu
+          :default-active="activeIndex"
+          :default-openeds="defaultOpeneds"
+          class="el-menu-vertical-demo"
+          :unique-opened="true"
+          @open="handleOpen"
+          @close="handleClose"
+          @select="handleSelect"
+        > 
+          <!-- <div class="first-menu">
+            <el-menu-item index="99" :key="99" @click="goPath(`/`)">
+              <i class="iconfont" v-html="basePath[0].meta.icon"></i>
+              <span>工作台</span>
+            </el-menu-item>
+          </div>  -->
+          <el-sub-menu>
+            <template #title>
+              <i class="iconfont" v-html="workbench"></i>
+              <span>工作台</span>
+            </template>
+            <el-menu-item index="99" :key="99" @click="goPath(`/`)">
+              <span>工作台</span>
+            </el-menu-item>
+            <el-menu-item index="100" :key="100" @click="goPath(`/main/dashboard`)">
+              <span>数据大屏</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu v-for="(item, index) in basePath"  :key="index"  :index="index.toString()" >
+            <template #title>
+              <i class="iconfont" v-html="item.meta.icon"></i>
+              <span>{{item.meta.title}}</span>
+            </template>
+            <el-menu-item v-for="(it, ind) in item.children" :key="ind" :index="`${index}-${ind}`" @click="goPath(`${it.path}`)">
+              {{it.meta.title}}
+            </el-menu-item>
+          </el-sub-menu>
+        </el-menu>
+      </div>
     </div>
     <span class="decorate"></span>
   </div>
@@ -207,6 +209,10 @@ watchEffect(()=>{
     font-size: 18px;
     margin-bottom: 15px;
     color: #000000;
+  }
+  .nav-wrapper { // 新增样式
+    height: calc(100vh - 150px); // 减去logo和装饰元素的高度
+    overflow-y: auto;
   }
   .nav{
     position: relative;
