@@ -1,6 +1,5 @@
 package com.tianji.user.service.impl;
 
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.api.client.trade.TradeClient;
 import com.tianji.api.dto.user.UserDTO;
@@ -9,7 +8,6 @@ import com.tianji.common.enums.UserType;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.RandomUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.user.constants.UserConstants;
 import com.tianji.user.domain.dto.StudentFormDTO;
@@ -18,7 +16,7 @@ import com.tianji.user.domain.dto.StudentUpdatePasswordDTO;
 import com.tianji.user.domain.po.User;
 import com.tianji.user.domain.po.UserDetail;
 import com.tianji.user.domain.query.UserPageQuery;
-import com.tianji.user.domain.vo.StudentPageVo;
+import com.tianji.user.domain.vo.StudentPageVO;
 import com.tianji.user.service.IStudentService;
 import com.tianji.user.service.IUserDetailService;
 import com.tianji.user.service.IUserService;
@@ -33,8 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.tianji.user.constants.UserConstants.DEFAULT_PASSWORD;
 
 /**
  * <p>
@@ -84,7 +80,7 @@ public class StudentServiceImpl implements IStudentService {
 
 
     @Override
-    public PageDTO<StudentPageVo> queryStudentPage(UserPageQuery query) {
+    public PageDTO<StudentPageVO> queryStudentPage(UserPageQuery query) {
         // 1.分页条件
         Page<UserDetail> page  =  detailService.queryUserDetailByPage(query, UserType.STUDENT);
         List<UserDetail> records = page.getRecords();
@@ -97,9 +93,9 @@ public class StudentServiceImpl implements IStudentService {
         Map<Long, Integer> numMap = tradeClient.countEnrollCourseOfStudent(stuIds);
 
         // 3.处理vo
-        List<StudentPageVo> list = new ArrayList<>(records.size());
+        List<StudentPageVO> list = new ArrayList<>(records.size());
         for (UserDetail r : records) {
-            StudentPageVo v = BeanUtils.toBean(r, StudentPageVo.class);
+            StudentPageVO v = BeanUtils.toBean(r, StudentPageVO.class);
             list.add(v);
             v.setCourseAmount(numMap.get(r.getId()));
         }

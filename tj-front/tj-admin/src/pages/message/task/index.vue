@@ -35,11 +35,41 @@
           <el-form-item label="任务名称">
             <el-input v-model="taskForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="通知模板ID">
-            <el-input v-model="taskForm.templateId"></el-input>
+          <el-form-item label="通知模板">
+            <el-select v-model="taskForm.templateId" placeholder="请选择通知模板">
+              <el-option
+                v-for="template in noticeTemplates"
+                :key="template.id"
+                :label="template.name"
+                :value="template.id"
+              ></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否通知部分人">
-            <el-switch v-model="taskForm.partial"></el-switch>
+            <el-switch v-model="taskForm.partial" @change="handlePartialChange"></el-switch>
+          </el-form-item>
+          <!-- 多选下拉查询框 -->
+          <el-form-item label="已选用户" v-if="taskForm.partial">
+            <el-select
+              v-model="taskForm.userIds"
+              multiple
+              filterable
+              collapse-tags
+              collapse-tags-tooltip
+              remote
+              :remote-method="remoteSearchUsers"
+              :loading="userLoading"
+              placeholder="请选择用户"
+              @visible-change="handleSelectVisibleChange"
+              class="adaptive-select"
+            >
+              <el-option
+                v-for="user in userList"
+                :key="user.id"
+                :label="user.name"
+                :value="user.id"
+              ></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="预期执行时间">
             <el-date-picker
@@ -76,8 +106,10 @@ import {
   saveNoticeTask,
   updateNoticeTask,
   queryNoticeTasks,
-  queryNoticeTask
+  queryNoticeTask,
+  queryNoticeTemplates
 } from '@/api/message.js';
+import { queryUsersByPage } from "@/api/user.js";
 import { ElMessage } from 'element-plus';
 // 导入组件
 import Search from './components/Search.vue';
@@ -109,13 +141,31 @@ const taskForm = ref({
   pushTime: null,
   maxTimes: 0,
   interval: null,
-  expireTime: null
+  expireTime: null,
+  userIds: [] // 新增字段用于存储选中的用户ID
 });
 const taskFormRef = ref(null);
 
 const loading = ref(false);
 const searchInfo = ref();
 const isSearch = ref(false);
+
+// 用户搜索表单
+const userSearchForm = reactive({
+  name: '',
+  gender: null,
+  type: null,
+  pageNo: 1,
+  pageSize: 30 // 一次查询十条数据
+});
+
+// 用户列表
+const userList = ref([]);
+const userTotal = ref(0);
+const userLoading = ref(false);
+
+// 通知模板列表
+const noticeTemplates = ref([]);
 
 // 搜索任务
 const handleSearch = async () => {
@@ -158,9 +208,11 @@ const handleAddTask = () => {
     templateId: null,
     partial: false,
     pushTime: null,
+    userIds: [],
     maxTimes: 0,
     interval: null,
-    expireTime: null
+    expireTime: null,
+    userIds: []
   };
   dialogVisible.value = true;
 };
@@ -169,8 +221,16 @@ const handleAddTask = () => {
 const handleEditTask = async (id) => {
   try {
     const res = await queryNoticeTask(id);
-    taskForm.value = res.data;
-    dialogVisible.value = true;
+    console.log(res)
+    if (res && res.data) {
+      taskForm.value = res.data;
+      dialogVisible.value = true;
+      if (taskForm.value.partial) {
+        remoteSearchUsers();
+      }
+    } else {
+      ElMessage.error('获取任务信息失败，返回数据为空');
+    }
   } catch (error) {
     ElMessage.error('获取任务信息失败');
   }
@@ -201,8 +261,57 @@ const getTime = (val) => {
   searchForm.maxPushTime = val[1];
 };
 
+// 当是否通知部分人开关状态改变时
+const handlePartialChange = (value) => {
+  if (value) {
+    userSearchForm.pageNo = 1;
+    remoteSearchUsers();
+  } else {
+    userList.value = [];
+    taskForm.value.userIds = [];
+  }
+};
+
+// 远程搜索用户
+const remoteSearchUsers = async (query = '') => {
+  userSearchForm.name = query;
+  userLoading.value = true;
+  try {
+    const res = await queryUsersByPage(userSearchForm);
+    if (userSearchForm.pageNo === 1) {
+      userList.value = res.data.list;
+    } else {
+      userList.value = [...userList.value, ...res.data.list];
+    }
+    userTotal.value = res.data.total;
+  } catch (error) {
+    ElMessage.error('查询用户失败');
+  } finally {
+    userLoading.value = false;
+  }
+};
+
+// 处理下拉框显示状态改变
+const handleSelectVisibleChange = (visible) => {
+  if (visible) {
+    userSearchForm.pageNo = 1;
+    remoteSearchUsers();
+  }
+};
+
+// 查询通知模板
+const fetchNoticeTemplates = async () => {
+  try {
+    const res = await queryNoticeTemplates({ pageNo: 1, pageSize: 100 }); // 假设一次查询100条模板数据
+    noticeTemplates.value = res.data.list;
+  } catch (error) {
+    ElMessage.error('查询通知模板失败');
+  }
+};
+
 onMounted(() => {
   handleSearch();
+  fetchNoticeTemplates();
 });
 </script>
 
@@ -211,5 +320,15 @@ onMounted(() => {
 
 .search-box {
   margin-bottom: 20px;
+}
+
+.el-table {
+  margin-bottom: 10px;
+}
+
+.adaptive-select .el-select-dropdown__wrap {
+  max-height: none; /* 移除最大高度限制 */
+  overflow-y: auto; /* 当内容超出时显示滚动条 */
+  width: 100%;
 }
 </style>

@@ -2,4 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tianji.message.mapper.NoticeTaskMapper">
 
+    <!-- 批量插入任务目标 -->
+    <insert id="insertTaskTargetBatch">
+        INSERT INTO notice_task_target(task_id, target_id)
+        VALUES
+        <foreach collection="userIds" item="userId" separator=",">
+            (#{taskId}, #{userId})
+        </foreach>
+    </insert>
+    <delete id="deleteTaskTargetBatch">
+        DELETE FROM notice_task_target
+        WHERE task_id = #{taskId}
+    </delete>
 </mapper>

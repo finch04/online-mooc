@@ -33,6 +33,12 @@ export default [
         meta: { title: "课程详情", hidden: true, fmeta: {path: '/curriculum/index', title: '课程管理'} },
       },
       {
+        path: "live",
+        name: "live",
+        component: () => import("@/pages/curriculum/live/index.vue"),
+        meta: { title: "直播管理" },
+      },
+      {
         path: "type",
         name: "type",
         component: () => import("@/pages/curriculum/type/index.vue"),
@@ -93,7 +99,7 @@ export default [
         path: "title/detail/:id",
         name: "titleDetail",
         component: () => import("@/pages/exam/title/detail.vue"),
-        meta: { title: "题目详情", hidden: true ,fmeta: {path: '/exam/title/index', title: '题目管理'} },
+        meta: { title: "题目详情", hidden: true ,fmeta: {path: '/title/index', title: '题目管理'} },
       }
     ],
   },
@@ -136,13 +142,6 @@ export default [
         name: "message",
         component: () => import("@/pages/message/index.vue"),
         meta: { title: "消息管理" },
-      },
-      
-      {
-        path: "live",
-        name: "live",
-        component: () => import("@/pages/message/live/index.vue"),
-        meta: { title: "直播管理" },
       },
       {
         path: "notice",

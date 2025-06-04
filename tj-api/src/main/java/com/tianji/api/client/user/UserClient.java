@@ -56,6 +56,4 @@ public interface UserClient {
     @GetMapping("/users/{id}")
     UserDTO queryUserById(@PathVariable("id") Long id);
 
-
-
 }

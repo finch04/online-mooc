@@ -103,7 +103,7 @@
                   <div class="item">
                     正确答案：
                     <span
-                      v-for="(val, index) in tipicData.answers"
+                      v-for="(val, index) in tipicData.answer"
                       :key="index"
                     >
                       {{ numLetter(val) }}

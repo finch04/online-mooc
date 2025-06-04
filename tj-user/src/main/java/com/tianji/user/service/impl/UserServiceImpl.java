@@ -1,12 +1,16 @@
 package com.tianji.user.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.client.auth.AuthClient;
 import com.tianji.api.dto.auth.RoleDTO;
 import com.tianji.api.dto.user.LoginFormDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
+import com.tianji.common.domain.dto.PageDTO;
+import com.tianji.common.domain.query.PageQuery;
 import com.tianji.common.enums.UserType;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
@@ -19,7 +23,10 @@ import com.tianji.common.utils.UserContext;
 import com.tianji.user.domain.dto.UserFormDTO;
 import com.tianji.user.domain.po.User;
 import com.tianji.user.domain.po.UserDetail;
+import com.tianji.user.domain.query.UserPageQuery;
+import com.tianji.user.domain.query.UserSimplePageQuery;
 import com.tianji.user.domain.vo.UserDetailVO;
+import com.tianji.user.domain.vo.UserPageVO;
 import com.tianji.user.enums.UserStatus;
 import com.tianji.user.mapper.UserMapper;
 import com.tianji.user.service.ICodeService;
@@ -29,6 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.tianji.user.constants.UserConstants.*;
 import static com.tianji.user.constants.UserErrorInfo.Msg.*;
@@ -308,7 +320,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .count() <= 0;
     }
 
+    @Override
+    public PageDTO<UserPageVO> queryUserPage(UserSimplePageQuery pageQuery) {
+        // 执行分页查询
+        Page<UserDetail> page = detailService.lambdaQuery()
+                .eq(pageQuery.getType() != null, UserDetail::getType, pageQuery.getType())
+                .eq(pageQuery.getGender() != null, UserDetail::getGender, pageQuery.getGender())
+                .like(StrUtil.isNotBlank(pageQuery.getName()), UserDetail::getName, pageQuery.getName())
+                .page(pageQuery.toMpPageDefaultSortByCreateTimeDesc());
 
+        // 转换为VO列表
+        List<UserPageVO> list = page.getRecords().stream()
+                .map(user -> {
+                    UserPageVO vo = BeanUtils.toBean(user, UserPageVO.class);
+                    // 如果UserPageVO的字段与UserDetail完全一致，这行即可
+                    // 如果有特殊字段需要额外处理，可以在这里添加
+                    return vo;
+                })
+                .filter(Objects::nonNull) // 过滤可能的null值
+                .collect(Collectors.toList());
 
+        return PageDTO.of(page, list);
+    }
 
+    @Override
+    public List<UserPageVO> queryUserList(UserSimplePageQuery pageQuery) {
+        LambdaQueryChainWrapper<UserDetail> like = detailService.lambdaQuery().eq(pageQuery.getType() != null, UserDetail::getType, pageQuery.getType())
+                .eq(pageQuery.getGender() != null, UserDetail::getGender, pageQuery.getGender())
+                .like(StrUtil.isNotBlank(pageQuery.getName()), UserDetail::getName, pageQuery.getName());
+        List<UserDetail> list = like.list();
+        return list.stream().map(user -> {
+            UserPageVO vo = BeanUtils.toBean(user, UserPageVO.class);
+            vo.setIcon(user.getIcon());
+            vo.setName(user.getName());
+            return vo;
+        }).collect(Collectors.toList());
+    }
 }

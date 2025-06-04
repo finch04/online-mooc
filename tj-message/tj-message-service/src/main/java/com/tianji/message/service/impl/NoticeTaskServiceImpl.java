@@ -48,9 +48,19 @@ public class NoticeTaskServiceImpl extends ServiceImpl<NoticeTaskMapper, NoticeT
     private final ISmsService smsService;
 
     @Override
+    @Transactional
     public Long saveNoticeTask(NoticeTaskFormDTO noticeTaskFormDTO) {
         // 1.保存任务
         NoticeTask noticeTask = BeanUtils.copyBean(noticeTaskFormDTO, NoticeTask.class);
+        if(noticeTaskFormDTO.getPartial()){
+            //如果是部分人的
+            List<Long> userIds = noticeTaskFormDTO.getUserIds();
+            if(CollUtils.isEmpty(userIds)){
+                // 部分用户，但是没有指定用户
+                throw new IllegalArgumentException(MessageErrorInfo.NOTICE_TASK_USER_NOT_EMPTY);
+            }
+            getBaseMapper().insertTaskTargetBatch(noticeTaskFormDTO.getId(), userIds);
+        }
         save(noticeTask);
         Long taskId = noticeTask.getId();
         // 2.判断是否有执行时间
@@ -115,6 +125,18 @@ public class NoticeTaskServiceImpl extends ServiceImpl<NoticeTaskMapper, NoticeT
     @Override
     public void updateNoticeTask(NoticeTaskFormDTO noticeTaskFormDTO) {
         NoticeTask noticeTask = BeanUtils.copyBean(noticeTaskFormDTO, NoticeTask.class);
+        if(noticeTaskFormDTO.getPartial()){
+            getBaseMapper().deleteTaskTargetBatch(noticeTaskFormDTO.getId());
+           //如果是部分人的
+            List<Long> userIds = noticeTaskFormDTO.getUserIds();
+            if(CollUtils.isEmpty(userIds)){
+                // 部分用户，但是没有指定用户
+                throw new IllegalArgumentException(MessageErrorInfo.NOTICE_TASK_USER_NOT_EMPTY);
+            }
+            getBaseMapper().insertTaskTargetBatch(noticeTaskFormDTO.getId(), userIds);
+        }else{
+            getBaseMapper().deleteTaskTargetBatch(noticeTaskFormDTO.getId());
+        }
         updateById(noticeTask);
     }
 
@@ -135,7 +157,10 @@ public class NoticeTaskServiceImpl extends ServiceImpl<NoticeTaskMapper, NoticeT
 
     @Override
     public NoticeTaskDTO queryNoticeTask(Long id) {
-        return BeanUtils.copyBean(getById(id), NoticeTaskDTO.class);
+        NoticeTaskDTO noticeTaskDTO = BeanUtils.copyBean(getById(id), NoticeTaskDTO.class);
+        List<Long> userIds = this.baseMapper.queryTaskTargetByTaskId(id);
+        noticeTaskDTO.setUserIds(userIds);
+        return noticeTaskDTO;
     }
 
     @Override

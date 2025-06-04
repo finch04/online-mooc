@@ -1,13 +1,12 @@
 package com.tianji.user.controller;
 
 
-import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.user.domain.dto.StudentFormDTO;
 import com.tianji.user.domain.dto.StudentUpdateDTO;
 import com.tianji.user.domain.dto.StudentUpdatePasswordDTO;
 import com.tianji.user.domain.query.UserPageQuery;
-import com.tianji.user.domain.vo.StudentPageVo;
+import com.tianji.user.domain.vo.StudentPageVO;
 import com.tianji.user.service.ICodeService;
 import com.tianji.user.service.IStudentService;
 import io.swagger.annotations.Api;
@@ -37,9 +36,10 @@ public class StudentController {
 
     @ApiOperation("分页查询学生信息")
     @GetMapping("/page")
-    public PageDTO<StudentPageVo> queryStudentPage(UserPageQuery pageQuery){
+    public PageDTO<StudentPageVO> queryStudentPage(UserPageQuery pageQuery){
         return studentService.queryStudentPage(pageQuery);
     }
+
 
     @ApiOperation("学员注册")
     @PostMapping("/register")

@@ -23,7 +23,7 @@ public class NoticeJobHandler {
         int index = XxlJobHelper.getShardIndex() + 1;
         String jobParam = XxlJobHelper.getJobParam();
         int size = StringUtils.isNumeric(jobParam) ? Integer.parseInt(jobParam) : 10;
-        // 2.查询待处理的任务：发布时间已经超时，并且尚未完成的任务
+        // 2.查询待处理的任务：发布时间已经超时，并且尚未完成的任务   ----兜底策略
         PageDTO<NoticeTask> page = taskService.queryTodoNoticeTaskByPage(index, size);
         if (page.isEmpty()) {
             // 没有待处理任务，直接结束

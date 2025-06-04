@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -29,6 +30,8 @@ public class NoticeTaskDTO extends BaseDTO {
     private String name;
     @ApiModelProperty("true-通知所有人;false-通知部分人。默认false")
     private Boolean partial;
+    @ApiModelProperty("如果是通知部分人，通知部分人的用户id")
+    private List<Long> userIds;
     @ApiModelProperty("任务预期执行时间")
     private LocalDateTime pushTime;
     @ApiModelProperty("任务重复执行次数上限，0则不重复")

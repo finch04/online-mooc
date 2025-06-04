@@ -3,15 +3,18 @@ package com.tianji.user.controller;
 import com.tianji.api.dto.user.LoginFormDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
+import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.user.constants.UserErrorInfo;
-import com.tianji.user.domain.dto.StudentFormDTO;
 import com.tianji.user.domain.dto.UserFormDTO;
 import com.tianji.user.domain.po.User;
 import com.tianji.user.domain.po.UserDetail;
+import com.tianji.user.domain.query.UserPageQuery;
+import com.tianji.user.domain.query.UserSimplePageQuery;
 import com.tianji.user.domain.vo.UserDetailVO;
+import com.tianji.user.domain.vo.UserPageVO;
 import com.tianji.user.enums.UserStatus;
 import com.tianji.user.service.IUserDetailService;
 import com.tianji.user.service.IUserService;
@@ -34,6 +37,18 @@ public class UserController {
     private IUserService userService;
     @Autowired
     private IUserDetailService detailService;
+
+    @ApiOperation("分页查询用户简易信息")
+    @GetMapping("/page")
+    public PageDTO<UserPageVO> queryUserPage(UserSimplePageQuery pageQuery){
+        return userService.queryUserPage(pageQuery);
+    }
+
+    @ApiOperation("列表查询用户简易信息")
+    @GetMapping("/list")
+    public List<UserPageVO> queryUserList(UserSimplePageQuery pageQuery){
+        return userService.queryUserList(pageQuery);
+    }
 
     @ApiOperation("新增用户，一般是员工或教师")
     @PostMapping

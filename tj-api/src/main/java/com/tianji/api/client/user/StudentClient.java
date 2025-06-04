@@ -6,6 +6,7 @@ import com.tianji.api.dto.user.LoginFormDTO;
 import com.tianji.api.dto.user.StudentFormDTO;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
+import com.tianji.common.domain.dto.PageDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,4 +28,5 @@ public interface StudentClient {
      */
     @PutMapping("/students/password")
     void updateMyPassword(@RequestBody StudentFormDTO studentFormDTO);
+
 }

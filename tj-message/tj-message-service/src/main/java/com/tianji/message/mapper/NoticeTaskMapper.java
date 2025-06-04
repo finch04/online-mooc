@@ -2,6 +2,8 @@ package com.tianji.message.mapper;
 
 import com.tianji.message.domain.po.NoticeTask;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -16,6 +18,10 @@ import java.util.List;
  */
 public interface NoticeTaskMapper extends BaseMapper<NoticeTask> {
 
-    @Select("SELECT user_id FROM notice_task_target WHERE task_id = #{task_id}")
+    @Select("SELECT target_id FROM notice_task_target WHERE task_id = #{task_id}")
     List<Long> queryTaskTargetByTaskId(Long taskId);
+
+    void insertTaskTargetBatch(@Param("taskId")Long taskId,@Param("userIds") List<Long> userId);
+
+    void deleteTaskTargetBatch(@Param("taskId") Long taskId);
 }

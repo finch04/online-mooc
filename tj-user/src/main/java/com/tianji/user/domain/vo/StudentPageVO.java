@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @ApiModel(description = "学生信息")
-public class StudentPageVo {
+public class StudentPageVO {
     @ApiModelProperty(value = "学生id，也是用户id", example = "1")
     private Long id;
     @ApiModelProperty(value = "学生名称", example = "张三")

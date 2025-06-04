@@ -62,3 +62,12 @@ export const queryUserById = (id) =>
     url: `/us/users/${id}`,
     method: "get"
   });
+
+  // 分页查询简单用户信息
+export const queryUsersByPage = (params) =>
+  request({
+    url: `/us/users/page`,
+    method: "get",
+    params
+  });
+
