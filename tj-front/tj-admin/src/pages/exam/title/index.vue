@@ -239,7 +239,7 @@ const handleOwnChange = () => {
   getList()
 };
 </script>
-<style src="./index.scss" lang="scss" scoped></style>
+<style src="../index.scss" lang="scss" scoped></style>
 <style lang="scss" scoped>
 .contentBox{
   margin-bottom: 20px;

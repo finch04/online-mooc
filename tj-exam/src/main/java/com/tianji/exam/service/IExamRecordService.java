@@ -8,6 +8,7 @@ import com.tianji.exam.domain.dto.ExamFormDTO;
 import com.tianji.exam.domain.po.ExamRecord;
 import com.tianji.exam.domain.query.ExamPageQuery;
 import com.tianji.exam.domain.vo.ExamQuestionVO;
+import com.tianji.exam.domain.vo.ExamRecordAdminVO;
 import com.tianji.exam.domain.vo.ExamRecordDetailVO;
 import com.tianji.exam.domain.vo.ExamRecordVO;
 
@@ -28,7 +29,10 @@ public interface IExamRecordService extends IService<ExamRecord> {
 
     void saveExamRecordDetails(ExamCommitDTO examCommitDTO);
 
-    List<ExamRecordDetailVO> queryDetailsByExamId(Long examId,Boolean isAdmin);
+    List<ExamRecordDetailVO> queryDetailsByExamId(Long examId);
 
-    PageDTO<ExamRecordVO> queryExamRecordsPage(ExamPageQuery query);
+    PageDTO<ExamRecordAdminVO> queryAdminExamRecordsPage(ExamPageQuery query);
+
+    List<ExamRecordDetailVO> queryAdminDetailsByExamId(Long examId);
+
 }

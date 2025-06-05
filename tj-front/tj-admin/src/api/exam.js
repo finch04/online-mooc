@@ -14,3 +14,11 @@ export const getExamById = (id) =>
     url: `/es/admin/exams/${id}`,
     method: "get",
   });
+
+//教师评语
+export const addComment = (data) =>
+  request({
+    url: `/es/admin/exams/comment`,
+    method: "post",
+    data,
+  });

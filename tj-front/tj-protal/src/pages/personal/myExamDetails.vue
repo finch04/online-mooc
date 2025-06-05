@@ -55,12 +55,13 @@
         </div>
         <div class="analysis">
           <div class="fx marg-bt-20">
-            <div class="col ft-wt-600">你的答案：{{answerChange(item.question.type, item.answer)}}</div>
+            <div class="col ft-wt-600">你的答案： {{ item.answer ? answerChange(item.question.type, item.answer) : '未作答' }}</div>
             <div class="col rt ft-wt-600">正确答案：{{answerChange(item.question.type, item.question.answer)}}</div>
             <div class="col">难易程度：{{defficultyChange(item.question.difficulty)}}</div>
-            <div>得分：{{item.score}}</div>
+            <div>得分：{{ item.score !== undefined ? item.score : '0' }}</div>
           </div>
           <div class="fx" v-if="item.question.analysis">答案解析：<span v-html="item.question.analysis"></span></div>
+          <div class="fx" v-if="item.comment" style="margin-top: 10px;">教师评语：<span v-html="item.comment"></span></div>
         </div>
         </div>
      </div>

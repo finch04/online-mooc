@@ -13,7 +13,7 @@
       <el-table-column type="index" align="center" width="100" label="序号" />
       <el-table-column label="学员昵称" min-width="240" class-name="studentname">
         <template #default="scope">
-          <div class="head" style="justify-content: left: ;">
+          <div class="head" style="justify-content: left ;">
             <span @click="handleMagnify(scope.row.icon)">
               <img :src="scope.row.icon" />
               <span class="shade"><i></i></span>

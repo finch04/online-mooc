@@ -66,6 +66,7 @@ public class ExamRecord implements Serializable {
      * 考试用时
      */
     private Integer duration;
+
     /**
      * 是否完成
      */

@@ -41,7 +41,7 @@ public class ExamRecordController {
     public List<ExamRecordDetailVO> queryDetailsByExamId(
             @ApiParam(value = "考试记录id", example = "1") @PathVariable("examId") Long examId
     ){
-        return examService.queryDetailsByExamId(examId,false);
+        return examService.queryDetailsByExamId(examId);
     }
 
     @ApiOperation("新增考试记录，考试或测试开始时需要保存基本信息，返回记录id")

@@ -84,6 +84,12 @@ export default [
         meta: { title: "教师阅卷" },
       },
       {
+        path: "exam/detail/:id",
+        name: "examDetail",
+        component: () => import("@/pages/exam/exam/detail.vue"),
+        meta: { title: "考试详情", hidden: true ,fmeta: {path: '/exam/index', title: '考试管理'}},
+      },
+      {
         path: "title/add/:id",
         name: "titleAdd",
         component: () => import("@/pages/exam/title/add.vue"),

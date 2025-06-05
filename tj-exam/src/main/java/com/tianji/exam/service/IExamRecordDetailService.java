@@ -1,7 +1,10 @@
 package com.tianji.exam.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tianji.exam.domain.dto.ExamDetailCommentDTO;
 import com.tianji.exam.domain.po.ExamRecordDetail;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,4 +15,6 @@ import com.tianji.exam.domain.po.ExamRecordDetail;
  */
 public interface IExamRecordDetailService extends IService<ExamRecordDetail> {
     void removeByExamId(Long examId);
+
+    void addComment(List<ExamDetailCommentDTO> dtos);
 }

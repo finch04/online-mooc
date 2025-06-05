@@ -836,7 +836,7 @@ const handleSubjectType = () => {
   })
 };
 </script>
-<style src="./index.scss" lang="scss" scoped></style>
+<style src="../index.scss" lang="scss" scoped></style>
 <style lang="scss" scoped>
 :deep(.tox) {
   .tox-editor-container {

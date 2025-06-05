@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.client.course.CatalogueClient;
 import com.tianji.api.client.course.CourseClient;
 import com.tianji.api.client.learning.LearningClient;
+import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.course.CataSimpleInfoDTO;
 import com.tianji.api.dto.course.CourseSimpleInfoDTO;
 import com.tianji.api.dto.exam.QuestionDTO;
+import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
 import com.tianji.common.exceptions.BadRequestException;
@@ -21,6 +23,7 @@ import com.tianji.exam.domain.po.ExamRecord;
 import com.tianji.exam.domain.po.ExamRecordDetail;
 import com.tianji.exam.domain.query.ExamPageQuery;
 import com.tianji.exam.domain.vo.ExamQuestionVO;
+import com.tianji.exam.domain.vo.ExamRecordAdminVO;
 import com.tianji.exam.domain.vo.ExamRecordDetailVO;
 import com.tianji.exam.domain.vo.ExamRecordVO;
 import com.tianji.exam.enums.ExamType;
@@ -57,7 +60,10 @@ public class ExamRecordServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRec
     private final IExamRecordDetailService recordDetailService;
 
     private final CourseClient courseClient;
+
     private final CatalogueClient catalogueClient;
+
+    private final UserClient userClient;
 
     @Override
     public PageDTO<ExamRecordVO> queryMyExamRecordsPage(PageQuery query) {
@@ -106,7 +112,7 @@ public class ExamRecordServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRec
     }
 
     @Override
-    public PageDTO<ExamRecordVO> queryExamRecordsPage(ExamPageQuery query) {
+    public PageDTO<ExamRecordAdminVO> queryAdminExamRecordsPage(ExamPageQuery query) {
         // 2.查询 练习没有分的过滤掉
         Page<ExamRecord> page = lambdaQuery()
                 .eq(query.getType()  != null,ExamRecord::getType, query.getType())
@@ -138,15 +144,50 @@ public class ExamRecordServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRec
             cataMap = catas.stream()
                     .collect(Collectors.toMap(CataSimpleInfoDTO::getId, CataSimpleInfoDTO::getName));
         }
+        //查询用户信息
+        List<UserDTO> users = userClient.queryUserByIds(records.stream()
+                .map(ExamRecord::getUserId)
+                .collect(Collectors.toSet()));
         // 4.结果处理
-        List<ExamRecordVO> list = new ArrayList<>(records.size());
+        List<ExamRecordAdminVO> list = new ArrayList<>(records.size());
         for (ExamRecord r : records) {
-            ExamRecordVO v = BeanUtils.toBean(r, ExamRecordVO.class);
+            ExamRecordAdminVO v = BeanUtils.toBean(r, ExamRecordAdminVO.class);
             v.setCourseName(courseMap.getOrDefault(r.getCourseId(), "未知"));
             v.setSectionName(cataMap.getOrDefault(r.getSectionId(), "未知"));
+            v.setUserId(r.getUserId());
+            v.setName(users.stream().filter(u -> u.getId().equals(r.getUserId())).findFirst().get().getName());
+            v.setIcon(users.stream().filter(u -> u.getId().equals(r.getUserId())).findFirst().get().getIcon());
             list.add(v);
         }
         return new PageDTO<>(page.getTotal(), page.getPages(), list);
+    }
+
+    @Override
+    public List<ExamRecordDetailVO> queryAdminDetailsByExamId(Long examId) {
+        ExamRecord exam = getById(examId);
+        if(exam == null ){
+            throw new BadRequestException("考试记录不存在");
+        }
+        // 1.查询考试详情
+        List<ExamRecordDetail> details = recordDetailService.lambdaQuery()
+                .eq(ExamRecordDetail::getExamId, examId)
+                .list();
+        AssertUtils.isNotEmpty(details, "考试数据不存在");
+        // 2.获取问题信息
+        List<Long> qIds = details.stream().map(ExamRecordDetail::getQuestionId).collect(Collectors.toList());
+        // 3.查询问题
+        List<QuestionDTO> questions = questionService.queryQuestionByIds(qIds);
+        AssertUtils.isTrue(questions.size() == qIds.size(), "问题不存在");
+        Map<Long, QuestionDTO> qMap = questions.stream()
+                .collect(Collectors.toMap(QuestionDTO::getId, Function.identity()));
+        // 4.组织VO
+        List<ExamRecordDetailVO> list = new ArrayList<>(details.size());
+        for (ExamRecordDetail detail : details) {
+            ExamRecordDetailVO v = BeanUtils.toBean(detail, ExamRecordDetailVO.class);
+            v.setQuestion(qMap.get(detail.getQuestionId()));
+            list.add(v);
+        }
+        return list;
     }
 
     @Override
@@ -265,9 +306,9 @@ public class ExamRecordServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRec
     }
 
     @Override
-    public List<ExamRecordDetailVO> queryDetailsByExamId(Long examId,Boolean isAdmin) {
+    public List<ExamRecordDetailVO> queryDetailsByExamId(Long examId) {
         ExamRecord exam = getById(examId);
-        if(!isAdmin || exam == null || exam.getUserId()!=UserContext.getUser()){
+        if(exam == null || exam.getUserId()!=UserContext.getUser()){
             throw new BadRequestException("考试记录不存在");
         }
         // 1.查询考试详情
@@ -291,5 +332,6 @@ public class ExamRecordServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRec
         }
         return list;
     }
+
 
 }
