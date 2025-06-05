@@ -17,7 +17,7 @@
       <el-table-column
         prop="categories"
         label="所属分类"
-        width="290"
+        width="190"
         class-name="textLeft"
       >
         <template #default="scope">
@@ -38,6 +38,7 @@
           <span v-if="scope.row.type === 2">多选题</span>
           <span v-if="scope.row.type === 3">不定向选择题</span>
           <span v-if="scope.row.type === 4">判断题</span>
+          <span v-if="scope.row.type === 5">主观题</span>
         </template>
       </el-table-column>
       <el-table-column label="难易程度" min-width="150">

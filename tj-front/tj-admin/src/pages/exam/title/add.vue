@@ -3,76 +3,40 @@
   <div class="contentBox">
     <div class="bg-wt radius marg-tp-20">
       <div class="detailBox">
-        <el-form
-          :model="fromData"
-          ref="ruleFormRef"
-          :rules="rules"
-          label-width="130px"
-          class="demo-ruleForm"
-        >
+        <el-form :model="fromData" ref="ruleFormRef" :rules="rules" label-width="130px" class="demo-ruleForm">
           <el-form-item label="所属题目分类：" prop="cates">
             <div class="el-input">
-              <el-cascader
-                v-model="fromData.cateIds"
-                :options="typeData.value"
-                @change="handleChange"
-                :props="{
-                  label: 'name',
-                  value: 'id',
-                  children: 'children',
-                }"
-                clearable
-                style="width: 100%"
-              >
+              <el-cascader v-model="fromData.cateIds" :options="typeData.value" @change="handleChange" :props="{
+                label: 'name',
+                value: 'id',
+                children: 'children',
+              }" clearable style="width: 100%">
               </el-cascader>
             </div>
           </el-form-item>
-          <el-form-item label="所属课程：">
+          <!-- <el-form-item label="所属课程：">
             <div class="el-input">
-              <el-select
-                v-model="fromData.courseIds"
-                clearable
-                placeholder="请选择"
-                style="width: 100%"
-                filterable
-                @change="handleCourse"
-              >
-                <el-option
-                  v-for="item in courseData.value"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"
-                ></el-option>
+              <el-select v-model="fromData.courseIds" clearable placeholder="请选择" style="width: 100%" filterable
+                @change="handleCourse">
+                <el-option v-for="item in courseData.value" :key="item.id" :label="item.name"
+                  :value="item.id"></el-option>
               </el-select>
             </div>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="题目类型：" prop="type">
             <el-radio-group v-model="fromData.type" @change="handleSubjectType">
-              <el-radio
-                v-for="(item, index) in titleTypeData"
-                :key="index"
-                :label="index + 1"
-                >{{ item.label }}</el-radio
-              >
+              <el-radio v-for="(item, index) in titleTypeData" :key="index" :label="index + 1">{{ item.label
+                }}</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="难易程度：" prop="difficulty">
             <el-radio-group v-model="fromData.difficulty">
-              <el-radio
-                v-for="(item, index) in difficultyData"
-                :key="index"
-                :label="index + 1"
-                >{{ item.label }}</el-radio
-              >
+              <el-radio v-for="(item, index) in difficultyData" :key="index" :label="index + 1">{{ item.label
+                }}</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="分值：" prop="score">
-            <el-input-number
-              v-model="fromData.score"
-              :min="0"
-              :max="50"
-              placeholder="0"
-            ></el-input-number>
+            <el-input-number v-model="fromData.score" :min="0" :max="50" placeholder="0"></el-input-number>
           </el-form-item>
           <div class="selectBox">
             <el-form-item label="题目名称：" prop="name">
@@ -88,19 +52,11 @@
               v-model="fromData.name"
               @blur="getCheckName"
               :key="keyTime"
-
             ></Tinymce> -->
               <div class="inputText">
-                <el-input
-                  v-model="fromData.name"
-                  type="textarea"
-                  placeholder="请输入，最多可添加200个字"
-                  resize="none"
-                  @input="nameTextInput"
-                />
-                <span class="numText" :class="nameNumVal === 0 ? 'tip' : ''"
-                  >{{ nameNumVal }}/200</span
-                >
+                <el-input v-model="fromData.name" type="textarea" placeholder="请输入，最多可添加200个字" resize="none"
+                  @input="nameTextInput" />
+                <span class="numText" :class="nameNumVal === 0 ? 'tip' : ''">{{ nameNumVal }}/200</span>
               </div>
             </el-form-item>
             <span class="seatBox"></span>
@@ -110,14 +66,13 @@
           <div v-if="fromData.type === 4">
             <el-form-item label="正确答案：" prop="radioanswer">
               <el-radio-group v-model="fromData.radioanswer">
-                <el-radio
-                  v-for="(item, index) in titleAnswerData"
-                  :key="index"
-                  :label="index + 1"
-                  >{{ item.label }}</el-radio
-                >
+                <el-radio v-for="(item, index) in titleAnswerData" :key="index" :label="index + 1">{{ item.label
+                  }}</el-radio>
               </el-radio-group>
             </el-form-item>
+          </div>
+          <!-- 主观题 -->
+          <div v-else-if="fromData.type === 5">
           </div>
           <!-- end -->
           <!-- 单选题、多选题、不定项选择 -->
@@ -129,35 +84,18 @@
                     <span class="star">*</span>选项{{ item.name }}
                   </template> -->
                   <div class="inputText">
-                    <el-input
-                      v-model="fromData[item.prop]"
-                      type="textarea"
-                      placeholder="请输入，最多可添加200个字"
-                      resize="none"
-                      @input="optionTextInput(item)"
-                      @blur="optionTextBlur(item)"
-                    />
-                    <span
-                      class="numText"
-                      :class="item.numVal === 0 ? 'tip' : ''"
-                      >{{ item.numVal }}/200</span
-                    >
+                    <el-input v-model="fromData[item.prop]" type="textarea" placeholder="请输入，最多可添加200个字" resize="none"
+                      @input="optionTextInput(item)" @blur="optionTextBlur(item)" />
+                    <span class="numText" :class="item.numVal === 0 ? 'tip' : ''">{{ item.numVal }}/200</span>
                   </div>
                 </el-form-item>
                 <span class="checkBox">
-                  
-                  <el-checkbox
-                    v-model="item.checked"
-                    v-if="
-                      fromData.type === 2 || fromData.type === 3
-                    "
-                    @change="handleCheck($event, index)"
-                    >正确</el-checkbox
-                  >
-                  <el-radio v-model="radio" :label="index + 1" v-else
-                    >正确</el-radio
-                  >
-                  
+
+                  <el-checkbox v-model="item.checked" v-if="
+                    fromData.type === 2 || fromData.type === 3
+                  " @change="handleCheck($event, index)">正确</el-checkbox>
+                  <el-radio v-model="radio" :label="index + 1" v-else>正确</el-radio>
+
                 </span>
               </div>
             </div>
@@ -174,45 +112,20 @@
               :key="keyTime"
             ></Tinymce> -->
               <div class="inputText">
-                <el-input
-                  v-model="fromData.analysis"
-                  type="textarea"
-                  placeholder="请输入，最多可添加300个字"
-                  resize="none"
-                  @input="analysisTextInput"
-                />
-                <span class="numText" :class="analysisNumVal === 0 ? 'tip' : ''"
-                  >{{ analysisNumVal }}/300</span
-                >
+                <el-input v-model="fromData.analysis" type="textarea" placeholder="请输入，最多可添加300个字" resize="none"
+                  @input="analysisTextInput" />
+                <span class="numText" :class="analysisNumVal === 0 ? 'tip' : ''">{{ analysisNumVal }}/300</span>
               </div>
             </el-form-item>
             <span class="seatBox"></span>
           </div>
         </el-form>
       </div>
-      <div
-        class="detailBox"
-        style="border-top: 1px solid #f5efee; padding-top: 0"
-      >
+      <div class="detailBox" style="border-top: 1px solid #f5efee; padding-top: 0">
         <div class="btn">
-          <el-button
-            class="button buttonSub"
-            @click="handleGo"
-            style="width: 130px"
-            >取消</el-button
-          >
-          <el-button
-            class="button buttonSub"
-            v-preventReClick
-            @click="handleSubmit('getback')"
-            >保存并返回</el-button
-          >
-          <el-button
-            class="button primary"
-            v-preventReClick
-            @click="handleSubmit()"
-            >保存并继续</el-button
-          >
+          <el-button class="button buttonSub" @click="handleGo" style="width: 130px">取消</el-button>
+          <el-button class="button buttonSub" v-preventReClick @click="handleSubmit('getback')">保存并返回</el-button>
+          <el-button class="button primary" v-preventReClick @click="handleSubmit()">保存并继续</el-button>
         </div>
       </div>
     </div>
@@ -249,7 +162,7 @@ const ruleFormRef = ref(); //表单校验ref
 let radio = ref(""); //单选当前
 let options = reactive([]); //已经选择的多选框
 let checkBoxData = reactive([]); //处理已经选择的多选框
-let answer = ref(""); //判断提的正确答案
+let answer = ref(""); //判断题的正确答案
 let courseData = reactive([]); //根据题目分类获取所属课程
 let courseIds = reactive([]); //所属课程ids
 let courseId = ref(null); //当前标题id
@@ -321,7 +234,7 @@ const validateName = async (rule, value, callback) => {
           }
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   } else {
     callback(new Error("题目为空，请设置题目"));
   }
@@ -478,7 +391,7 @@ watch(fromData, (newValue, oldValue) => {
   analysisNumVal.value = analysisValue.numVal;
   // 选项默认的字数
   // const objData = fromData.value;
-  if(!newValue.options) return
+  if (!newValue.options) return
   list.forEach((obj, index) => {
     newValue.options.forEach((val, i) => {
       if (index === i) {
@@ -494,6 +407,7 @@ watch(fromData, (newValue, oldValue) => {
 const init = () => {
   // 获取课程id
   courseId.value = route.params.id;
+  // console.log(courseId.value);
   if (courseId.value !== "null") {
     getDetailData(); //详情
   }
@@ -505,11 +419,16 @@ const getDetailData = async () => {
   await getDetails(courseId.value)
     .then((res) => {
       if (res.code === 200) {
-        res.data.answer = res.data.answer.split(",").map(s => parseInt(s));
+        if (res.data.type !== 5) {
+          //不是主观题才需要转换选项，主观题选项为null
+          res.data.answer = res.data.answer.split(",").map(s => parseInt(s));
+        }
         fromData.value = res.data;
+        console.log("fromData", fromData.value)
         const objData = fromData.value;
         // 处理选项内容
-        if (fromData.value.type !== 4) {
+        if (fromData.value.type !== 4 && fromData.value.type !== 5) {
+          //非判断或非主观
           objData.optionA = objData.options[0];
           objData.optionB = objData.options[1];
           objData.optionC = objData.options[2];
@@ -522,13 +441,16 @@ const getDetailData = async () => {
           //   });
           // });
         }
-
+        console.log("处理判断题", fromData.value)
         // 处理单选数据
         if (fromData.value.type === 1) {
           radio.value = fromData.value.answer[0];
         } else if (fromData.value.type === 4) {
           fromData.value.radioanswer = fromData.value.answer[0];
-        } else {
+        } else if (fromData.value.type === 5) {
+          //主观题
+        }
+        else {
           // 处理多选数据
           list.forEach((val) => {
             fromData.value.answer.forEach((obj) => {
@@ -540,15 +462,17 @@ const getDetailData = async () => {
         }
         // 题目分类
         let thirdCateId = [res.data.cateId3];
-        fromData.value.cateIds = [res.data.cateId1,res.data.cateId2,res.data.cateId3];
+        fromData.value.cateIds = [res.data.cateId1, res.data.cateId2, res.data.cateId3];
+        console.log("所属课程", thirdCateId, res.data.courseIds)
         // 根据题目三级分类获取所属课程
         getCourse(thirdCateId);
         // 处理所属课程
+        console.log("所属课程", thirdCateId, res.data.courseIds)
         fromData.value.courseIds = res.data.courseIds ? res.data.courseIds : [];
         courseIds.push(fromData.value.courseIds);
       }
     })
-    .catch((err) => {});
+    .catch((err) => { });
 };
 // 保存
 const handleSubmit = async (str) => {
@@ -575,7 +499,6 @@ const handleSubmit = async (str) => {
   if (valid) {
     if (!baseVal.name || baseVal.name === "") {
       ElMessage({
-
         message: "题目为空，请设置题目",
         type: "error",
         showClose: false,
@@ -583,12 +506,12 @@ const handleSubmit = async (str) => {
       return false;
     } else if (
       baseVal.type !== 4 &&
+      baseVal.type !== 5 &&
       baseVal.type !== 1 &&
       baseVal.options === undefined
     ) {
       // 选项内容
       ElMessage({
-
         message: "选项内容为空，请输入选项内容",
         type: "error",
         showClose: false,
@@ -599,7 +522,6 @@ const handleSubmit = async (str) => {
     if (baseVal.type === 1) {
       if (baseVal.options === undefined || baseVal.options.length < 4) {
         ElMessage({
-
           message: "选项内容为空，请输入选项内容",
           type: "error",
           showClose: false,
@@ -607,7 +529,6 @@ const handleSubmit = async (str) => {
         return false;
       } else if (radio.value === "") {
         ElMessage({
-
           message: "正确答案为空，请设置正确答案",
           type: "error",
           showClose: false,
@@ -621,7 +542,6 @@ const handleSubmit = async (str) => {
     if (baseVal.type === 2 || baseVal.type === 3) {
       if (baseVal.options === undefined || baseVal.options.length < 4) {
         ElMessage({
-
           message: "选项内容为空，请输入选项内容",
           type: "error",
           showClose: false,
@@ -630,7 +550,6 @@ const handleSubmit = async (str) => {
       }
       if (baseVal.answer === undefined || baseVal.answer.length === 0) {
         ElMessage({
-
           message: "正确答案为空，请设置正确答案",
           type: "error",
           showClose: false,
@@ -640,7 +559,6 @@ const handleSubmit = async (str) => {
       if (baseVal.type === 2) {
         if (baseVal.answer === undefined || baseVal.answer.length < 2) {
           ElMessage({
-
             message: "请至少设置两个答案",
             type: "error",
             showClose: false,
@@ -654,6 +572,10 @@ const handleSubmit = async (str) => {
       baseVal.answer = [];
       fromData.value.options = null;
       baseVal.answer.push(baseVal.radioanswer);
+    }
+    if (baseVal.type === 5) {
+      baseVal.answer = [];
+      fromData.value.options = null;
     }
     baseVal.courseIds = courseIds;
     // 处理课程分类数据，提交的时候只传1-3级的id
@@ -680,14 +602,13 @@ const handleSubmit = async (str) => {
       score: baseVal.score,
       type: baseVal.type,
       options: baseVal.options,
-      id:baseVal.id,
+      id: baseVal.id,
     };
     let func = !baseVal.id ? addSubject : editSubject;
     await func(params)
       .then((res) => {
         if (res.code === 200) {
           ElMessage({
-
             message: "恭喜你，操作成功！",
             type: "success",
             showClose: false,
@@ -723,14 +644,13 @@ const handleSubmit = async (str) => {
           }
         } else {
           ElMessage({
-
             message: res.data.msg,
             type: "error",
             showClose: false,
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }
 };
 // 获取分类
@@ -741,7 +661,7 @@ const getTypeList = async () => {
         typeData.value = res.data;
       }
     })
-    .catch((err) => {});
+    .catch((err) => { });
 };
 // 根据题目三级分类获取所属课程
 const getCourse = async (ids) => {
@@ -751,7 +671,7 @@ const getCourse = async (ids) => {
         courseData.value = res.data;
       }
     })
-    .catch((err) => {});
+    .catch((err) => { });
 };
 // 多选
 const handleCheck = (e, index) => {
@@ -761,20 +681,20 @@ const handleCheck = (e, index) => {
       e: e,
       i: index + 1,
     };
-    
+
     if (courseId.value !== "null") {
       let checkArr = [];
       checkArr.push(obj);
-      
+
       if (fromData.value.answer.length > 0) {
         fromData.value.answer.map((val) => {
           checkArr.push({ e: true, i: val });
         });
         checkBoxData = checkArr;
-      }else{
+      } else {
         checkBoxData = checkArr;
       }
-      
+
     } else {
       checkBoxData.push(obj);
     }
@@ -794,7 +714,7 @@ const handleCheck = (e, index) => {
       }
     }
   }
- 
+
   var str = [];
 
   checkBoxData.map((val) => {
@@ -818,6 +738,7 @@ const getAnalysis = (content) => {
 };
 // 触发题目分类获取所属课程
 const handleChange = (val) => {
+  console.log("触发题目分类获取所属课程", val);
   if (!val || val.length === 0) {
     return;
   } else {
@@ -861,7 +782,7 @@ const getCheckName = async (e, editor) => {
         }
       }
     })
-    .catch((err) => {});
+    .catch((err) => { });
 };
 // 题目名称字数限制
 const nameTextInput = () => {
@@ -907,10 +828,10 @@ const optionTextInput = (item) => {
   });
 };
 //
-const optionTextBlur = (item) => {};
+const optionTextBlur = (item) => { };
 const handleSubjectType = () => {
   fromData.value.answer = [];
-  list.forEach(val=>{
+  list.forEach(val => {
     val.checked = false
   })
 };
@@ -921,10 +842,12 @@ const handleSubjectType = () => {
   .tox-editor-container {
     width: 1100px;
   }
+
   .tox-edit-area {
     font-family: PingFangSC-Regular;
     font-weight: 400;
     font-size: 14px;
+
     label {
       top: -5px !important;
       left: -4px !important;
@@ -932,9 +855,11 @@ const handleSubjectType = () => {
     }
   }
 }
+
 :deep(.tox-tinymce) {
   overflow: initial;
 }
+
 :deep(.el-input) {
   .el-input__wrapper {
     .el-input__inner {
@@ -944,6 +869,7 @@ const handleSubjectType = () => {
     }
   }
 }
+
 .detailBox {
   :deep(.el-form-item__label) {
     font-family: PingFangSC-Regular;
@@ -952,6 +878,7 @@ const handleSubjectType = () => {
     color: #332929;
   }
 }
+
 :deep(.tox) *:not(svg):not(rect) {
   font-family: PingFangSC-Regular;
   font-weight: 400;
@@ -962,8 +889,10 @@ const handleSubjectType = () => {
 :deep(.el-input .el-input__wrapper .el-input__inner) {
   color: #332929;
 }
+
 :deep(.el-textarea textarea.el-textarea__inner) {
   color: #332929;
+
   // max-width: 1250px;
   &::placeholder {
     color: #b5abab;
@@ -982,11 +911,13 @@ const handleSubjectType = () => {
     right: 0px;
     top: 0;
     color: #000;
+
     &:hover {
       color: var(--color-btnbackground);
     }
   }
 }
+
 :deep(.el-input-number__decrease.is-disabled) {
   .el-icon {
     background: #faf6f5;
@@ -999,11 +930,13 @@ const handleSubjectType = () => {
     top: 0;
     // 不可点击
     color: #b5abab;
+
     &:hover {
       color: #b5abab;
     }
   }
 }
+
 :deep(.el-input-number__decrease) {
   .el-icon {
     background: #faf6f5;
@@ -1014,14 +947,17 @@ const handleSubjectType = () => {
     bottom: 0px;
     left: 0px;
     top: 0;
+
     &:hover {
       color: var(--color-btnbackground);
     }
   }
 }
+
 :deep(.el-input-number__increase) {
   border-left: 0;
 }
+
 :deep(.el-input-number__decrease) {
   border-right: 0;
   background: #faf6f5;
@@ -1031,16 +967,20 @@ const handleSubjectType = () => {
   bottom: 1px;
   left: 1px;
 }
+
 :deep(.el-input .el-input__wrapper) {
   height: 42px;
 }
+
 :deep(.el-input) {
   width: 293px;
 }
+
 .seatBox {
   display: block;
   width: 144px;
 }
+
 // :deep(.detailBox .checkBox) {
 //   .el-checkbox {
 //     color: var(--el-radio-text-color);
@@ -1086,5 +1026,4 @@ const handleSubjectType = () => {
 // }
 // :deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
 //   color: #332929;
-// }
-</style>
+// }</style>

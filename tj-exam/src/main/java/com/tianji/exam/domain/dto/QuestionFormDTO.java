@@ -42,6 +42,9 @@ public class QuestionFormDTO implements Serializable {
     @ApiModelProperty("课程三级分类的id集合")
     private List<Long> cateIds;
 
+    @ApiModelProperty("题目所属课程的id集合")
+    private List<Long> courseIds;
+
     @ApiModelProperty("难易度，1：简单，2：中等，3：困难")
     @NotNull(message = "难度不能为空")
     @EnumValid(enumeration = {1,2,3},message = "题目难度错误")

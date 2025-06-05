@@ -13,6 +13,7 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.StringUtils;
+import com.tianji.common.utils.UserContext;
 import com.tianji.exam.domain.dto.QuestionFormDTO;
 import com.tianji.exam.domain.po.Question;
 import com.tianji.exam.domain.po.QuestionBiz;
@@ -113,6 +114,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         Page<Question> page = lambdaQuery()
                 .eq(query.getDifficulty() != null, Question::getDifficulty, query.getDifficulty())
                 .eq(query.getCreater() != null, Question::getCreater, query.getCreater())
+                .eq(query.getOwn() != null && query.getOwn(), Question::getCreater, UserContext.getUser())
                 .in(CollUtils.isNotEmpty(query.getTypes()), Question::getType, query.getTypes())
                 .in(CollUtils.isNotEmpty(query.getCateIds()), Question::getCateId3, query.getCateIds())
                 .like(StringUtils.isNotBlank(query.getKeyword()), Question::getName, query.getKeyword())

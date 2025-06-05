@@ -44,11 +44,6 @@ public class UserController {
         return userService.queryUserPage(pageQuery);
     }
 
-    @ApiOperation("列表查询用户简易信息")
-    @GetMapping("/list")
-    public List<UserPageVO> queryUserList(UserSimplePageQuery pageQuery){
-        return userService.queryUserList(pageQuery);
-    }
 
     @ApiOperation("新增用户，一般是员工或教师")
     @PostMapping

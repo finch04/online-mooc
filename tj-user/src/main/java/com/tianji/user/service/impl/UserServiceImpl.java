@@ -343,17 +343,4 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return PageDTO.of(page, list);
     }
 
-    @Override
-    public List<UserPageVO> queryUserList(UserSimplePageQuery pageQuery) {
-        LambdaQueryChainWrapper<UserDetail> like = detailService.lambdaQuery().eq(pageQuery.getType() != null, UserDetail::getType, pageQuery.getType())
-                .eq(pageQuery.getGender() != null, UserDetail::getGender, pageQuery.getGender())
-                .like(StrUtil.isNotBlank(pageQuery.getName()), UserDetail::getName, pageQuery.getName());
-        List<UserDetail> list = like.list();
-        return list.stream().map(user -> {
-            UserPageVO vo = BeanUtils.toBean(user, UserPageVO.class);
-            vo.setIcon(user.getIcon());
-            vo.setName(user.getName());
-            return vo;
-        }).collect(Collectors.toList());
-    }
 }

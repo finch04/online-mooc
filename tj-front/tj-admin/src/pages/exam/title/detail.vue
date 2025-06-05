@@ -46,6 +46,7 @@
                   >不定项选择题</span
                 >
                 <span v-if="detailData.data.type === 4">判断题</span>
+                <span v-if="detailData.data.type === 5">主观题</span>
               </th>
               <th class="tabletitle">难易程度</th>
               <th>
@@ -103,6 +104,9 @@
               <th v-if="detailData.data.type === 4">
                 <span v-if="detailData.data.answers[0] === 1">正确</span>
                 <span v-if="detailData.data.answers[0] === 2">错误</span>
+              </th>
+              <th v-if="detailData.data.type === 5">
+                主观题答案请参考题目解析
               </th>
               <th class="tabletitle">分值</th>
               <th>{{ detailData.data.score }}分</th>

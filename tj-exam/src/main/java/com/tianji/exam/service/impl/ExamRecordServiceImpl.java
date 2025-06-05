@@ -19,6 +19,7 @@ import com.tianji.exam.domain.dto.ExamDetailDTO;
 import com.tianji.exam.domain.dto.ExamFormDTO;
 import com.tianji.exam.domain.po.ExamRecord;
 import com.tianji.exam.domain.po.ExamRecordDetail;
+import com.tianji.exam.domain.query.ExamPageQuery;
 import com.tianji.exam.domain.vo.ExamQuestionVO;
 import com.tianji.exam.domain.vo.ExamRecordDetailVO;
 import com.tianji.exam.domain.vo.ExamRecordVO;
@@ -91,6 +92,50 @@ public class ExamRecordServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRec
         Map<Long, String> cataMap = new HashMap<>(0);
         if(CollUtils.isNotEmpty(catas)) {
            cataMap = catas.stream()
+                    .collect(Collectors.toMap(CataSimpleInfoDTO::getId, CataSimpleInfoDTO::getName));
+        }
+        // 4.结果处理
+        List<ExamRecordVO> list = new ArrayList<>(records.size());
+        for (ExamRecord r : records) {
+            ExamRecordVO v = BeanUtils.toBean(r, ExamRecordVO.class);
+            v.setCourseName(courseMap.getOrDefault(r.getCourseId(), "未知"));
+            v.setSectionName(cataMap.getOrDefault(r.getSectionId(), "未知"));
+            list.add(v);
+        }
+        return new PageDTO<>(page.getTotal(), page.getPages(), list);
+    }
+
+    @Override
+    public PageDTO<ExamRecordVO> queryExamRecordsPage(ExamPageQuery query) {
+        // 2.查询 练习没有分的过滤掉
+        Page<ExamRecord> page = lambdaQuery()
+                .eq(query.getType()  != null,ExamRecord::getType, query.getType())
+                .eq(ExamRecord::getFinished, true)
+                .page(query.toMpPage("finish_time", false));
+        List<ExamRecord> records = page.getRecords();
+        if (CollUtils.isEmpty(records)) {
+            return PageDTO.empty(page);
+        }
+        // 3.获取课程和章节信息
+        Set<Long> courseIds = new HashSet<>();
+        Set<Long> secIds = new HashSet<>();
+        // 3.1.获取课程和小节id
+        for (ExamRecord r : records) {
+            courseIds.add(r.getCourseId());
+            secIds.add(r.getSectionId());
+        }
+        // 3.2.查询课程
+        List<CourseSimpleInfoDTO> courseInfos = courseClient.getSimpleInfoList(courseIds);
+        Map<Long, String> courseMap = new HashMap<>(0);
+        if(CollUtils.isNotEmpty(courseInfos)) {
+            courseMap = courseInfos.stream()
+                    .collect(Collectors.toMap(CourseSimpleInfoDTO::getId, CourseSimpleInfoDTO::getName));
+        }
+        // 3.3.查询小节
+        List<CataSimpleInfoDTO> catas = catalogueClient.batchQueryCatalogue(secIds);
+        Map<Long, String> cataMap = new HashMap<>(0);
+        if(CollUtils.isNotEmpty(catas)) {
+            cataMap = catas.stream()
                     .collect(Collectors.toMap(CataSimpleInfoDTO::getId, CataSimpleInfoDTO::getName));
         }
         // 4.结果处理
@@ -220,7 +265,11 @@ public class ExamRecordServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRec
     }
 
     @Override
-    public List<ExamRecordDetailVO> queryDetailsByExamId(Long examId) {
+    public List<ExamRecordDetailVO> queryDetailsByExamId(Long examId,Boolean isAdmin) {
+        ExamRecord exam = getById(examId);
+        if(!isAdmin || exam == null || exam.getUserId()!=UserContext.getUser()){
+            throw new BadRequestException("考试记录不存在");
+        }
         // 1.查询考试详情
         List<ExamRecordDetail> details = recordDetailService.lambdaQuery()
                 .eq(ExamRecordDetail::getExamId, examId)

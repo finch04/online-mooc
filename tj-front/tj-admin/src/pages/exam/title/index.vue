@@ -226,12 +226,14 @@ const handleCheckedCitiesChange = (value) => {
       types.push(3)
     } else if (val === "判断题") {
       types.push(4)
+    } else if (val == "主观题"){
+      types.push(5)
     }
   })
   searchData.subjectTypes = types.join(",")
   getList()
 }
-//紧录入我的
+//仅录入我的
 const handleOwnChange = () => {
   searchData.own = ownChecked.value
   getList()

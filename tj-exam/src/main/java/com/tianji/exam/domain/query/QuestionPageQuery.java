@@ -22,4 +22,6 @@ public class QuestionPageQuery extends PageQuery {
     private String keyword;
     @ApiModelProperty("题目录入者id")
     private Long creater;
+    @ApiModelProperty("是否为本人录入")
+    private Boolean own;
 }

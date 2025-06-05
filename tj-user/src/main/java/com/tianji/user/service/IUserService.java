@@ -44,5 +44,4 @@ public interface IUserService extends IService<User> {
 
     PageDTO<UserPageVO> queryUserPage(UserSimplePageQuery pageQuery);
 
-    List<UserPageVO> queryUserList(UserSimplePageQuery pageQuery);
 }
