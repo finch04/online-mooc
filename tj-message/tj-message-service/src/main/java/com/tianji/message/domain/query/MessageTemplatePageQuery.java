@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 @ApiModel(description = "通知模板查询对象")
 @Data
 public class MessageTemplatePageQuery extends PageQuery {
-    private Long thirdPlatformId;
+    private String platformCode;
     private Integer status;
     private String keyword;
 }

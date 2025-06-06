@@ -19,4 +19,7 @@ public interface LearningConstants {
     Integer REWARD_NOTE_GATHERED = 2;
     /* 课程评价 */
     Integer REWARD_COURSE_COMMENT = 10;
+
+
+
 }

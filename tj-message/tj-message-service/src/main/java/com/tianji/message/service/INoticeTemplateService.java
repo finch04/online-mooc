@@ -1,6 +1,7 @@
 package com.tianji.message.service;
 
 import com.tianji.message.domain.dto.NoticeTemplateDTO;
+import com.tianji.message.domain.dto.NoticeTemplateDetailDTO;
 import com.tianji.message.domain.dto.NoticeTemplateFormDTO;
 import com.tianji.message.domain.query.NoticeTemplatePageQuery;
 import com.tianji.common.domain.dto.PageDTO;
@@ -23,7 +24,7 @@ public interface INoticeTemplateService extends IService<NoticeTemplate> {
 
     PageDTO<NoticeTemplateDTO> queryNoticeTemplates(NoticeTemplatePageQuery pageQuery);
 
-    NoticeTemplateDTO queryNoticeTemplate(Long id);
+    NoticeTemplateDetailDTO queryNoticeTemplate(Long id);
 
     NoticeTemplate queryByCode(String code);
 }

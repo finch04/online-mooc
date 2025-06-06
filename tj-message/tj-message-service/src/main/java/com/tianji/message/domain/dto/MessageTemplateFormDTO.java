@@ -16,7 +16,7 @@ import lombok.Data;
 @ApiModel(description = "短信模板表单实体")
 public class MessageTemplateFormDTO {
 
-    @ApiModelProperty("信发送模板id，新增时无需填写")
+    @ApiModelProperty("短信发送模板id，新增时无需填写")
     private Long id;
 
     @ApiModelProperty("第三方短信平台代号")

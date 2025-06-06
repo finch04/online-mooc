@@ -22,11 +22,11 @@ public class MessageTemplateDTO extends BaseDTO {
     @ApiModelProperty("信发送模板id，新增时无需填写")
     private Long id;
 
-    @ApiModelProperty("第三方短信推送渠道id")
-    private Long platformCode;
+    @ApiModelProperty("第三方短信推送渠道代号")
+    private String platformCode;
 
-    @ApiModelProperty("第三方短信推送渠道名称")
-    private String platformName;
+//    @ApiModelProperty("第三方短信推送渠道名称")
+//    private String platformName;
 
     @ApiModelProperty("短信模板名称")
     private String name;

@@ -57,7 +57,7 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
         // 2.过滤条件
         page = lambdaQuery()
                 .eq(query.getStatus() != null, MessageTemplate::getStatus, query.getStatus())
-                .eq(query.getThirdPlatformId() != null, MessageTemplate::getPlatformCode, query.getThirdPlatformId())
+                .eq(query.getPlatformCode() != null, MessageTemplate::getPlatformCode, query.getPlatformCode())
                 .like(StringUtils.isNotBlank(query.getKeyword()), MessageTemplate::getName, query.getKeyword())
                 .page(page);
         // 3.数据转换

@@ -72,6 +72,13 @@ export const querySmsThirdPlatform = (id) => {
   });
 };
 
+// export const deleteSmsThirdPlatform = (id) => {
+//   return request({
+//     url: `/sms/sms-templates/${id}`,
+//     method: 'delete'
+//   });
+// };
+
 /**短信模板 */
 // 新增短信模板
 export const saveMessageTemplate = (messageTemplateFormDTO) => {
@@ -144,3 +151,10 @@ export const queryNoticeTemplate = (id) => {
     method: 'get'
   });
 };
+
+// export const deleteNoticeTemplate = (id) => {
+//   return request({
+//     url: `/sms/notice-templates/${id}`,
+//     method: 'delete'
+//   });
+// };

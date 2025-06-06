@@ -167,12 +167,30 @@ export default [
         component: () => import("@/pages/message/template/index.vue"),
         meta: { title: "模板管理" },
       },
-      // {
-      //   path: "index",
-      //   name: "message",
-      //   component: () => import("@/pages/message/index.vue"),
-      //   meta: { title: "短信模板管理" },
-      // },
+      {
+        path: "template/add/:id",
+        name: "templateAdd",
+        component: () => import("@/pages/message/template/add.vue"),
+        meta: { title: "添加编辑", hidden: true ,fmeta: {path: '/message/template', title: '模板管理'}},
+      },
+      {
+        path: "template/detail/:id",
+        name: "templateDetail",
+        component: () => import("@/pages/message/template/detail.vue"),
+        meta: { title: "模板详情", hidden: true ,fmeta: {path: '/message/template', title: '模板管理'}},
+      },
+      {
+        path: "template/config",
+        name: "config",
+        component: () => import("@/pages/message/template/config.vue"),
+        meta: { title: "第三方短信平台管理",hidden:true ,fmeta: {path: '/message/template', title: '模板管理'} },
+      },
+      {
+        path: "template/message",
+        name: "message",
+        component: () => import("@/pages/message/template/message.vue"),
+        meta: { title: "短信模板管理",hidden:true ,fmeta: {path: '/message/template', title: '模板管理'} },
+      },
     ],
   },
   {

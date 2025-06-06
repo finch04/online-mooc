@@ -89,5 +89,51 @@ public interface MqConstants {
 
         //领取优惠券的key
         String COUPON_RECEIVE ="coupon.receive";
+
+        /**公告发送RoutingKey*/
+        String NOTICE_SEND = "notice.send";
+
+        /* 问题被回答 */
+        String QUETSION_ANSWERED = "inbox.question.answered";
+        /* 回答被评论 */
+        String ANSWER_COMMENTED = "inbox.answer.commented";
+        /* 评论被点赞 */
+        String COMMENT_LIKED = "inbox.comment.liked";
+        /* 笔记被点赞*/
+        String NOTE_LIKED = "inbox.note.liked";
+        /* 笔记被采集 */
+        String NOTE_GATHERD = "inbox.note.gathered";
+        /* 课程评价有人标记“有用” */
+        String EVALUATION_USED = "inbox.evaluation.used";
+
+        /* 订单支付成功消息*/
+        String ORDER_PAY_SUCCESS = "inbox.order.pay.success";
+        /* 订单支付失败消息*/
+        String ORDER_PAY_FAIL = "inbox.order.pay.fail";
+        /* 订单未付款自动取消 */
+        String ORDER_AUTO_CANCEL = "inbox.order.auto.cancel";
+        /* 订单退款成功通知 */
+        String ORDER_REFUND_SUCCESS = "inbox.order.refund.success";
+        /* 订单退款失败通知 */
+        String ORDER_REFUND_FAIL = "inbox.order.refund.fail";
+
+        /* 优惠券即将过期 */
+        String COUPON_EXPIRE = "inbox.coupon.expire";
+        /* 优惠券已过期*/
+        String COUPON_EXPIRED = "inbox.coupon.expired";
+
+        /* 用户注册成功*/
+        String USER_REGISTER = "inbox.user.register";
+
+        /* 排行榜结算 */
+        String POINTS_BOARD_SETTLE = "inbox.points.board.settle";
+        /* 积分快到期通知 */
+        String POINTS_EXPIRE = "inbox.points.expire";
+        /* 兑换商品发货通知 */
+        String POINTS_EXCHANGE = "inbox.points.exchange";
+
+        /* 直播开始提醒 */
+        String LIVE_START = "inbox.live.start";
+
     }
 }

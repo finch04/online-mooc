@@ -10,6 +10,7 @@ import com.tianji.common.utils.StringUtils;
 import com.tianji.message.constants.MessageErrorInfo;
 import com.tianji.message.domain.dto.MessageTemplateFormDTO;
 import com.tianji.message.domain.dto.NoticeTemplateDTO;
+import com.tianji.message.domain.dto.NoticeTemplateDetailDTO;
 import com.tianji.message.domain.dto.NoticeTemplateFormDTO;
 import com.tianji.message.domain.po.MessageTemplate;
 import com.tianji.message.domain.po.NoticeTemplate;
@@ -142,8 +143,10 @@ public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper,
     }
 
     @Override
-    public NoticeTemplateDTO queryNoticeTemplate(Long id) {
-        return BeanUtils.copyBean( getById(id), NoticeTemplateDTO.class);
+    public NoticeTemplateDetailDTO queryNoticeTemplate(Long id) {
+        NoticeTemplateDetailDTO noticeTemplateDetailDTO = BeanUtils.copyBean(getById(id), NoticeTemplateDetailDTO.class);
+        noticeTemplateDetailDTO.setMessageTemplates(messageTemplateService.queryByNoticeTemplateId(id));
+        return noticeTemplateDetailDTO;
     }
 
     @Override

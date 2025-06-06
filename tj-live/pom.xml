@@ -16,6 +16,22 @@
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
+
+
+        <!-- Javacv 依赖 -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv</artifactId>
+            <version>1.5.4</version>
+        </dependency>
+
+        <!-- Ffmpeg 依赖 -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>4.4-1.5.7</version>
+        </dependency>
+
         <!--auth-sdk-->
         <dependency>
             <groupId>com.tianji</groupId>

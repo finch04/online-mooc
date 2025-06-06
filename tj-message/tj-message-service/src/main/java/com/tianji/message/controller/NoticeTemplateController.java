@@ -3,6 +3,7 @@ package com.tianji.message.controller;
 
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.message.domain.dto.NoticeTemplateDTO;
+import com.tianji.message.domain.dto.NoticeTemplateDetailDTO;
 import com.tianji.message.domain.dto.NoticeTemplateFormDTO;
 import com.tianji.message.domain.query.NoticeTemplatePageQuery;
 import com.tianji.message.service.INoticeTemplateService;
@@ -51,7 +52,7 @@ public class NoticeTemplateController {
 
     @GetMapping("/{id}")
     @ApiOperation("根据id查询模板")
-    public NoticeTemplateDTO queryNoticeTemplate(@ApiParam(value = "模板id", example = "1") @PathVariable("id") Long id){
+    public NoticeTemplateDetailDTO queryNoticeTemplate(@ApiParam(value = "模板id", example = "1") @PathVariable("id") Long id){
         return noticeTemplateService.queryNoticeTemplate(id);
     }
 }

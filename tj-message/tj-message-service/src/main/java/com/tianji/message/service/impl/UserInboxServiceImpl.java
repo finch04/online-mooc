@@ -69,6 +69,9 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
         saveBatch(list);
     }
 
+
+
+
     @Override
     @Transactional
     public PageDTO<UserInboxDTO> queryUserInBoxesPage(UserInboxQuery query) {
