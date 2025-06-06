@@ -25,3 +25,10 @@ tj:
       enable: true
   jdbc:
     database: tj_aigc #指定使用的数据库名
+  ai:
+    prompt:
+      system:
+        chat:
+          data-id: system-chat-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000

@@ -21,12 +21,12 @@ logging:
     com:
       #      alibaba: debug
       tianji: debug
-#    org:
-#      springframework:
-#        ai:
-#          chat:
-#            client:
-#              advisor: DEBUG
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG
 #      apache:
 #        hc:
 #          client5:
