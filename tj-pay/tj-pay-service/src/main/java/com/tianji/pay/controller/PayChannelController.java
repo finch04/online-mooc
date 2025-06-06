@@ -40,6 +40,11 @@ public class PayChannelController {
     public Long addPayChannel(@Valid @RequestBody PayChannelDTO channelDTO){
         return channelService.addPayChannel(channelDTO);
     }
+    @ApiOperation("根据id查询支付渠道")
+    @GetMapping("/{id}")
+    public PayChannelDTO getPayChannelById(@PathVariable("id") Long id){
+        return channelService.getPayChannelById(id);
+    }
 
     @ApiOperation("修改支付渠道")
     @PutMapping("/{id}")

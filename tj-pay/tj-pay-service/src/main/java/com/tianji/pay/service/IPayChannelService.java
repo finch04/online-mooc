@@ -17,4 +17,6 @@ public interface IPayChannelService extends IService<PayChannel> {
     Long addPayChannel(PayChannelDTO channelDTO);
 
     void updatePayChannel(PayChannelDTO channelDTO);
+
+    PayChannelDTO getPayChannelById(Long id);
 }

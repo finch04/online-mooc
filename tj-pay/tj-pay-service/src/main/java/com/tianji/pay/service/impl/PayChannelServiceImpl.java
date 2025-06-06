@@ -1,6 +1,7 @@
 package com.tianji.pay.service.impl;
 
 import com.tianji.common.utils.BeanUtils;
+import com.tianji.common.utils.UserContext;
 import com.tianji.pay.sdk.dto.PayChannelDTO;
 import com.tianji.pay.domain.po.PayChannel;
 import com.tianji.pay.mapper.PayChannelMapper;
@@ -23,6 +24,9 @@ public class PayChannelServiceImpl extends ServiceImpl<PayChannelMapper, PayChan
     public Long addPayChannel(PayChannelDTO channelDTO) {
         // 1.属性转换
         PayChannel payChannel = BeanUtils.toBean(channelDTO, PayChannel.class);
+        Long userId = UserContext.getUser();
+        payChannel.setCreater(userId);
+        payChannel.setUpdater(userId);
         // 2.保存
         save(payChannel);
         return payChannel.getId();
@@ -32,7 +36,14 @@ public class PayChannelServiceImpl extends ServiceImpl<PayChannelMapper, PayChan
     public void updatePayChannel(PayChannelDTO channelDTO) {
         // 1.属性转换
         PayChannel payChannel = BeanUtils.toBean(channelDTO, PayChannel.class);
+        payChannel.setUpdater(UserContext.getUser());
         // 2.保存
         updateById(payChannel);
+    }
+
+    @Override
+    public PayChannelDTO getPayChannelById(Long id) {
+        PayChannel channel = getById(id);
+        return  BeanUtils.toBean(channel, PayChannelDTO.class);
     }
 }

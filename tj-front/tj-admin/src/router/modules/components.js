@@ -285,6 +285,12 @@ export default [
         meta: { title: "对账管理" },
       },
       {
+        path: "channel",
+        name: "channel",
+        component: () => import("@/pages/reconciliation/channel.vue"),
+        meta: { title: "支付渠道管理" ,hidden: true  },
+      },
+      {
         path: "details/:id",
         name: "orderDetails",
         component: () => import("@/pages/order/details.vue"),
