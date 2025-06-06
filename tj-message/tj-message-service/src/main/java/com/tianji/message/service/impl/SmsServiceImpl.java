@@ -72,7 +72,14 @@ public class SmsServiceImpl implements ISmsService {
             try {
                 ISmsHandler smsHandler = smsHandlers.get(template.getPlatformCode());
                 //短信发送核心方法
-                log.info("验证码已发送：{}",smsInfoDTO.getTemplateParams().get("code"));
+                if(smsInfoDTO.getTemplateParams()==null){
+                    //消息微服务公告或通知内容发送
+                    log.info("公告已发送：{}",template.getContent());
+                }else{
+                    //短信发送
+                    log.info("验证码已发送：{}",smsInfoDTO.getTemplateParams().get("code"));
+                }
+
 //                smsHandler.send(smsInfoDTO, template);
                 return;
             } catch (Exception e) {

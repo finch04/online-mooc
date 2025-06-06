@@ -165,14 +165,11 @@ const reconciliationStatusData = [
 
 // ------生命周期------
 onMounted(() => {
-  init();
+  getList();
 });
 
 // ------定义方法------
-// 获取初始值
-const init = () => {
-  getList(); //获取对账列表数据
-};
+
 
 // 获取列表值
 const getList = async () => {
@@ -225,9 +222,7 @@ const handleCheck = (row) => {
 
 // 打开支付渠道管理页面
 const openChannelManagement = () => {
-  router.push({
-    path: "/order/channel"
-  });
+  router.push('/order/channel');
 };
 </script>
 

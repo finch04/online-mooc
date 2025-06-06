@@ -1,40 +1,37 @@
 <template>
     <div>
-        <!-- 操作按钮区域 -->
-        <div class="searchForm">
-            <el-button class="button primary" @click="handleAdd">
-                新增
-            </el-button>
-            <el-button class="button primary" @click="handleBack" style="float: right;">
-                返回
-            </el-button>
+        <div class="bg-wt radius marg-tp-20">
+            <!-- 操作按钮区域 -->
+            <div class="pad-30  searchForm">
+                    <el-button class="button primary" @click="handleAdd">
+                        新增
+                    </el-button>
+                    <el-button class="button primary" @click="handleBack" style="float: right;">
+                        返回
+                    </el-button>
+            </div>
         </div>
         <!-- 表格 -->
         <div class="bg-wt radius marg-tp-20">
             <div class="tableBox">
-                <el-table :data="baseData" border stripe v-loading="loading" :default-sort="{prop:'createTime',order:'descending'}">
+                <el-table :data="baseData" border stripe v-loading="loading"
+                    :default-sort="{ prop: 'createTime', order: 'descending' }">
                     <el-table-column type="index" align="center" width="100" label="序号" />
-                    <el-table-column label="渠道名称" prop="name" min-width="200" /> 
-                    <el-table-column label="渠道编码" prop="channelCode" min-width="150" /> 
-                    <el-table-column label="渠道优先级" prop="channelPriority" min-width="150" /> 
-                    <el-table-column label="渠道图标" min-width="150"> 
+                    <el-table-column label="渠道名称" prop="name" min-width="200" />
+                    <el-table-column label="渠道编码" prop="channelCode" min-width="150" />
+                    <el-table-column label="渠道优先级" prop="channelPriority" min-width="150" />
+                    <el-table-column label="渠道图标" min-width="150">
                         <template #default="scope">
                             <el-image :src="scope.row.channelIcon" alt=""></el-image>
                         </template>
                     </el-table-column>
-                    <el-table-column label="状态" prop="status" min-width="150"> 
+                    <el-table-column label="状态" prop="status" min-width="150">
                         <template #default="scope">
                             <el-tag v-if="scope.row.status === 1" type="success">使用中</el-tag>
                             <el-tag v-if="scope.row.status === 2" type="danger">停用</el-tag>
                         </template>
                     </el-table-column>
-                    <el-table-column
-                        fixed="right"
-                        label="操作"
-                        align="center"
-                        min-width="100"
-                        class-name="orderTable"
-                    >
+                    <el-table-column fixed="right" label="操作" align="center" min-width="100" class-name="orderTable">
                         <template #default="scope">
                             <div class="operate">
                                 <span class="textDefault" @click="handleEdit(scope.row)">
@@ -62,12 +59,10 @@
                     <el-input v-model.number="channelData.channelPriority" type="number"></el-input>
                 </el-form-item>
                 <el-form-item label="渠道图标">
-                    <UploadImage
-                        @getCoverUrl="(url) => channelData.channelIcon = url"
-                        @setUplad="(val) => channelData.channelIcon = ''"
-                        :upladImg="channelData.channelIcon"
-                        :isCourse="false"
-                    ></UploadImage>
+                    <UploadImage @getCoverUrl="(url) => channelData.channelIcon = url"
+                        @setUplad="(val) => channelData.channelIcon = ''" :upladImg="channelData.channelIcon"
+                        :isCourse="false">
+                    </UploadImage>
                 </el-form-item>
                 <el-form-item label="支付渠道状态">
                     <el-select v-model="channelData.status" placeholder="请选择">
@@ -87,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, reactive,onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 import { formatTime } from "@/utils/index";

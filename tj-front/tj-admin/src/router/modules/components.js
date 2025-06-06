@@ -145,7 +145,7 @@ export default [
     children: [
       {
         path: "index",
-        name: "message",
+        name: "index",
         component: () => import("@/pages/message/index.vue"),
         meta: { title: "消息管理" },
       },

@@ -30,7 +30,7 @@ public class PublicNoticeServiceImpl extends ServiceImpl<PublicNoticeMapper, Pub
         PublicNotice notice = new PublicNotice();
         notice.setTitle(noticeTemplate.getTitle());
         notice.setContent(noticeTemplate.getContent());
-        notice.setPushTime(now);
+        notice.setPushTime(LocalDateTime.now());
         notice.setType(noticeTemplate.getType());
         notice.setExpireTime(now.plusMonths(messageProperties.getNoticeTtlMonths()));
         save(notice);
