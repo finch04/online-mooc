@@ -18,7 +18,7 @@ public class Langchain4jConfig {
                 .baseUrl("http://localhost:11434/v1")
                 .apiKey("EMPTY")
                 .maxTokens(1000)
-                .temperature(0d)
+                .temperature(0.4)
                 .timeout(Duration.ofSeconds(15))
                 .modelName("deepseek-r1:1.5b")
                 .maxRetries(3)
@@ -31,7 +31,7 @@ public class Langchain4jConfig {
                 .baseUrl("http://localhost:11434/v1")
                 .apiKey("EMPTY")
                 .maxTokens(1000)
-                .temperature(0d)
+                .temperature(0.7)
                 .timeout(Duration.ofSeconds(15))
                 .modelName("deepseek-r1:1.5b")
                 .build();

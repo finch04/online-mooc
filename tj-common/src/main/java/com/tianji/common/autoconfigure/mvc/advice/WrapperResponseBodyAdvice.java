@@ -25,7 +25,9 @@ public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             Object body, @NonNull MethodParameter returnType, @NonNull MediaType selectedContentType,
             @NonNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
             @NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response) {
-        if (request.getURI().getPath().equals("/v2/api-docs")){
+        if (request.getURI().getPath().equals("/v2/api-docs")
+       || MediaType.TEXT_EVENT_STREAM.includes(selectedContentType)){
+            //如果是文档接口或SSE接口，就不管。（主要是为AI对话配置）
             return body;
         }
         if (body == null) {

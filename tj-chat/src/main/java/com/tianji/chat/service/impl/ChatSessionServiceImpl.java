@@ -7,6 +7,7 @@ import com.tianji.chat.mapper.ChatSessionMapper;
 import com.tianji.chat.service.IChatSessionService;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.model.output.Response;
@@ -43,41 +44,49 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     private final AiConfig.KnowledgeAdvisor knowledgeAdvisor;
     private final EmbeddingStore<TextSegment> embeddingStore;
     private final StreamingChatLanguageModel streamingChatLanguageModel;
+    private final ChatLanguageModel chatLanguageModel;
 
     @Autowired
     public ChatSessionServiceImpl(@Lazy AiConfig.AssistantRedis assistantRedis,
                                   @Lazy AiConfig.KnowledgeAdvisor knowledgeAdvisor,
                                   @Lazy EmbeddingStore<TextSegment> embeddingStore,
-                                  StreamingChatLanguageModel streamingChatLanguageModel) {
+                                  StreamingChatLanguageModel streamingChatLanguageModel,
+                                  ChatLanguageModel chatLanguageModel) {
         this.assistantRedis = assistantRedis;
         this.knowledgeAdvisor = knowledgeAdvisor;
         this.embeddingStore = embeddingStore;
         this.streamingChatLanguageModel = streamingChatLanguageModel;
+        this.chatLanguageModel=chatLanguageModel;
     }
 
 
     @Override
     public String chat(String memoryId, String message) {
-        return assistantRedis.chat(memoryId, message);
-
+         assistantRedis.chat(memoryId, message);
+         return chatLanguageModel.generate(message);
     }
 
     @Override
     public Flux<String> stream(String memoryId, String message) {
-
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
 
         streamingChatLanguageModel.generate(message, new dev.langchain4j.model.StreamingResponseHandler() {
             @Override
             public void onNext(String s) {
-                for (int i = 0; i < s.length(); i++) {
-                    sink.tryEmitNext(String.valueOf(s.charAt(i)));
+                // 检查特殊字符
+                if("\n".equals(s)) {
+                    System.out.println("收到换行符");
+                } else if(s.contains(" ")) {
+                    System.out.println("收到包含空格的内容: " + s);
                 }
+
+                // 格式化并发送 SSE 消息
+                sink.tryEmitNext(formatSseMessage(s));
             }
 
             @Override
-            public void onComplete(Response response) { // 在完成时发送 [DONE] 事件
-                sink.tryEmitNext("[DONE]");
+            public void onComplete(Response response) {
+                sink.tryEmitNext(formatSseMessage("[DONE]"));
                 sink.tryEmitComplete();
             }
 
@@ -88,6 +97,12 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         });
 
         return sink.asFlux();
+    }
+
+    private String formatSseMessage(String data) {
+        // 处理换行符
+        data =data.replace(" ", "&nbsp;");
+        return data.replace("\n", "\ndata: ") + "\n\n";
     }
 
 //    @Override

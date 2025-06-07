@@ -31,7 +31,7 @@ public class ChatController {
     @GetMapping(value = "/assistant/redis/stream",  produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> memoryChatRedisStream(@RequestParam(defaultValue = "我叫finch") String message,
                                               @RequestParam(defaultValue = "1") String memoryId) {
-            return chatSessionService.stream(memoryId, message);
+        return chatSessionService.stream(memoryId, message);
     }
 
 //    @GetMapping(value = "file/stream", produces = "text/stream;charset=UTF-8")

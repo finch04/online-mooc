@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.service.IChatSessionService;
 import com.tianji.chat.utils.DataDelayTaskHandler;
+import com.tianji.common.utils.UserContext;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     private static final String REDIS_PREFIX = "chat:memory:";
 
     private String getKey(Object memoryId) {
-        return REDIS_PREFIX + "37:" + memoryId;
+        return REDIS_PREFIX + UserContext.getUser() + memoryId;
     }
 
     @Override
@@ -54,7 +55,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
             }
             // 获取不到对话历史，则从数据库中获取
             List<ChatSession> chatSessionList = chatSessionService.lambdaQuery()
-                    .eq(ChatSession::getUserId, 37L)
+                    .eq(ChatSession::getUserId, UserContext.getUser())
                     .eq(ChatSession::getSessionId, memoryId)
                     .orderByAsc(ChatSession::getSegmentIndex)
                     .list();

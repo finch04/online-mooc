@@ -26,8 +26,8 @@
                             <span class="dot"></span>
                             <span class="dot"></span>
                         </div>
-                          <!-- 添加复制图标按钮 -->
-                          <button @click="copyMessage(msg.processedContent)" class="copyButton">
+                        <!-- 添加复制图标按钮 -->
+                        <button @click="copyMessage(msg.processedContent)" class="copyButton">
                             <CopyDocument />
                         </button>
                     </div>
@@ -35,12 +35,10 @@
             </div>
             <!-- 输入框和发送按钮 -->
             <div class="inputArea fx">
-                <input type="text" v-model="inputMessage" placeholder="请输入聊天内容" @keyup.enter="sendMessage(isStreamMode)"
+                <input type="text" v-model="inputMessage" placeholder="请输入聊天内容" @keyup.enter="sendMessage"
                     :disabled="isLoading">
                 <div class="buttonGroup">
-                    <button @click="toggleStreamMode(false)" :class="{ active: !isStreamMode }">普通聊天</button>
-                    <button @click="toggleStreamMode(true)" :class="{ active: isStreamMode }">流式聊天</button>
-                    <button @click="sendMessage(isStreamMode)" :disabled="isLoading || !inputMessage">发送</button>
+                    <button @click="sendMessage" :disabled="isLoading || !inputMessage">发送</button>
                     <button @click="stopStream" v-if="isStreaming" class="stopButton">停止</button>
                 </div>
             </div>
@@ -65,23 +63,12 @@ const inputMessage = ref('');
 const chatMessages = ref(null);
 // 是否正在加载
 const isLoading = ref(false);
-// 当前是否为流式模式
-const isStreamMode = ref(true);
 // 是否正在流式传输
 const isStreaming = ref(false);
 // 中止控制器
 const abortController = ref(null); // 初始化为 null
 // 结束标识
 const END_FLAG = '[END]';
-
-// 切换流式模式
-const toggleStreamMode = (mode) => {
-    isStreamMode.value = mode;
-    ElMessage({
-        message: `已切换到${mode ? '流式' : '普通'}聊天模式`,
-        type: 'success'
-    });
-};
 
 // 停止流式传输
 const stopStream = () => {
@@ -103,7 +90,7 @@ const stopStream = () => {
     }
 };
 
-const sendMessage = async (isStream) => {
+const sendMessage = async () => {
     if (!inputMessage.value.trim()) {
         ElMessage.error('请输入聊天内容');
         return;
@@ -119,127 +106,99 @@ const sendMessage = async (isStream) => {
 
     await scrollToBottom();
     try {
-        if (isStream) {
-            isStreaming.value = true;
-            // 添加占位消息
-            chatHistory.value.push({
-                type: 'assistant',
-                content: '',
-                isTyping: true,
-                showMarkdown: false,
-                processedContent: '',
-                thinkingContent: ''
-            });
+        isStreaming.value = true;
+        // 添加占位消息
+        chatHistory.value.push({
+            type: 'assistant',
+            content: '',
+            isTyping: true,
+            showMarkdown: false,
+            processedContent: '',
+            thinkingContent: ''
+        });
 
-            const assistantMessage = chatHistory.value[chatHistory.value.length - 1];
-            let content = '';
-            let thinkingContent = '';
-            let inThinkingTag = false;
-            let partialTag = '';
-            const AI_API_PREFIX = "http://localhost:10010/ct";
+        const assistantMessage = chatHistory.value[chatHistory.value.length - 1];
+        let content = '';
+        let thinkingContent = '';
+        let inThinkingTag = false;
+        const AI_API_PREFIX = "http://localhost:10010/ct";
 
-            // 构建查询参数
-            const queryParams = new URLSearchParams();
-            queryParams.append('message', userMessage);
-            queryParams.append('memoryId', '1');
+        // 构建查询参数
+        const queryParams = new URLSearchParams();
+        queryParams.append('message', userMessage);
+        queryParams.append('memoryId', '1');
 
-            abortController.value = new AbortController(); // 每次请求前重置 abortController
+        abortController.value = new AbortController(); // 每次请求前重置 abortController
 
-            await fetchEventSource(`${AI_API_PREFIX}/chat/assistant/redis/stream?${queryParams.toString()}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'text/event-stream'
-                },
-                signal: abortController.value.signal,
-                openWhenHidden: true, // 保持连接即使页面不可见
+        await fetchEventSource(`${AI_API_PREFIX}/chat/assistant/redis/stream?${queryParams.toString()}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/event-stream'
+            },
+            signal: abortController.value.signal,
+            openWhenHidden: true, // 保持连接即使页面不可见
 
-                onopen(response) {
-                    if (!response.ok || response.headers.get('content-type') !== 'text/event-stream') {
-                        throw new Error(`请求失败: ${response.status}`);
-                    }
-                },
-
-                onmessage(msg) {
-                    // 后端主动关闭时会发送[DONE]事件
-                    if (msg.data === '[DONE]') {
-                        assistantMessage.isTyping = false;
-                        isStreaming.value = false;
-                        abortController.value.abort(); // 主动关闭连接
-                        console.log('SSE 数据接收完成');
-                        return;
-                    }
-
-                    if (msg.data) {
-                        for (let i = 0; i < msg.data.length; i++) {
-                            const char = msg.data[i];
-                            partialTag += char;
-
-                            if (partialTag === '<think>') {
-                                inThinkingTag = true;
-                                partialTag = '';
-                            } else if (partialTag === '</think>') {
-                                inThinkingTag = false;
-                                partialTag = '';
-                                assistantMessage.thinkingContent = thinkingContent;
-                                thinkingContent = '';
-                            } else if (inThinkingTag) {
-                                if (!'</think>'.startsWith(partialTag)) {
-                                    thinkingContent += partialTag;
-                                    assistantMessage.thinkingContent = thinkingContent;
-                                    partialTag = '';
-                                }
-                            } else {
-                                if (!'<think>'.startsWith(partialTag)) {
-                                    content += partialTag;
-                                    const processed = processContent(content);
-                                    assistantMessage.processedContent = processed.content;
-                                    assistantMessage.showMarkdown = processed.showMarkdown;
-                                    partialTag = '';
-                                }
-                            }
-                        }
-                        scrollToBottom();
-                    }
-                },
-
-                onclose() {
-                    // 连接关闭时清理状态
-                    assistantMessage.isTyping = false;
-                    isStreaming.value = false;
-                },
-
-                onerror(err) {
-                    console.error('流式传输错误:', err);
-                    // 不自动重试
-                    assistantMessage.isTyping = false;
-                    isStreaming.value = false;
-                    if (abortController.value) {
-                        abortController.value.abort();
-                    }
-
-                    // 只有非主动中断的错误才显示
-                    if (err.name !== 'AbortError') {
-                        assistantMessage.content = '对话出错: ' + (err.message || '连接中断');
-                    }
+            onopen(response) {
+                if (!response.ok || response.headers.get('content-type') !== 'text/event-stream') {
+                    throw new Error(`请求失败: ${response.status}`);
                 }
-            });
-        } else {
-            // 普通聊天处理
-            const response = await memoryChatRedis({
-                message: userMessage,
-                memoryId: '1'
-            });
+            },
 
-            const processed = processContent(response.data);
-            chatHistory.value.push({
-                type: 'assistant',
-                content: response.data,
-                isTyping: false,
-                showMarkdown: processed.showMarkdown,
-                processedContent: processed.content,
-                thinkingContent: processed.thinkingContent
-            });
-        }
+            onmessage(msg) {
+                // 后端主动关闭时会发送[DONE]事件
+                if (msg.data === '[DONE]') {
+                    assistantMessage.isTyping = false;
+                    isStreaming.value = false;
+                    abortController.value.abort(); // 主动关闭连接
+                    console.log('SSE 数据接收完成');
+                    return;
+                }
+
+                if (msg.data) {
+                    if (msg.data === '<think>') {
+                        inThinkingTag = true;
+                    } else if (msg.data === '</think>') {
+                        inThinkingTag = false;
+                        assistantMessage.thinkingContent = thinkingContent;
+                        thinkingContent = '';
+                    } else if (inThinkingTag) {
+                        thinkingContent += msg.data;
+                        assistantMessage.thinkingContent = thinkingContent;
+                    } else {
+                        // const responseDiv = document.getElementById('response');
+                        // const preElement = document.createElement('pre');
+                        // preElement.textContent =msg.data;
+                        // responseDiv.appendChild(preElement);
+                        content += msg.data;
+                        const processed = processContent(content);
+                        assistantMessage.processedContent = processed.content;
+                        assistantMessage.showMarkdown = processed.showMarkdown;
+                    }
+                    scrollToBottom();
+                }
+            },
+
+            onclose() {
+                // 连接关闭时清理状态
+                assistantMessage.isTyping = false;
+                isStreaming.value = false;
+            },
+
+            onerror(err) {
+                console.error('流式传输错误:', err);
+                // 不自动重试
+                assistantMessage.isTyping = false;
+                isStreaming.value = false;
+                if (abortController.value) {
+                    abortController.value.abort();
+                }
+
+                // 只有非主动中断的错误才显示
+                if (err.name !== 'AbortError') {
+                    assistantMessage.content = '对话出错: ' + (err.message || '连接中断');
+                }
+            }
+        });
     } catch (error) {
         console.error('请求失败:', error);
         if (error.name !== 'AbortError') {
@@ -481,44 +440,20 @@ onMounted(() => {
             height: 45px;
             border: none;
             border-radius: 8px;
-            background-color: #e0e0e0;
-            color: #333;
+            background-color: #007BFF;
+            color: white;
             margin-left: 10px;
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
 
             &:hover {
-                background-color: #d0d0d0;
-            }
-
-            &.active {
-                background-color: #007BFF;
-                color: white;
-
-                &:hover {
-                    background-color: #0056b3;
-                }
+                background-color: #0056b3;
             }
 
             &:disabled {
-                background-color: #e0e0e0;
-                color: #aaa;
+                background-color: #a0c4ff;
                 cursor: not-allowed;
-            }
-
-            &:last-child {
-                background-color: #007BFF;
-                color: white;
-
-                &:hover {
-                    background-color: #0056b3;
-                }
-
-                &:disabled {
-                    background-color: #a0c4ff;
-                    cursor: not-allowed;
-                }
             }
         }
     }
