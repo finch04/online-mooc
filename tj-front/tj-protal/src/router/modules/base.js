@@ -19,6 +19,12 @@ export default [
         name: 'coupon',
         component: () => import('@/pages/main/coupon.vue'),
         meta: { title: '首页' },
+      },
+      {
+        path: 'ai',
+        name: 'ai',
+        component: () => import('@/pages/main/ai.vue'),
+        meta: { title: '首页' },
       }
     ],
   },

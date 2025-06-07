@@ -330,6 +330,8 @@ import userStatistics from './components/userStatistics.vue' // 引入用户统�
 import popularCourses from './components/popularCourses.vue' // 引入热门课程组件
 import TableSwitchBar from "./components/TableSwitch.vue" // 切换top10表格
 import iconImg from  '@/assets/img_touxiang_small@2x.png'
+
+
 // 数组
 const messageData = [
   {

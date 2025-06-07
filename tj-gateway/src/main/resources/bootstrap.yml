@@ -88,6 +88,10 @@ spring:
           uri: lb://live-service
           predicates:
             - Path=/lv/**
+        - id: ct
+          uri: lb://chat-service
+          predicates:
+            - Path=/ct/**
       default-filters:
         - StripPrefix=1
       globalcors: # 全局的跨域处理

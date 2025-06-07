@@ -25,6 +25,7 @@
         <module>tj-remark</module>
         <module>tj-promotion</module>
         <module>tj-live</module>
+        <module>tj-chat</module>
     </modules>
     <packaging>pom</packaging>
 

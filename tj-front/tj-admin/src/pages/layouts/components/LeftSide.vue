@@ -97,6 +97,7 @@ const getMenuList = (list, basePath) => {
 const basePath = getMenuList(routers)
 // 进入导航
 const goPath = (path) => {
+  console.log(path)
   useStore.setTabNumber(0)
   router.push(path)
 }
