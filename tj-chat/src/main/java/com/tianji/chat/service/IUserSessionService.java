@@ -2,6 +2,7 @@ package com.tianji.chat.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tianji.chat.domain.po.ChatSession;
+import com.tianji.chat.domain.po.UserSession;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -14,13 +15,12 @@ import java.util.List;
  * @author lusy
  * @since 2025-05-06
  */
-public interface IChatSessionService extends IService<ChatSession> {
+public interface IUserSessionService extends IService<UserSession> {
 
-    String chat(String sessionId, String message);
 
-    Flux<String> stream(String sessionId, String message);
+    void createUserSession(Long userId);
 
-    List<ChatSession> getRecord(String sessionId);
+    void deleteUserSession(Long id);
 
-//    Flux<String> FileStream(String memoryId, String message);
+    List<UserSession> getUserSessionList();
 }

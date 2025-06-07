@@ -2,6 +2,7 @@ package com.tianji.chat.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Builder;
 import lombok.Data;
@@ -12,23 +13,19 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 聊天对话的每个片段记录（分片存储）
+ * 用户与会话关联表
  * </p>
  *
- * @author lusy
- * @since 2025-05-06
+ * @author [你的名字]
+ * @since [具体日期]
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@Builder
-@TableName("chat_session")
-public class ChatSession {
+@TableName("user_session")
+public class UserSession {
 
-    /**
-     * 聊天记录id
-     */
-    @TableId(value = "id", type =IdType.ASSIGN_ID)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -42,19 +39,8 @@ public class ChatSession {
     private String sessionId;
 
     /**
-     * 会话片段序号，从0开始
-     */
-    private Integer segmentIndex;
-
-    /**
-     * 消息内容，JSON 格式，包含 role、type、text 等
-     */
-    private String content;
-
-    /**
-     * 插入时间
+     * 创建时间
      */
     private LocalDateTime createdAt;
-
 
 }

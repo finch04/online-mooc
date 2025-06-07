@@ -36,10 +36,16 @@ tj:
     resource:
       enable: true
       excludeLoginPaths:
-        # 测试用
-        - /chat/assistant/redis
-        - /chat/assistant/redis/stream
   mq:
     listener:
       retry:
         stateless: false # mq开启无状态
+langchain4j:
+  base-url: http://localhost:11434/v1  #本地ollama
+  api-key: EMPTY
+  max-tokens: 1000
+  timeout-seconds: 15
+  model-name: deepseek-r1:1.5b
+  max-retries: 3
+  chat-model-temperature: 0.4
+  streaming-chat-model-temperature: 0.7

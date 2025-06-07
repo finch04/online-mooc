@@ -1,4 +1,4 @@
-package com.tianji.chat.domain.po;
+package com.tianji.chat.domain.vo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -21,14 +21,11 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@Builder
-@TableName("chat_session")
-public class ChatSession {
+public class ChatSessionVO {
 
     /**
      * 聊天记录id
      */
-    @TableId(value = "id", type =IdType.ASSIGN_ID)
     private Long id;
 
     /**

@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.service.IChatSessionService;
+import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.tianji.chat.constants.RedisConstants.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -31,10 +34,6 @@ public class DataDelayTaskHandler {
     private final StringRedisTemplate redisTemplate;
 
     private final IChatSessionService chatSessionService;
-
-    private final String DELAY_QUEUE = "chat-delay-queue";
-
-    private final String RETRY_QUEUE = "chat-retry-blocking";
 
     private static volatile boolean begin = true;
 
@@ -51,12 +50,12 @@ public class DataDelayTaskHandler {
     }
 
     public void handleDelayTask() {
-        RBlockingQueue<String> queue = redissonClient.getBlockingQueue(DELAY_QUEUE);
+        RBlockingQueue<String> queue = redissonClient.getBlockingQueue(CHAT_DELAY_QUEUE);
         handleTask(queue);
     }
 
     public void handleRetryTask() {
-        RBlockingQueue<String> retryQueue = redissonClient.getBlockingQueue(RETRY_QUEUE);
+        RBlockingQueue<String> retryQueue = redissonClient.getBlockingQueue(CHAT_RETRY_QUEUE);
         handleTask(retryQueue);
     }
 
@@ -98,7 +97,7 @@ public class DataDelayTaskHandler {
 
                 for (int i = index + 1; i < contentList.size(); i++) {
                     ChatSession chatSession = ChatSession.builder()
-                            .userId(37L)
+                            .userId(Long.valueOf(split[2]))
                             .sessionId(split[3])
                             .segmentIndex(i)
                             .content(contentList.get(i))
@@ -134,14 +133,14 @@ public class DataDelayTaskHandler {
 
 
     public void addDelayedTask(String task, long delay, TimeUnit unit) {
-        RBlockingQueue<String> blockingQueue = redissonClient.getBlockingQueue(DELAY_QUEUE);
+        RBlockingQueue<String> blockingQueue = redissonClient.getBlockingQueue(CHAT_DELAY_QUEUE);
         RDelayedQueue<String> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
         delayedQueue.offer(task, delay, unit);
     }
 
     private void addRetryTask(String task) {
 
-        RBlockingQueue<String> retryBlockingQueue = redissonClient.getBlockingQueue(RETRY_QUEUE);
+        RBlockingQueue<String> retryBlockingQueue = redissonClient.getBlockingQueue(CHAT_RETRY_QUEUE);
         RDelayedQueue<String> retryDelayedQueue = redissonClient.getDelayedQueue(retryBlockingQueue);
         retryDelayedQueue.offer(task, 10, TimeUnit.SECONDS);
     }

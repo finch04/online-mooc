@@ -1,10 +1,12 @@
 package com.tianji.chat.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.chat.config.AiConfig;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.mapper.ChatSessionMapper;
 import com.tianji.chat.service.IChatSessionService;
+import com.tianji.common.utils.UserContext;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -61,13 +63,19 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
 
 
     @Override
-    public String chat(String memoryId, String message) {
-         assistantRedis.chat(memoryId, message);
+    public String chat(String sessionId, String message) {
+         assistantRedis.chat(sessionId, message);
+
          return chatLanguageModel.generate(message);
     }
 
     @Override
-    public Flux<String> stream(String memoryId, String message) {
+    public Flux<String> stream(String sessionId, String message) {
+        if(UserContext.getUser()==null){
+            return Flux.error(new RuntimeException("请先登录"));
+        }
+        assistantRedis.chat(sessionId, message);
+
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
 
         streamingChatLanguageModel.generate(message, new dev.langchain4j.model.StreamingResponseHandler() {
@@ -79,7 +87,6 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                 } else if(s.contains(" ")) {
                     System.out.println("收到包含空格的内容: " + s);
                 }
-
                 // 格式化并发送 SSE 消息
                 sink.tryEmitNext(formatSseMessage(s));
             }
@@ -105,53 +112,9 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         return data.replace("\n", "\ndata: ") + "\n\n";
     }
 
-//    @Override
-//    public Flux<String> FileStream(String memoryId, String message) {
-//        // 1. 向量化问题
-//        Embedding queryEmbedding = embeddingModel.embed(message).content();
-//
-//        // 2. 查询向量数据库
-//        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
-//                .queryEmbedding(queryEmbedding)
-//                .filter(metadataKey("userId").isEqualTo(37L))
-//                .maxResults(3)
-//                .minScore(0.7)
-//                .build();
-//
-//        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(request).matches();
-//
-//        for (EmbeddingMatch<TextSegment> match : matches) {
-//            System.out.println("匹配得分: " + match.score());
-//            System.out.println("匹配内容:\n" + match.embedded().text());
-//        }
-//
-//        // 3. 拼接 context 参考材料
-//        String context = matches.stream()
-//                .map(match -> "- " + match.embedded().text())
-//                .collect(Collectors.joining("\n"));
-//
-//        // 4. 构造一个增强版问题（加入 context）
-//       String enhancedQuestion = String.format(
-//            "以下是一些参考资料：\n" +
-//            "%s\n" +
-//            "\n" +
-//            "请根据上面的资料回答这个问题：%s\n" +
-//            "回答时请注意以下几点：\n" +
-//            "1. 不要提到信息来源或对背景知识做任何评价。\n" +
-//            "2. 背景内容可能包含与问题无关的信息，你需要自行判断哪些内容是有用的。\n" +
-//            "3. 如果完全没有相关信息，可以根据常识推断并在最后加一句：‘回答来源于网络，请您自行甄别哦~’",
-//            context, message
-//       );
-//
-//
-//        // 5. 调用你已经实现的 LLM 接口
-//        TokenStream advise = knowledgeAdvisor.advise(memoryId, enhancedQuestion);
-//
-//        return Flux.create(fluxSink -> {
-//            advise.onPartialResponse(fluxSink::next)
-//                    .onCompleteResponse(chatResponse -> fluxSink.complete())
-//                    .onError(fluxSink::error)
-//                    .start();
-//        });
-//    }
+    @Override
+    public List<ChatSession> getRecord(String sessionId) {
+        LambdaQueryWrapper<ChatSession> wrapper =  new LambdaQueryWrapper<>();
+        return baseMapper.selectList(wrapper);
+    }
 }

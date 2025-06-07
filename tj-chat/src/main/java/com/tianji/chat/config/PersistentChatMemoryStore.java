@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.tianji.chat.constants.RedisConstants.*;
 import static dev.langchain4j.data.message.ChatMessageDeserializer.messagesFromJson;
 import static dev.langchain4j.data.message.ChatMessageSerializer.messageToJson;
 
@@ -38,16 +39,16 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-    private static final String REDIS_PREFIX = "chat:memory:";
 
-    private String getKey(Object memoryId) {
-        return REDIS_PREFIX + UserContext.getUser() + memoryId;
+    private String getKey(Object sessionId) {
+        //示例：chat:memory:2:1
+        return CHAT_MEMORY_KEY_PREFIX + UserContext.getUser()+":"+ sessionId ;
     }
 
     @Override
-    public List<ChatMessage> getMessages(Object memoryId) {
+    public List<ChatMessage> getMessages(Object sessionId) {
         try {
-            List<String> messageList = redisTemplate.opsForList().range(getKey(memoryId), 0, -1);
+            List<String> messageList = redisTemplate.opsForList().range(getKey(sessionId), 0, -1);
 
             if (CollUtil.isNotEmpty(messageList)) {
                 String json = messageList.toString();
@@ -56,7 +57,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
             // 获取不到对话历史，则从数据库中获取
             List<ChatSession> chatSessionList = chatSessionService.lambdaQuery()
                     .eq(ChatSession::getUserId, UserContext.getUser())
-                    .eq(ChatSession::getSessionId, memoryId)
+                    .eq(ChatSession::getSessionId, sessionId)
                     .orderByAsc(ChatSession::getSegmentIndex)
                     .list();
 
@@ -70,7 +71,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
                 List<String> finalMessageList = messageList;
                 executorService.submit(() -> {
                     try {
-                        redisTemplate.opsForList().rightPushAll(getKey(memoryId), finalMessageList);
+                        redisTemplate.opsForList().rightPushAll(getKey(sessionId), finalMessageList);
                     } catch (Exception e) {
                         log.error("同步数据库到 Redis 失败", e);
                     }
@@ -87,18 +88,18 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     }
 
     @Override
-    public void updateMessages(Object memoryId, List<ChatMessage> messages) {
+    public void updateMessages(Object sessionId, List<ChatMessage> messages) {
         if (messages == null || messages.isEmpty()) {
             return;
         }
         try {
             // 将最新的一条数据存储到Redis中
             String json = messageToJson(messages.get(messages.size() - 1));
-            redisTemplate.opsForList().rightPush(getKey(memoryId), json);
+            redisTemplate.opsForList().rightPush(getKey(sessionId), json);
             // 开启延时任务
             // 封装实体类
             Map<String, Object> map = new HashMap<>();
-            map.put("key", getKey(memoryId));
+            map.put("key", getKey(sessionId));
             map.put("num", messages.size());
             String jsonStr = JSONUtil.toJsonStr(map);
             dataDelayTaskHandler.addDelayedTask(jsonStr, 1, TimeUnit.MINUTES);
@@ -108,9 +109,9 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     }
 
     @Override
-    public void deleteMessages(Object memoryId) {
+    public void deleteMessages(Object sessionId) {
         try {
-            redisTemplate.delete(getKey(memoryId));
+            redisTemplate.delete(getKey(sessionId));
         } catch (Exception e) {
             log.error("删除对话历史失败", e);
         }

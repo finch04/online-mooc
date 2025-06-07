@@ -116,7 +116,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-
+        <!--auth-sdk-->
+        <dependency>
+            <groupId>com.tianji</groupId>
+            <artifactId>tj-auth-resource-sdk</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>dev.langchain4j</groupId>-->
 <!--            <artifactId>langchain4j-community-dashscope-spring-boot-starter</artifactId>-->
