@@ -24,7 +24,7 @@
                         <div class="assistantMessage" v-else>
                             <div class="thinking" v-if="msg.thinkingContent">
                                 <div class="thinkingLabel">AI思考中...</div>
-                               <div v-html="md.render(msg.thinkingContent)" class="thinkingContent"></div>
+                                <div v-html="md.render(msg.thinkingContent)" class="thinkingContent"></div>
                             </div>
                             <div class="messageContent" v-if="msg.showMarkdown">
                                 <div v-html="msg.processedContent"></div>
@@ -120,7 +120,6 @@ const fetchUserSessionList = async () => {
     }
 };
 
-
 // 选择会话
 const selectSession = async (sessionId) => {
     selectedSessionId.value = sessionId;
@@ -129,6 +128,13 @@ const selectSession = async (sessionId) => {
     try {
         const response = await getChatRecord({sessionId:sessionId, pageNo:currentPage.value, pageSize:pageSize.value});
         const records = response.data.list; // 从响应对象中提取 data 属性
+         // 按照 segmentIndex 从小到大排序
+        records.sort((a, b) => {
+                const segmentIndexA = a.segmentIndex || 0;
+                const segmentIndexB = b.segmentIndex || 0;
+                return segmentIndexB - segmentIndexA;
+        });
+
         const newHistory = records.map(record => {
             const content = JSON.parse(record.content);
             let type = '';
@@ -251,11 +257,13 @@ const sendMessage = async () => {
                         inThinkingTag = true;
                     } else if (msg.data === '</think>') {
                         inThinkingTag = false;
+                        if (thinkingContent.trim() === '') {
+                            thinkingContent = '';
+                        }
                         assistantMessage.thinkingContent = thinkingContent;
                         thinkingContent = '';
                     } else if (inThinkingTag) {
                         thinkingContent += msg.data;
-                        assistantMessage.thinkingContent = thinkingContent;
                     } else {
                         content += msg.data;
                         const processed = processContent(content);
@@ -339,6 +347,12 @@ const handleScroll = async () => {
         try {
             const response = await getChatRecord({sessionId:selectedSessionId.value, pageNo:currentPage.value, pageSize:pageSize.value});
             const records = response.data.list;
+            // 按照 segmentIndex 从小到大排序
+            records.sort((a, b) => {
+                    const segmentIndexA = a.segmentIndex || 0;
+                    const segmentIndexB = b.segmentIndex || 0;
+                    return segmentIndexB - segmentIndexA;
+            });
             if (records.length > 0) {
                 const newHistory = records.map(record => {
                     const content = JSON.parse(record.content);
@@ -386,11 +400,17 @@ const processContent = (content) => {
     if (thinkStartIndex !== -1 && thinkEndIndex !== -1) {
         // 提取思考内容
         thinkingContent = content.slice(thinkStartIndex + thinkStart.length, thinkEndIndex);
+        if (thinkingContent.trim() === '') {
+            thinkingContent = '';
+        }
         // 处理主要内容
         processedContent = content.slice(0, thinkStartIndex) + content.slice(thinkEndIndex + thinkEnd.length);
     } else if (thinkStartIndex !== -1) {
         // 只有开始标签没有结束标签
         thinkingContent = content.slice(thinkStartIndex + thinkStart.length);
+        if (thinkingContent.trim() === '') {
+            thinkingContent = '';
+        }
         processedContent = content.slice(0, thinkStartIndex);
     }
 
