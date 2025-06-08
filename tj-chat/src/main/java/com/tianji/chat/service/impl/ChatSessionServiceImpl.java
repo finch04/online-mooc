@@ -1,13 +1,18 @@
 package com.tianji.chat.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.chat.config.AiConfig;
 import com.tianji.chat.domain.po.ChatSession;
+import com.tianji.chat.domain.query.RecordQuery;
 import com.tianji.chat.mapper.ChatSessionMapper;
 import com.tianji.chat.service.IChatSessionService;
+import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.utils.UserContext;
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -81,6 +86,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         streamingChatLanguageModel.generate(message, new dev.langchain4j.model.StreamingResponseHandler() {
             @Override
             public void onNext(String s) {
+                log.info("{}",s);
                 // 检查特殊字符
                 if("\n".equals(s)) {
                     System.out.println("收到换行符");
@@ -95,6 +101,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
             public void onComplete(Response response) {
                 sink.tryEmitNext(formatSseMessage("[DONE]"));
                 sink.tryEmitComplete();
+                log.info("数据接收完成！");
             }
 
             @Override
@@ -113,8 +120,10 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     }
 
     @Override
-    public List<ChatSession> getRecord(String sessionId) {
-        LambdaQueryWrapper<ChatSession> wrapper =  new LambdaQueryWrapper<>();
-        return baseMapper.selectList(wrapper);
+    public PageDTO<ChatSession> getRecord(RecordQuery query) {
+        Page<ChatSession> page = this.lambdaQuery()
+                .eq(ChatSession::getSessionId,query.getSessionId())
+                .eq(ChatSession::getUserId,UserContext.getUser()).page(query.toMpPageDefaultSortByCreateTimeDesc());
+        return PageDTO.of(page);
     }
 }

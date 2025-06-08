@@ -1,7 +1,9 @@
 package com.tianji.chat.controller;
 
 import com.tianji.chat.domain.po.ChatSession;
+import com.tianji.chat.domain.query.RecordQuery;
 import com.tianji.chat.service.IChatSessionService;
+import com.tianji.common.domain.dto.PageDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +42,9 @@ public class ChatController {
     }
 
     @ApiOperation("获取聊天记录")
-    @GetMapping("/{id}")
-    public List<ChatSession> getRecord(@PathVariable("id") String sessionId) {
-        return chatSessionService.getRecord(sessionId);
+    @GetMapping("/records")
+    public PageDTO<ChatSession> getRecord(RecordQuery query) {
+        return chatSessionService.getRecord(query);
     }
 
 }

@@ -1,8 +1,10 @@
 package com.tianji.chat.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tianji.chat.domain.dto.UserSessionDTO;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.domain.po.UserSession;
+import com.tianji.common.domain.query.PageQuery;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -18,9 +20,11 @@ import java.util.List;
 public interface IUserSessionService extends IService<UserSession> {
 
 
-    void createUserSession(Long userId);
+    void createUserSession(UserSessionDTO dto);
 
     void deleteUserSession(Long id);
 
     List<UserSession> getUserSessionList();
+
+    void updateUserSession( Long id,UserSessionDTO dto);
 }

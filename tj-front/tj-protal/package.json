@@ -20,6 +20,8 @@
     "axios": "^0.27.2",
     "element-china-area-data": "^6.1.0",
     "element-plus": "^2.2.9",
+    "katex": "^0.16.22",
+    "markdown-it-katex": "^2.0.3",
     "moment": "^2.29.4",
     "nprogress": "^0.2.0",
     "pinia": "^2.0.15",

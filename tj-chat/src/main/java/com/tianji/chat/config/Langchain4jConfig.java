@@ -4,6 +4,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
+import dev.langchain4j.service.SystemMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +37,7 @@ public class Langchain4jConfig {
 
     @Value("${langchain4j.streaming-chat-model-temperature}")
     private double streamingChatModelTemperature;
-
+    @SystemMessage("你叫小美，是一个智能助手")
     @Bean
     public ChatLanguageModel qwenChatModel() {
         return OpenAiChatModel.builder()
@@ -50,6 +51,7 @@ public class Langchain4jConfig {
                 .build();
     }
 
+    @SystemMessage("你叫小明，是一个智能助手")
     @Bean
     public StreamingChatLanguageModel qwenStreamingChatModel() {
         return OpenAiStreamingChatModel.builder()

@@ -4,8 +4,9 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.tianji.chat.domain.po.ChatSession;
+import com.tianji.chat.domain.po.UserSession;
 import com.tianji.chat.service.IChatSessionService;
-import com.tianji.common.utils.UserContext;
+import com.tianji.chat.service.IUserSessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingQueue;
@@ -34,6 +35,8 @@ public class DataDelayTaskHandler {
     private final StringRedisTemplate redisTemplate;
 
     private final IChatSessionService chatSessionService;
+
+    private final IUserSessionService userSessionService;
 
     private static volatile boolean begin = true;
 
@@ -82,6 +85,11 @@ public class DataDelayTaskHandler {
                 // 查询数据库中最后保存的数据
                 String[] split = key.split(":");
 
+                Integer count = userSessionService.lambdaQuery().eq(UserSession::getSessionId, split[3]).count();
+                if(count==0){
+                    //这个会话已经被删除了，延迟同步不用做了
+                    continue;
+                }
                 List<ChatSession> lastContents = chatSessionService.lambdaQuery()
                         .eq(ChatSession::getUserId, split[2])
                         .eq(ChatSession::getSessionId, split[3])
@@ -94,14 +102,13 @@ public class DataDelayTaskHandler {
                     index = lastContent.getSegmentIndex();
                 }
                 List<ChatSession> chatSessionList = new ArrayList<>();
-
                 for (int i = index + 1; i < contentList.size(); i++) {
                     ChatSession chatSession = ChatSession.builder()
                             .userId(Long.valueOf(split[2]))
                             .sessionId(split[3])
                             .segmentIndex(i)
                             .content(contentList.get(i))
-                            .createdAt(LocalDateTime.now())
+                            .createTime(LocalDateTime.now())
                             .build();
                     chatSessionList.add(chatSession);
                 }

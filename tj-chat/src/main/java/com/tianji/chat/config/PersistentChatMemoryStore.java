@@ -49,6 +49,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     public List<ChatMessage> getMessages(Object sessionId) {
         try {
             List<String> messageList = redisTemplate.opsForList().range(getKey(sessionId), 0, -1);
+            log.info("getMessages messageList:{}", messageList);
 
             if (CollUtil.isNotEmpty(messageList)) {
                 String json = messageList.toString();
@@ -68,14 +69,16 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
                         .collect(Collectors.toList());
 
                 // 缓存到Redis
-                List<String> finalMessageList = messageList;
-                executorService.submit(() -> {
-                    try {
-                        redisTemplate.opsForList().rightPushAll(getKey(sessionId), finalMessageList);
-                    } catch (Exception e) {
-                        log.error("同步数据库到 Redis 失败", e);
-                    }
-                });
+//                List<String> finalMessageList = messageList;
+//                executorService.submit(() -> {
+//                    try {
+                //延迟任务，不是同一个用户线程，导致用户id为null
+//                        redisTemplate.opsForList().rightPushAll(getKey(sessionId), finalMessageList);
+//                        log.info("getMessages sessionId{}:finalMessageList:{}", sessionId,finalMessageList);
+//                    } catch (Exception e) {
+//                        log.error("同步数据库到 Redis 失败:{}", e);
+//                    }
+//                });
 
                 return messagesFromJson(messageList.toString());
             }
@@ -96,6 +99,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
             // 将最新的一条数据存储到Redis中
             String json = messageToJson(messages.get(messages.size() - 1));
             redisTemplate.opsForList().rightPush(getKey(sessionId), json);
+            log.info("存数据到redis中 sessionId{}:json:{}", sessionId,json);
             // 开启延时任务
             // 封装实体类
             Map<String, Object> map = new HashMap<>();

@@ -5,21 +5,18 @@
         </div>
         <div class="chatLayout fx">
             <!-- 会话列表 -->
-            <div class="sessionList">
-                <button @click="createSession">新增会话</button>
-                <ul>
-                    <li v-for="session in userSessionList" :key="session.id"
-                        :class="{ active: selectedSessionId === session.sessionId }"
-                        @click="selectSession(session.sessionId)">
-                        {{ session.sessionId }}
-                        <button @click="deleteSession(session.id, $event)">删除</button>
-                    </li>
-                </ul>
-            </div>
+            <SessionList
+                :userSessionList="userSessionList"
+                :selectedSessionId="selectedSessionId"
+                @selectSession="selectSession"
+                @createSession="fetchUserSessionList"
+                @updateSession="fetchUserSessionList"
+                @deleteSession="()=>{fetchUserSessionList();selectSession(null)}"
+            />
             <!-- 聊天区域 -->
             <div class="chatItems container bg-wt">
                 <!-- 聊天消息显示区域 -->
-                <div class="chatMessages" ref="chatMessages">
+                <div class="chatMessages" ref="chatMessages" @scroll="handleScroll">
                     <div class="message" v-for="(msg, index) in chatHistory" :key="index">
                         <div class="userMessage" v-if="msg.type === 'user'">
                             <div class="messageContent">{{ msg.content }}</div>
@@ -27,13 +24,13 @@
                         <div class="assistantMessage" v-else>
                             <div class="thinking" v-if="msg.thinkingContent">
                                 <div class="thinkingLabel">AI思考中...</div>
-                                <vue-markdown class="thinkingContent" :source="msg.thinkingContent"></vue-markdown>
+                               <div v-html="md.render(msg.thinkingContent)" class="thinkingContent"></div>
                             </div>
                             <div class="messageContent" v-if="msg.showMarkdown">
-                                <vue-markdown :source="msg.processedContent"></vue-markdown>
+                                <div v-html="msg.processedContent"></div>
                             </div>
                             <div class="messageContent" v-else>
-                                {{ msg.processedContent }}
+                                <div v-html="msg.processedContent"></div>
                             </div>
                             <div class="typingIndicator" v-if="msg.isTyping">
                                 <span class="dot"></span>
@@ -64,11 +61,12 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
-import { createUserSession, getUserSessionList, deleteUserSession, getChatRecord } from '@/api/ai.js';
+import { getUserSessionList, getChatRecord } from '@/api/ai.js';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import VueMarkdown from 'vue3-markdown-it';
 import { CopyDocument } from '@element-plus/icons-vue'; // 引入复制图标
+import SessionList from './components/SessionList.vue'; // 引入会话列表组件
 
 // 用户信息
 const TOKEN = sessionStorage.getItem('token');
@@ -91,12 +89,28 @@ const END_FLAG = '[END]';
 const userSessionList = ref([]);
 // 当前选中的会话 ID
 const selectedSessionId = ref(null);
+// 当前页码
+const currentPage = ref(1);
+// 每页数量
+const pageSize = ref(10);
+// 是否正在加载更多历史记录
+const isLoadingMore = ref(false);
+import MarkdownIt from 'markdown-it';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import markdownItKatex from 'markdown-it-katex';
+
+// 创建一个 MarkdownIt 实例并配置 katex 插件
+const md = new MarkdownIt().use(markdownItKatex, {
+    throwOnError: false, // 防止错误抛出
+    errorColor: '#cc0000', // 错误颜色
+});
 
 // 获取用户会话列表
 const fetchUserSessionList = async () => {
     try {
         const sessions = await getUserSessionList();
-        userSessionList.value = sessions;
+        userSessionList.value = sessions.data;
         if (sessions.length > 0 && !selectedSessionId.value) {
             selectSession(sessions[0].sessionId);
         }
@@ -106,47 +120,35 @@ const fetchUserSessionList = async () => {
     }
 };
 
-// 创建用户会话关联
-const createSession = async () => {
-    try {
-        await createUserSession();
-        await fetchUserSessionList();
-        ElMessage.success('创建会话成功');
-    } catch (error) {
-        console.error('创建会话失败:', error);
-        ElMessage.error('创建会话失败: ' + (error.message || '未知错误'));
-    }
-};
-
-// 删除用户会话关联
-const deleteSession = async (id, event) => {
-    event.stopPropagation();
-    try {
-        await deleteUserSession(id);
-        await fetchUserSessionList();
-        ElMessage.success('删除会话成功');
-    } catch (error) {
-        console.error('删除会话失败:', error);
-        ElMessage.error('删除会话失败: ' + (error.message || '未知错误'));
-    }
-};
 
 // 选择会话
 const selectSession = async (sessionId) => {
     selectedSessionId.value = sessionId;
+    currentPage.value = 1;
+    chatHistory.value = [];
     try {
-        const records = await getChatRecord(sessionId);
-        chatHistory.value = records.map(record => {
+        const response = await getChatRecord({sessionId:sessionId, pageNo:currentPage.value, pageSize:pageSize.value});
+        const records = response.data.list; // 从响应对象中提取 data 属性
+        const newHistory = records.map(record => {
             const content = JSON.parse(record.content);
+            let type = '';
+            if (content.type === 'AI') {
+                type = 'assistant';
+            } else if (content.type === 'USER') {
+                type = 'user';
+            }
+            const text = content.type === 'AI' ? content.text : content.contents[0].text;
+            const processed = processContent(text);
             return {
-                type: content.role,
-                content: content.text,
+                type: type,
+                content: text,
                 isTyping: false,
-                showMarkdown: false,
-                processedContent: content.text,
-                thinkingContent: ''
+                showMarkdown: processed.showMarkdown,
+                processedContent: processed.content,
+                thinkingContent: processed.thinkingContent
             };
         });
+        chatHistory.value = newHistory.reverse();
         await scrollToBottom();
     } catch (error) {
         console.error('加载会话历史记录失败:', error);
@@ -328,6 +330,47 @@ const scrollToBottom = async () => {
     }
 };
 
+// 处理滚动事件
+const handleScroll = async () => {
+    const { scrollTop, scrollHeight, clientHeight } = chatMessages.value;
+    if (scrollTop === 0 && !isLoadingMore.value) {
+        isLoadingMore.value = true;
+        currentPage.value++;
+        try {
+            const response = await getChatRecord({sessionId:selectedSessionId.value, pageNo:currentPage.value, pageSize:pageSize.value});
+            const records = response.data.list;
+            if (records.length > 0) {
+                const newHistory = records.map(record => {
+                    const content = JSON.parse(record.content);
+                    let type = '';
+                    if (content.type === 'AI') {
+                        type = 'assistant';
+                    } else if (content.type === 'USER') {
+                        type = 'user';
+                    }
+                    const text = content.type === 'AI' ? content.text : content.contents[0].text;
+                    const processed = processContent(text);
+                    return {
+                        type: type,
+                        content: text,
+                        isTyping: false,
+                        showMarkdown: processed.showMarkdown,
+                        processedContent: processed.content,
+                        thinkingContent: processed.thinkingContent
+                    };
+                });
+                chatHistory.value = newHistory.reverse().concat(chatHistory.value);
+            }
+        } catch (error) {
+            console.error('加载更多会话历史记录失败:', error);
+            ElMessage.error('加载更多会话历史记录失败: ' + (error.message || '未知错误'));
+            currentPage.value--;
+        } finally {
+            isLoadingMore.value = false;
+        }
+    }
+};
+
 // 处理内容，提取<think>标签和主要内容
 const processContent = (content) => {
     let showMarkdown = true;
@@ -355,7 +398,10 @@ const processContent = (content) => {
     if (processedContent.trim() === '') {
         showMarkdown = false;
     }
-
+    // 使用配置好的 MarkdownIt 实例渲染内容
+    if (showMarkdown) {
+        processedContent = md.render(processedContent);
+    }
     return {
         content: processedContent,
         showMarkdown,
@@ -371,40 +417,14 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .aiChatWrapper {
+    margin-left: 20px;
+    margin-right: 20px;
     .chatLayout {
         display: flex;
     }
 
-    .sessionList {
-        width: 200px;
-        padding: 20px;
-        border-right: 1px solid #EEEEEE;
-
-        button {
-            margin-bottom: 10px;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-
-            li {
-                margin-bottom: 5px;
-                cursor: pointer;
-
-                &.active {
-                    font-weight: bold;
-                }
-
-                button {
-                    margin-left: 10px;
-                }
-            }
-        }
-    }
-
     .chatItems {
-        flex: 1;
+        flex: 2; /* 减小聊天区域的宽度 */
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
@@ -413,7 +433,7 @@ onMounted(async () => {
 
     .chatMessages {
         width: 100%;
-        height: 500px;
+        height: 400px; /* 减小聊天消息显示区域的高度 */
         overflow-y: auto;
         border: 1px solid #EEEEEE;
         border-radius: 8px;

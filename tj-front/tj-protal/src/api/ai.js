@@ -4,10 +4,11 @@ const AI_API_PREFIX = "/ct"
 // 用户会话模块
 
 //新增会话
-export const createUserSession = () =>
+export const createUserSession = (data) =>
     request({
         url: `${AI_API_PREFIX}/session`,
-        method: 'get',
+        method: 'post',
+        data
     })
 //查询用户会话列表
 export const getUserSessionList = () =>
@@ -15,20 +16,28 @@ export const getUserSessionList = () =>
         url: `${AI_API_PREFIX}/session/list`,
         method: 'get',
     })
+//更改对话
+export const updateUserSession = (id,params) =>
+    request({
+        url: `${AI_API_PREFIX}/session/${id}`,
+        method: 'put',
+        params
+    })
 //删除会话
 export const deleteUserSession = (id) =>
     request({
         url: `${AI_API_PREFIX}/session/${id}`,
-        method: 'get',
+        method: 'delete',
     })
 
 //聊天接口
 
 //根据会话id获取聊天记录
-export const getChatRecord = (id) =>
+export const getChatRecord = (params) =>
     request({
-        url: `${AI_API_PREFIX}/chat/${id}`,
+        url: `${AI_API_PREFIX}/chat/records`,
         method: 'get',
+        params
     })
 
 // AI聊天接口

@@ -683,6 +683,11 @@
   "resolved" "https://registry.npmmirror.com/commander/-/commander-7.2.0.tgz"
   "version" "7.2.0"
 
+"commander@^8.3.0":
+  "integrity" "sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww=="
+  "resolved" "https://registry.npmmirror.com/commander/-/commander-8.3.0.tgz"
+  "version" "8.3.0"
+
 "convert-source-map@^1.7.0":
   "integrity" "sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA=="
   "resolved" "https://registry.npmmirror.com/convert-source-map/-/convert-source-map-1.8.0.tgz"
@@ -1125,6 +1130,20 @@
   "resolved" "https://registry.npmmirror.com/json5/-/json5-2.2.1.tgz"
   "version" "2.2.1"
 
+"katex@^0.16.22":
+  "integrity" "sha512-XCHRdUw4lf3SKBaJe4EvgqIuWwkPSo9XoeO8GjQW94Bp7TWv9hNhzZjZ+OH9yf1UmLygb7DIT5GSFQiyt16zYg=="
+  "resolved" "https://registry.npmmirror.com/katex/-/katex-0.16.22.tgz"
+  "version" "0.16.22"
+  dependencies:
+    "commander" "^8.3.0"
+
+"katex@^0.6.0":
+  "integrity" "sha512-rS4mY3SvHYg5LtQV6RBcK0if7ur6plyEukAOV+jGGPqFImuzu8fHL6M752iBmRGoUyF0bhZbAPoezehn7xYksA=="
+  "resolved" "https://registry.npmmirror.com/katex/-/katex-0.6.0.tgz"
+  "version" "0.6.0"
+  dependencies:
+    "match-at" "^0.1.0"
+
 "linkify-it@^3.0.1":
   "integrity" "sha512-ynTsyrFSdE5oZ/O9GEf00kPngmOfVwazR5GKDq6EYfhlpFug3J2zybX56a2PRRpc9P+FuSoGNAwjlbDs9jJBPQ=="
   "resolved" "https://registry.npmmirror.com/linkify-it/-/linkify-it-3.0.3.tgz"
@@ -1197,6 +1216,13 @@
   "resolved" "https://registry.npmmirror.com/markdown-it-ins/-/markdown-it-ins-3.0.1.tgz"
   "version" "3.0.1"
 
+"markdown-it-katex@^2.0.3":
+  "integrity" "sha512-nUkkMtRWeg7OpdflamflE/Ho/pWl64Lk9wNBKOmaj33XkQdumhXAIYhI0WO03GeiycPCsxbmX536V5NEXpC3Ng=="
+  "resolved" "https://registry.npmmirror.com/markdown-it-katex/-/markdown-it-katex-2.0.3.tgz"
+  "version" "2.0.3"
+  dependencies:
+    "katex" "^0.6.0"
+
 "markdown-it-mark@^3.0.1":
   "integrity" "sha512-HyxjAu6BRsdt6Xcv6TKVQnkz/E70TdGXEFHRYBGLncRE9lBFwDNLVtFojKxjJWgJ+5XxUwLaHXy+2sGBbDn+4A=="
   "resolved" "https://registry.npmmirror.com/markdown-it-mark/-/markdown-it-mark-3.0.1.tgz"
@@ -1232,6 +1258,11 @@
     "linkify-it" "^3.0.1"
     "mdurl" "^1.0.1"
     "uc.micro" "^1.0.5"
+
+"match-at@^0.1.0":
+  "integrity" "sha512-h4Yd392z9mST+dzc+yjuybOGFNOZjmXIPKWjxBd1Bb23r4SmDOsk2NYCU2BMUBGbSpZqwVsZYNq26QS3xfaT3Q=="
+  "resolved" "https://registry.npmmirror.com/match-at/-/match-at-0.1.1.tgz"
+  "version" "0.1.1"
 
 "mdn-data@2.0.14":
   "integrity" "sha512-dn6wd0uw5GsdswPFfsgMp5NSB0/aDe6fK94YJV/AJDYXL6HVLWBsxeq7js7Ad+mU2K9LAlwpk6kN2D5mwCPVow=="

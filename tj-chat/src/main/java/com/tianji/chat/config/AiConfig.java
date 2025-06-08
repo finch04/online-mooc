@@ -1,6 +1,8 @@
 package com.tianji.chat.config;
 
 import com.tianji.chat.service.ToolsService;
+import com.tianji.common.utils.SPELUtils;
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -10,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+import java.util.List;
 
 @Configuration
 public class AiConfig {
@@ -18,6 +21,8 @@ public class AiConfig {
         String chat(@MemoryId String memoryId, @UserMessage String message);
         // 流式响应
         TokenStream stream(@MemoryId String memoryId, @UserMessage String message);
+        //获取历史记录
+        List<ChatMessage> getHistory(@MemoryId String memoryId);
     }
 
     // ----------------------------- 存储到 Redis -----------------------------
