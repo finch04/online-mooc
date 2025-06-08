@@ -1,23 +1,43 @@
 <template>
     <div class="sessionList">
         <!-- 新增会话按钮 -->
-        <span  class="add-button" @click="openModal(null)">新增会话</span>
-        <ul>
+        <el-button style="margin-bottom: 20px;text-align: center;color: white;" @click="openModal(null)" >新增会话</el-button>
+        <ul class="session-ul">
             <li v-for="session in userSessionList" :key="session.id"
-                :class="{ active: selectedSessionId === session.sessionId }"
-                @click="selectSession(session.sessionId)"
-                @mouseenter="showButtons(session.id)"
-                @mouseleave="hideButtons(session.id)">
-                {{ session.name }}
-                <div class="button-group" :class="{ visible: visibleButtons[session.id] }">
-                    <!-- 修改按钮 -->
-                    <button class="edit-button" @click="openModal(session.id, $event)">修改</button>
-                    <!-- 删除按钮 -->
-                    <button class="delete-button" @click="deleteSession(session.id, $event)">删除</button>
+                :class="{ 'active-session': selectedSessionId === session.sessionId }"
+                @click="selectSession(session.sessionId)" 
+                class="session-item">
+                <!-- 会话内容区域 -->
+                <div class="session-content">
+                    <!-- 会话名称 -->
+                    <div class="session-name">
+                        {{ session.name }}
+                        <!-- 会话标签 -->
+                        <div class="session-tag" v-if="session.tag">#{{ session.tag }}</div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮组 -->
+                <div class="button-group">
+                    <el-button 
+                        type="primary" 
+                        class="edit-button" 
+                        :icon="Edit" 
+                        circle 
+                        @click="openModal(session.id)"
+                    ></el-button>
+                    <el-button 
+                        type="danger" 
+                        class="delete-button" 
+                        :icon="Delete" 
+                        circle 
+                        @click="confirmDelete(session.id)"
+                    ></el-button>
                 </div>
             </li>
         </ul>
-        <!-- 新增/修改会话的模态框 -->
+
+        <!-- 模态框 -->
         <el-dialog v-model="isModalVisible" :title="dialogTitle">
             <el-form :model="formData" :rules="formRules" ref="formRef" label-width="80px">
                 <el-form-item label="会话名称" prop="name">
@@ -28,29 +48,36 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="isModalVisible = false">取消</el-button>
-                    <el-button type="primary" @click="submitForm">确定</el-button>
+                <span class="dialog-footer btn">
+                    <el-button class="bt-round bt-red" @click="isModalVisible = false" style="color:white">取消</el-button>
+                    <el-button class="bt-round" type="primary" @click="submitForm">确定</el-button>
                 </span>
+            </template>
+        </el-dialog>
+
+        <!-- 删除确认对话框 -->
+        <el-dialog 
+            v-model="deleteConfirmVisible" 
+            title="删除确认" 
+            @close="handleDeleteCancel"
+        >
+            <p>确定要删除该会话吗？</p>
+            <template #footer>
+                <el-button @click="deleteConfirmVisible = false" style="color:white">取消</el-button>
+                <el-button type="danger" @click="handleDeleteConfirm">删除</el-button>
             </template>
         </el-dialog>
     </div>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, reactive, toRefs } from 'vue';
-import { ElMessage } from 'element-plus';
-import { createUserSession, getUserSessionList, deleteUserSession, updateUserSession } from '@/api/ai.js';
-
+import { ref, defineProps, defineEmits, reactive } from 'vue';
+import { ElMessage, ElDialog } from 'element-plus';
+import { createUserSession, deleteUserSession, updateUserSession } from '@/api/ai.js';
+import { Edit,Delete } from '@element-plus/icons-vue'; 
 const props = defineProps({
-    userSessionList: {
-        type: Array,
-        default: () => []
-    },
-    selectedSessionId: {
-        type: String,
-        default: null
-    }
+    userSessionList: { type: Array, default: () => [] },
+    selectedSessionId: { type: String, default: null }
 });
 
 const emits = defineEmits(['selectSession', 'createSession', 'deleteSession', 'updateSession']);
@@ -58,55 +85,33 @@ const emits = defineEmits(['selectSession', 'createSession', 'deleteSession', 'u
 // 模态框相关变量
 const isModalVisible = ref(false);
 const dialogTitle = ref('');
-const formData = ref({
-    name: '',
-    tag: ''
-});
+const formData = ref({ name: '', tag: '' });
 const formRef = ref(null);
-const formRules = reactive({
-    name: [
-        { required: true, message: '会话名称为必填项', trigger: 'blur' }
-    ]
-});
+const formRules = reactive({ name: [{ required: true, message: '会话名称为必填项', trigger: 'blur' }] });
 const currentSessionId = ref(null);
 
-// 用于记录哪些会话的按钮需要显示
-const visibleButtons = ref({});
+// 删除确认对话框
+const deleteConfirmVisible = ref(false);
+const deletingSessionId = ref(null);
 
 // 打开模态框
-const openModal = (id, event) => {
-    if (event) event.stopPropagation();
+const openModal = (id) => {
     currentSessionId.value = id;
+    dialogTitle.value = id ? '修改会话' : '新增会话';
     if (id) {
-        // 修改操作
-        dialogTitle.value = '修改会话';
         const session = props.userSessionList.find(s => s.id === id);
-        if (session) {
-            formData.value.name = session.name;
-            formData.value.tag = session.tag;
-        }
+        session && (formData.value = { ...session });
     } else {
-        // 新增操作
-        dialogTitle.value = '新增会话';
-        formData.value = {
-            name: '',
-            tag: ''
-        };
+        formData.value = { name: '', tag: '' };
     }
     isModalVisible.value = true;
 };
 
 // 提交表单
-const submitForm = async () => {
-    await formRef.value.validate((valid) => {
+const submitForm = () => {
+    formRef.value.validate(valid => {
         if (valid) {
-            if (currentSessionId.value) {
-                // 修改操作
-                updateSession(currentSessionId.value);
-            } else {
-                // 新增操作
-                createSession();
-            }
+            currentSessionId.value ? updateSession(currentSessionId.value) : createSession();
         }
     });
 };
@@ -116,38 +121,15 @@ const createSession = async () => {
     try {
         const res = await createUserSession(formData.value);
         if (res.code === 200) {
-            emits('createSession');
+            emits('createSession', res.data.sessionId);
             ElMessage.success('创建会话成功');
             isModalVisible.value = false;
         } else {
-            ElMessage.error('创建会话失败: ' + (res.msg || '未知错误'));
+            ElMessage.error(`创建失败: ${res.msg || '未知错误'}`);
         }
     } catch (error) {
-        console.error('创建会话失败:', error);
-        ElMessage.error('创建会话失败: ' + (error.message || '未知错误'));
+        ElMessage.error(`创建失败: ${error.message || '网络错误'}`);
     }
-};
-
-// 删除会话
-const deleteSession = async (id, event) => {
-    event.stopPropagation();
-    try {
-        const res = await deleteUserSession(id);
-        if (res.code === 200) {
-            emits('deleteSession');
-            ElMessage.success('删除会话成功');
-        } else {
-            ElMessage.error('删除会话失败: ' + (res.msg || '未知错误'));
-        }
-    } catch (error) {
-        console.error('删除会话失败:', error);
-        ElMessage.error('删除会话失败: ' + (error.message || '未知错误'));
-    }
-};
-
-// 选择会话
-const selectSession = (sessionId) => {
-    emits('selectSession', sessionId);
 };
 
 // 修改会话
@@ -155,115 +137,142 @@ const updateSession = async (id) => {
     try {
         const res = await updateUserSession(id, formData.value);
         if (res.code === 200) {
-            isModalVisible.value = false;
             emits('updateSession');
-            ElMessage.success('修改会话成功');
+            ElMessage.success('修改成功');
+            isModalVisible.value = false;
         } else {
-            ElMessage.error('修改会话失败: ' + (res.msg || '未知错误'));
+            ElMessage.error(`修改失败: ${res.msg || '未知错误'}`);
         }
     } catch (error) {
-        console.error('修改会话失败:', error);
-        ElMessage.error('修改会话失败: ' + (error.message || '未知错误'));
+        ElMessage.error(`修改失败: ${error.message || '网络错误'}`);
     }
 };
 
-// 显示按钮
-const showButtons = (id) => {
-    visibleButtons.value[id] = true;
+// 删除确认流程
+const confirmDelete = (id) => {
+    deletingSessionId.value = id;
+    deleteConfirmVisible.value = true;
 };
 
-// 隐藏按钮
-const hideButtons = (id) => {
-    visibleButtons.value[id] = false;
+const handleDeleteConfirm = async () => {
+    try {
+        const res = await deleteUserSession(deletingSessionId.value);
+        if (res.code === 200) {
+            emits('deleteSession');
+            ElMessage.success('删除成功');
+            deleteConfirmVisible.value = false;
+        } else {
+            ElMessage.error(`删除失败: ${res.msg || '未知错误'}`);
+        }
+    } catch (error) {
+        ElMessage.error(`删除失败: ${error.message || '网络错误'}`);
+    }
+};
+
+const handleDeleteCancel = () => {
+    deletingSessionId.value = null;
+};
+
+// 选择会话
+const selectSession = (sessionId) => {
+    emits('selectSession', sessionId);
 };
 </script>
-<style lang="scss" src="../index.scss"> </style>
+
 <style scoped>
 .sessionList {
-    width: 200px;
-    padding: 20px;
+    width: 220px;
+    padding: 15px;
     background-color: white;
+    border-right: 1px solid rgb(249, 249, 249);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
+.session-ul {
+    width: 100%;
+    padding: 0;
+}
+
+.session-item {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 12px 15px;
+    border: 1px solid #e4e7ed;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    background-color: white;
+    transition: all 0.2s ease;
     display: flex;
-    flex-direction: column;
-    align-items: center; 
+    justify-content: space-between;
+    align-items: center;
+}
 
-    .add-button {
-        background-color: #007BFF;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-bottom: 10px;
-        transition: background-color 0.3s ease;
-        align-self: center; 
+.session-item:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
 
-        &:hover {
-            background-color: #0056b3;
-        }
+.active-session {
+    border-color: #409eff;
+    background-color: #f5f7fa;
+    box-shadow: inset 0 0 0 2px #409eff;
+}
+
+.session-content {
+    flex-grow: 1;
+    margin-right: 15px;
+}
+
+.session-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #303133;
+}
+
+.session-tag {
+    margin-left: 8px;
+    font-size: 12px;
+    color: #606266;
+    background-color: #f0f2f5;
+    padding: 2px 6px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 3px;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.el-button.circle {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 14px;
+}
+
+.el-button.edit-button {
+    background-color: #409eff;
+    color: white;
+    
+    &:hover {
+        background-color: #3583d0;
     }
+}
 
-    ul {
-        list-style-type: none;
-        padding: 0;
-        width: 100%;
-
-        li {
-            margin-bottom: 5px;
-            cursor: pointer;
-            position: relative;
-
-            &.active {
-                font-weight: bold;
-            }
-
-            .button-group {
-                display: inline-block;
-                margin-left: 10px;
-                position: absolute;
-                right: 0;
-                top: 50%;
-                transform: translateY(-50%);
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.3s ease, visibility 0.3s ease;
-
-                &.visible {
-                    opacity: 1;
-                    visibility: visible;
-                }
-
-                .edit-button {
-                    background-color: #28a745;
-                    color: white;
-                    border: none;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    margin-right: 5px;
-                    transition: background-color 0.3s ease;
-
-                    &:hover {
-                        background-color: #218838;
-                    }
-                }
-
-                .delete-button {
-                    background-color: #dc3545;
-                    color: white;
-                    border: none;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-
-                    &:hover {
-                        background-color: #c82333;
-                    }
-                }
-            }
-        }
+.el-button.delete-button {
+    background-color: #dc3545;
+    color: white;
+    
+    &:hover {
+        background-color: #c22535;
     }
+}
+
+.el-dialog.delete-confirm {
+    width: 300px;
 }
 </style>

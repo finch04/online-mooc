@@ -9,7 +9,7 @@
                 :userSessionList="userSessionList"
                 :selectedSessionId="selectedSessionId"
                 @selectSession="selectSession"
-                @createSession="fetchUserSessionList"
+                @createSession="()=>{fetchUserSessionList()}"
                 @updateSession="fetchUserSessionList"
                 @deleteSession="()=>{fetchUserSessionList();selectSession(null)}"
             />

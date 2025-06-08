@@ -27,9 +27,9 @@ public class UserSessionController {
 
     @ApiOperation("创建用户会话关联")
     @PostMapping
-    public void createUserSession(@RequestBody UserSessionDTO dto) {
+    public UserSession createUserSession(@RequestBody UserSessionDTO dto) {
         dto.setUserId(UserContext.getUser());
-        userSessionService.createUserSession(dto);
+        return userSessionService.createUserSession(dto);
     }
 
     @ApiOperation("修改用户会话关联")

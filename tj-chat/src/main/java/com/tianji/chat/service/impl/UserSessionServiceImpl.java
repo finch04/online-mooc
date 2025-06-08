@@ -44,13 +44,14 @@ public class UserSessionServiceImpl extends ServiceImpl<UserSessionMapper, UserS
     private final IChatSessionService chatSessionService;
 
     @Override
-    public void createUserSession(UserSessionDTO dto) {
+    public UserSession createUserSession(UserSessionDTO dto) {
         UserSession userSession = new UserSession();
         userSession.setUserId(dto.getUserId());
         userSession.setName(dto.getName());
         userSession.setTag(dto.getTag());
         userSession.setSessionId(UUID.randomUUID().toString());
         this.baseMapper.insert(userSession);
+        return userSession;
     }
 
     @Override

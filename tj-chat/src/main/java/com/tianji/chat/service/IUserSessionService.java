@@ -20,7 +20,7 @@ import java.util.List;
 public interface IUserSessionService extends IService<UserSession> {
 
 
-    void createUserSession(UserSessionDTO dto);
+    UserSession createUserSession(UserSessionDTO dto);
 
     void deleteUserSession(Long id);
 
