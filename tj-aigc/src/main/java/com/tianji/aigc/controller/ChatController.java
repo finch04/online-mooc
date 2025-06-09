@@ -6,10 +6,7 @@ import com.tianji.aigc.vo.ChatEventVO;
 import com.tianji.common.annotations.NoWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 @RestController
@@ -25,4 +22,8 @@ public class ChatController {
         return this.chatService.chat(chatDTO.getQuestion(), chatDTO.getSessionId());
     }
 
+    @PostMapping("/stop")
+    public void stop(@RequestParam("sessionId") String sessionId) {
+        this.chatService.stop(sessionId);
+    }
 }
