@@ -2,6 +2,7 @@ package com.tianji.aigc.memory.mogodb;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.tianji.aigc.memory.MessageUtil;
 import jakarta.annotation.Resource;
@@ -44,7 +45,24 @@ public class MongoDBChatMemory implements ChatMemory {
 
     @Override
     public List<Message> get(String conversationId, int lastN) {
-        return List.of();
+        if (lastN <= 0) {
+            return List.of();
+        }
+
+        Query query = Query.query(Criteria.where("conversationId").is(conversationId)); //构造查询条件
+        ChatRecord chatRecord = this.mongoTemplate.findOne(query, ChatRecord.class);
+        if(ObjectUtil.isEmpty(chatRecord)){
+            return List.of();
+        }
+
+        List<String> messages = chatRecord.getMessages();
+        int size = messages.size();
+
+        // 获取最后 lastN 条消息
+        List<String> subList = CollUtil.sub(messages, Math.max(0, size - lastN), size);
+
+        // 转换为 Message 对象返回
+        return CollStreamUtil.toList(subList, MessageUtil::toMessage);
     }
 
     @Override
