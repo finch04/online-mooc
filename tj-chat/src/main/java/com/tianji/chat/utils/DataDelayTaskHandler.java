@@ -82,6 +82,7 @@ public class DataDelayTaskHandler {
                 // size <= num，则说明用户已经结束聊天，则从Redis中队列中取出所有数据，并保存到数据库中
                 // 查询Redis中的数据
                 List<String> contentList = redisTemplate.opsForList().range(key, 0, -1);
+                log.info("延迟落库 查找：{}",contentList);
                 // 查询数据库中最后保存的数据
                 String[] split = key.split(":");
 
@@ -99,18 +100,20 @@ public class DataDelayTaskHandler {
                 ChatSession lastContent = !lastContents.isEmpty() ? lastContents.get(0) : null; // 取第一条数据或者
                 int index = 0;
                 if (ObjectUtil.isNotEmpty(lastContent)) {
-                    index = lastContent.getSegmentIndex();
+                    assert lastContent != null;
+                    index = lastContent.getSegmentIndex()+1;
                 }
                 List<ChatSession> chatSessionList = new ArrayList<>();
-                for (int i = index + 1; i < contentList.size(); i++) {
+                for (int i = 0; i < contentList.size(); i++) {
                     ChatSession chatSession = ChatSession.builder()
                             .userId(Long.valueOf(split[2]))
                             .sessionId(split[3])
-                            .segmentIndex(i)
+                            .segmentIndex(index+i)
                             .content(contentList.get(i))
                             .createTime(LocalDateTime.now())
                             .build();
                     chatSessionList.add(chatSession);
+                    log.info("chatSessionList.add:{}",chatSession);
                 }
 
                 chatSessionService.saveBatch(chatSessionList);

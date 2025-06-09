@@ -71,7 +71,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     public String chat(String sessionId, String message) {
          assistantRedis.chat(sessionId, message);
 
-         return chatLanguageModel.generate(message);
+        return chatLanguageModel.generate(message);
+//        TokenStream advise = knowledgeAdvisor.advise(sessionId, message);
     }
 
     @Override

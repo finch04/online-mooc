@@ -8,6 +8,7 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.service.AiServices;
 import org.apache.http.client.ResponseHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -83,5 +84,16 @@ public class ChatTest {
                 error.printStackTrace();
             }
         });
+    }
+
+
+    @Test
+    public void test2() {
+//        Assistant assistant = AiServices.builder(Assistant.class)
+//                .chatLanguageModel(model)
+//                .tools(new Tools())
+//                .build();
+//
+//        String answer = assistant.chat("What is 1+2 and 3*4?");
     }
 }

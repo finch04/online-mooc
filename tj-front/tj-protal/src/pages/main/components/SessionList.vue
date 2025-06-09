@@ -27,7 +27,7 @@
                         @click="openModal(session.id)"
                     ></el-button>
                     <el-button 
-                        type="danger" 
+                        type="warning"
                         class="delete-button" 
                         :icon="Delete" 
                         circle 

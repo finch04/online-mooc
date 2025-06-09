@@ -61,7 +61,7 @@ public class AiConfig {
         return AiServices.builder(KnowledgeAdvisor.class)
                 .chatLanguageModel(qwenChatModel)
                 .streamingChatLanguageModel(qwenStreamingChatModel)
-//                .tools(toolsService)
+                .tools(toolsService)
                 .chatMemoryProvider(memoryId ->
                         MessageWindowChatMemory.builder()
                                 .maxMessages(500)

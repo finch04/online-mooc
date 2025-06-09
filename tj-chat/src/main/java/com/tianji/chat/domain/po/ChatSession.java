@@ -55,6 +55,4 @@ public class ChatSession {
      * 插入时间
      */
     private LocalDateTime createTime;
-
-
 }
