@@ -135,7 +135,7 @@ public class DataDelayTaskHandler {
                     log.info("任务 {} 重试第 {} 次", taskJson.getStr("key"), retryCount + 1);
                 } else {
                     log.error("任务最终失败，加入死信队列: {}", taskJson);
-                    redisTemplate.opsForList().rightPush("chat-dead-letter-queue", taskJson.toString());
+                    redisTemplate.opsForList().rightPush(CHAT_DEAD_LETTER_QUEUE, taskJson.toString());
                 }
             }
         }

@@ -10,6 +10,7 @@ import dev.langchain4j.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.List;

@@ -37,7 +37,7 @@ public class Langchain4jConfig {
 
     @Value("${langchain4j.streaming-chat-model-temperature}")
     private double streamingChatModelTemperature;
-    @SystemMessage("你叫小美，是一个智能助手")
+
     @Bean
     public ChatLanguageModel qwenChatModel() {
         return OpenAiChatModel.builder()
@@ -51,7 +51,7 @@ public class Langchain4jConfig {
                 .build();
     }
 
-    @SystemMessage("你叫小明，是一个智能助手")
+
     @Bean
     public StreamingChatLanguageModel qwenStreamingChatModel() {
         return OpenAiStreamingChatModel.builder()

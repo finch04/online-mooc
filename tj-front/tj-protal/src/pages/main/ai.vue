@@ -128,11 +128,11 @@ const selectSession = async (sessionId) => {
     try {
         const response = await getChatRecord({sessionId:sessionId, pageNo:currentPage.value, pageSize:pageSize.value});
         const records = response.data.list; // 从响应对象中提取 data 属性
-         // 按照 segmentIndex 从小到大排序
+        // 按照 segmentIndex 从小到大排序
         records.sort((a, b) => {
-                const segmentIndexA = a.segmentIndex || 0;
-                const segmentIndexB = b.segmentIndex || 0;
-                return segmentIndexB - segmentIndexA;
+            const segmentIndexA = a.segmentIndex || 0;
+            const segmentIndexB = b.segmentIndex || 0;
+            return segmentIndexB - segmentIndexA;
         });
 
         const newHistory = records.map(record => {
@@ -140,7 +140,7 @@ const selectSession = async (sessionId) => {
             let type = '';
             if (content.type === 'AI') {
                 type = 'assistant';
-            } else if (content.type === 'USER') {
+            } else {
                 type = 'user';
             }
             const text = content.type === 'AI' ? content.text : content.contents[0].text;
@@ -214,6 +214,8 @@ const sendMessage = async () => {
             thinkingContent: ''
         });
 
+        await scrollToBottom();
+
         const assistantMessage = chatHistory.value[chatHistory.value.length - 1];
         let content = '';
         let thinkingContent = '';
@@ -249,6 +251,7 @@ const sendMessage = async () => {
                     isStreaming.value = false;
                     abortController.value.abort(); // 主动关闭连接
                     console.log('SSE 数据接收完成');
+                    scrollToBottom();
                     return;
                 }
 
@@ -278,6 +281,7 @@ const sendMessage = async () => {
                 // 连接关闭时清理状态
                 assistantMessage.isTyping = false;
                 isStreaming.value = false;
+                scrollToBottom();
             },
 
             onerror(err) {
@@ -293,6 +297,7 @@ const sendMessage = async () => {
                 if (err.name !== 'AbortError') {
                     assistantMessage.content = '对话出错: ' + (err.message || '连接中断');
                 }
+                scrollToBottom();
             }
         });
     } catch (error) {
@@ -306,6 +311,7 @@ const sendMessage = async () => {
                 lastMsg.isTyping = false;
             }
         }
+        scrollToBottom();
     } finally {
         isLoading.value = false;
         isStreaming.value = false;
@@ -343,15 +349,16 @@ const handleScroll = async () => {
     const { scrollTop, scrollHeight, clientHeight } = chatMessages.value;
     if (scrollTop === 0 && !isLoadingMore.value) {
         isLoadingMore.value = true;
+        const oldScrollHeight = chatMessages.value.scrollHeight; // 记录旧的滚动高度
         currentPage.value++;
         try {
             const response = await getChatRecord({sessionId:selectedSessionId.value, pageNo:currentPage.value, pageSize:pageSize.value});
             const records = response.data.list;
             // 按照 segmentIndex 从小到大排序
             records.sort((a, b) => {
-                    const segmentIndexA = a.segmentIndex || 0;
-                    const segmentIndexB = b.segmentIndex || 0;
-                    return segmentIndexB - segmentIndexA;
+                const segmentIndexA = a.segmentIndex || 0;
+                const segmentIndexB = b.segmentIndex || 0;
+                return segmentIndexB - segmentIndexA;
             });
             if (records.length > 0) {
                 const newHistory = records.map(record => {
@@ -380,6 +387,10 @@ const handleScroll = async () => {
             ElMessage.error('加载更多会话历史记录失败: ' + (error.message || '未知错误'));
             currentPage.value--;
         } finally {
+            await nextTick();
+            const newScrollHeight = chatMessages.value.scrollHeight; // 获取新的滚动高度
+            const diff = newScrollHeight - oldScrollHeight; // 计算滚动高度的差值
+            chatMessages.value.scrollTop = diff; // 设置滚动位置，保持当前视角
             isLoadingMore.value = false;
         }
     }

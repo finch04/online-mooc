@@ -18,6 +18,11 @@ public interface RedisConstants {
     String CHAT_RETRY_QUEUE = "chat-retry-blocking";
 
     /**
+     * 聊天消息-死信队列
+     */
+    String CHAT_DEAD_LETTER_QUEUE = "chat-dead-letter-queue";
+
+    /**
      * 延迟任务执行时间  单位秒
      */
     int DELAY_TASK_EXECUTE_TIME = 10;

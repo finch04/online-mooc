@@ -68,18 +68,6 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
                         .map(ChatSession::getContent)
                         .collect(Collectors.toList());
 
-                // 缓存到Redis
-//                List<String> finalMessageList = messageList;
-//                executorService.submit(() -> {
-//                    try {
-                //延迟任务，不是同一个用户线程，导致用户id为null
-//                        redisTemplate.opsForList().rightPushAll(getKey(sessionId), finalMessageList);
-//                        log.info("getMessages sessionId{}:finalMessageList:{}", sessionId,finalMessageList);
-//                    } catch (Exception e) {
-//                        log.error("同步数据库到 Redis 失败:{}", e);
-//                    }
-//                });
-
                 return messagesFromJson(messageList.toString());
             }
 
