@@ -1,7 +1,8 @@
-package com.tianji.aigc.memory;
+package com.tianji.aigc.memory.redis;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import com.tianji.aigc.memory.MessageUtil;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;

@@ -16,7 +16,7 @@ public class MessageUtil {
      * @return 符合Redis存储规范的JSON字符串
      */
     public static String toJson(Message message) {
-        var redisMessage = BeanUtil.toBean(message, RedisMessage.class);
+        var redisMessage = BeanUtil.toBean(message, MyMessage.class);
         // 设置消息内容
         redisMessage.setTextContent(message.getText());
         if (message instanceof AssistantMessage assistantMessage) {
@@ -38,7 +38,7 @@ public class MessageUtil {
      * @throws RuntimeException 当无法识别的消息类型时抛出异常
      */
     public static Message toMessage(String json) {
-        var redisMessage = JSONUtil.toBean(json, RedisMessage.class);
+        var redisMessage = JSONUtil.toBean(json, MyMessage.class);
         var messageType = MessageType.valueOf(redisMessage.getMessageType());
         switch (messageType) {
             case SYSTEM -> {
