@@ -56,8 +56,6 @@ public class SpringAIConfig {
 
     /**
      * 对话记忆的增强器
-     *
-     * @param chatMemory 基于MySQL的ChatMemory
      */
     @Bean
     public Advisor messageChatMemoryAdvisor(ChatMemory chatMemory) {
