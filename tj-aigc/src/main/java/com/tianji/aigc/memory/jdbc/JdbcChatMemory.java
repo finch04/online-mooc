@@ -1,12 +1,12 @@
-package com.tianji.aigc.memory;
+package com.tianji.aigc.memory.jdbc;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.tianji.aigc.entity.ChatRecord;
+import com.tianji.aigc.memory.MessageUtil;
 import com.tianji.aigc.service.ChatRecordService;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemory;

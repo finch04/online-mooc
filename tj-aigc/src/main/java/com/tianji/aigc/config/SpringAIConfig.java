@@ -1,12 +1,14 @@
 package com.tianji.aigc.config;
 
-import com.tianji.aigc.memory.JdbcChatMemory;
-import com.tianji.aigc.memory.RedisChatMemory;
+import com.tianji.aigc.memory.jdbc.JdbcChatMemory;
+import com.tianji.aigc.memory.mogodb.MongoDBChatMemory;
+import com.tianji.aigc.memory.redis.RedisChatMemory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,34 +36,32 @@ public class SpringAIConfig {
         return new SimpleLoggerAdvisor();
     }
 
-    // @Bean
-    // public ChatMemory redisChatMemory() {
-    //     return new RedisChatMemory();
-    // }
-
-    /**
-     * 对话记忆的增强器
-     *
-     * @param redisChatMemory 基于Redis的ChatMemory
-     */
-    // @Bean
-    // public Advisor messageChatMemoryAdvisor(ChatMemory redisChatMemory) {
-    //     return new MessageChatMemoryAdvisor(redisChatMemory);
-    // }
+    @Bean
+    @ConditionalOnProperty(prefix = "tj.ai", name = "chat-memory", havingValue = "Redis")
+    public ChatMemory redisChatMemory() {
+        return new RedisChatMemory();
+    }
 
     @Bean
+    @ConditionalOnProperty(prefix = "tj.ai", name = "chat-memory", havingValue = "MYSQL")
     public ChatMemory jdbcChatMemory(){
         return new JdbcChatMemory();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "tj.ai", name = "chat-memory", havingValue = "MongoDB")
+    public ChatMemory mongoDBChatMemory(){
+        return new MongoDBChatMemory();
     }
 
     /**
      * 对话记忆的增强器
      *
-     * @param jdbcChatMemory 基于MySQL的ChatMemory
+     * @param chatMemory 基于MySQL的ChatMemory
      */
     @Bean
-    public Advisor messageChatMemoryAdvisor(ChatMemory jdbcChatMemory) {
-        return new MessageChatMemoryAdvisor(jdbcChatMemory);
+    public Advisor messageChatMemoryAdvisor(ChatMemory chatMemory) {
+        return new MessageChatMemoryAdvisor(chatMemory);
     }
 
 }

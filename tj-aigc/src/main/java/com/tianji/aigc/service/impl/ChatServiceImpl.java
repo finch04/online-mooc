@@ -22,7 +22,7 @@ public class ChatServiceImpl implements ChatService {
 
     private final ChatClient chatClient;
     private final SystemPromptConfig systemPromptConfig;
-    private final ChatMemory jdbcChatMemory;
+    private final ChatMemory chatMemory;
 
     // 存储大模型的生成状态，这里采用ConcurrentHashMap是确保线程安全
     // 目前的版本暂时用Map实现，如果考虑分布式环境的话，可以考虑用redis来实现
@@ -79,6 +79,6 @@ public class ChatServiceImpl implements ChatService {
 
     private void saveStopHistoryRecord(String conversationId, String text) {
         // 手动封装AssistantMessage对象，存储到redis中
-        this.jdbcChatMemory.add(conversationId, new AssistantMessage(text));
+        this.chatMemory.add(conversationId, new AssistantMessage(text));
     }
 }

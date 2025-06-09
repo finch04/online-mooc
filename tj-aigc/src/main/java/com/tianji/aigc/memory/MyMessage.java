@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class RedisMessage {
+public class MyMessage {
 
     private String messageType;
     private Map<String, Object> metadata = Map.of();
