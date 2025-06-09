@@ -448,7 +448,7 @@ onMounted(async () => {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        padding: 50px 50px 20px 50px;
+        padding: 50px 50px 20px 5px;
     }
 
     .chatMessages {

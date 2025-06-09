@@ -1,7 +1,7 @@
 <template>
     <div class="sessionList">
         <!-- 新增会话按钮 -->
-        <el-button style="margin-bottom: 20px;text-align: center;color: white;" @click="openModal(null)" >新增会话</el-button>
+        <el-button style="margin-bottom: 20px;text-align: center;color: white;" @click="openModal(null)">新增会话</el-button>
         <ul class="session-ul">
             <li v-for="session in userSessionList" :key="session.id"
                 :class="{ 'active-session': selectedSessionId === session.sessionId }"
@@ -38,13 +38,21 @@
         </ul>
 
         <!-- 模态框 -->
-        <el-dialog v-model="isModalVisible" :title="dialogTitle">
+        <el-dialog v-model="isModalVisible" :title="dialogTitle" @close="handleModalClose">
             <el-form :model="formData" :rules="formRules" ref="formRef" label-width="80px">
                 <el-form-item label="会话名称" prop="name">
-                    <el-input v-model="formData.name"></el-input>
+                    <el-input 
+                        v-model="formData.name" 
+                        :maxlength="8" 
+                        @input="handleInputLimit('name')"
+                    ></el-input>
                 </el-form-item>
                 <el-form-item label="会话标签">
-                    <el-input v-model="formData.tag"></el-input>
+                    <el-input 
+                        v-model="formData.tag" 
+                        :maxlength="8" 
+                        @input="handleInputLimit('tag')"
+                    ></el-input>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -74,7 +82,8 @@
 import { ref, defineProps, defineEmits, reactive } from 'vue';
 import { ElMessage, ElDialog } from 'element-plus';
 import { createUserSession, deleteUserSession, updateUserSession } from '@/api/ai.js';
-import { Edit,Delete } from '@element-plus/icons-vue'; 
+import { Edit, Delete } from '@element-plus/icons-vue'; 
+
 const props = defineProps({
     userSessionList: { type: Array, default: () => [] },
     selectedSessionId: { type: String, default: null }
@@ -87,12 +96,35 @@ const isModalVisible = ref(false);
 const dialogTitle = ref('');
 const formData = ref({ name: '', tag: '' });
 const formRef = ref(null);
-const formRules = reactive({ name: [{ required: true, message: '会话名称为必填项', trigger: 'blur' }] });
+const formRules = reactive({ 
+    name: [
+        { required: true, message: '会话名称为必填项', trigger: 'blur' }
+    ]
+});
 const currentSessionId = ref(null);
 
 // 删除确认对话框
 const deleteConfirmVisible = ref(false);
 const deletingSessionId = ref(null);
+
+// 关闭模态框时清除校验状态
+const handleModalClose = () => {
+    formRef.value?.resetFields(); // 清除表单校验状态
+    formData.value = { name: '', tag: '' }; // 清空输入内容
+};
+
+// 输入长度限制处理
+const handleInputLimit = (field) => {
+    if (field === 'name') {
+        if (formData.value.name.length > 8) {
+            formData.value.name = formData.value.name.slice(0, 8);
+        }
+    } else if (field === 'tag') {
+        if (formData.value.tag.length > 5) {
+            formData.value.tag = formData.value.tag.slice(0, 5);
+        }
+    }
+};
 
 // 打开模态框
 const openModal = (id) => {
@@ -181,11 +213,11 @@ const selectSession = (sessionId) => {
 
 <style scoped>
 .sessionList {
-    width: 220px;
+    width: 250px;
     padding: 15px;
     background-color: white;
     border-right: 1px solid rgb(249, 249, 249);
-    border-radius: 8px;
+    /* border-radius: 8px; */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 

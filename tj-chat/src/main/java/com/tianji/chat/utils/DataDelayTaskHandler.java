@@ -152,7 +152,7 @@ public class DataDelayTaskHandler {
 
         RBlockingQueue<String> retryBlockingQueue = redissonClient.getBlockingQueue(CHAT_RETRY_QUEUE);
         RDelayedQueue<String> retryDelayedQueue = redissonClient.getDelayedQueue(retryBlockingQueue);
-        retryDelayedQueue.offer(task, 10, TimeUnit.SECONDS);
+        retryDelayedQueue.offer(task, RETRY_TASK_EXECUTE_TIME, TimeUnit.SECONDS);
     }
 
 }

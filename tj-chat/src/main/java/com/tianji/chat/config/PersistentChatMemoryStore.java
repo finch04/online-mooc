@@ -106,7 +106,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
             map.put("key", getKey(sessionId));
             map.put("num", messages.size());
             String jsonStr = JSONUtil.toJsonStr(map);
-            dataDelayTaskHandler.addDelayedTask(jsonStr, 1, TimeUnit.MINUTES);
+            dataDelayTaskHandler.addDelayedTask(jsonStr,DELAY_TASK_EXECUTE_TIME , TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("更新对话历史失败", e);
         }

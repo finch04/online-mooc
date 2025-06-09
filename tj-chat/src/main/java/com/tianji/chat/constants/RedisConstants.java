@@ -17,4 +17,13 @@ public interface RedisConstants {
      */
     String CHAT_RETRY_QUEUE = "chat-retry-blocking";
 
+    /**
+     * 延迟任务执行时间  单位秒
+     */
+    int DELAY_TASK_EXECUTE_TIME = 10;
+
+    /**
+     * 重试任务执行时间  单位秒
+     */
+    int RETRY_TASK_EXECUTE_TIME = 10;
 }

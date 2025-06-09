@@ -10,6 +10,7 @@ import com.tianji.chat.mapper.ChatSessionMapper;
 import com.tianji.chat.service.IChatSessionService;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.utils.UserContext;
+import dev.ai4j.openai4j.embedding.EmbeddingModel;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -49,9 +50,9 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
 
     private final AiConfig.AssistantRedis assistantRedis;
     private final AiConfig.KnowledgeAdvisor knowledgeAdvisor;
-    private final EmbeddingStore<TextSegment> embeddingStore;
     private final StreamingChatLanguageModel streamingChatLanguageModel;
     private final ChatLanguageModel chatLanguageModel;
+    private final EmbeddingStore<TextSegment> embeddingStore;
 
     @Autowired
     public ChatSessionServiceImpl(@Lazy AiConfig.AssistantRedis assistantRedis,
@@ -127,4 +128,6 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                 .eq(ChatSession::getUserId,UserContext.getUser()).page(query.toMpPageDefaultSortByCreateTimeDesc());
         return PageDTO.of(page);
     }
+
+
 }
