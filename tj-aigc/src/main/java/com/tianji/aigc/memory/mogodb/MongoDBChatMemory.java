@@ -2,6 +2,7 @@ package com.tianji.aigc.memory.mogodb;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.tianji.aigc.memory.MessageUtil;
 import jakarta.annotation.Resource;
