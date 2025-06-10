@@ -2,6 +2,7 @@ package com.tianji.message.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.client.user.UserClient;
@@ -132,16 +133,27 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
     private void saveNoticeListToInbox(List<PublicNotice> notices, Long userId) {
         List<UserInbox> list = new ArrayList<>(notices.size());
         for (PublicNotice notice : notices) {
-            UserInbox box = new UserInbox();
-            box.setTitle(notice.getTitle());
-            box.setContent(notice.getContent());
-            box.setUserId(userId);
-            box.setType(notice.getType());
-            box.setPushTime(notice.getPushTime());
-            box.setExpireTime(notice.getExpireTime());
-            list.add(box);
+            // 检查公告是否已存在
+            boolean exists = this.lambdaQuery()
+                            .eq(UserInbox::getUserId, userId)
+                            .eq(UserInbox::getNoticeId, notice.getId()).count()>0;// 假设你有noticeId字段
+
+            if (!exists) {
+                UserInbox box = new UserInbox();
+                box.setTitle(notice.getTitle());
+                box.setContent(notice.getContent());
+                box.setUserId(userId);
+                box.setType(notice.getType());
+                box.setPushTime(notice.getPushTime());
+                box.setExpireTime(notice.getExpireTime());
+                box.setNoticeId(notice.getId()); // 关联原始公告ID
+                list.add(box);
+            }
         }
-        saveBatch(list);
+
+        if (!list.isEmpty()) {
+            saveBatch(list);
+        }
     }
 
 

@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserPrivateMessageServiceImpl  extends ServiceImpl<UserPrivateMessageMapper, UserPrivateMessage> implements IUserPrivateMessageService {
 
-        private final UserClient userClient;
-        private final UserPrivateMessageMapper userPrivateMessageMapper;
+    private final UserClient userClient;
+    private final UserPrivateMessageMapper userPrivateMessageMapper;
 //        private final IUserConversationService userConversationService;
 
     @Override
@@ -49,7 +49,7 @@ public class UserPrivateMessageServiceImpl  extends ServiceImpl<UserPrivateMessa
         userPrivateMessage.setSenderId(UserContext.getUser());
         userPrivateMessage.setReceiverId(userPrivateMessageFormDTO.getUserId());
         userPrivateMessage.setContent(userPrivateMessageFormDTO.getContent());
-        userPrivateMessage.setIsRead(1);
+        userPrivateMessage.setIsRead(0);
 
 //        UserConversation conversation = userConversationService.getConversationByUserId(UserContext.getUser(), userPrivateMessageFormDTO.getUserId());
 //        if(conversation == null){
@@ -96,7 +96,11 @@ public class UserPrivateMessageServiceImpl  extends ServiceImpl<UserPrivateMessa
             userPrivateMessageVO.setReceiverIcon(receiver.getIcon());
 
             //查阅到的消息标记为已读
-            message.setIsRead(1);
+            if(message.getReceiverId().equals(userId)){
+                //必须接收者的对方才标已读
+                message.setIsRead(1);
+            }
+
             this.updateById(message);
 
             return userPrivateMessageVO;
@@ -123,17 +127,31 @@ public class UserPrivateMessageServiceImpl  extends ServiceImpl<UserPrivateMessa
         return this.baseMapper.selectOne(queryWrapper);
     }
 
-    //根据对方用户id得到未读数
+//    //根据对方用户id得到未读数
+//    @Override
+//    public Integer getUnreadCount(Long otherUserId) {
+//        Long userId = UserContext.getUser();
+//        // 构建查询条件，查询两个用户之间的所有消息
+//        QueryWrapper<UserPrivateMessage> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.and(wrapper -> wrapper
+//                        .eq("sender_id", userId).eq("receiver_id", otherUserId)
+//                        .or()
+//                        .eq("sender_id", otherUserId).eq("receiver_id", userId)
+//                )
+//                .eq("delete_flag", 0)
+//                .eq("is_read", 0);
+//        // 执行查询并返回结果
+//        return this.baseMapper.selectCount(queryWrapper);
+//    }
+
+    // 根据对方用户 id 得到未读数
     @Override
     public Integer getUnreadCount(Long otherUserId) {
         Long userId = UserContext.getUser();
-        // 构建查询条件，查询两个用户之间的所有消息
+        // 构建查询条件，只查询对方发给当前用户且未读的消息
         QueryWrapper<UserPrivateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.and(wrapper -> wrapper
-                        .eq("sender_id", userId).eq("receiver_id", otherUserId)
-                        .or()
-                        .eq("sender_id", otherUserId).eq("receiver_id", userId)
-                )
+        queryWrapper.eq("sender_id", otherUserId)
+                .eq("receiver_id", userId)
                 .eq("delete_flag", 0)
                 .eq("is_read", 0);
         // 执行查询并返回结果
@@ -143,13 +161,10 @@ public class UserPrivateMessageServiceImpl  extends ServiceImpl<UserPrivateMessa
     //得到自己总的私信未读数
     @Override
     public Integer getAllUnreadCountBySelf(Long userId) {
-        // 构建查询条件，查询两个用户之间的所有消息
+        // 构建查询条件，只查询对方发给当前用户且未读的消息
         QueryWrapper<UserPrivateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.and(wrapper -> wrapper
-                        .eq("sender_id", userId)
-                        .or()
-                        .eq("receiver_id", userId)
-                )
+        queryWrapper
+                .eq("receiver_id", userId)
                 .eq("delete_flag", 0)
                 .eq("is_read", 0);
         // 执行查询并返回结果

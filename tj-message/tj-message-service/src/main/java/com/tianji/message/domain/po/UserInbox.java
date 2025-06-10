@@ -38,6 +38,11 @@ public class UserInbox implements Serializable {
     private Long userId;
 
     /**
+     * 公告id
+     */
+    private Long noticeId;
+
+    /**
      * 通知类型：0-系统通知，1-笔记通知，2-问答通知，3-其它通知
      */
     private Integer type;

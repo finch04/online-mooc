@@ -174,6 +174,7 @@ const sortedConversationMessages = computed(() => {
 
 const selectMessage = async (message) => {
     selectedMessage.value = message;
+
     // 重置页码和消息数据
     emit('select-message', {
         ...message,
@@ -185,13 +186,14 @@ const selectMessage = async (message) => {
     currentPage.value = 1; // 重置当前页码
     // 滚动到顶部
     await nextTick();
+    // 清 0 未读消息数并标记为已读
+    if (message.unReadCount > 0) {
+        console.log('清 0 未读消息数并标记为已读', message)
+        message.unReadCount = 0;
+    }
     scrollToBottom();
 
-    // 清 0 未读消息数并标记为已读
-    if (message.unreadCount > 0) {
-        message.unreadCount = 0;
-        emit('mark-read', message.id);
-    }
+
 
     // 加载对话记录
     await loadConversationMessages(message.otherUserId, 1);
@@ -262,7 +264,7 @@ const scrollToBottom = () => {
 // 滚动处理 - 追加数据
 const handleScroll = (event) => {
     const container = event.target;
-    
+
     // 当滚动到底部附近时加载更多数据
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
         if (!isLoading.value && hasMoreData.value) {
@@ -385,27 +387,27 @@ const loadPrivateMessages = async (append = false) => {
         const res = await queryUserConversation({
             pageNo: privateMessageCurrentPage.value,
             pageSize: privateMessagePageSize.value,
-            status:  0 // 根据筛选条件传参
+            status: 0 // 根据筛选条件传参
         });
-        
+
         if (res.code === 200) {
             const newMessages = res.data.list || [];
-            
+
             // 更新总数据量
             privateMessageTotal.value = res.data.total;
-            
+
             // 判断是否还有更多数据
             hasMoreData.value = (privateMessageCurrentPage.value * privateMessagePageSize.value) < privateMessageTotal.value;
-            
+
             if (append) {
                 // 追加数据模式
                 // 过滤掉已有的消息，避免重复
                 const existingIds = messages.value.map(msg => msg.id);
                 const uniqueNewMessages = newMessages.filter(msg => !existingIds.includes(msg.id));
-                
+
                 // 追加到现有列表
                 messages.value = [...messages.value, ...uniqueNewMessages];
-            } 
+            }
             else {
                 // 覆盖模式（如切换筛选条件或初始加载）
                 messages.value = newMessages;
