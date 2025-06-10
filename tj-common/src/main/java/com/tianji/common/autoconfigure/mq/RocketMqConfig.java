@@ -27,6 +27,4 @@ public class RocketMqConfig {
     public RocketMqHelper rocketMqHelper() {
         return new RocketMqHelper(rocketMQTemplate);
     }
-
-
 }

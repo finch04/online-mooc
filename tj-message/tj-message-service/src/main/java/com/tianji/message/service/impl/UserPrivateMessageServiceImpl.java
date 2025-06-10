@@ -70,15 +70,23 @@ public class UserPrivateMessageServiceImpl  extends ServiceImpl<UserPrivateMessa
         if(messagesList.isEmpty()){
             return PageDTO.empty(new Page<>());
         }
-        //调用用户服务给发送者和接收者添加用户信息
-        UserPrivateMessage userPrivateMessage = messagesList.get(0);
+        UserPrivateMessage userPrivateMessage = null;
+        if(messagesList.size()>0){
+            //调用用户服务给发送者和接收者添加用户信息
+            userPrivateMessage = messagesList.get(0);
+        }else{
+            return PageDTO.empty(new Page<>());
+        }
+
+
 
         Set<Long> userIds =new HashSet<>();
-
-        for (UserPrivateMessage message : messagesList) {
-            userIds.add(message.getSenderId());
-            userIds.add(message.getReceiverId());
-        }
+        userIds.add(userPrivateMessage.getSenderId());
+        userIds.add(userPrivateMessage.getReceiverId());
+//        for (UserPrivateMessage message : messagesList) {
+//            userIds.add(message.getSenderId());
+//            userIds.add(message.getReceiverId());
+//        }
         // 批量查询用户信息
         List<UserDTO> userDTOS = userClient.queryUserByIds(userIds);
         //转成map

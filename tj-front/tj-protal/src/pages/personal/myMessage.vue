@@ -241,7 +241,7 @@ const markAllMessage = async () => {
   try {
     //是否全部已读二次确认弹框
     await ElMessageBox.confirm(
-      `是否确认将所有消息标记为已读？`,
+      `是否确认将所有通知类型消息（私聊内容除外）标记为已读？`,
       '全部已读',
       {
         confirmButtonText: '确认',

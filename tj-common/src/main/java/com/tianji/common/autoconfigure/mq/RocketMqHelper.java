@@ -40,6 +40,4 @@ public class RocketMqHelper {
             return false;
         }
     }
-
-
 }

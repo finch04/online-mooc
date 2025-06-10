@@ -149,6 +149,7 @@ public class UserConversationServiceImpl  extends ServiceImpl<UserConversationMa
 
     @Override
     public void blockConversation(Long conversationId) {
+        // TODO 这里有问题，对方视角中会话也被屏蔽了，所以可能出现对方可以在被屏蔽列表再取消屏蔽即可。
         // 业务逻辑：将会话状态设置为"已屏蔽"（status=1）
         userConversationMapper.update(null,
                 new UpdateWrapper<UserConversation>()
