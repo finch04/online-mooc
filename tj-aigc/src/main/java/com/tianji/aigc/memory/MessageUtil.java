@@ -16,18 +16,18 @@ public class MessageUtil {
      * @return 符合Redis存储规范的JSON字符串
      */
     public static String toJson(Message message) {
-        var redisMessage = BeanUtil.toBean(message, MyMessage.class);
+        var myMessage = BeanUtil.toBean(message, MyMessage.class);
         // 设置消息内容
-        redisMessage.setTextContent(message.getText());
+        myMessage.setTextContent(message.getText());
         if (message instanceof AssistantMessage assistantMessage) {
-            redisMessage.setToolCalls(assistantMessage.getToolCalls());
+            myMessage.setToolCalls(assistantMessage.getToolCalls());
         }
 
         if (message instanceof ToolResponseMessage toolResponseMessage) {
-            redisMessage.setToolResponses(toolResponseMessage.getResponses());
+            myMessage.setToolResponses(toolResponseMessage.getResponses());
         }
 
-        return JSONUtil.toJsonStr(redisMessage);
+        return JSONUtil.toJsonStr(myMessage);
     }
 
     /**
@@ -38,20 +38,20 @@ public class MessageUtil {
      * @throws RuntimeException 当无法识别的消息类型时抛出异常
      */
     public static Message toMessage(String json) {
-        var redisMessage = JSONUtil.toBean(json, MyMessage.class);
-        var messageType = MessageType.valueOf(redisMessage.getMessageType());
+        var myMessage = JSONUtil.toBean(json, MyMessage.class);
+        var messageType = MessageType.valueOf(myMessage.getMessageType());
         switch (messageType) {
             case SYSTEM -> {
-                return new SystemMessage(redisMessage.getTextContent());
+                return new SystemMessage(myMessage.getTextContent());
             }
             case USER -> {
-                return new UserMessage(redisMessage.getTextContent(), redisMessage.getMedia(), redisMessage.getMetadata());
+                return new UserMessage(myMessage.getTextContent(), myMessage.getMedia(), myMessage.getMetadata());
             }
             case ASSISTANT -> {
-                return new AssistantMessage(redisMessage.getTextContent(), redisMessage.getProperties(), redisMessage.getToolCalls());
+                return new AssistantMessage(myMessage.getTextContent(), myMessage.getMetadata(), myMessage.getToolCalls());
             }
             case TOOL -> {
-                return new ToolResponseMessage(redisMessage.getToolResponses(), redisMessage.getMetadata());
+                return new ToolResponseMessage(myMessage.getToolResponses(), myMessage.getMetadata());
             }
         }
 
