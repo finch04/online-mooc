@@ -3,6 +3,7 @@ package com.tianji.aigc.config;
 import com.tianji.aigc.memory.jdbc.JdbcChatMemory;
 import com.tianji.aigc.memory.mogodb.MongoDBChatMemory;
 import com.tianji.aigc.memory.redis.RedisChatMemory;
+import com.tianji.aigc.tools.CourseTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -21,10 +22,12 @@ public class SpringAIConfig {
     @Bean
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder,
                                  Advisor loggerAdvisor, // 日志增强器
-                                 Advisor messageChatMemoryAdvisor // 对话记忆的增强器
+                                 Advisor messageChatMemoryAdvisor, // 对话记忆的增强器
+                                 CourseTools courseTools // 课程工具
     ) {
         return chatClientBuilder
                 .defaultAdvisors(loggerAdvisor, messageChatMemoryAdvisor) // 设置默认的增强器
+                .defaultTools(courseTools) // 设置默认的tools
                 .build();
     }
 
@@ -44,13 +47,13 @@ public class SpringAIConfig {
 
     @Bean
     @ConditionalOnProperty(prefix = "tj.ai", name = "chat-memory", havingValue = "MYSQL")
-    public ChatMemory jdbcChatMemory(){
+    public ChatMemory jdbcChatMemory() {
         return new JdbcChatMemory();
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "tj.ai", name = "chat-memory", havingValue = "MongoDB")
-    public ChatMemory mongoDBChatMemory(){
+    public ChatMemory mongoDBChatMemory() {
         return new MongoDBChatMemory();
     }
 
