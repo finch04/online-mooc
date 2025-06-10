@@ -26,7 +26,7 @@ tj:
   jdbc:
     database: tj_aigc #指定使用的数据库名
   ai:
-    chat-memory: MongoDB # Redis / MYSQL / MongoDB
+    chat-memory: MYSQL # Redis / MYSQL / MongoDB
     prompt:
       system:
         chat:
