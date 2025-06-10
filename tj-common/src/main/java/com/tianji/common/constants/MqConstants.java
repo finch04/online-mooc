@@ -136,4 +136,73 @@ public interface MqConstants {
         String LIVE_START = "inbox.live.start";
 
     }
+
+
+    //rocketmq相关
+    interface Topic {
+        /* 消息有关topic */
+        String MESSAGE_TOPIC = "message";
+
+        /*学习有关topic*/
+        String LEARN_TOPIC = "learn";
+
+        /*QA:点赞记录有关topic*/
+        String LIKE_RECORD_TOPIC = "like_record";
+
+        /*订单有关topic*/
+        String ORDER_TOPIC = "order";
+
+        /*课程有关topic*/
+        String COURSE_TOPIC = "course";
+
+        /*促销服务有关topic*/
+        String PROMOTION_TOPIC = "promotion";
+    }
+
+    interface Tag{
+
+        /**
+         * 消息发送有关tag
+         */
+        String MESSAGE_CODE = "code";
+
+        /**
+         * 用户课程有关tag
+         */
+        String USER_COURSE_DELETE = "delete";
+        String USER_COURSE_SAVE = "save";
+
+        /*订单有关*/
+        String ORDER_PAY_TAG = "order.pay";
+        String ORDER_REFUND_TAG = "order.refund";
+
+    }
+
+    interface ConsumerGroup{
+
+        /**
+         * 消息服务有关消费组
+         */
+        String MESSAGE_GROUP = "consumer_group_message";
+
+
+        String SIGN_GROUP = "consumer_group_sign";
+        String LIKED_RECORD_GROUP = "consumer_group_liked_record";
+
+        /*用户课程有关消费组*/
+        String USER_COURSE_DELETE = "consumer_group_delete_course";
+        String USER_COURSE_SAVE = "consumer_group_save_course";
+
+        /**
+         * 用户优惠券相关消费组
+         */
+        String USER_COUPON_SAVE = "consumer_group_save_user_coupon";
+        String USER_COUPON_DELETE = "consumer_group_delete_user_coupon";
+
+        /**
+         * 库存有关消费组
+         */
+        String COUPON_STOCK_REDUCE = "consumer_group_reduce_coupon_stock";
+        String COUPON_STOCK_ADD = "consumer_group_add_coupon_stock";
+    }
 }

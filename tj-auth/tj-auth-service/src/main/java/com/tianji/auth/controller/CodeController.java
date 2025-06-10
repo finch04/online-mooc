@@ -39,6 +39,7 @@ public class CodeController {
 
     @PostMapping("/verifycode")
     @ApiOperation("注册发送短信验证码")
+    @TjRateLimiter(permitsPerSecond = 3000, timeout = 0)
     public void sendVerfiycode(@RequestParam String cellPhone){
         codeService.sendVerifyCode(cellPhone);
     }

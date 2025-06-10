@@ -1,97 +1,73 @@
 <template>
   <div class="contentBox">
     <!-- 搜索 -->
-    <Search
-      :searchForm="searchForm"
-      ref="searchInfo"
-      @getTime="getTime"
-      @handleSearch="handleSearch"
-      @handleReset="handleReset"
-    ></Search>
+    <Search :searchForm="searchForm" ref="searchInfo" @getTime="getTime" @handleSearch="handleSearch"
+      @handleReset="handleReset"></Search>
     <!-- end -->
     <div class="bg-wt radius marg-tp-20">
       <div class="tableBox">
         <div class="subHead pad-30">
           <!-- 新增 -->
-          <el-button class="button primary" style="margin-bottom: 10px;" @click="handleAddTask" :text="text">新增任务</el-button>
+          <el-button class="button primary" style="margin-bottom: 10px;" @click="handleAddTask"
+            :text="text">新增任务</el-button>
           <!-- end -->
         </div>
         <!-- 表格数据 -->
-        <TableList
-          :noticeTasks="noticeTasks"
-          :searchForm="searchForm"
-          :loading="loading"
-          :isSearch="isSearch"
-          @handleSizeChange="handleSizeChange"
-          @handleCurrentChange="handleCurrentChange"
-          @handleEditTask="handleEditTask"
-        ></TableList>
+        <TableList :noticeTasks="noticeTasks" :searchForm="searchForm" :loading="loading" :isSearch="isSearch"
+          @handleSizeChange="handleSizeChange" @handleCurrentChange="handleCurrentChange"
+          @handleEditTask="handleEditTask"></TableList>
         <!-- end -->
       </div>
     </div>
     <!-- 新增/编辑任务对话框 -->
     <el-dialog v-model="dialogVisible" title="任务信息" class="detailBox">
-        <el-form :model="taskForm" ref="taskFormRef" label-width="180px" label-position="right">
-          <el-form-item label="任务名称">
-            <el-input v-model="taskForm.name"></el-input>
-          </el-form-item>
-          <el-form-item label="通知模板">
-            <el-select v-model="taskForm.templateId" placeholder="请选择通知模板">
-              <el-option
-                v-for="template in noticeTemplates"
-                :key="template.id"
-                :label="template.name"
-                :value="template.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="是否通知部分人">
-            <el-switch v-model="taskForm.partial" @change="handlePartialChange"></el-switch>
-          </el-form-item>
-          <!-- 多选下拉查询框 -->
-          <el-form-item label="已选用户" v-if="taskForm.partial">
-            <el-select
-              v-model="taskForm.userIds"
-              multiple
-              filterable
-              collapse-tags
-              collapse-tags-tooltip
-              remote
-              :remote-method="remoteSearchUsers"
-              :loading="userLoading"
-              placeholder="请选择用户"
-              @visible-change="handleSelectVisibleChange"
-              class="adaptive-select"
-            >
-              <el-option
-                v-for="user in userList"
-                :key="user.id"
-                :label="user.name"
-                :value="user.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="预期执行时间">
-            <el-date-picker
-              v-model="taskForm.pushTime"
-              type="datetime"
-              placeholder="请选择预期执行时间"
-            ></el-date-picker>
-          </el-form-item>
-          <el-form-item label="重复执行次数上限">
-            <el-input v-model="taskForm.maxTimes" type="number"></el-input>
-          </el-form-item>
-          <el-form-item label="重复执行时间间隔（分钟）">
-            <el-input v-model="taskForm.interval" type="number"></el-input>
-          </el-form-item>
-          <el-form-item label="失效时间">
-            <el-date-picker
-              v-model="taskForm.expireTime"
-              type="datetime"
-              placeholder="请选择失效时间"
-            ></el-date-picker>
-          </el-form-item>
-        </el-form>
+      <el-form :model="taskForm" ref="taskFormRef" label-width="180px" label-position="right">
+        <el-form-item label="任务名称">
+          <el-input v-model="taskForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="通知模板">
+          <el-select v-model="taskForm.templateId" placeholder="请选择通知模板">
+            <el-option v-for="template in noticeTemplates" :key="template.id" :label="template.name"
+              :value="template.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="是否通知部分人">
+          <el-switch v-model="taskForm.partial" @change="handlePartialChange"></el-switch>
+        </el-form-item>
+        <!-- 多选下拉查询框 -->
+        <el-form-item label="已选用户" v-if="taskForm.partial">
+          <el-select v-model="taskForm.userIds" multiple filterable collapse-tags collapse-tags-tooltip remote
+            :remote-method="remoteSearchUsers" :loading="userLoading" placeholder="请选择用户"
+            @visible-change="handleSelectVisibleChange" class="adaptive-select">
+            <el-option v-for="user in userList" :key="user.id" :label="user.name" :value="user.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="预期执行时间">
+          <el-date-picker
+          v-model="taskForm.pushTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="datetime"
+          placeholder="请选择预期执行时间"
+          clearable
+          :default-time="baseTime"
+        ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="重复执行次数上限">
+          <el-input v-model="taskForm.maxTimes" type="number"></el-input>
+        </el-form-item>
+        <el-form-item label="重复执行时间间隔（分钟）">
+          <el-input v-model="taskForm.interval" type="number"></el-input>
+        </el-form-item>
+        <el-form-item label="失效时间">
+          <el-date-picker
+          v-model="taskForm.expireTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="datetime"
+          placeholder="请选择失效时间"
+          clearable
+          :default-time="baseTime"></el-date-picker>
+        </el-form-item>
+      </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSaveTask">保存</el-button>
@@ -114,7 +90,7 @@ import { ElMessage } from 'element-plus';
 // 导入组件
 import Search from './components/Search.vue';
 import TableList from './components/TableList.vue';
-
+const baseTime = ref(new Date(2000, 2, 1, 23, 59, 59));
 // 搜索表单
 const searchForm = reactive({
   pageNo: 1,
@@ -328,8 +304,10 @@ onMounted(() => {
 }
 
 .adaptive-select .el-select-dropdown__wrap {
-  max-height: none; /* 移除最大高度限制 */
-  overflow-y: auto; /* 当内容超出时显示滚动条 */
+  max-height: none;
+  /* 移除最大高度限制 */
+  overflow-y: auto;
+  /* 当内容超出时显示滚动条 */
   width: 100%;
 }
 </style>

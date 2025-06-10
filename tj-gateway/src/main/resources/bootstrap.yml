@@ -18,6 +18,7 @@ spring:
             refresh: false
           - data-id: shared-logs.yaml # 共享日志配置
             refresh: false
+          - data-id: shared-rocketmq.yaml # 共享数据源配置
     gateway:
       routes:
         - id: ms

@@ -211,9 +211,16 @@ watchEffect(()=>{
     margin-bottom: 15px;
     color: #000000;
   }
-  .nav-wrapper { // 新增样式
-    height: calc(100vh - 150px); // 减去logo和装饰元素的高度
-    overflow-y: auto;
+  
+  .nav-wrapper { // 新增包裹层
+    height: calc(100vh - 150px); /* 减去logo和装饰元素的高度 */
+    overflow-y: auto; /* 允许垂直滚动 */
+    position: relative;
+    
+    /* 隐藏原生滚动条（可选） */
+    &::-webkit-scrollbar {
+      width: 0; /* 设为0隐藏滚动条，但保留滚动功能 */
+    }
   }
   .nav{
     position: relative;

@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.tianji.auth.constants.AuthConstants;
 import com.tianji.auth.service.ICodeService;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.autoconfigure.mq.RocketMqHelper;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.CollUtils;
@@ -44,6 +45,7 @@ public class CodeServiceImpl  implements ICodeService {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final AsyncSmsClient asyncSmsClient;
+    private final RocketMqHelper rocketMqHelper;
 
     @Override
     public void sendVerifyCode(String phone) {
@@ -65,7 +67,10 @@ public class CodeServiceImpl  implements ICodeService {
         Map<String, String> params = new HashMap<>(1);
         params.put(VERIFY_CODE_PARAM_NAME, code);
         info.setTemplateParams(params);
-        asyncSmsClient.sendMessage(info);
+//        asyncSmsClient.sendMessage(info);
+
+        rocketMqHelper.sendSync(MqConstants.Topic.MESSAGE_TOPIC, info);
+
     }
 
     @Override
