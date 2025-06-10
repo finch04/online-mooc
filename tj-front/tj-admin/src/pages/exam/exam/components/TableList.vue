@@ -41,6 +41,12 @@
       :page-sizes="[10, 20, 30, 40]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
       :total="Number(total)" class="paginationBox">
     </el-pagination>
+     <!-- 放大图片弹层 -->
+     <ImageMagnify
+      :dialogPicVisible="dialogPicVisible"
+      :pic="pic"
+      @handleMagnifyClose="handleMagnifyClose"
+    ></ImageMagnify>
   </div>
 </template>
 
@@ -51,6 +57,8 @@ import { ElMessage } from "element-plus";
 import { formatTime } from "@/utils/index";
 import { getExamById } from "@/api/exam";
 
+// 图片放大弹层
+import ImageMagnify from "@/components/ImageMagnify/index.vue";
 // 导入组件
 import EmptyPage from "@/components/EmptyPage/index.vue";
 
@@ -80,13 +88,28 @@ const props = defineProps({
 const emit = defineEmits();
 const router = useRouter();
 
+
+let pic = ref(""); //要放大的图片
+let dialogPicVisible = ref(false); //控制放大图片弹层显示隐藏
+//打开放大图弹层
+const handleMagnify = (val) => {
+  dialogPicVisible.value = true;
+  pic.value = val;
+};
+// 关闭放大图弹层
+const handleMagnifyClose = () => {
+  dialogPicVisible.value = false;
+  pic.value = "";
+};
+// 按esc关闭弹层
 const handleEsc = (e) => {
   if (e.keyCode === 27) {
-    // 这里可以根据实际情况处理，比如返回上一页
-    router.back();
+    dialogPicVisible.value = false;
+    dialogResetVisible.value = false;
+    dialogStatusVisible.value = false;
+    pic.value = ""
   }
 };
-
 const handleDetail = async (row) => {
   // 跳转到考试详情页面，并传递必要的参数
   router.push({

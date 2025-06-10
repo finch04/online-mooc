@@ -187,7 +187,7 @@ export default [
       },
       {
         path: "template/message",
-        name: "message",
+        name: "SmsTemplate",
         component: () => import("@/pages/message/template/message.vue"),
         meta: { title: "短信模板管理",hidden:true ,fmeta: {path: '/message/template', title: '模板管理'} },
       },

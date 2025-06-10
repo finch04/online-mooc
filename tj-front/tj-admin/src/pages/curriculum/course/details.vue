@@ -15,7 +15,8 @@
         </div>
         <div class="headerBox-right">
           <div class="title">
-            {{ courseData.data.cateNames }}
+            <!-- {{ courseData.data.cateNames }} -->
+            {{ courseData.data.name }}
             <!-- 1：待上架，2：已上架，3：下架，4：已完结 -->
             <span v-if="courseData.data.status == 1" class="waitgrounding"
               >待上架</span

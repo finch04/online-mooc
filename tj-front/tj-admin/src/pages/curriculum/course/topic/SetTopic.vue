@@ -100,13 +100,13 @@
                   </li>
                 </ul>
                 <div class="answer">
-                  <div class="item">
+                  <div class="item" v-if="tipicData.type!==5 && tipicData.answer ">
                     正确答案：
                     <span
-                      v-for="(val, index) in tipicData.answer"
-                      :key="index"
+                      v-for="(val, index) in tipicData.answer.split(',')"
+                      :key="index" 
                     >
-                      {{ numLetter(val) }}
+                      {{ numLetter(val)}}
                     </span>
                   </div>
                   <div class="item">
@@ -229,8 +229,8 @@ const getTitleList = async () => {
     pageNo: 1,
     sortBy: "update_time",
     isAsc: false,
-    thirdCateIds: searchData.thirdCateIds,
-    name: searchData.name
+    cateIds: searchData.thirdCateIds,
+    keyword: searchData.name
   }
   await getSubjectPage(parent)
     .then((res) => {
@@ -346,6 +346,8 @@ const handleShow = async (val) => {
   await getDetails(val.id)
     .then((res) => {
       tipicData.value = res.data
+      // console.log(tipicData.value)
+      // 这里才是真正鼠标划过显示的抽屉界面！！！
     })
     .catch((err) => { })
 };

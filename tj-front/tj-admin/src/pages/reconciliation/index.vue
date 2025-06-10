@@ -32,9 +32,6 @@
                 <el-button class="button buttonSub" @click="handleReset(ruleForm)">
                   重置
                 </el-button>
-                <el-button class="button primary" @click="openChannelManagement" style="float: right;">
-                  支付渠道管理
-                </el-button>
               </div>
             </el-col>
           </el-row>
@@ -44,6 +41,9 @@
     <!-- 表格 -->
     <div class="bg-wt radius marg-tp-20">
       <div class="tableBox">
+        <el-button class="button primary" @click="openChannelManagement" style="float: right;margin-bottom: 20px;margin-right: 20px;">
+                  支付渠道管理
+                </el-button>
         <el-table :data="baseData.value" border stripe v-loading="loading" :default-sort="{prop:'createTime',order:'descending'}">
           <el-table-column type="index" align="center" width="100" label="序号" />
           <el-table-column label="业务订单号" prop="bizOrderNo" min-width="230" />

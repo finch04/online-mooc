@@ -11,11 +11,11 @@
         <h6 class="tit" v-html="detailData.name"></h6>
         <ul class="item">
           <li v-for="(item, index) in detailData.options" :key="index">
-            {{ statusWord(index + 1) }}、<span v-html="item"></span>
+            {{ statusWord(index + 1) }}<span v-html="removeLineBreaks(item)"></span>
           </li>
         </ul>
         <div class="drawerInfo">
-          <p>
+          <p v-if="detailData.type !== 5">
             正确答案：<span v-if="detailData.type === 4">{{
               detailData.answers[0] === 1 ? '正确' : '错误'
             }}</span
@@ -89,6 +89,10 @@ const statusWord = (val) => {
     case 10:
       return "J"
   }
+};
+// 去除字符串中的换行符
+const removeLineBreaks = (str) => {
+  return str.replace(/(\r\n|\n|\r)/gm, "");
 };
 </script>
 <style lang="scss" scoped>

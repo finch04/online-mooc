@@ -15,21 +15,19 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
+            <!-- 日期范围选择 -->
             <el-form-item label="预期执行时间" prop="datePicker">
-              <div class="el-input">
-                <el-date-picker
-                  v-model="datePicker"
-                  format="YYYY-MM-DD HH:mm:ss"
-                  value-format="YYYY-MM-DD HH:mm:ss"
-                  type="datetimerange"
-                  range-separator="至"
-                  start-placeholder="开始时间"
-                  end-placeholder="结束时间"
-                  clearable
-                  @change="handleDate($event)"
-                >
-                </el-date-picker>
-              </div>
+              <el-date-picker
+                v-model="datePicker"
+                format="YYYY-MM-DD HH:mm:ss"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                type="datetimerange"
+                range-separator="至"
+                start-placeholder="开始时间"
+                end-placeholder="结束时间"
+                clearable
+                @change="handleDate" 
+              />
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -56,23 +54,40 @@
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue';
 
+// 定义 props 和 emits
 const props = defineProps({
   searchForm: {
     type: Object,
-    required: true
+    required: true,
+    default: () => ({
+      keyword: '',
+      finished: false, // 布尔值更合理
+      minPushTime: null, // 开始时间
+      maxPushTime: null // 结束时间
+    })
   }
 });
 
 const emit = defineEmits(['handleSearch', 'handleReset', 'getTime']);
 const ruleFormRef = ref(null);
-let datePicker = ref([]);
+// 双向绑定日期范围（数组形式）
+const datePicker = ref(props.searchForm.datePicker ? [props.searchForm.minPushTime, props.searchForm.maxPushTime] : []);
 
 const handleSearch = () => {
   emit('handleSearch');
 };
 
+// 处理日期变化
 const handleDate = (val) => {
-  emit('getTime', val);
+  // 拆分开始和结束时间
+  if (val && val.length === 2) {
+    props.searchForm.minPushTime = val[0];
+    props.searchForm.maxPushTime = val[1];
+  } else {
+    props.searchForm.minPushTime = null;
+    props.searchForm.maxPushTime = null;
+  }
+  emit('getTime', { min: props.searchForm.minPushTime, max: props.searchForm.maxPushTime });
 };
 
 // 重置搜索表单
@@ -82,7 +97,7 @@ const handleReset = () => {
   }
   datePicker.value = []; // 清空时间
   props.searchForm.keyword = '';
-  props.searchForm.finished = '';
+  props.searchForm.finished = false;
   props.searchForm.minPushTime = null;
   props.searchForm.maxPushTime = null;
   console.log(props.searchForm);

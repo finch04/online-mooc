@@ -596,7 +596,7 @@ const handleSubmit = async (str) => {
       analysis: baseVal.analysis,
       answer: (baseVal.type === 1 ? options : baseVal.answer).join(","),
       cateIds: baseVal.cateIds,
-      courseIds: baseVal.courseIds,
+      // courseIds: baseVal.courseIds,
       difficulty: baseVal.difficulty,
       name: baseVal.name,
       score: baseVal.score,

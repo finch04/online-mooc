@@ -172,6 +172,7 @@ const handleSearch = async () => {
   isSearch.value = true;
   loading.value = true;
   try {
+    console.log(searchForm)
     const res = await queryNoticeTasks(searchForm);
     noticeTasks.value.data = res.data.list;
     loading.value = false;
@@ -257,8 +258,8 @@ const handleSaveTask = async () => {
 
 // 获取时间
 const getTime = (val) => {
-  searchForm.minPushTime = val[0];
-  searchForm.maxPushTime = val[1];
+  searchForm.minPushTime = val.min;
+  searchForm.maxPushTime = val.max;
 };
 
 // 当是否通知部分人开关状态改变时

@@ -229,7 +229,7 @@ const resetChannelData = () => {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .searchForm {
     display: flex;
     justify-content: space-between;
