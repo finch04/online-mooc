@@ -7,6 +7,7 @@ import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
+import com.tianji.common.utils.StringUtils;
 import com.tianji.user.constants.UserErrorInfo;
 import com.tianji.user.domain.dto.UserFormDTO;
 import com.tianji.user.domain.po.User;
@@ -54,13 +55,15 @@ public class UserController {
 
     @ApiOperation("更新用户信息")
     @PutMapping("/{id}")
-    public void updateUser(@RequestBody UserDTO userDTO){
+    public void updateUser(@PathVariable Long id , @RequestBody UserDTO userDTO){
+        userDTO.setId(id);
         userService.updateUser(userDTO);
     }
 
     @ApiOperation("更新当前登录用户信息，可修改密码")
-    @PutMapping
-    public void updateCurrentUser(@Valid @RequestBody UserFormDTO userDTO){
+    @PutMapping("/current/{id}")
+    public void updateCurrentUser(@PathVariable Long id ,@RequestBody UserFormDTO userDTO){
+        userDTO.setId(id);
         userService.updateUserWithPassword(userDTO);
     }
 
@@ -160,6 +163,14 @@ public class UserController {
     @GetMapping("checkCellphone")
     public Boolean checkCellPhone(@RequestParam("cellphone") String cellPhone){
         return userService.checkCellPhone(cellPhone);
+    }
+    @ApiOperation("检查用户密码是否正确")
+    @GetMapping("checkPasswd/{password}")
+    public Boolean checkPasswd(@PathVariable("password") String password){
+        if(StringUtils.isEmpty(password)){
+            return false;
+        }
+        return userService.checkPasswd(password);
     }
 
 

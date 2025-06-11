@@ -28,7 +28,7 @@
           :teacherData="teacherData.data"
           @editTeacher="editTeacher"
           @handleSaveTeacher="handleSaveTeacher"
-          v-if="userInfo.data.type == 1"
+          v-if="userInfo.data.type == 3"
         ></Teacher>
         <!-- 使用User组件 -->
         <Staffs
@@ -37,7 +37,7 @@
           @editStaffs="editStaffs"
           @handleSaveUser="handleSaveUser"
           rulesuserpassWord
-          v-if="userInfo.data.type == 2"
+          v-if="userInfo.data.type == 1"
         ></Staffs>
       </div>
     </div>
@@ -49,13 +49,13 @@
         <el-button
           class="button primary"
           @click="rulesteacherpassWord"
-          v-if="userInfo.data.type == 1"
+          v-if="userInfo.data.type == 3"
           >保存并返回</el-button
         >
         <el-button
           class="button primary"
           @click="rulesuserpassWord"
-          v-if="userInfo.data.type == 2"
+          v-if="userInfo.data.type == 1"
           >保存并返回</el-button
         >
       </div>
@@ -70,7 +70,7 @@ import { useRouter } from "vue-router"
 import Teacher from "./components/teacher.vue" // 教师个人详情页
 import Staffs from "./components/user.vue" // 用户个人详情页
 // 接口api
-import { getUserInfo, editCurrentUser } from "@/api/user.js"//老师接口
+import { getUserInfo,editUser, editCurrentUser,queryUserTypeById } from "@/api/user.js"//老师接口
 import { USER_KEY } from "@/config/global.js"//用户接口
 import { ElMessage } from "element-plus"
 // ------定义变量------
@@ -126,10 +126,10 @@ onMounted(() => {
   userinfoDetail()
 })
 watch(userInfo, (val) => {
-  if (userInfo.data.type == 1) {
-    getTeacherDetail() //userInfo.data.type == 1时，用户身份为老师，调用老师接口
-  } else if (userInfo.data.type == 2) {
-    getStaffsDetail() //userInfo.data.type == 2时，用户身份为用户，调用用户接口
+  if (userInfo.data.type == 3) {
+    getTeacherDetail() //userInfo.data.type == 3时，用户身份为老师，调用老师接口
+  } else if (userInfo.data.type == 1) {
+    getStaffsDetail() //userInfo.data.type == 1时，用户身份为用户，调用用户接口
   }
 })
 // 获取教师详情信息
@@ -138,6 +138,7 @@ const getTeacherDetail = async () => {
     .then((res) => {
       if (res.code === 200) {
         teacherData.data = res.data
+        console.log("老师信息",res.data)
       }
     })
     .catch((err) => { })
@@ -146,15 +147,26 @@ const getTeacherDetail = async () => {
 const userinfoDetail = async () => {
   // 获取当前登录用户存储在LOCALSTORAGE中的信息
   userInfo.data = JSON.parse(sessionStorage.getItem(USER_KEY))
+  //根据用户id查询用户类型
+  queryUserTypeById(userInfo.data.id)
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("用户类型",res.data)
+        userInfo.data.type = res.data
+      }
+    })
+    .catch((err) => { })
 }
 //修改教师个人信息
 const handleSaveTeacher = async () => {
   // 判断是否收到子组件传过来的值
   if (isEdit.value == true) {
     isEdit.value == false //将布尔值改为false,防止重复提交和第二次修改后不进行判断
+    console.log("密码",teachereditData.data.oldPassword,teachereditData.data.password)
     // 当teachereditData.data中的intro、job、photo中任意一向和teacherData.data中的intro、job、photo中任意一向不相等时，说明非密码区域内容有变化
     if (teachereditData.data.intro !== teacherData.data.intro || teachereditData.data.job !== teacherData.data.job || teachereditData.data.photo !== teacherData.data.photo) {
-      editCurrentUser(teachereditData.data)
+      console.log("修改当前用户: ", teachereditData.data,teacherData.data)
+      editUser(teacherData.data.id,teachereditData.data)
         .then((res) => {
           if (res.code === 200) {
             ElMessage({
@@ -173,11 +185,10 @@ const handleSaveTeacher = async () => {
     } else {
       // 当teachereditData.data中的password和oldPassword都有值，说明密码区域内容有变化执行修改操作
       if (teachereditData.data.oldPassword && teachereditData.data.password) {
-        editCurrentUser(teachereditData.data)
+        editCurrentUser(teacherData.data.id,teachereditData.data)
           .then((res) => {
             if (res.code === 200) {
               ElMessage({
-
                 message: "恭喜你，操作成功！",
                 type: "success",
                 showClose: false,
@@ -185,7 +196,6 @@ const handleSaveTeacher = async () => {
               router.go(-1)
             } else {
               ElMessage({
-
                 message: "请填写正确信息!",
                 type: "error",
                 showClose: false,
@@ -194,8 +204,7 @@ const handleSaveTeacher = async () => {
           })
       } else {
         ElMessage({
-
-          message: "请填写正确信息!",
+          message: "您未更改您的信息!",
           type: "error",
           showClose: false,
         })
@@ -207,18 +216,18 @@ const handleSaveTeacher = async () => {
 // 修改用户个人信息
 const isChaseUser = ref(false) //判断是否修改用户信息，false为未修改，true为修改
 const handleSaveUser = async () => {
+  // console.log("修改用户信息",staffseditData.data)
   if (!isChaseUser.value) {
     return
   }
   // 调用Staffs组件中的rulespassWord方法，验证密码是否符合规则
-  rulesuserpassWord()
   if (staffseditData.data.oldPassword && staffseditData.data.password) {
-    await editCurrentUser(staffseditData.data)
+    console.log("修改当前用户: ", staffseditData.data,staffsData.data)
+    await editCurrentUser(staffsData.data.id,staffseditData.data)
       // 成功或失败时出现提示
       .then((res) => {
         if (res.code === 200) {
           ElMessage({
-
             message: "密码修改成功",
             type: "success",
             showClose: false,
@@ -226,8 +235,7 @@ const handleSaveUser = async () => {
           router.go(-1)
         } else {
           ElMessage({
-
-            message: res.data.msg,
+            message: res.msg,
             type: "error",
             showClose: false,
           })
@@ -236,8 +244,7 @@ const handleSaveUser = async () => {
       .catch((err) => { })
   } else {
     ElMessage({
-
-      message: "请填写正确信息!",
+      message: "您未更改您的信息!",
       type: "error",
       showClose: false,
     })
@@ -250,6 +257,7 @@ const getStaffsDetail = async () => {
     .then((res) => {
       if (res.code === 200) {
         staffsData.data = res.data
+        console.log("员工信息",res.data)
       }
     })
     .catch((err) => { })

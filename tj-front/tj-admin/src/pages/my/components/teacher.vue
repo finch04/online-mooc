@@ -199,6 +199,11 @@ watch(photoImg, (news, olds) => {
 // 通过改变布尔值的取值，实现点击修改密码出现修改密码框，再次点击隐藏修改密码框
 const editpassword = () => {
   ispassword.value = !ispassword.value;
+  if(!ispassword.value){
+    teachereditData.password=null
+    teachereditData.oldPassword=null
+    teachereditData.checkpassword=null
+  }
 };
 // 为密码框添加正则验证
 const rules = ref(() => {
@@ -240,7 +245,7 @@ const setRules = () => {
     oldPassword: [
       {
         required: true,
-        message: "密码为空，请输入密码",
+        message: "旧密码不正确，请重新输入",
         trigger: "blur",
       },
       // 根据isPassword的值，验证是否与旧密码一致，若isPassword的值为true，则不一致，出错误文本提示：旧密码不正确，请重新输入；
@@ -262,10 +267,10 @@ const setRules = () => {
     password: [
       {
         required: true,
-        message: "密码为空，请输入密码",
+        message: "新密码不能为空",
         trigger: "blur",
       },
-      { min: 6, max: 16, message: "密码格式错误，请重新输入", trigger: "blur" },
+      { min: 5, max: 16, message: "密码格式错误，请重新输入", trigger: "blur" },
       {
         validator: (rule, value, callback) => {
           if (value == teachereditData.oldPassword) {
@@ -280,7 +285,7 @@ const setRules = () => {
     checkpassword: [
       {
         required: true,
-        message: "密码为空，请输入新密码",
+        message: "新密码与确认新密码不一致",
         trigger: "blur",
       },
       {
@@ -355,7 +360,7 @@ const rulespassWord = () => {
 const checkoldPassword = async () => {
   await CheckPassword(teachereditData.oldPassword).then((res) => {
     if (res.code === 200) {
-      isPassword.value = res.data.right;
+      isPassword.value = res.data;
     }
   });
 };

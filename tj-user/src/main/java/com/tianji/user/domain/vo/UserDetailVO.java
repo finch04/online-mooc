@@ -21,10 +21,14 @@ public class UserDetailVO {
     private String username;
     @ApiModelProperty(value = "邮箱")
     private String email;
+    @ApiModelProperty(value = "岗位")
+    private String job;
     @ApiModelProperty(value = "QQ号码")
     private String qq;
     @ApiModelProperty(value = "个人介绍")
     private String intro;
+    @ApiModelProperty(value = "教师形象照")
+    private String photo;
     @ApiModelProperty(value = "省")
     private String province;
     @ApiModelProperty(value = "市")

@@ -1,6 +1,7 @@
 package com.tianji.user.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -225,6 +227,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
+    @Transactional
     public void updateUserWithPassword(UserFormDTO userDTO) {
         // 1.尝试更新密码
         String pw = userDTO.getPassword();
@@ -235,24 +238,69 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             User user = getById(userId);
             // 1.2.校验
             if (user == null) {
-                throw new UnauthorizedException(USER_ID_NOT_EXISTS);
+                throw new BadRequestException(USER_ID_NOT_EXISTS);
             }
             // 1.3.校验密码
             if (!passwordEncoder.matches(oldPw, user.getPassword())) {
                 // 密码不一致
-                throw new UnauthorizedException(INVALID_UN_OR_PW);
+                throw new BadRequestException(INVALID_OLD_PASSWORD);
             }
-            // 1.4.修改密码
-            user = new User();
-            user.setId(userId);
-            user.setPassword(passwordEncoder.encode(pw));
-            updateById(user);
+//            // 1.4.修改密码
+//            user = new User();
+//            user.setId(userId);
+//            user.setPassword(passwordEncoder.encode(pw));
+//            updateById(user);
+            this.lambdaUpdate()
+                    .eq(User::getId, userId)
+                    .set(User::getPassword, passwordEncoder.encode(pw))
+                    .update();
         }
         // 2.更新用户详情
         UserDetail detail = BeanUtils.toBean(userDTO, UserDetail.class);
-        detail.setRoleId(null);
-        detail.setType(null);
-        detailService.updateById(detail);
+        LambdaUpdateWrapper<UserDetail> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(UserDetail::getId, detail.getId());
+
+        // 依次检查每个字段是否为 null，如果不为 null 则添加到更新条件中
+        if (detail.getName() != null) {
+            updateWrapper.set(UserDetail::getName, detail.getName());
+        }
+        if (detail.getGender() != null) {
+            updateWrapper.set(UserDetail::getGender, detail.getGender());
+        }
+        if (detail.getIcon() != null) {
+            updateWrapper.set(UserDetail::getIcon, detail.getIcon());
+        }
+        if (detail.getEmail() != null) {
+            updateWrapper.set(UserDetail::getEmail, detail.getEmail());
+        }
+        if (detail.getQq() != null) {
+            updateWrapper.set(UserDetail::getQq, detail.getQq());
+        }
+        if (detail.getBirthday() != null) {
+            updateWrapper.set(UserDetail::getBirthday, detail.getBirthday());
+        }
+        if (detail.getJob() != null) {
+            updateWrapper.set(UserDetail::getJob, detail.getJob());
+        }
+        if (detail.getProvince() != null) {
+            updateWrapper.set(UserDetail::getProvince, detail.getProvince());
+        }
+        if (detail.getCity() != null) {
+            updateWrapper.set(UserDetail::getCity, detail.getCity());
+        }
+        if (detail.getDistrict() != null) {
+            updateWrapper.set(UserDetail::getDistrict, detail.getDistrict());
+        }
+        if (detail.getIntro() != null) {
+            updateWrapper.set(UserDetail::getIntro, detail.getIntro());
+        }
+        if (detail.getPhoto() != null) {
+            updateWrapper.set(UserDetail::getPhoto, detail.getPhoto());
+        }
+        updateWrapper.set(UserDetail::getUpdateTime, new Date());
+        // 执行更新操作
+         detailService.update(updateWrapper);
+
     }
 
     public User loginByPw(LoginFormDTO loginDTO) {
@@ -343,4 +391,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return PageDTO.of(page, list);
     }
 
+    @Override
+    public Boolean checkPasswd(String password) {
+        Long user = UserContext.getUser();
+        User userInfo = getById(user);
+        return passwordEncoder.matches(password, userInfo.getPassword());
+    }
 }

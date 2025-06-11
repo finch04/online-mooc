@@ -84,25 +84,7 @@ public class RocketMqHelper {
      * @param topic 主题
      * @param tags 标签
      * @param msg 消息内容
-     * @param delayLevel 延迟级别 RocketMQ 默认提供了 18 个延迟级别如下：
-     * 1 -> 1s
-     * 2 -> 5s
-     * 3 -> 10s
-     * 4 -> 30s
-     * 5 -> 1m
-     * 6 -> 2m
-     * 7 -> 3m
-     * 8 -> 4m
-     * 9 -> 5m
-     * 10 -> 6m
-     * 11 -> 7m
-     * 12 -> 8m
-     * 13 -> 9m
-     * 14 -> 10m
-     * 15 -> 20m
-     * 16 -> 30m
-     * 17 -> 1h
-     * 18 -> 2h
+     * @param delayLevel 延时消息一共分为18个等级分别为：1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
      * @param <T> 消息类型
      * @return 发送结果
      */

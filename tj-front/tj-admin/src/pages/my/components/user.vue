@@ -138,14 +138,18 @@ const props = defineProps({
 // 点击出现，再次点击隐藏
 const editpassword = () => {
   isCourse.value = !isCourse.value
+  if(!isCourse.value){
+    staffseditData.password=null
+    staffseditData.oldPassword=null
+    staffseditData.checkpassword=null
+  }
 }
 // 为密码框添加正则验证
-const rules = computed(() => {
-  return {
+const rules =  {
     oldPassword: [
       {
         required: true,
-        message: "密码为空，请输入密码",
+        message: "旧密码不正确，请重新输入",
         trigger: "blur",
       },
       // 根据isPassword的值，验证是否与旧密码一致，若isPassword的值为true，则不一致，出错误文本提示：旧密码不正确，请重新输入；
@@ -166,10 +170,10 @@ const rules = computed(() => {
     ],
     password: [{
       required: true,
-      message: '密码为空，请输入密码',
+      message: '新密码不能为空',
       trigger: 'blur'
     },
-    { min: 6, max: 16, message: '密码格式错误，请重新输入', trigger: "blur" },
+    { min: 5, max: 16, message: '密码格式错误，请重新输入', trigger: "blur" },
     {
       validator: (rule, value, callback) => {
         if (value == staffseditData.oldPassword) {
@@ -184,7 +188,7 @@ const rules = computed(() => {
     checkpassword: [
       {
         required: true,
-        message: "密码为空，请输入密码",
+        message: "新密码与确认新密码不一致",
         trigger: "blur",
       },
       {
@@ -199,7 +203,7 @@ const rules = computed(() => {
       },
     ],
   }
-})
+
 // 定义事件，用于传递staffseditData的内容给父组件
 const editStaffs = () => {
   // 将staffseditData中的内容传递给父组件
@@ -207,27 +211,33 @@ const editStaffs = () => {
 }
 // 定义事件，用于校验当前所有的密码框格式是否正确
 const rulespassWord = () => {
+
   if (!isCourse.value){
     router.go(-1)
   }
   // 校验当前所有的密码框格式是否正确
   ruleFormRef.value.validate((valid) => {
+    console.log("valid", valid)
     if (valid) {
       emit("handleSaveUser", staffeditData)
     } else {
       // 清除密码框中的内容
       staffseditData.oldPassword = ""
       staffseditData.password = ""
-      staffseditData.checkpassword = ""
+      staffseditData.checkpassword = ""  
+       return false; 
     }
   })
 }
 // 校验密码是否重复
 const checkoldPassword = async () => {
+  if(!isCourse.value || staffeditData.oldPassword==""){
+    return;
+  }
   await CheckPassword(staffseditData.oldPassword)
     .then((res) => {
       if (res.code === 200) {
-        isPassword.value = res.data.right
+        isPassword.value = res.data
       }
     })
     .catch((err) => { })

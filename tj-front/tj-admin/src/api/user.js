@@ -43,16 +43,16 @@ export const saveUser = (data) =>
     data
   });
 // 修改用户
-export const editUser = (data) =>
+export const editUser = (id,data) =>
   request({
-    url: `/us/users/${data.id}`,
+    url: `/us/users/${id}`,
     method: "put",
     data
   });
 // 修改当前用户
-export const editCurrentUser = (data) =>
+export const editCurrentUser = (id,data) =>
   request({
-    url: `/us/users`,
+    url: `/us/users/current/${id}`,
     method: "put",
     data
   });
@@ -70,4 +70,9 @@ export const queryUsersByPage = (params) =>
     method: "get",
     params
   });
-
+// 根据用户id查询用户类型
+export const queryUserTypeById = (id) =>
+  request({
+    url: `/us/users/${id}/type`,
+    method: "get"
+  });

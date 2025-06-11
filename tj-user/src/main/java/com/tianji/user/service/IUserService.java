@@ -44,4 +44,5 @@ public interface IUserService extends IService<User> {
 
     PageDTO<UserPageVO> queryUserPage(UserSimplePageQuery pageQuery);
 
+    Boolean checkPasswd(String password);
 }
