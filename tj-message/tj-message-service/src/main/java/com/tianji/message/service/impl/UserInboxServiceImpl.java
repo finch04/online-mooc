@@ -78,26 +78,8 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
     public PageDTO<UserInboxDTO> queryUserInBoxesPage(UserInboxQuery query) {
         // 1.获取用户信息
         Long userId = UserContext.getUser();
-//        // 2.查询用户信箱中的最后一条公告，确认本次加载公告的最早时间点
-        UserInbox latest = getBaseMapper().queryLatestPublicNotice(userId);
-        // 2.1.默认时间点是当前时间减去公告的最大有效期时间（未过期的最早公告时间）
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime minTime = now.minusMonths(properties.getNoticeTtlMonths());
-        // 2.2.如果有最后一条公告，判断公告时间是不是比最早时间要晚
-        if(latest != null && latest.getPushTime().isAfter(minTime)){
-            // 用户上次加载时间比最早时间晚，更新一下时间
-            minTime = latest.getPushTime();
-        }
-        // 3.按照发布时间倒序，查看公告箱中的消息，最多加载200条
-        Page<PublicNotice> noticePage = new Page<PublicNotice>(1, 200)
-                .addOrder(new OrderItem("push_time", false));
-        noticePage = publicNoticeService.lambdaQuery()
-                .ge(PublicNotice::getPushTime, minTime)
-                .page(noticePage);
-        // 4.将公告写入用户收件箱
-        if (CollUtils.isNotEmpty(noticePage.getRecords())) {
-            saveNoticeListToInbox(noticePage.getRecords(), userId);
-        }
+        queryNeedNoticeToInbox(userId);
+
         Page<UserInbox> page = new Page<UserInbox>(query.getPageNo(), query.getPageSize())
                 .addOrder(new OrderItem("push_time", false));
 
@@ -130,6 +112,32 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
         return PageDTO.of(page, dtoList);
     }
 
+    /**
+     * 查询需不需要将公告写入收件箱
+     * @param userId
+     */
+    private void queryNeedNoticeToInbox(Long userId){
+        // 2.查询用户信箱中的最后一条公告，确认本次加载公告的最早时间点
+        UserInbox latest = getBaseMapper().queryLatestPublicNotice(userId);
+        // 2.1.默认时间点是当前时间减去公告的最大有效期时间（未过期的最早公告时间）
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime minTime = now.minusMonths(properties.getNoticeTtlMonths());
+        // 2.2.如果有最后一条公告，判断公告时间是不是比最早时间要晚
+        if(latest != null && latest.getPushTime().isAfter(minTime)){
+            // 用户上次加载时间比最早时间晚，更新一下时间
+            minTime = latest.getPushTime();
+        }
+        // 3.按照发布时间倒序，查看公告箱中的消息，最多加载200条
+        Page<PublicNotice> noticePage = new Page<PublicNotice>(1, 200)
+                .addOrder(new OrderItem("push_time", false));
+        noticePage = publicNoticeService.lambdaQuery()
+                .ge(PublicNotice::getPushTime, minTime)
+                .page(noticePage);
+        // 4.将公告写入用户收件箱
+        if (CollUtils.isNotEmpty(noticePage.getRecords())) {
+            saveNoticeListToInbox(noticePage.getRecords(), userId);
+        }
+    }
     private void saveNoticeListToInbox(List<PublicNotice> notices, Long userId) {
         List<UserInbox> list = new ArrayList<>(notices.size());
         for (PublicNotice notice : notices) {
@@ -178,6 +186,7 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
         //用户高频请求接口，可以考虑放到redis优化
         //获取当前登录人
         Long userId = UserContext.getUser();
+        queryNeedNoticeToInbox(userId);
         Integer userInboxUnReadCount = this.lambdaQuery()
                 .eq(UserInbox::getUserId, userId)          // 用户ID相等
                 .eq(UserInbox::getIsRead, false)          // 未读消息

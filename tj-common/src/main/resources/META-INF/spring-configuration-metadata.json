@@ -263,6 +263,18 @@
       "type": "java.lang.String",
       "description": "xxl-job的执行器日志存储最长周期，过期会被清理",
       "defaultValue": ""
+    },
+    {
+      "name": "tj.rocketmq.producer.group",
+      "type": "java.lang.String",
+      "description": "RocketMQ消息生产者组",
+      "defaultValue": ""
+    },
+    {
+      "name": "tj.rocketmq.host.port",
+      "type": "java.lang.String",
+      "description": "name-server的地址和端口",
+      "defaultValue": ""
     }
   ],
   "hints": []

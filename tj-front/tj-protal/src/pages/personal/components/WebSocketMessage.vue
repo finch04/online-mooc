@@ -81,6 +81,7 @@
             <div class="online-users-panel">
                 <div class="panel-header">
                     <span>在线用户 ({{ onlineUserCount }})</span>
+                    <el-button style="color: white;float: right;height: 20px;width: 20px;" circle :icon="Refresh" @click="fetchOnlineCount"></el-button>
                 </div>
                 <div class="user-list">
                     <!-- 当前用户始终显示在第一位 -->
@@ -166,7 +167,7 @@ import { ElMessage } from 'element-plus';
 import { Client } from '@stomp/stompjs';
 import { useUserStore } from "@/store"
 import { getOnlineCount, getAllGroups, getMyGroups, addToGroup, getHistoryMessages } from '@/api/message.js'
-
+import { Refresh } from '@element-plus/icons-vue';
 const store = useUserStore()
 const userInfo = ref(store.getUserInfo)
 const user = reactive({
@@ -1059,7 +1060,7 @@ window.addEventListener('beforeunload', () => {
         .lable {
             display: flex;
             align-items: center;
-
+            margin-top: 10px;
             span {
                 display: inline-block;
                 width: 96px;

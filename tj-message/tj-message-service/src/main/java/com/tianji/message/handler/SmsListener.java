@@ -22,5 +22,6 @@ public class SmsListener implements RocketMQListener<SmsInfoDTO> {
     @Override
     public void onMessage(SmsInfoDTO msg) {
         log.debug("接收发送验证码的消息：{}", msg);
+
     }
 }
