@@ -14,17 +14,16 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnClass(RocketMQTemplate.class)
 public class RocketMqConfig {
 
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+//    @Autowired
+//    private RocketMQTemplate rocketMQTemplate;
 
     /**
      * 配置rocketmqHelpler bean
      * @return
      */
     @Bean
-    @ConditionalOnClass(RocketMQTemplate.class)
     @ConditionalOnMissingBean
-    public RocketMqHelper rocketMqHelper() {
+    public RocketMqHelper rocketMqHelper(RocketMQTemplate rocketMQTemplate) {
         return new RocketMqHelper(rocketMQTemplate);
     }
 }
