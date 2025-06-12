@@ -13,4 +13,5 @@ CREATE TABLE `chat_record` (
     COMMENT='对话记录'
 COLLATE='utf8mb4_bin'
 ENGINE=InnoDB
-ROW_FORMAT=DYNAMIC;
+ROW_FORMAT=DYNAMIC
+;
