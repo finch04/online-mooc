@@ -46,4 +46,5 @@ public interface IRefundApplyService extends IService<RefundApply> {
     void sendRefundRequest(RefundApply refundApply);
 
     boolean checkRefundStatus(RefundApply refundApply);
+
 }

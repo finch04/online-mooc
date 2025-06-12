@@ -204,10 +204,10 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
         vo.setNodes(progressNodes);
 
         // 5.6.是否允许退款:
-        // - 已经支付并且当前没有退款
+        // - 已经支付并且当前没有退款也没有取消退款
         // - 当前只且只有1次退款并且退款进程已完结
         vo.setCanRefund(
-                (OrderStatus.canRefund(detail.getStatus()) && refundApply == null) ||
+                (OrderStatus.canRefund(detail.getStatus()) && refundApply == null ) ||
                         (refundApply != null && refundApplyList.size() == 1 &&
                                 !RefundStatus.inProgress(refundApply.getStatus()))
         );

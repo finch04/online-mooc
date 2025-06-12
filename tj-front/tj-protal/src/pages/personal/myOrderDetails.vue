@@ -16,7 +16,7 @@
       </div>
     </div>
     <div class="content">
-      <CardsTitle class="marg-bt-20" title="课程信息"/>
+      <CardsTitle class="marg-bt-20" title="课程信息" />
       <div>
         <el-table class="table" :data="orderDetails && orderDetails.details">
           <el-table-column prop="courseName" center label="课程名称">
@@ -38,56 +38,48 @@
             <template #default="scope">
               <div v-if="scope.row.canRefund" class="font-bt1" @click="openRefundDialog('refund', scope.row)">申请退款</div>
               <span v-else-if="!scope.row.refundStatus || scope.row.refundStatus === 3"> -- </span>
-              <div v-else class="font-bt1" @click="openRefundDialog('details', scope.row)">退款详情</div>
+              <div v-else>
+                <div class="font-bt1" v-if="scope.row.refundStatus === 1" @click="cancelRefundApplyReq(scope.row)">取消退款
+                </div>
+                <div class="font-bt1" @click="openRefundDialog('details', scope.row)">退款详情</div>
+              </div>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="info">
         <div><span>订单总价：</span>
-          <span class="pirc">￥ {{ orderDetails && amountConversion(orderDetails.totalAmount) || 0 }}</span></div>
+          <span class="pirc">￥ {{ orderDetails && amountConversion(orderDetails.totalAmount) || 0 }}</span>
+        </div>
         <div class="fx">
           <span>优惠券：</span>
           <span v-if="orderDetails && orderDetails.couponRule.length" class="ruleBox">
-            <span v-for="(r,i) in orderDetails.couponRule" :key="i">
-            {{ r }}
+            <span v-for="(r, i) in orderDetails.couponRule" :key="i">
+              {{ r }}
             </span>
           </span>
           <span v-else class="pirc">无</span>
         </div>
-        <div><span>优惠金额：</span><span
-            class="pirc">￥ {{ orderDetails && amountConversion(orderDetails.discountAmount) || 0 }}</span></div>
-        <div><span>实付金额：</span><span
-            class="pirc red">￥ {{ orderDetails && amountConversion(orderDetails.realAmount) || 0 }}</span></div>
+        <div><span>优惠金额：</span><span class="pirc">￥ {{ orderDetails && amountConversion(orderDetails.discountAmount) ||
+          0
+        }}</span></div>
+        <div><span>实付金额：</span><span class="pirc red">￥ {{ orderDetails && amountConversion(orderDetails.realAmount) ||
+          0
+        }}</span></div>
       </div>
     </div>
     <!-- 申请退款 - start -->
-    <el-dialog
-        v-model="refundDialog"
-        title="申请退款"
-        width="40%"
-    >
+    <el-dialog v-model="refundDialog" title="申请退款" width="40%">
       <div class="refundCont">
         <div class="fx"><span class="lab">退款原因：</span>
           <el-select v-model="refundReason" class="m-2" style="width:100%;" placeholder="请选择退款原因">
-            <el-option
-                v-for="item in refundsOptions"
-                :key="item"
-                :label="item"
-                :value="item"
-            />
+            <el-option v-for="item in refundsOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </div>
         <div class="fx">
           <span class="lab">问题描述：</span>
-          <el-input
-              v-model="questionDesc"
-              rows="4"
-              maxlength="200"
-              placeholder="请输入退款详细描述"
-              show-word-limit
-              type="textarea"
-          />
+          <el-input v-model="questionDesc" rows="4" maxlength="200" placeholder="请输入退款详细描述" show-word-limit
+            type="textarea" />
         </div>
       </div>
       <template #footer>
@@ -99,37 +91,50 @@
     </el-dialog>
     <!-- 申请退款 - end -->
     <!-- 退款详情 - start -->
-    <el-dialog
-        v-model="refundDetailsDialog"
-        title="退款详情"
-        width="60%"
-    >
+    <el-dialog v-model="refundDetailsDialog" title="退款详情" width="60%">
       <div class="refundDetailsCont">
         <div class="tab">
-          <div class="ut"><p class="ft-wt-600">退款ID</p>
-            <p class="ft-cl-des">{{ refundDetailsData.id }}</p></div>
-          <div class="ut"><p class="ft-wt-600">支付方式</p>
-            <p class="ft-cl-des">{{ refundDetailsData.payChannel || "--" }}</p></div>
-          <div class="ut"><p class="ft-wt-600">退款流水号</p>
-            <p class="ft-cl-des">{{ refundDetailsData.refundOrderNo }}</p></div>
-          <div class="ut"><p class="ft-wt-600">退款方式</p>
-            <p class="ft-cl-des">{{ refundDetailsData.refundChannel }}</p></div>
-          <div class="ut"><p class="ft-wt-600">订单ID</p>
-            <p class="ft-cl-des">{{ refundDetailsData.orderId }}</p></div>
-          <div class="ut"><p class="ft-wt-600">申请原因</p>
-            <p class="ft-cl-des">{{ refundDetailsData.refundReason }}</p></div>
+          <div class="ut">
+            <p class="ft-wt-600">退款ID</p>
+            <p class="ft-cl-des">{{ refundDetailsData.id }}</p>
+          </div>
+          <div class="ut">
+            <p class="ft-wt-600">支付方式</p>
+            <p class="ft-cl-des">{{ refundDetailsData.payChannel || "--" }}</p>
+          </div>
+          <div class="ut">
+            <p class="ft-wt-600">退款流水号</p>
+            <p class="ft-cl-des">{{ refundDetailsData.refundOrderNo }}</p>
+          </div>
+          <div class="ut">
+            <p class="ft-wt-600">退款方式</p>
+            <p class="ft-cl-des">{{ refundDetailsData.refundChannel }}</p>
+          </div>
+          <div class="ut">
+            <p class="ft-wt-600">订单ID</p>
+            <p class="ft-cl-des">{{ refundDetailsData.orderId }}</p>
+          </div>
+          <div class="ut">
+            <p class="ft-wt-600">申请原因</p>
+            <p class="ft-cl-des">{{ refundDetailsData.refundReason }}</p>
+          </div>
           <div class="row">
             <div class="ft-wt-600">操作时间</div>
             <div class="ft-cl-des fx-wp">
               <span>下单时间：{{ refundDetailsData.orderTime }}</span><span>支付时间{{ refundDetailsData.paySuccessTime }}</span>
-              <span>退款申请时间：{{ refundDetailsData.createTime }}</span><span>退款审批时间：{{ refundDetailsData.approveTime }}</span>
+              <span>退款申请时间：{{ refundDetailsData.createTime }}</span><span>退款审批时间：{{ refundDetailsData.approveTime
+              }}</span>
             </div>
           </div>
           <div class="row">
             <p class="ft-wt-600">处理结果：</p>
-            <p class="ft-cl-des" v-if="refundDetailsData.remark != null">
-              审批结果：{{ refundDetailsData.remark ? '同意' : '拒绝退款' }}</p>
-            <p class="ft-cl-des">审批意见：{{ refundDetailsData.approvalOpinion || '暂无！' }}</p>
+            <div class="ft-cl-des fx-wp">
+              <span class="ft-cl-des" v-if="refundDetailsData.remark != null">
+                审批结果：{{ refundDetailsData.remark ? '同意' : '拒绝退款' }}</span>
+              <span class="ft-cl-des">审批意见：{{ refundDetailsData.approvalOpinion || '暂无！' }}</span>
+              <span class="ft-cl-des">流转消息：{{ refundDetailsData.message || '暂无！' }}</span>
+              <span class="ft-cl-des">退款失败原因：{{ refundDetailsData.failedReason || '暂无！' }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -140,13 +145,13 @@
 <script setup>
 
 /** 数据导入 **/
-import {onMounted, ref} from "vue";
-import {ElMessage} from "element-plus";
-import {getOrderDetails, refundsApply, refundsDetails} from "@/api/order.js";
-import {useRoute} from "vue-router";
-import {dataCacheStore} from "@/store"
-import {amountConversion} from "@/utils/tool.js"
-import {ElMessageBox} from 'element-plus'
+import { onMounted, ref } from "vue";
+import { ElMessage } from "element-plus";
+import { getOrderDetails, refundsApply, refundsDetails, cancelRefundApply } from "@/api/order.js";
+import { useRoute } from "vue-router";
+import { dataCacheStore } from "@/store"
+import { amountConversion } from "@/utils/tool.js"
+import { ElMessageBox } from 'element-plus'
 
 // 组件导入
 import BreadCrumb from "./components/BreadCrumb.vue";
@@ -196,14 +201,45 @@ const refundApplyReq = () => {
   }
   // 上面验证通过后申请退款
   refundsApply(params)
+    .then((res) => {
+      if (res.code === 200) {
+        refundDialog.value = false;
+        ElMessage({
+          message: "退款成功",
+          type: 'success'
+        });
+        router.push('/personal/main/myOrder')
+      } else {
+        ElMessage({
+          message: res.msg,
+          type: 'error'
+        });
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        message: "订单列表请求失败！",
+        type: 'error'
+      });
+    });
+}
+//取消退款
+const cancelRefundApplyReq = (detail) => {
+  ElMessageBox.confirm('确定取消申请退款吗？取消退款后本订单商品将无法再次申请退款。', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    console.log('取消申请退款', detail)
+    cancelRefundApply({ orderDetailId: detail.id })
       .then((res) => {
         if (res.code === 200) {
-          refundDialog.value = false;
           ElMessage({
-            message: "退款成功",
+            message: "取消退款成功",
             type: 'success'
           });
-          router.push('/personal/main/myOrder')
+          //刷新界面
+          getOrderDetailsData()
         } else {
           ElMessage({
             message: res.msg,
@@ -211,57 +247,52 @@ const refundApplyReq = () => {
           });
         }
       })
-      .catch(() => {
-        ElMessage({
-          message: "订单列表请求失败！",
-          type: 'error'
-        });
-      });
+  })
 }
 // 退款详情
 const refundDetailsData = ref()
 const refundDetailsReq = () => {
   refundsDetails(refundOrderDetail.value.id)
-      .then((res) => {
-        if (res.code === 200) {
-          refundDetailsData.value = res.data
-          refundDetailsDialog.value = true
-        } else {
-          ElMessage({
-            message: res.msg,
-            type: 'error'
-          });
-        }
-      })
-      .catch(() => {
+    .then((res) => {
+      if (res.code === 200) {
+        refundDetailsData.value = res.data
+        refundDetailsDialog.value = true
+      } else {
         ElMessage({
-          message: "订单列表请求失败！",
+          message: res.msg,
           type: 'error'
         });
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        message: "订单列表请求失败！",
+        type: 'error'
       });
+    });
 }
 
 // 获取订单详情信息
 const orderDetails = ref()
 const getOrderDetailsData = async () => {
   await getOrderDetails(route.query.id)
-      .then((res) => {
-        if (res.code === 200) {
-          res.data.couponRule = res.data.couponDesc ? res.data.couponDesc.split("/") : [];
-          orderDetails.value = res.data
-        } else {
-          ElMessage({
-            message: res.msg,
-            type: 'error'
-          });
-        }
-      })
-      .catch(() => {
+    .then((res) => {
+      if (res.code === 200) {
+        res.data.couponRule = res.data.couponDesc ? res.data.couponDesc.split("/") : [];
+        orderDetails.value = res.data
+      } else {
         ElMessage({
-          message: "订单列表请求失败！",
+          message: res.msg,
           type: 'error'
         });
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        message: "订单列表请求失败！",
+        type: 'error'
       });
+    });
 }
 
 // 
@@ -281,6 +312,7 @@ const getOrderDetailsData = async () => {
   height: 20px;
   text-align: right;
 }
+
 .myOrderDetailsWrapper .info .pirc {
   width: 200px;
 }

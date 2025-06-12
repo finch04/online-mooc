@@ -52,6 +52,6 @@ public enum RefundStatus implements BaseEnum {
         if (value == null) {
             return false;
         }
-        return UN_APPROVE.getValue() == value || AGREE.getValue() == value;
+        return UN_APPROVE.getValue() == value || AGREE.getValue() == value || CANCEL.getValue() == value;
     }
 }

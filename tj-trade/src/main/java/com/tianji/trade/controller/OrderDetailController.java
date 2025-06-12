@@ -63,6 +63,7 @@ public class OrderDetailController {
         return detailService.countEnrollCourseOfStudent(studentIds);
     }
 
+    @ApiOperation("统计课程购买信息")
     @GetMapping("purchaseInfo")
     public CoursePurchaseInfoDTO getPurchaseInfoOfCourse(@RequestParam("courseId") Long courseId){
         return detailService.getPurchaseInfoOfCourse(courseId);

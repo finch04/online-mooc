@@ -148,6 +148,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
             log.error("线程名称：{},订单退款失败, 状态异常，订单信息：{}", Thread.currentThread().getName(), order);
             throw new RuntimeException("订单退款流程流转失败, 订单状态异常");
         }
+
         // 3.查询申请人信息
         UserDTO userDTO = userClient.queryUserById(userId);
         AssertUtils.isNotNull(userDTO, ErrorInfo.Msg.USER_NOT_EXISTS);
@@ -412,7 +413,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         }
         // 4.更新退款记录
         RefundApply r = new RefundApply();
-        r.setId(applyId);
+        r.setId(apply.getId());
         r.setStatus(RefundStatus.CANCEL.getValue());
         r.setMessage(RefundStatus.CANCEL.getProgressName());
         boolean success = updateById(r);
@@ -420,7 +421,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
             throw new DbException(ErrorInfo.Msg.DB_UPDATE_EXCEPTION);
         }
         // 4.更新子订单状态
-        detailService.updateRefundStatusById(r.getOrderDetailId(), r.getStatus());
+        detailService.updateRefundStatusById(apply.getOrderDetailId(), r.getStatus());
     }
 
     @Override
@@ -552,8 +553,5 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
     private void sendRefundRequestAsync(RefundApply refundApply) {
         sendRefundRequestExecutor.execute(() -> this.sendRefundRequest(refundApply));
     }
-
-
-
 
 }
