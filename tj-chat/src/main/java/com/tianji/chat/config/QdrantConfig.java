@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
+import static com.tianji.chat.constants.AiConstants.QDRANT_COLLECTION;
+
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "qdrant")
@@ -37,7 +39,7 @@ public class QdrantConfig {
         return QdrantEmbeddingStore.builder()
                 .host(host)
                 .port(port)
-                .collectionName("ai-chat")
+                .collectionName(QDRANT_COLLECTION)
                 .build();
     }
 }

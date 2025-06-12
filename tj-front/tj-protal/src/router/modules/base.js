@@ -25,6 +25,12 @@ export default [
         name: 'ai',
         component: () => import('@/pages/main/ai.vue'),
         meta: { title: '首页' },
+      },
+      {
+        path: 'ai/knowledge',
+        name: 'knowledge',
+        component: () => import('@/pages/main/knowledge.vue'),
+        meta: { title: 'AI聊天' },
       }
     ],
   },

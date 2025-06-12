@@ -55,3 +55,58 @@ export const memoryChatRedisStream = (params) =>
         params,
         responseType: 'stream' 
     })
+
+// 知识库接口
+
+// 上传文件到知识库
+export const uploadMarkdown = (file, level = 2) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('level', level);
+    return request({
+    url: `${AI_API_PREFIX}/file/upload`,
+    method: 'post',
+    data: formData,
+    headers: {
+        'Content-Type': 'multipart/form-data'
+    }
+    });
+};
+
+// 根据知识库内容对话
+export const chatByMarkdownDoc = (params) =>
+    request({
+    url: `${AI_API_PREFIX}/file/chat`,
+    method: 'get',
+    params
+    });
+
+// 分页查询用户知识库文件列表
+export const queryMarkdownPage = (query) =>
+    request({
+    url: `${AI_API_PREFIX}/file/page`,
+    method: 'get',
+    query
+    });
+
+// 根据文件 id 查看文件内容
+export const getMarkdown = (fileId) =>
+    request({
+    url: `${AI_API_PREFIX}/file/${fileId}`,
+    method: 'get'
+    });
+
+// 更新文件内容
+export const updateMarkdown = (markdownDocs) =>
+    request({
+    url: `${AI_API_PREFIX}/file/update`,
+    method: 'put',
+    data: markdownDocs
+    });
+
+// 根据文件 id 删除文件
+export const deleteMarkdown = (fileId) =>
+    request({
+    url: `${AI_API_PREFIX}/file/${fileId}`,
+    method: 'delete'
+});

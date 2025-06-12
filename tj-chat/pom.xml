@@ -115,10 +115,11 @@
             <artifactId>langchain4j-qdrant</artifactId>
             <version>0.29.1</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>dev.langchain4j</groupId>-->
-<!--            <artifactId>langchain4j-core</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-core</artifactId>
+            <version>0.29.1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -130,23 +131,19 @@
             <artifactId>tj-auth-resource-sdk</artifactId>
             <version>1.0.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>dev.langchain4j</groupId>-->
-<!--            <artifactId>langchain4j-community-dashscope-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
 
-<!--        &lt;!&ndash;pdfbox&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.pdfbox</groupId>-->
-<!--            <artifactId>pdfbox</artifactId>-->
-<!--            <version>2.0.27</version>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash;markdown&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.vladsch.flexmark</groupId>-->
-<!--            <artifactId>flexmark-all</artifactId>-->
-<!--            <version>0.64.8</version>-->
-<!--        </dependency>-->
+        <!--pdfbox-->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.27</version>
+        </dependency>
+        <!--markdown-->
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+            <version>0.64.8</version>
+        </dependency>
     </dependencies>
 
     <!-- 加载bom 后，所有langchain4j引用不需要加版本号 -->

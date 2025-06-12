@@ -1,4 +1,4 @@
-package com.tianji.chat.domain.dto;
+package com.tianji.chat.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -26,7 +26,7 @@ public class MarkdownDocs  {
     /**
      * 主键，自增
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -47,12 +47,12 @@ public class MarkdownDocs  {
     /**
      * 上传时间
      */
-    private LocalDateTime createdAt;
+    private LocalDateTime createTime;
 
     /**
      * 最近更新时间
      */
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateTime;
 
     /**
      * 文档切割等级

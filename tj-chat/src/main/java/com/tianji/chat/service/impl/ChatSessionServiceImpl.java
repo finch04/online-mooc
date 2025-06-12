@@ -91,9 +91,14 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         }
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
         StringBuilder responseBuilder = new StringBuilder();
+        StringBuilder originBuilder = new StringBuilder();
         streamingChatLanguageModel.generate(message,new StreamingResponseHandler<AiMessage>() {
             @Override
             public void onNext(String s) {
+                // 格式化并发送 SSE 消息
+                String sse = formatSseMessage(s);
+                sink.tryEmitNext(sse);
+                originBuilder.append(sse);
                 log.info("{}", s);
                 // 检查特殊字符
                 if ("\n".equals(s)) {
@@ -101,8 +106,6 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                 } else if (s.contains(" ")) {
                     System.out.println("收到包含空格的内容: " + s);
                 }
-                // 格式化并发送 SSE 消息
-                sink.tryEmitNext(formatSseMessage(s));
                 responseBuilder.append(s);
             }
 
@@ -110,7 +113,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
             public void onComplete(Response response) {
                 sink.tryEmitNext(formatSseMessage("[DONE]"));
                 sink.tryEmitComplete();
-                log.info("数据接收完成！{}",responseBuilder.toString());
+                log.info("数据接收完成！\n{}",responseBuilder.toString());
+                log.info("纯发送的消息：\n{}", originBuilder.toString());
             }
 
             @Override
@@ -124,7 +128,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     }
     private String formatSseMessage(String data) {
         data = data.replace(" ", "&nbsp;"); // 替换空格为 HTML 实体
-        return data.replace("\n", "\ndata: ") + "\n\n"; // 格式化为 SSE 消息
+        return  data;  // 符合 SSE 协议格式
     }
 
 /**

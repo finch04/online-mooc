@@ -1,5 +1,6 @@
 package com.tianji.chat;
-
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -8,17 +9,18 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections;
 import io.qdrant.client.grpc.Points;
+import org.apache.pdfbox.util.Vector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import static io.qdrant.client.ConditionFactory.matchKeyword;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -107,31 +109,37 @@ public class QdrantTest {
     }
 
     @Test
-    public void testBasicQdrantOperations() {
+    public void testBasicQdrantOperations() throws Exception {
         // 1. 准备测试数据
         List<String> testTexts = List.of(
                 "人工智能是计算机科学的一个分支",
                 "机器学习是人工智能的一个子领域",
-                "深度学习是机器学习的一个子领域"
+                "深度学习是机器学习的一个子领域",
+                "are you ok?"
         );
 
         // 2. 创建文本片段
         List<TextSegment> segments = testTexts.stream()
                 .map(TextSegment::from)
                 .collect(Collectors.toList());
-
         // 3. 计算嵌入向量
         List<dev.langchain4j.data.embedding.Embedding> embeddings = segments.stream()
-                .map(segment -> embeddingModel.embed(segment).content())
+                .map(segment ->{
+                        segment.metadata("tj"+UUID.randomUUID().toString());
+                        segment.metadata().put("userId", "8");
+                        segment.metadata().put("docId", UUID.randomUUID().toString());
+                        return embeddingModel.embed(segment).content();
+                })
                 .collect(Collectors.toList());
 
         // 4. 存储嵌入向量
         embeddingStore.addAll(embeddings, segments);
-
+        // 构建过滤条件
+//        var metadataFilter = metadataKey("userId").isEqualTo(targetUserId);
         // 5. 执行相似度搜索
         String query = "什么是机器学习?";
         dev.langchain4j.data.embedding.Embedding queryEmbedding = embeddingModel.embed(query).content();
-        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.findRelevant(queryEmbedding, 2);
+        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.findRelevant(queryEmbedding, 2 );
 
         // 6. 验证结果
         assertFalse(matches.isEmpty(), "搜索结果不应为空");
@@ -142,6 +150,56 @@ public class QdrantTest {
         for (EmbeddingMatch<TextSegment> match : matches) {
             System.out.printf("相似度: %.4f, 内容: %s\n",
                     match.score(), match.embedded().text());
+        }
+    }
+
+    @Test
+    public void testCreatePoint() {
+        // 创建一个1536维的向量
+        double[] vectorData = new double[1536];
+
+        // 填充示例数据（使用double值）
+        Arrays.fill(vectorData, 0.5); // 注意：0.5默认是double类型
+
+        // 构建向量对象
+        Points.Vector vector = Points.Vector.newBuilder()
+                .addAllData(Arrays.stream(vectorData)
+                        .mapToObj(d -> (float) d) // 将double转换为Float对象
+                        .collect(Collectors.toList()))
+                .build();
+
+        // 设置向量到Points.Vectors对象
+        Points.Vectors vectors = Points.Vectors.newBuilder()
+                .setVector(vector)
+                .build();
+        qdrantClient.upsertAsync(AI_CHAT_COLLECTION,
+                List.of(
+                        Points.PointStruct.newBuilder()
+                                .setId(Points.PointId.newBuilder().setNum(22L).build())
+                                .setVectors(vectors)
+                                .build()));
+    }
+
+    @Test
+    public void testWithCleanCollection() {
+        try {
+            // 检查集合是否存在
+            Collections.CollectionInfo collectionInfo = qdrantClient.getCollectionInfoAsync(AI_CHAT_COLLECTION).get();
+
+            if (collectionInfo!=null) {
+                qdrantClient.deleteAsync(AI_CHAT_COLLECTION,
+                        Points.Filter.newBuilder()
+                                .addMust(matchKeyword("userId", "12L"))
+                                .build());
+
+                // 等待操作完成
+                Thread.sleep(500);
+                System.out.println("成功清空集合: " + AI_CHAT_COLLECTION);
+            } else {
+                System.out.println("集合不存在: " + AI_CHAT_COLLECTION);
+            }
+        } catch (Exception e) {
+            fail("清空集合失败: " + e.getMessage());
         }
     }
 }

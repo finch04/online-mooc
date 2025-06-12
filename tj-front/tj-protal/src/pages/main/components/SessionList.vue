@@ -218,7 +218,7 @@ const selectSession = (sessionId) => {
     background-color: white;
     border-right: 1px solid rgb(249, 249, 249);
     /* border-radius: 8px; */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
 
 .session-ul {
@@ -230,7 +230,7 @@ const selectSession = (sessionId) => {
     width: 100%;
     margin-bottom: 10px;
     padding: 12px 15px;
-    border: 1px solid #e4e7ed;
+    border: 1px solid gray;
     border-radius: 6px;
     cursor: pointer;
     position: relative;

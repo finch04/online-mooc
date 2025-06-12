@@ -45,6 +45,10 @@ public class UserSessionServiceImpl extends ServiceImpl<UserSessionMapper, UserS
 
     @Override
     public UserSession createUserSession(UserSessionDTO dto) {
+        Integer count = this.lambdaQuery().eq(UserSession::getUserId, dto.getUserId()).count();
+        if (count > 5) {
+            throw new RuntimeException("每个用户最多只能创建5个会话");
+        }
         UserSession userSession = new UserSession();
         userSession.setUserId(dto.getUserId());
         userSession.setName(dto.getName());

@@ -1,7 +1,10 @@
 <template>
     <div class="aiChatWrapper">
-        <div class="container">
+        <div class="container" style="display: flex;">
             <Breadcrumb data="AI聊天"></Breadcrumb>
+            <div class="btn" style="float: right;  top: 90px;right: 60px;">
+                     <span class="bt bt-round" style="float: right;"  @click="() => $router.push({path: 'ai/knowledge'})">我的知识库</span>
+            </div>
         </div>
         <div class="chatLayout fx">
             <!-- 会话列表 -->
@@ -13,8 +16,10 @@
                 @updateSession="fetchUserSessionList"
                 @deleteSession="()=>{fetchUserSessionList();selectSession(null)}"
             />
+            
             <!-- 聊天区域 -->
-            <div class="chatItems container bg-wt">
+            <div class="chatItems container bg-wt ">
+                
                 <!-- 聊天消息显示区域 -->
                 <div class="chatMessages" ref="chatMessages" @scroll="handleScroll">
                     <div class="message" v-for="(msg, index) in chatHistory" :key="index">
@@ -245,6 +250,7 @@ const sendMessage = async () => {
             },
 
             onmessage(msg) {
+                console.log('接收到数据:', msg.data)
                 // 后端主动关闭时会发送[DONE]事件
                 if (msg.data === '[DONE]') {
                     assistantMessage.isTyping = false;
@@ -256,7 +262,7 @@ const sendMessage = async () => {
                 }
 
                 if (msg.data) {
-                    if (msg.data === '<think>') {
+                    if (msg.data === '<think>'||  msg.data === '"<think>"') {
                         inThinkingTag = true;
                     } else if (msg.data === '</think>') {
                         inThinkingTag = false;
@@ -447,11 +453,22 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+.btn {
+  position: absolute;
+  width: 250px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
 .aiChatWrapper {
     margin-left: 20px;
     margin-right: 20px;
+    margin-bottom: 20px;
     .chatLayout {
         display: flex;
+        // border: 1px solid grey;
     }
 
     .chatItems {
