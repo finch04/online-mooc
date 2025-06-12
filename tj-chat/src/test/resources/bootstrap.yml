@@ -1,0 +1,51 @@
+server:
+  port: 9999  #端口
+  tomcat:
+    uri-encoding: UTF-8   #服务编码
+spring:
+  profiles:
+    active: dev
+  application:
+    name: chat-service
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        # 未指定 namespace，默认使用 public 命名空间
+        shared-configs: # 共享配置
+          - dataId: shared-spring.yaml # 共享spring配置
+          - dataId: shared-redis.yaml # 共享redis配置
+          - dataId: shared-mybatis.yaml # 共享mybatis配置
+          - dataId: shared-logs.yaml # 共享日志配置
+          - dataId: shared-feign.yaml # 共享feign配置
+          - dataId: shared-qdrant.yaml
+tj:
+  swagger:
+    enable: true
+    enableResponseWrap: true
+    package-path: com.tianji.chat.controller
+    title: 天机学堂 - AI智能对话中心接口文档
+    description: 该服务提供AI聊天、AI知识库分析等功能
+    contact-name: 传智教育·研究院
+    contact-url: http://www.itcast.cn/
+    contact-email: zhanghuyi@itcast.cn
+    version: v1.0
+  jdbc:
+    database: tj_chat
+  auth:
+    resource:
+      enable: true
+      excludeLoginPaths:
+  mq:
+    listener:
+      retry:
+        stateless: false # mq开启无状态
+langchain4j:
+  base-url: http://localhost:11434/v1  #本地ollama
+  api-key: EMPTY
+  max-tokens: 1000
+  timeout-seconds: 15
+  model-name: deepseek-r1:1.5b
+  max-retries: 3
+  chat-model-temperature: 0.4
+  streaming-chat-model-temperature: 0.7

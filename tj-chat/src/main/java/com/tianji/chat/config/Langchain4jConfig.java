@@ -2,7 +2,9 @@ package com.tianji.chat.config;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.service.SystemMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,6 +61,16 @@ public class Langchain4jConfig {
                 .apiKey(apiKey)
                 .maxTokens(maxTokens)
                 .temperature(streamingChatModelTemperature)
+                .timeout(Duration.ofSeconds(timeoutSeconds))
+                .modelName(modelName)
+                .build();
+    }
+
+    @Bean
+    public EmbeddingModel embeddingModel() {
+        return OpenAiEmbeddingModel.builder()
+                .baseUrl(baseUrl)
+                .apiKey(apiKey)
                 .timeout(Duration.ofSeconds(timeoutSeconds))
                 .modelName(modelName)
                 .build();
