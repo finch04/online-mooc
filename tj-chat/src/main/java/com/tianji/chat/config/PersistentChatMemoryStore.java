@@ -4,10 +4,14 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.tianji.chat.domain.po.ChatSession;
+import com.tianji.chat.domain.po.UserSession;
 import com.tianji.chat.service.IChatSessionService;
+import com.tianji.chat.service.IUserSessionService;
 import com.tianji.chat.utils.DataDelayTaskHandler;
 import com.tianji.common.utils.UserContext;
+import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +44,17 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
+    private final IUserSessionService userSessionService;
+
 
     private String getKey(Object sessionId) {
+        Long userId = UserContext.getUser();
+        if(userId==null){
+            UserSession one = userSessionService.lambdaQuery().eq(UserSession::getSessionId, sessionId).one();
+            userId = one.getUserId();
+        }
         //示例：chat:memory:2:1
-        return CHAT_MEMORY_KEY_PREFIX + UserContext.getUser()+":"+ sessionId ;
+        return CHAT_MEMORY_KEY_PREFIX + userId +":"+ sessionId ;
     }
 
     @Override
@@ -85,15 +96,15 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
             return;
         }
         try {
+            for (ChatMessage message : messages) {
+                //只存储用户消息和AI回复的消息
+                if(!(message instanceof UserMessage ||  message instanceof AiMessage)){
+                    return;
+                }
+            }
             // 将最新的一条数据存储到Redis中
             String json = messageToJson(messages.get(messages.size() - 1));
             redisTemplate.opsForList().rightPush(getKey(sessionId), json);
-            JSONObject jsonObject = new JSONObject(json);
-            Object o = jsonObject.get("type");
-            if("SYSTEM".equals(o)){
-                log.info("系统消息不存redis：{}",o);
-                return;
-            }
 
             log.info("存数据到redis中 sessionId{}:json:{}", sessionId,json);
             // 开启延时任务

@@ -3,28 +3,17 @@ package com.tianji.chat.service.impl;
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tianji.chat.config.AiConfig;
 import com.tianji.chat.domain.dto.UserSessionDTO;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.domain.po.UserSession;
-import com.tianji.chat.mapper.ChatSessionMapper;
 import com.tianji.chat.mapper.UserSessionMapper;
 import com.tianji.chat.service.IChatSessionService;
 import com.tianji.chat.service.IUserSessionService;
 import com.tianji.common.utils.UserContext;
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.output.Response;
-import dev.langchain4j.store.embedding.EmbeddingStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
 import java.util.List;
 

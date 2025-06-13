@@ -49,6 +49,13 @@ public class ChatController {
         return chatSessionService.fileStream(sessionId, message);
     }
 
+    @ApiOperation("测试流式聊天接口")
+    @GetMapping(value = "/test",  produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter test(@RequestParam(defaultValue = "我叫finch，你叫什么名字？") String message,
+                                           @RequestParam(defaultValue = "1") String sessionId) {
+        return chatSessionService.test(sessionId, message);
+    }
+
     @ApiOperation("获取聊天记录")
     @GetMapping("/records")
     public PageDTO<ChatSession> getRecord(RecordQuery query) {

@@ -3,9 +3,12 @@ package com.tianji.chat.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tianji.chat.domain.po.MarkdownDocs;
 import com.tianji.chat.domain.vo.MarkdownChunk;
+import com.tianji.chat.domain.vo.MarkdownChunkVO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * <p>
@@ -21,7 +24,7 @@ public interface IMarkdownDocsService extends IService<MarkdownDocs> {
 
     PageDTO<MarkdownDocs> queryMarkdownPage(PageQuery query);
 
-    MarkdownChunk chatByMarkdownDoc(String message);
+    List<MarkdownChunkVO> chatByMarkdownDoc(String message);
 
     void updateMarkdown(MarkdownDocs markdownDocs);
 

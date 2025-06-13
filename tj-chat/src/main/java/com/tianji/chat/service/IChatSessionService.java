@@ -28,5 +28,7 @@ public interface IChatSessionService extends IService<ChatSession> {
 
     SseEmitter fileStream(String sessionId, String message);
 
+    SseEmitter test(String sessionId, String message);
+
 //    Flux<String> FileStream(String memoryId, String message);
 }

@@ -2,6 +2,7 @@ package com.tianji.chat.controller;
 
 import com.tianji.chat.domain.po.MarkdownDocs;
 import com.tianji.chat.domain.vo.MarkdownChunk;
+import com.tianji.chat.domain.vo.MarkdownChunkVO;
 import com.tianji.chat.service.IMarkdownDocsService;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
@@ -10,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,7 +31,7 @@ public class MarkdownController {
 
     @ApiOperation("根据知识库内容对话")
     @GetMapping("/chat")
-    public MarkdownChunk chatByMarkdownDoc(@RequestParam String message) {
+    public List<MarkdownChunkVO> chatByMarkdownDoc(@RequestParam String message) {
         return markdownDocsService.chatByMarkdownDoc(message);
     }
 

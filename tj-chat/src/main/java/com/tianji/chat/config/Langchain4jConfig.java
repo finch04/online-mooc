@@ -6,6 +6,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
+import dev.langchain4j.model.openai.OpenAiTokenizer;
 import dev.langchain4j.service.SystemMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -45,8 +46,9 @@ public class Langchain4jConfig {
         return OpenAiChatModel.builder()
                 .baseUrl(baseUrl)
                 .apiKey(apiKey)
-                .maxTokens(maxTokens)
                 .temperature(chatModelTemperature)
+                .maxTokens(maxTokens)
+                .tokenizer(new OpenAiTokenizer())
                 .timeout(Duration.ofSeconds(timeoutSeconds))
                 .modelName(modelName)
                 .maxRetries(maxRetries)
@@ -59,12 +61,14 @@ public class Langchain4jConfig {
         return OpenAiStreamingChatModel.builder()
                 .baseUrl(baseUrl)
                 .apiKey(apiKey)
-                .maxTokens(maxTokens)
                 .temperature(streamingChatModelTemperature)
+                .maxTokens(maxTokens)
+                .tokenizer(new OpenAiTokenizer())
                 .timeout(Duration.ofSeconds(timeoutSeconds))
                 .modelName(modelName)
                 .build();
     }
+
 
     @Bean
     public EmbeddingModel embeddingModel() {

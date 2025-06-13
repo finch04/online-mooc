@@ -1,7 +1,10 @@
 <template>
     <div class="aiChatWrapper" @click="handleGlobalClick">
         <div class="container" style="display: flex;">
-            <Breadcrumb data="AI知识库"/>
+            <Breadcrumb data="我的知识库"/>
+            <div class="btn" style="float: right;  top: 90px;right: 60px;">
+                     <span class="bt bt-round" style="float: right;"  @click="() => $router.push({path: '/main/ai'})">返回AI聊天</span>
+            </div>
         </div>
         <div class="chatLayout fx">
             <!-- 文件列表 -->
@@ -29,18 +32,18 @@
                             <div class="messageContent" v-html="msg.processedContent"></div>
                         </div>
                         <div class="markdownChunkMessage" v-else-if="msg.type === 'markdownChunk'">
-                            <div class="markdownChunkContainer">
+                            <div class="markdownChunkContainer" v-for="(chunk, chunkIndex) in msg.chunks" :key="chunkIndex">
                                 <div class="markdownChunkHeader">
-                                    <div class="markdownChunkTitle">{{ msg.chunk.title }}</div>
+                                    <div class="markdownChunkTitle">{{ chunk.title }} (匹配得分: {{ chunk.score.toFixed(2) }})</div>
                                 </div>
-                                <div class="markdownChunkContent" v-html="msg.chunk.contentHtml"></div>
+                                <div class="markdownChunkContent" v-html="chunk.contentHtml"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- 提问区域 -->
                 <div class="inputArea fx">
-                    <el-input  v-model="question" placeholder="请输入问题" @keyup.enter="askQuestion"
+                    <el-input  v-model="question" placeholder="请输入你要匹配的文本，AI会帮助你从知识库找到对应答案" @keyup.enter="askQuestion"
                         :disabled="isLoading" style="margin-right: 10px;" />
                     <button @click="askQuestion" :disabled="isLoading || !question" style="     min-width: 100px;height: 45px;">提问</button>
                 </div>
@@ -92,6 +95,14 @@
                         :rows="10"
                         placeholder="请输入文件内容"
                     ></el-input>
+                </el-form-item>
+                <el-form-item label="切割等级" prop="level">
+                    <el-input-number
+                        v-model="editFormData.level" 
+                        type="number"
+                        max="5"
+                        min="1"
+                    ></el-input-number>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -270,6 +281,7 @@ const openEditModal = async (id) => {
     try {
         const fileData = await getMarkdown(id);
         editFormData.value.content = fileData.data;
+        editFormData.value.level= fileList.value.filter(item => item.id === id)[0].level;
         isEditModalVisible.value = true;
     } catch (error) {
         ElMessage.error('获取文件内容失败: ' + (error.message || '未知错误'));
@@ -353,17 +365,18 @@ const askQuestion = async () => {
         const res = await chatByMarkdownDoc({message:question.value});
         
         // 检查返回的数据格式
-        if (res && res.data && res.data.title && res.data.content) {
-            // 处理 MarkdownChunk 格式的响应
-            const markdownChunk = {
-                title: res.data.title,
-                content: res.data.content,
-                contentHtml: md.render(res.data.content)
-            };
+        if (res && res.data && Array.isArray(res.data)) {
+            // 处理 MarkdownChunk 格式的响应列表
+            const markdownChunks = res.data.map(chunk => ({
+                title: chunk.title,
+                content: chunk.content,
+                contentHtml: md.render(chunk.content),
+                score: chunk.score
+            }));
             
             chatMessagesList.value.push({ 
                 type: 'markdownChunk', 
-                chunk: markdownChunk 
+                chunks: markdownChunks 
             });
         } else if (res && res.content) {
             // 处理普通文本格式的响应
@@ -376,7 +389,7 @@ const askQuestion = async () => {
             });
         } else {
             // 处理未知格式的响应
-            ElMessage.error('AI返回的响应格式不正确');
+            ElMessage.error(res.msg || '未知错误');
         }
     } catch (error) {
         ElMessage.error('提问失败: ' + (error.message || '未知错误'));
@@ -428,6 +441,14 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+.btn {
+  position: absolute;
+  width: 250px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
 .aiChatWrapper {
     margin-left: 20px;
     margin-right: 20px;

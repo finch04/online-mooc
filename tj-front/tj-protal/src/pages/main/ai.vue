@@ -24,7 +24,7 @@
                 <div class="chatMessages" ref="chatMessages" @scroll="handleScroll">
                     <div class="message" v-for="(msg, index) in chatHistory" :key="index">
                         <div class="userMessage" v-if="msg.type === 'user'">
-                            <div class="messageContent">{{ msg.content }}</div>
+                            <div class="messageContent" v-html="md.render(msg.content)"></div>
                         </div>
                         <div class="assistantMessage" v-else>
                             <div class="thinking" v-if="msg.thinkingContent">
@@ -53,7 +53,15 @@
                 <div class="inputArea fx">
                     <input type="text" v-model="inputMessage" placeholder="请输入聊天内容" @keyup.enter="sendMessage"
                            :disabled="isLoading">
-                    <div class="buttonGroup">
+                           <div class="buttonGroup">
+                        <!-- 模式选择下拉按钮 -->
+                        <div class="mode-selector">
+                            <el-select v-model="currentMode" @change="selectMode" class="mode-button">
+                                <el-option label="普通聊天" value="normal"></el-option>
+                                <el-option label="知识库问答" value="knowledge"></el-option>
+                                <el-option label="聊天测试" value="test"></el-option>
+                            </el-select>
+                        </div>
                         <button @click="sendMessage" :disabled="isLoading || !inputMessage">发送</button>
                         <button @click="stopStream" v-if="isStreaming" class="stopButton">停止</button>
                     </div>
@@ -100,6 +108,27 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 // 是否正在加载更多历史记录
 const isLoadingMore = ref(false);
+
+
+// API 前缀配置
+const API_CONFIG = {
+    normal: {
+        name: '普通聊天',
+        prefix: 'http://localhost:10010/ct/chat/'
+    },
+    knowledge: {
+        name: '知识库问答',
+        prefix: 'http://localhost:10010/ct/chat/file'
+    },
+    test: {
+        name: '聊天测试',
+        prefix: 'http://localhost:10010/ct/chat/test'
+    }
+};
+// 当前选择的模式
+const currentMode = ref('normal');
+// 当前模式名称
+const currentModeName = ref(API_CONFIG.normal.name);
 import MarkdownIt from 'markdown-it';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -166,7 +195,21 @@ const selectSession = async (sessionId) => {
         ElMessage.error('加载会话历史记录失败: ' + (error.message || '未知错误'));
     }
 };
+// 切换模式下拉菜单显示状态
+const toggleModeDropdown = () => {
+    showModeDropdown.value = !showModeDropdown.value;
+};
 
+// 选择聊天模式
+
+const selectMode = (mode) => {
+    currentMode.value = mode;
+    currentModeName.value = API_CONFIG[mode].name;
+    ElMessage({
+        message: `已切换到${API_CONFIG[mode].name}模式`,
+        type: 'info'
+    });
+};
 // 停止流式传输
 const stopStream = () => {
     if (abortController.value) {
@@ -225,8 +268,6 @@ const sendMessage = async () => {
         let content = '';
         let thinkingContent = '';
         let inThinkingTag = false;
-        const AI_API_PREFIX = "http://localhost:10010/ct/chat/file";
-        const FILE_API_PREFIX = "http://localhost:10010/ct/chat/file";
 
         // 构建查询参数
         const queryParams = new URLSearchParams();
@@ -234,8 +275,9 @@ const sendMessage = async () => {
         queryParams.append('sessionId', selectedSessionId.value);
 
         abortController.value = new AbortController(); // 每次请求前重置 abortController
-
-        await fetchEventSource(`${AI_API_PREFIX}/?${queryParams.toString()}`, {
+        // 获取当前模式对应的API前缀
+        const currentApiPrefix = API_CONFIG[currentMode.value].prefix;
+        await fetchEventSource(`${currentApiPrefix}/?${queryParams.toString()}`, {
             method: 'GET',
             headers: {
                 // 'Accept': 'text/event-stream',
@@ -500,6 +542,7 @@ onMounted(async () => {
         margin-left: 20%;
 
         .messageContent {
+            text-align: left;
             display: inline-block;
             background-color: #007BFF;
             color: white;

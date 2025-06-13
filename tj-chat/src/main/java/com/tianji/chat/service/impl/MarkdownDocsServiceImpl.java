@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.chat.domain.po.MarkdownDocs;
 import com.tianji.chat.domain.vo.MarkdownChunk;
+import com.tianji.chat.domain.vo.MarkdownChunkVO;
 import com.tianji.chat.mapper.MarkdownDocsMapper;
 import com.tianji.chat.service.IMarkdownDocsService;
+import com.tianji.chat.utils.QdrantEmbeddingUtils;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
 import com.tianji.common.exceptions.BadRequestException;
@@ -46,6 +48,7 @@ import static com.tianji.chat.constants.AiConstants.QDRANT_COLLECTION;
 import static com.tianji.chat.utils.MarkdownSplitter.getMarkdownChunksByH;
 import static com.tianji.chat.utils.MarkdownSplitter.smartSplitByHeading;
 import static io.qdrant.client.ConditionFactory.matchKeyword;
+import static io.qdrant.client.WithPayloadSelectorFactory.enable;
 
 /**
  * <p>
@@ -106,7 +109,7 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
             return markdownDocs;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("文件解析失败：" + e.getMessage());
+            throw new BadRequestException("文件解析失败：" + e.getMessage());
         }
 
     }
@@ -121,61 +124,63 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
     }
 
     @Override
-    public MarkdownChunk chatByMarkdownDoc(String message) {
-        //这只是筛选！并非对话
-        long userId =UserContext.getUser();
-        //TODO 每个用户只能看到自己上传知识库的内容并总结
-        Embedding queryEmbedding = embeddingModel.embed(message).content();
+    public List<MarkdownChunkVO> chatByMarkdownDoc(String message) {
+        // 获取当前用户ID
+        Long userId = UserContext.getUser();
+        if (userId == null) {
+            throw new RuntimeException("请先登录");
+        }
 
-//        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(
-//                EmbeddingSearchRequest.builder()
-//                        .queryEmbedding(queryEmbedding)
-//                        .maxResults(5)
-////                        .filter(new MetadataFilterBuilder("user_id").isEqualTo(String.valueOf(userId)))
-//                        .filter(Points.WithPayloadSelector.newBuilder().setField("user_id", String.valueOf(userId)))
-//                        .build()).matches();
-        List<Points.ScoredPoint> matches  =new ArrayList<>();
-//        // 将float数组转换为Qdrant的Vector对象
-//        float[] vectorData = queryEmbedding.vector();
-//        Points.Vector.Builder vectorBuilder = Points.Vector.newBuilder();
-//
-//        // 逐个设置向量元素
-//        for (int i = 0; i < vectorData.length; i++) {
-//            vectorBuilder.setData(i, vectorData[i]);
-//        }
-
-//        Points.Vector vector = vectorBuilder.build();
         try {
-            matches = qdrantClient.searchAsync(Points.SearchPoints.newBuilder()
+            // 1. 向量化问题
+            Embedding queryEmbedding = embeddingModel.embed(message).content();
+
+            // 2. 查询向量数据库
+            Points.Filter filter = Points.Filter.newBuilder().addMust(matchKeyword("user_id", userId.toString())).build();
+            List<Points.ScoredPoint> results = qdrantClient.searchAsync(Points.SearchPoints.newBuilder()
                     .setCollectionName(QDRANT_COLLECTION)
                     .addAllVector(queryEmbedding.vectorAsList())
+                    .setLimit(3)
+                    .setWithPayload(enable(true))
                     .setWithVectors(WithVectorsSelectorFactory.enable(true))
-                    .setLimit(5)
-                    .setFilter(Points.Filter.newBuilder()
-                            .addMust(matchKeyword("user_id", String.valueOf(userId))))
+                    .setFilter(filter)
                     .build()).get();
+
+            List<EmbeddingMatch<TextSegment>> matches = results.stream()
+                    .map(point -> QdrantEmbeddingUtils.toEmbeddingMatch(point, queryEmbedding, "text_segment"))
+                    .collect(Collectors.toList());
+
+
+            // 3. 验证结果
+            if (matches.isEmpty()) {
+                throw new BadRequestException("当前您知识库似乎还没有相关内容，快去上传吧~");
+            }
+            // 4. 打印结果用于调试
+            log.info("\n===== 问题：{} =====", message);
+            log.info("\n===== 相似度搜索结果 =====");
+            for (EmbeddingMatch<TextSegment> match : matches) {
+                System.out.println("匹配得分: " + match.score());
+                System.out.println("匹配内容:\n" + match.embedded().text());
+            }
+
+
+            // 3. 拼接 context 参考材料
+            List<MarkdownChunkVO> vos = matches.stream()
+                    .map(match -> {
+                        MarkdownChunkVO vo = new MarkdownChunkVO();
+                        vo.setScore(match.score());
+                        MarkdownChunk markdownChunk = MarkdownChunkVO.fromString(match.embedded().text());
+                        vo.setContent(markdownChunk.content);
+                        vo.setTitle(markdownChunk.title);
+                        return vo;
+                    })
+                    .collect(Collectors.toList());
+
+            return vos;
         } catch (Exception e) {
-            log.error("向量数据库搜索失败：{}",e.getMessage());
-            throw new RuntimeException(e);
+            log.error("处理用户问题时发生错误", e);
+            throw new RuntimeException("处理用户问题时发生错误", e);
         }
-        // 6. 验证结果
-        Assert.notEmpty(matches, "当前您知识库似乎还没有内容···");
-
-        // 打印结果
-        log.info("\n===== 问题：{} =====",message);
-        log.info("\n===== 相似度搜索结果 =====");
-//        for (EmbeddingMatch<TextSegment> match : matches) {
-//            log.info("相似度: {}\n内容: {}\n",
-//                    match.score(), match.embedded().text());
-//        }
-//        String text = matches.get(0).embedded().text();
-//        return   MarkdownChunk.fromString(text);
-
-        for (Points.ScoredPoint point : matches) {
-            log.info("相似度: {}\n内容: {}\n",
-                    point.getScore(), point.getPayloadMap().get("text"));
-        }
-        return  MarkdownChunk.fromString(String.valueOf(matches.get(0).getPayloadMap().get("text")));
     }
 
 
@@ -190,7 +195,7 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
                 .one();
 
         if (ObjectUtil.isEmpty(markdownDocs)) {
-            throw new RuntimeException("文件不存在");
+            throw new BadRequestException("文件不存在");
         }
 
         return markdownDocs.getContent();
@@ -204,14 +209,14 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
         // 判断前端是否传送了文件id
         Long id = markdownDocs.getId();
         if (ObjectUtil.isEmpty(id)) {
-            throw new RuntimeException("文件id不能为空");
+            throw new BadRequestException("文件id不能为空");
         }
 
         MarkdownDocs docs = lambdaQuery()
                 .eq(MarkdownDocs::getId, id)
                 .eq(MarkdownDocs::getUserId, userId)
                 .oneOpt()
-                .orElseThrow(() -> new RuntimeException("文件不存在"));
+                .orElseThrow(() -> new BadRequestException("文件不存在"));
 
         // 获取文档切割等级, 更新数据库文档
         int level = docs.getLevel();
@@ -236,7 +241,7 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
                 .eq(MarkdownDocs::getId, fileId)
                 .eq(MarkdownDocs::getUserId, userId)
                 .oneOpt()
-                .orElseThrow(() -> new RuntimeException("文件不存在"));
+                .orElseThrow(() -> new BadRequestException("文件不存在"));
         deleteSegment(docs);
         // 删除文档
         if(!removeById(docs.getId())){
