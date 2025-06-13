@@ -26,5 +26,7 @@ public interface IChatSessionService extends IService<ChatSession> {
 
     PageDTO<ChatSession> getRecord(RecordQuery query);
 
+    SseEmitter fileStream(String sessionId, String message);
+
 //    Flux<String> FileStream(String memoryId, String message);
 }

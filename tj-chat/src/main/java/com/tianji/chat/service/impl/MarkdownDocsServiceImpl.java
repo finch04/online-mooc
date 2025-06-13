@@ -16,14 +16,20 @@ import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
+import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import io.qdrant.client.QdrantClient;
+import io.qdrant.client.WithVectorsSelectorFactory;
 import io.qdrant.client.grpc.Collections;
+import io.qdrant.client.grpc.JsonWithInt;
 import io.qdrant.client.grpc.Points;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -31,7 +37,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static com.tianji.chat.constants.AiConstants.QDRANT_COLLECTION;
 import static com.tianji.chat.utils.MarkdownSplitter.getMarkdownChunksByH;
@@ -54,6 +63,7 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
     @Autowired
     private final QdrantClient qdrantClient;
 
+    @Transactional
     @Override
     public MarkdownDocs upload(MultipartFile file, Integer level) {
         // 判断是否为md文件
@@ -112,23 +122,63 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
 
     @Override
     public MarkdownChunk chatByMarkdownDoc(String message) {
+        //这只是筛选！并非对话
+        long userId =UserContext.getUser();
         //TODO 每个用户只能看到自己上传知识库的内容并总结
-        dev.langchain4j.data.embedding.Embedding queryEmbedding = embeddingModel.embed(message).content();
-        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.findRelevant(queryEmbedding, 5 );
+        Embedding queryEmbedding = embeddingModel.embed(message).content();
 
+//        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(
+//                EmbeddingSearchRequest.builder()
+//                        .queryEmbedding(queryEmbedding)
+//                        .maxResults(5)
+////                        .filter(new MetadataFilterBuilder("user_id").isEqualTo(String.valueOf(userId)))
+//                        .filter(Points.WithPayloadSelector.newBuilder().setField("user_id", String.valueOf(userId)))
+//                        .build()).matches();
+        List<Points.ScoredPoint> matches  =new ArrayList<>();
+//        // 将float数组转换为Qdrant的Vector对象
+//        float[] vectorData = queryEmbedding.vector();
+//        Points.Vector.Builder vectorBuilder = Points.Vector.newBuilder();
+//
+//        // 逐个设置向量元素
+//        for (int i = 0; i < vectorData.length; i++) {
+//            vectorBuilder.setData(i, vectorData[i]);
+//        }
+
+//        Points.Vector vector = vectorBuilder.build();
+        try {
+            matches = qdrantClient.searchAsync(Points.SearchPoints.newBuilder()
+                    .setCollectionName(QDRANT_COLLECTION)
+                    .addAllVector(queryEmbedding.vectorAsList())
+                    .setWithVectors(WithVectorsSelectorFactory.enable(true))
+                    .setLimit(5)
+                    .setFilter(Points.Filter.newBuilder()
+                            .addMust(matchKeyword("user_id", String.valueOf(userId))))
+                    .build()).get();
+        } catch (Exception e) {
+            log.error("向量数据库搜索失败：{}",e.getMessage());
+            throw new RuntimeException(e);
+        }
         // 6. 验证结果
-        Assert.notEmpty(matches, "搜索结果不应为空");
+        Assert.notEmpty(matches, "当前您知识库似乎还没有内容···");
 
         // 打印结果
         log.info("\n===== 问题：{} =====",message);
         log.info("\n===== 相似度搜索结果 =====");
-        for (EmbeddingMatch<TextSegment> match : matches) {
+//        for (EmbeddingMatch<TextSegment> match : matches) {
+//            log.info("相似度: {}\n内容: {}\n",
+//                    match.score(), match.embedded().text());
+//        }
+//        String text = matches.get(0).embedded().text();
+//        return   MarkdownChunk.fromString(text);
+
+        for (Points.ScoredPoint point : matches) {
             log.info("相似度: {}\n内容: {}\n",
-                    match.score(), match.embedded().text());
+                    point.getScore(), point.getPayloadMap().get("text"));
         }
-        String text = matches.get(0).embedded().text();
-        return  MarkdownChunk.fromString(text);
+        return  MarkdownChunk.fromString(String.valueOf(matches.get(0).getPayloadMap().get("text")));
     }
+
+
 
     @Override
     public String getMarkdown(Long fileId) {
@@ -146,6 +196,7 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
         return markdownDocs.getContent();
     }
 
+    @Transactional
     @Override
     public void updateMarkdown(MarkdownDocs markdownDocs) {
         // 获取用户id
@@ -175,7 +226,7 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
 
         log.info("更新成功");
     }
-
+    @Transactional
     @Override
     public void removeMarkdown(Long fileId) {
         // 获取当前用户id
@@ -203,7 +254,7 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
         for (MarkdownChunk markdownChunk : markdownChunks) {
             TextSegment segment = TextSegment.from(markdownChunk.toString());
             segment.metadata().put("user_id", userId);
-            segment.metadata().put("doc_id", markdownDocs.getId());
+            segment.metadata().put("doc_id", markdownDocs.getId().toString());
             Embedding embedding = embeddingModel.embed(segment).content();
             String add = embeddingStore.add(embedding, segment);
             log.info("添加成功:{}",add);

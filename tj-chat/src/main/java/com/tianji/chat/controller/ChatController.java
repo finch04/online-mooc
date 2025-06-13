@@ -42,6 +42,13 @@ public class ChatController {
         return chatSessionService.stream(sessionId, message);
     }
 
+    @ApiOperation("根据知识库内容流式聊天")
+    @GetMapping(value = "/file",  produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter memoryChatFileStream(@RequestParam(defaultValue = "我叫finch，你叫什么名字？") String message,
+                                            @RequestParam(defaultValue = "1") String sessionId) {
+        return chatSessionService.fileStream(sessionId, message);
+    }
+
     @ApiOperation("获取聊天记录")
     @GetMapping("/records")
     public PageDTO<ChatSession> getRecord(RecordQuery query) {

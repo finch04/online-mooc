@@ -1,6 +1,7 @@
 package com.tianji.chat.config;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.service.IChatSessionService;
@@ -87,6 +88,13 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
             // 将最新的一条数据存储到Redis中
             String json = messageToJson(messages.get(messages.size() - 1));
             redisTemplate.opsForList().rightPush(getKey(sessionId), json);
+            JSONObject jsonObject = new JSONObject(json);
+            Object o = jsonObject.get("type");
+            if("SYSTEM".equals(o)){
+                log.info("系统消息不存redis：{}",o);
+                return;
+            }
+
             log.info("存数据到redis中 sessionId{}:json:{}", sessionId,json);
             // 开启延时任务
             // 封装实体类

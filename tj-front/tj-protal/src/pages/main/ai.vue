@@ -225,7 +225,8 @@ const sendMessage = async () => {
         let content = '';
         let thinkingContent = '';
         let inThinkingTag = false;
-        const AI_API_PREFIX = "http://localhost:10010/ct";
+        const AI_API_PREFIX = "http://localhost:10010/ct/chat/file";
+        const FILE_API_PREFIX = "http://localhost:10010/ct/chat/file";
 
         // 构建查询参数
         const queryParams = new URLSearchParams();
@@ -234,7 +235,7 @@ const sendMessage = async () => {
 
         abortController.value = new AbortController(); // 每次请求前重置 abortController
 
-        await fetchEventSource(`${AI_API_PREFIX}/chat/?${queryParams.toString()}`, {
+        await fetchEventSource(`${AI_API_PREFIX}/?${queryParams.toString()}`, {
             method: 'GET',
             headers: {
                 // 'Accept': 'text/event-stream',

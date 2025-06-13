@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import static com.tianji.chat.constants.AiConstants.QDRANT_COLLECTION;
 import static io.qdrant.client.ConditionFactory.matchKeyword;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -201,5 +202,49 @@ public class QdrantTest {
         } catch (Exception e) {
             fail("清空集合失败: " + e.getMessage());
         }
+        List<Points.Condition> conditions = new ArrayList<>();
+        //必须这两个都匹配才可以！
+//                conditions.add(matchKeyword("user_id", docs.getUserId().toString()));
+//        conditions.add(matchKeyword("doc_id","2222"));
+//
+//        Points.UpdateResult updateResult = qdrantClient.deleteAsync(QDRANT_COLLECTION,
+//                Points.Filter.newBuilder()
+//                        .addAllMust(conditions)
+//                        .build()).get();
+    }
+
+//    @Autowired
+//    private final EmbeddingModel embeddingModel;
+    @Test
+    public void testSearch() throws ExecutionException, InterruptedException {
+//        List<Points.Condition> conditions = new ArrayList<>();
+//        //必须这两个都匹配才可以！
+////                conditions.add(matchKeyword("user_id", docs.getUserId().toString()));
+//        conditions.add(matchKeyword("user_id", "2"));
+//
+//        List<Points.ScoredPoint> scoredPoints = qdrantClient.searchAsync(Points.SearchPoints.newBuilder()
+//                        .setCollectionName(AI_CHAT_COLLECTION)
+//                        .setFilter(Points.Filter.newBuilder()
+//                        .addAllMust(conditions)
+//                        .build())
+//                .build()).get();
+//        System.out.println(scoredPoints);
+        Points.ScrollResponse response = qdrantClient
+                .scrollAsync(
+                        Points.ScrollPoints.newBuilder()
+                                .setCollectionName(AI_CHAT_COLLECTION)
+                                .setLimit(5)
+                                .setFilter(
+                                        Points.Filter.newBuilder()
+                                                .addMust(matchKeyword("user_id", "2"))
+                                                .build())
+                                .build())
+                .get();
+        System.out.println(response);
+        for(int i = 0;i<response.getResultCount();i++){
+            String textSegment = response.getResult(i).getPayloadOrThrow("text_segment").getStringValue();
+            System.out.println(textSegment);
+        }
+
     }
 }
