@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -36,8 +37,8 @@ public class ChatController {
 
     @ApiOperation("流式聊天")
     @GetMapping(value = "/",  produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> memoryChatRedisStream(@RequestParam(defaultValue = "我叫finch，你叫什么名字？") String message,
-                                              @RequestParam(defaultValue = "1") String sessionId) {
+    public SseEmitter memoryChatRedisStream(@RequestParam(defaultValue = "我叫finch，你叫什么名字？") String message,
+                                            @RequestParam(defaultValue = "1") String sessionId) {
         return chatSessionService.stream(sessionId, message);
     }
 

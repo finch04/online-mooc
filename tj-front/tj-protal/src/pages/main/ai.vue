@@ -237,7 +237,7 @@ const sendMessage = async () => {
         await fetchEventSource(`${AI_API_PREFIX}/chat/?${queryParams.toString()}`, {
             method: 'GET',
             headers: {
-                'Accept': 'text/event-stream',
+                // 'Accept': 'text/event-stream',
                 "authorization": TOKEN
             },
             signal: abortController.value.signal,
@@ -262,7 +262,7 @@ const sendMessage = async () => {
                 }
 
                 if (msg.data) {
-                    if (msg.data === '<think>'||  msg.data === '"<think>"') {
+                    if (msg.data === '<think>') {
                         inThinkingTag = true;
                     } else if (msg.data === '</think>') {
                         inThinkingTag = false;

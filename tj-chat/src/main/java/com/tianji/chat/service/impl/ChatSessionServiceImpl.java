@@ -28,10 +28,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,47 +88,130 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     }
 
     @Override
-    public Flux<String> stream(String sessionId, String message) {
-        if(UserContext.getUser()==null){
-            return Flux.error(new RuntimeException("请先登录"));
+    public SseEmitter stream(String sessionId, String message) {
+        if (UserContext.getUser() == null) {
+            // 创建一个立即错误的SseEmitter
+            SseEmitter emitter = new SseEmitter(0L);
+            emitter.completeWithError(new RuntimeException("请先登录"));
+            return emitter;
         }
-        Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+
+        // 创建SseEmitter，设置超时时间为30分钟
+        SseEmitter emitter = new SseEmitter(1800000L);
+
+        // 添加超时和完成回调
+        emitter.onTimeout(emitter::complete);
+        emitter.onCompletion(() -> log.info("SSE流已完成"));
+        emitter.onError(error -> log.error("SSE流发生错误", error));
+
         StringBuilder responseBuilder = new StringBuilder();
         StringBuilder originBuilder = new StringBuilder();
-        streamingChatLanguageModel.generate(message,new StreamingResponseHandler<AiMessage>() {
-            @Override
-            public void onNext(String s) {
-                // 格式化并发送 SSE 消息
-                String sse = formatSseMessage(s);
-                sink.tryEmitNext(sse);
-                originBuilder.append(sse);
-                log.info("{}", s);
-                // 检查特殊字符
-                if ("\n".equals(s)) {
-                    System.out.println("收到换行符");
-                } else if (s.contains(" ")) {
-                    System.out.println("收到包含空格的内容: " + s);
+
+        try {
+            // 调用生成方法
+            streamingChatLanguageModel.generate(message, new StreamingResponseHandler<AiMessage>() {
+                @Override
+                public void onNext(String s) {
+                    try {
+                        // 格式化并发送SSE消息
+                        String sse = formatSseMessage(s);
+                        originBuilder.append(sse);
+                        log.info("{}", s);
+
+                        // 检查特殊字符
+                        if ("\n".equals(s)) {
+                            System.out.println("收到换行符");
+                        } else if (s.contains(" ")) {
+                            System.out.println("收到包含空格的内容: " + s);
+                        }
+
+                        responseBuilder.append(s);
+
+                        // 通过SseEmitter发送消息
+                        emitter.send(SseEmitter.event()
+                                .data(sse, MediaType.TEXT_PLAIN)
+                                .name("message"));
+                    } catch (IOException e) {
+                        log.error("发送SSE消息失败", e);
+                        emitter.completeWithError(e);
+                    }
                 }
-                responseBuilder.append(s);
-            }
 
-            @Override
-            public void onComplete(Response response) {
-                sink.tryEmitNext(formatSseMessage("[DONE]"));
-                sink.tryEmitComplete();
-                log.info("数据接收完成！\n{}",responseBuilder.toString());
-                log.info("纯发送的消息：\n{}", originBuilder.toString());
-            }
+                @Override
+                public void onComplete(Response response) {
+                    try {
+                        // 发送完成消息
+                        emitter.send(SseEmitter.event()
+                                .data(formatSseMessage("[DONE]"), MediaType.TEXT_PLAIN)
+                                .name("message"));
 
-            @Override
-            public void onError(Throwable error) {
-                sink.tryEmitError(error);
-            }
-        });
+                        // 完成SseEmitter
+                        emitter.complete();
+                        log.info("数据接收完成！\n{}", responseBuilder.toString());
+                        log.info("纯发送的消息：\n{}", originBuilder.toString());
+                    } catch (IOException e) {
+                        log.error("发送完成消息失败", e);
+                        emitter.completeWithError(e);
+                    }
+                }
+
+                @Override
+                public void onError(Throwable error) {
+                    log.error("生成过程发生错误", error);
+                    emitter.completeWithError(error);
+                }
+            });
+        } catch (Exception e) {
+            log.error("生成过程发生异常", e);
+            emitter.completeWithError(e);
+        }
 
         assistantRedis.chat(sessionId, message);
-        return sink.asFlux();
+        return emitter;
     }
+
+    //    @Override
+//    public Flux<String> stream(String sessionId, String message) {
+//        if(UserContext.getUser()==null){
+//            return Flux.error(new RuntimeException("请先登录"));
+//        }
+//        Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+//        StringBuilder responseBuilder = new StringBuilder();
+//        StringBuilder originBuilder = new StringBuilder();
+//        streamingChatLanguageModel.generate(message,new StreamingResponseHandler<AiMessage>() {
+//            @Override
+//            public void onNext(String s) {
+//                // 格式化并发送 SSE 消息
+//                String sse = formatSseMessage(s);
+//                sink.tryEmitNext(sse);
+//                originBuilder.append(sse);
+//                log.info("{}", s);
+//                // 检查特殊字符
+//                if ("\n".equals(s)) {
+//                    System.out.println("收到换行符");
+//                } else if (s.contains(" ")) {
+//                    System.out.println("收到包含空格的内容: " + s);
+//                }
+//                responseBuilder.append(s);
+//            }
+//
+//            @Override
+//            public void onComplete(Response response) {
+//                sink.tryEmitNext(formatSseMessage("[DONE]"));
+//                sink.tryEmitComplete();
+//                log.info("数据接收完成！\n{}",responseBuilder.toString());
+//                log.info("纯发送的消息：\n{}", originBuilder.toString());
+//            }
+//
+//            @Override
+//            public void onError(Throwable error) {
+//                sink.tryEmitError(error);
+//            }
+//        });
+//
+//        assistantRedis.chat(sessionId, message);
+//        return sink.asFlux();
+//    }
     private String formatSseMessage(String data) {
         data = data.replace(" ", "&nbsp;"); // 替换空格为 HTML 实体
         return  data;  // 符合 SSE 协议格式
