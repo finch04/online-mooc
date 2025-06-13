@@ -189,7 +189,7 @@ public class QdrantTest {
             if (collectionInfo!=null) {
                 qdrantClient.deleteAsync(AI_CHAT_COLLECTION,
                         Points.Filter.newBuilder()
-                                .addMust(matchKeyword("userId", "12L"))
+                                .addMust(matchKeyword("doc_id", "1933081651337330690"))
                                 .build());
 
                 // 等待操作完成

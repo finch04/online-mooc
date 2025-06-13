@@ -60,11 +60,11 @@
                     >
                         <el-button slot="trigger" type="primary">选取文件</el-button>
                     </el-upload>
-                    <template>
-                        <div class="el-upload__tip">请上传2MB以内的Markdown 文件</div>
-                    </template>
-                    <div v-if="addFormData.fileName">{{ addFormData.fileName }}</div>
                 </el-form-item>
+                <div style="text-align: left;margin-left: 80px;" class="el-upload__tip">请上传2MB以内的Markdown 文件</div>
+                <el-form-item  prop="fileName">
+                <div v-if="addFormData.fileName">{{ addFormData.fileName }}</div>
+            </el-form-item>
                 <el-form-item label="切割等级" prop="level">
                     <el-input-number
                         v-model="addFormData.level" 
@@ -198,6 +198,15 @@ const currentViewFileId = ref(null);
 // 引用聊天消息显示区域的 DOM 元素
 const chatMessages = ref(null);
 
+// 打开模态框
+const openModal = (id) => {
+    if (id) {
+        openEditModal(id);
+    } else {
+        isAddModalVisible.value = true;
+    }
+};
+
 // 获取文件列表
 const fetchFileList = async (page = 1) => {
     try {
@@ -227,18 +236,9 @@ const handleAddFileChange = (file) => {
     addFormData.value.fileName = file.name;
 };
 
-// 打开新增文件模态框
-const openAddModal = () => {
-    isAddModalVisible.value = true;
-};
-
 // 提交新增文件表单
 const submitAddForm = () => {
-    addFormRef.value.validate(valid => {
-        if (valid) {
-            createFile();
-        }
-    });
+    createFile();
 };
 
 // 新增文件
@@ -288,6 +288,8 @@ const updateFile = async (id) => {
         if (res.code === 200) {
             ElMessage.success('修改成功');
             isEditModalVisible.value = false;
+            const fileData = await getMarkdown(id);
+            viewFileContentData.value = fileData.data;
             currentPage.value = 1;
             fetchFileList();
         } else {

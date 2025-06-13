@@ -53,7 +53,7 @@ public class MarkdownController {
     }
 
     @ApiOperation("根据文件id删除文件")
-    @DeleteMapping("/{{id}")
+    @DeleteMapping("/{id}")
     public void deleteMarkdown(@PathVariable("id") Long fileId) {
          markdownDocsService.removeMarkdown(fileId);
     }

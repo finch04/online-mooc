@@ -164,7 +164,9 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
 
         // 获取文档切割等级, 更新数据库文档
         int level = docs.getLevel();
-        String markdownContent = docs.getContent();
+        //这里应该传前端传入的内容
+        String markdownContent = markdownDocs.getContent();
+        docs.setContent(markdownContent);
         updateById(docs);
 
         deleteSegment(docs);
@@ -215,13 +217,14 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
             if (collectionInfo!=null) {
                 List<Points.Condition> conditions = new ArrayList<>();
                 //必须这两个都匹配才可以！
-                conditions.add(matchKeyword("user_id", docs.getUserId().toString()));
+//                conditions.add(matchKeyword("user_id", docs.getUserId().toString()));
                 conditions.add(matchKeyword("doc_id", docs.getId().toString()));
 
-                qdrantClient.deleteAsync(QDRANT_COLLECTION,
+                Points.UpdateResult updateResult = qdrantClient.deleteAsync(QDRANT_COLLECTION,
                         Points.Filter.newBuilder()
                                 .addAllMust(conditions)
-                                .build());
+                                .build()).get();
+                System.out.println("成功删除文档: " + updateResult);
             } else {
                 throw new BadRequestException("集合不存在: ");
             }
