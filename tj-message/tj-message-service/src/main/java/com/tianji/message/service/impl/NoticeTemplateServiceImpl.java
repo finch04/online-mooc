@@ -145,7 +145,9 @@ public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper,
     @Override
     public NoticeTemplateDetailDTO queryNoticeTemplate(Long id) {
         NoticeTemplateDetailDTO noticeTemplateDetailDTO = BeanUtils.copyBean(getById(id), NoticeTemplateDetailDTO.class);
-        noticeTemplateDetailDTO.setMessageTemplates(messageTemplateService.queryByNoticeTemplateId(id));
+        if(noticeTemplateDetailDTO.getIsSmsTemplate()){
+            noticeTemplateDetailDTO.setMessageTemplates(messageTemplateService.queryByNoticeTemplateId(id));
+        }
         return noticeTemplateDetailDTO;
     }
 

@@ -1,14 +1,16 @@
 package com.tianji.data.service.impl;
 
+import com.tianji.api.dto.data.CourseDataVO;
+import com.tianji.api.dto.data.OrderDataVO;
 import com.tianji.common.utils.JsonUtils;
 import com.tianji.common.utils.NumberUtils;
 import com.tianji.data.constants.DataTypeEnum;
+import com.tianji.data.constants.RedisConstants;
 import com.tianji.data.model.dto.BoardDataSetDTO;
-import com.tianji.data.model.vo.AxisVO;
-import com.tianji.data.model.vo.EchartsVO;
-import com.tianji.data.model.vo.SerierVO;
+import com.tianji.data.model.vo.*;
 import com.tianji.data.service.BoardService;
 import com.tianji.data.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.tianji.data.constants.RedisConstants.KEY_BOARD_DATA;
 
@@ -26,6 +29,7 @@ import static com.tianji.data.constants.RedisConstants.KEY_BOARD_DATA;
  * @Version
  **/
 @Service
+@Slf4j
 public class BoardServiceImpl implements BoardService {
 
     @Autowired
@@ -87,5 +91,69 @@ public class BoardServiceImpl implements BoardService {
                 .put(key,
                         boardDataSetDTO.getType().toString(),
                         JsonUtils.toJsonStr(boardDataSetDTO.getData()));
+    }
+
+
+    @Override
+    public CourseDataVO courseBoardData() {
+        // 1.数据redis存储key
+        String key = RedisConstants.KEY_COURSE_BOARD + DataUtils.getVersion(1);
+        // 2.获取数据
+        Object originData = redisTemplate.opsForValue().get(key);
+        // 2.1.数据判空
+        if (originData == null) {
+            return new CourseDataVO();
+        }
+        return JsonUtils.toBean(originData.toString(), CourseDataVO.class);
+    }
+
+    @Override
+    public OrderDataVO orderBoardData() {
+        // 1.数据redis存储key
+        String key = RedisConstants.KEY_ORDER_BOARD + DataUtils.getVersion(1);
+        // 2.获取数据
+        Object originData = redisTemplate.opsForValue().get(key);
+        // 2.1.数据判空
+        if (originData == null) {
+            return new OrderDataVO();
+        }
+        return JsonUtils.toBean(originData.toString(), OrderDataVO.class);
+    }
+
+    @Override
+    public void updateOrderData(OrderDataVO orderData) {
+        // 1. 构建 Redis 存储 key（与查询逻辑保持一致）
+        String key = RedisConstants.KEY_ORDER_BOARD + DataUtils.getVersion(1);
+
+        try {
+            // 2. 将对象序列化为 JSON 字符串
+            String jsonData = JsonUtils.toJsonStr(orderData);
+
+            // 3. 存储到 Redis 中（设置合理的过期时间，例如 1 天）
+            redisTemplate.opsForValue().set(key, jsonData, 1, TimeUnit.DAYS);
+
+            log.info("订单数据已更新到 Redis，key: {}", key);
+        } catch (Exception e) {
+            log.error("更新订单数据到 Redis 失败", e);
+            // 可以添加降级处理或重试逻辑
+        }
+    }
+
+    @Override
+    public void updateCourseData(CourseDataVO courseData) {
+        // 1. 构建 Redis 存储 key（与查询逻辑保持一致）
+        String key = RedisConstants.KEY_COURSE_BOARD + DataUtils.getVersion(1);
+        try {
+            // 2. 将对象序列化为 JSON 字符串
+            String jsonData = JsonUtils.toJsonStr(courseData);
+
+            // 3. 存储到 Redis 中（设置合理的过期时间，例如 1 天）
+            redisTemplate.opsForValue().set(key, jsonData, 1, TimeUnit.DAYS);
+
+            log.info("课程数据已更新到 Redis，key: {}", key);
+        } catch (Exception e) {
+            log.error("更新课程数据到 Redis 失败", e);
+            // 可以添加降级处理或重试逻辑
+        }
     }
 }

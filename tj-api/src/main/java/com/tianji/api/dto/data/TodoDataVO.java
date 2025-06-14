@@ -1,4 +1,4 @@
-package com.tianji.data.model.vo;/**
+package com.tianji.api.dto.data;/**
  * @author fsq
  * @date 2025/5/18 19:03
  */

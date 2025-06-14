@@ -1,8 +1,8 @@
 package com.tianji.data.service;
 
 
+import com.tianji.api.dto.data.TodoDataVO;
 import com.tianji.data.model.dto.Top10DataSetDTO;
-import com.tianji.data.model.vo.TodoDataVO;
 import com.tianji.data.model.vo.Top10DataVO;
 
 /**
@@ -16,4 +16,10 @@ public interface TodoService {
      * @return
      */
     TodoDataVO get();
+
+    /**
+     * 更新待办事项
+     * @param vo
+     */
+    void updateTodoData(TodoDataVO vo);
 }

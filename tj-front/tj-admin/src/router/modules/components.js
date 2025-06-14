@@ -146,14 +146,8 @@ export default [
       {
         path: "index",
         name: "message",
-        component: () => import("@/pages/message/index.vue"),
+        component: () => import("@/pages/message/message/index.vue"),
         meta: { title: "消息管理" },
-      },
-      {
-        path: "notice",
-        name: "notice",
-        component: () => import("@/pages/message/notice/index.vue"),
-        meta: { title: "公告管理" },
       },
       {
         path: "task",

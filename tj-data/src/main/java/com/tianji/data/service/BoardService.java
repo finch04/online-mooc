@@ -1,6 +1,8 @@
 package com.tianji.data.service;
 
 
+import com.tianji.api.dto.data.CourseDataVO;
+import com.tianji.api.dto.data.OrderDataVO;
 import com.tianji.data.model.dto.BoardDataSetDTO;
 import com.tianji.data.model.vo.EchartsVO;
 
@@ -28,4 +30,29 @@ public interface BoardService {
      * @param boardDataSetDTO
      */
     void setBoardData(BoardDataSetDTO boardDataSetDTO);
+
+    /**
+     * 查看课程看板数据
+     * @return
+     */
+    CourseDataVO courseBoardData();
+
+
+    /**
+     * 查看订单看板数据
+     * @return
+     */
+    OrderDataVO orderBoardData();
+
+    /**
+     * 更新订单数据
+     * @param orderData
+     */
+    void updateOrderData(OrderDataVO orderData);
+
+    /**
+     * 更新课程数据
+     * @param courseData
+     */
+    void updateCourseData(CourseDataVO courseData);
 }

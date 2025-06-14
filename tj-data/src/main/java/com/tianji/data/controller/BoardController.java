@@ -1,5 +1,7 @@
 package com.tianji.data.controller;
 
+import com.tianji.api.dto.data.CourseDataVO;
+import com.tianji.api.dto.data.OrderDataVO;
 import com.tianji.data.model.dto.BoardDataSetDTO;
 import com.tianji.data.model.vo.EchartsVO;
 import com.tianji.data.service.BoardService;
@@ -38,4 +40,17 @@ public class BoardController {
     public void setBoardData(@Validated @RequestBody BoardDataSetDTO boardDataSetDTO) {
         boardService.setBoardData(boardDataSetDTO);
     }
+
+    @GetMapping("/course")
+    @ApiOperation("课程看板数据获取")
+    public CourseDataVO courseBoardData() {
+        return boardService.courseBoardData();
+    }
+
+    @GetMapping("/order")
+    @ApiOperation("订单看板数据获取")
+    public OrderDataVO orderBoardData() {
+        return boardService.orderBoardData();
+    }
+
 }

@@ -158,3 +158,38 @@ export const queryNoticeTemplate = (id) => {
 //     method: 'delete'
 //   });
 // };
+
+/**敏感词管理 */
+// 新增敏感词
+export const saveSensitiveWord = (sensitiveWordFormDTO) => {
+  return request({
+    url: '/sensitive',
+    method: 'post',
+    data: sensitiveWordFormDTO
+  });
+};
+
+// 更新敏感词
+export const updateSensitiveWord = (sensitiveWordFormDTO) => {
+  return request({
+    url: '/sensitive',
+    method: 'put',
+    data: sensitiveWordFormDTO
+  });
+};
+
+// 查询所有敏感词
+export const listSensitiveWords = () => {
+  return request({
+    url: '/sensitive/list',
+    method: 'get'
+  });
+};
+
+// 删除敏感词
+export const deleteSensitiveWord = (id) => {
+  return request({
+    url: `/sensitive/${id}`,
+    method: 'delete'
+  });
+};

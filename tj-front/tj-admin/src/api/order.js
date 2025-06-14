@@ -26,3 +26,12 @@ export const editCoupon = (params) =>
     method: "put",
     data: params,
   });
+
+
+
+//订单数据展板
+export const getOrderBoard = () =>
+  request({
+    url: `/ds/data/board/order`,
+    method: "get",
+  });

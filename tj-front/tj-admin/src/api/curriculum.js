@@ -184,3 +184,10 @@ request({
   method: "get",
   params
 });
+
+//课程数据展板
+export const getCourseBoard = () =>
+  request({
+    url: `/ds/data/board/course`,
+    method: "get",
+  });

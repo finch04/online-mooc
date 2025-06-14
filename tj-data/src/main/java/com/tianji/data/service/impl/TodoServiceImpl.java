@@ -1,12 +1,9 @@
 package com.tianji.data.service.impl;
 
+import com.tianji.api.dto.data.TodoDataVO;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.JsonUtils;
 import com.tianji.data.constants.RedisConstants;
-import com.tianji.data.model.dto.TodayDataDTO;
-import com.tianji.data.model.po.TodayDataInfo;
-import com.tianji.data.model.vo.TodayDataVO;
-import com.tianji.data.model.vo.TodoDataVO;
 import com.tianji.data.service.TodoService;
 import com.tianji.data.utils.DataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,4 +34,19 @@ public class TodoServiceImpl implements TodoService {
         return JsonUtils.toBean(originData.toString(), TodoDataVO.class);
     }
 
+    @Override
+    public void updateTodoData(TodoDataVO vo) {
+        if(vo==null){
+            return;
+        }
+        TodoDataVO todoDataVO = get();
+        if(vo.getTodoCouponNum()!=null){
+            todoDataVO.setTodoCouponNum(vo.getTodoCouponNum());
+        }else if(vo.getTodoRefundNum()!=null){
+            todoDataVO.setTodoRefundNum(vo.getTodoRefundNum());
+        }
+        redisTemplate.opsForValue().set(RedisConstants.KEY_TODO + DataUtils.getVersion(1)
+                , JsonUtils.toJsonStr(todoDataVO));
+
+    }
 }

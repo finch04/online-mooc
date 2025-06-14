@@ -5,6 +5,9 @@ public interface MqConstants {
 
     interface Exchange{
 
+        /*数据中心有关的交换机*/
+        String DATA_EXCHANGE = "data.topic";
+
         /*课程有关的交换机*/
         String COURSE_EXCHANGE = "course.topic";
 
@@ -22,6 +25,7 @@ public interface MqConstants {
 
         /*支付有关的交换机*/
         String PAY_EXCHANGE = "pay.topic";
+
         /*交易服务延迟任务交换机*/
         String TRADE_DELAY_EXCHANGE = "trade.delay.topic";
 
@@ -36,6 +40,8 @@ public interface MqConstants {
         String ERROR_QUEUE_TEMPLATE = "error.{}.queue";
     }
     interface Key{
+        /*数据有关的 RoutingKey*/
+        String DATA_TODO_KEY = "data.todo";
 
         /*课程有关的 RoutingKey*/
         String COURSE_NEW_KEY = "course.new";
@@ -43,12 +49,14 @@ public interface MqConstants {
         String COURSE_DOWN_KEY = "course.down";
         String COURSE_EXPIRE_KEY = "course.expire";
         String COURSE_DELETE_KEY = "course.delete";
+        String COURSE_DATA_KEY = "course.data";
         String COURSE_COMMENT_KEY = "course.comment";
 
         /*订单有关的RoutingKey*/
         String ORDER_PAY_KEY = "order.pay";
         String ORDER_REFUND_KEY = "order.refund";
         String ORDER_ANALYSIS_KEY = "order.analysis";
+        String ORDER_DATA_KEY = "order.data";
         String ORDER_DETAIL_ANALYSIS_KEY = "order.detail.analysis";
 
         /*积分相关RoutingKey*/

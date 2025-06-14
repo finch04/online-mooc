@@ -7,35 +7,35 @@
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>12.56</p>
+              <p>{{ board.allOrderAmount }}</p>
               <p>累计订单金额（万元）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>1.56</p>
+              <p>{{ board.noPayAmount }}</p>
               <p>待支付金额（万元）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>0.56</p>
+              <p>{{ board.closeAmount }}</p>
               <p>已关闭金额（万元）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>1.00</p>
+              <p>{{ board.refundAmount }}</p>
               <p>已退款金额（万元）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>9.44</p>
+              <p>{{ board.realAmount }}</p>
               <p>实收金额（万元）</p>
             </div>
           </li>
@@ -83,7 +83,7 @@ import { useUserStore } from "@/store";
 // 公用数据
 import { statusData } from "@/utils/commonData";
 // 接口api
-import { getOrderPage, getDetails } from "@/api/order";
+import { getOrderPage, getDetails ,getOrderBoard} from "@/api/order";
 // 导入组件
 // 搜索
 import Search from "./components/Search.vue";
@@ -112,6 +112,8 @@ let searchData = reactive({
 let baseData = reactive([]); //表格数据
 let fromData = reactive({}); //新增编辑表单数据
 let isSearch = ref(false); //是否触发了搜索按钮,用来控制没有搜索出数据和正常列表无数据的区分，显示的图片和提示语不一样
+
+const board = ref({});
 // ------生命周期------
 onMounted(() => {
   init();
@@ -120,6 +122,12 @@ onMounted(() => {
 // 获取初始值
 const init = () => {
   getList(); //获取订单列表数据
+  getOrderBoard()
+    .then((res) => {
+      if (res.code === 200) {
+        board.value = res.data;
+      }
+    })
 };
 // 获取列表值
 const getList = async () => {

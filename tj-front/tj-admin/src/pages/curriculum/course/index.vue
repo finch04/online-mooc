@@ -7,35 +7,35 @@
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>81</p>
+              <p>{{ board.courseNum }}</p>
               <p>课程总数量（个）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>27</p>
+              <p>{{ board.upCourse }}</p>
               <p>上架课程（个）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>11</p>
+              <p>{{ board.downCourse }}</p>
               <p>下架课程（个）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>12</p>
+              <p>{{ board.waitUpCourse }}</p>
               <p>待上架课程（个）</p>
             </div>
           </li>
           <li>
             <span class="img"></span>
             <div class="text">
-              <p>31</p>
+              <p>{{ board.endCourse }}</p>
               <p>完结课程（个）</p>
             </div>
           </li>
@@ -109,7 +109,7 @@ import { useUserStore } from "@/store";
 // 公用数据
 import { courseStatusData } from "@/utils/commonData";
 // 接口api
-import { getCoursesPage, getDetails } from "@/api/curriculum";
+import { getCoursesPage, getDetails,getCourseBoard } from "@/api/curriculum";
 // 导入组件
 // 新增按钮
 import AddButton from "@/components/AddButton/index.vue";
@@ -142,6 +142,7 @@ let fromData = reactive({}); //新增编辑表单数据
 const activeName = ref(0); //当前选中的tab值
 let isSearch = ref(false); //是否触发了搜索按钮,用来控制没有搜索出数据和正常列表无数据的区分，显示的图片和提示语不一样
 let pageShow = ref(false); //tab切换是分页重新加载，解决tab切换后分页的当前页不刷新问题
+const board = ref({});
 // ------生命周期------
 onMounted(() => {
   // 需求：当筛选待上架、已上架、已下架、已完结tab标签后，刷新页面后还停留再已选tab的页面上
@@ -155,6 +156,11 @@ onMounted(() => {
 // 获取初始值
 const init = () => {
   getList();
+  getCourseBoard().then((res) => {
+    if (res.code === 200) {
+      board.value = res.data;
+    }
+  });
 };
 // 获取列表值
 const getList = async () => {
