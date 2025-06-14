@@ -1,6 +1,8 @@
 package com.tianji.message.controller;
 
+import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.message.domain.po.Sensitive;
+import com.tianji.message.domain.query.SensitiveQuery;
 import com.tianji.message.service.ISensitiveService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +16,13 @@ import java.util.List;
 @RequestMapping("/sensitive")
 @RequiredArgsConstructor
 public class SensitiveController {
+
     @Autowired
     private ISensitiveService sensitiveService;
 
     @GetMapping("/list")
-    public List<Sensitive> list() {
-        return sensitiveService.getAllSensitiveWords();
+    public PageDTO<Sensitive> list(SensitiveQuery query) {
+        return sensitiveService.getAllSensitiveWords(query);
     }
 
     @PostMapping
@@ -33,7 +36,7 @@ public class SensitiveController {
     }
 
     @DeleteMapping("/{id}")
-    public boolean deleteSensitive(@PathVariable Integer id) {
+    public boolean deleteSensitive(@PathVariable Long id) {
         return sensitiveService.deleteSensitive(id);
     }
 }    

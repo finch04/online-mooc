@@ -163,7 +163,7 @@ export const queryNoticeTemplate = (id) => {
 // 新增敏感词
 export const saveSensitiveWord = (sensitiveWordFormDTO) => {
   return request({
-    url: '/sensitive',
+    url: '/sms/sensitive',
     method: 'post',
     data: sensitiveWordFormDTO
   });
@@ -172,24 +172,25 @@ export const saveSensitiveWord = (sensitiveWordFormDTO) => {
 // 更新敏感词
 export const updateSensitiveWord = (sensitiveWordFormDTO) => {
   return request({
-    url: '/sensitive',
+    url: '/sms/sensitive',
     method: 'put',
     data: sensitiveWordFormDTO
   });
 };
 
 // 查询所有敏感词
-export const listSensitiveWords = () => {
+export const listSensitiveWords = (pageQuery) => {
   return request({
-    url: '/sensitive/list',
-    method: 'get'
+    url: '/sms/sensitive/list',
+    method: 'get',
+    params: pageQuery
   });
 };
 
 // 删除敏感词
 export const deleteSensitiveWord = (id) => {
   return request({
-    url: `/sensitive/${id}`,
+    url: `/sms/sensitive/${id}`,
     method: 'delete'
   });
 };

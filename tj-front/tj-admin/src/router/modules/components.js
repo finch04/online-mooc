@@ -150,6 +150,12 @@ export default [
         meta: { title: "消息管理" },
       },
       {
+        path: "sensitive",
+        name: "message/sensitive",
+        component: () => import("@/pages/message/message/sensitive.vue"),
+        meta: { title: "敏感词管理" },
+      },
+      {
         path: "task",
         name: "task",
         component: () => import("@/pages/message/task/index.vue"),

@@ -12,7 +12,7 @@ import java.util.Date;
 @TableName("`sensitive`")
 public class Sensitive {
     @TableId(type = IdType.ASSIGN_ID)
-    private Integer id;
+    private Long id;
     private String sensitives;
     private LocalDateTime createTime;
 }    

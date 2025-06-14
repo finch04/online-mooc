@@ -1,9 +1,15 @@
 package com.tianji.message.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
+import com.tianji.common.utils.StringUtils;
+import com.tianji.message.domain.dto.NoticeTaskDTO;
+import com.tianji.message.domain.po.NoticeTask;
 import com.tianji.message.domain.po.Sensitive;
+import com.tianji.message.domain.query.SensitiveQuery;
 import com.tianji.message.mapper.SensitiveMapper;
 import com.tianji.message.service.ISensitiveService;
 import com.tianji.message.utils.SensitiveWordDetector; // 假设工具类路径
@@ -26,8 +32,13 @@ public class SensitiveServiceImpl extends ServiceImpl<SensitiveMapper, Sensitive
     private static final long CACHE_TTL = 7200; // 缓存过期时间(秒)
 
     @Override
-    public List<Sensitive> getAllSensitiveWords() {
-        return this.list();
+    public PageDTO<Sensitive> getAllSensitiveWords(SensitiveQuery query) {
+        Page<Sensitive> page = query.toMpPage();
+        // 2.过滤条件
+        page = lambdaQuery()
+                .like(query.getName() != null, Sensitive::getSensitives, query.getName()).page(page);
+        // 3.数据转换
+        return PageDTO.of(page, Sensitive.class);
     }
 
     @Override
@@ -45,7 +56,7 @@ public class SensitiveServiceImpl extends ServiceImpl<SensitiveMapper, Sensitive
     }
 
     @Override
-    public boolean deleteSensitive(Integer id) {
+    public boolean deleteSensitive(Long id) {
         boolean b = SensitiveWordDetector.deleteSensitiveWord(id);
         refreshRedisCache();
         return b;

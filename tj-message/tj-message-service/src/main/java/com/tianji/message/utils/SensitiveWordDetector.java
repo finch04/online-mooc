@@ -4,6 +4,7 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.JsonUtils;
 import com.tianji.message.domain.po.Sensitive;
 import com.tianji.message.service.ISensitiveService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 /**
  * 敏感词检测工具类，统一使用 StringRedisTemplate
  */
+@Slf4j
 public class SensitiveWordDetector {
 
     // 统一使用 StringRedisTemplate
@@ -264,6 +266,7 @@ public class SensitiveWordDetector {
             }
             return result;
         } catch (Exception e) {
+            log.info("添加敏感词失败:{}",e);
             throw new BadRequestException("添加敏感词失败");
         }
     }
@@ -294,7 +297,7 @@ public class SensitiveWordDetector {
     /**
      * 删除敏感词
      */
-    public static boolean deleteSensitiveWord(Integer id) {
+    public static boolean deleteSensitiveWord(Long id) {
         try {
             Sensitive sensitive = sensitiveService.getById(id);
             if (sensitive == null) {

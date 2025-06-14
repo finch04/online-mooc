@@ -72,8 +72,8 @@ public class WebSocketController {
 
         boolean b = SensitiveWordDetector.containsSensitiveWord(message.getContent());
         if (b) {
+            //TODO websocket中报错后不会像前端通知，为了让前端通知要让用户订阅另外的错误websocket交换队列，感觉麻烦了，所以就先不实现。
             throw new BadRequestException("聊天消息有违禁词！");
-
         }
 
         // 构建响应消息（包含发送者姓名和头像，需从用户微服务获取）
