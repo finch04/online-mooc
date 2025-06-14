@@ -2,6 +2,7 @@ package com.tianji.chat.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tianji.chat.domain.dto.PromptBuilder;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.domain.query.RecordQuery;
 import com.tianji.chat.mapper.ChatSessionMapper;
@@ -365,14 +366,15 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
             // 4. 构造一个增强版问题（加入 context）
 
             // 构造系统消息，使用 Markdown 格式渲染知识库资料
-            String systemMessageContent = String.format(
-                            "以下是与问题相关的参考资料：\n" +
-                            "> \n" +
-                            "%s\n" +
-                            "> \n" +
-                            "\n" +"%s\n",
-                    context,message
-            );
+//            String systemMessageContent = String.format(
+//                            "以下是与问题相关的参考资料：\n" +
+//                            "> \n" +
+//                            "%s\n" +
+//                            "> \n" +
+//                            "\n" +"%s\n",
+//                    context,message
+//            );
+            String systemMessageContent = PromptBuilder.buildSystemMessage(context, message);
 
             // 使用 TokenStream 接收流
             TokenStream stream = knowledgeAdvisor.advise(sessionId, systemMessageContent,systemMessageContent);

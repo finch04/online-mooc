@@ -1,8 +1,11 @@
 package com.tianji.chat.config;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.tianji.chat.domain.dto.PromptBuilder;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.domain.po.UserSession;
 import com.tianji.chat.service.IChatSessionService;
@@ -57,6 +60,8 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
         return CHAT_MEMORY_KEY_PREFIX + userId +":"+ sessionId ;
     }
 
+
+
     @Override
     public List<ChatMessage> getMessages(Object sessionId) {
         try {
@@ -102,8 +107,21 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
                     return;
                 }
             }
+            ChatMessage chatMessage = messages.get(messages.size() - 1);
             // 将最新的一条数据存储到Redis中
-            String json = messageToJson(messages.get(messages.size() - 1));
+            String json = messageToJson(chatMessage);
+            if(chatMessage instanceof UserMessage){
+                com.alibaba.fastjson.JSONObject root = JSON.parseObject(json);
+                JSONArray contents = root.getJSONArray("contents");
+                JSONObject firstContent = contents.getJSONObject(0);
+                String originalText = firstContent.getString("text");
+                // 处理文本
+                String processedText = PromptBuilder.extractOriginalMessage(originalText);
+                // 更新 JSON
+                firstContent.put("text", processedText);
+                json = root.toJSONString();
+            }
+
             redisTemplate.opsForList().rightPush(getKey(sessionId), json);
 
             log.info("存数据到redis中 sessionId{}:json:{}", sessionId,json);
