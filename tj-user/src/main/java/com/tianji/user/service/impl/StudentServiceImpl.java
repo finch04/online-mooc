@@ -3,6 +3,8 @@ package com.tianji.user.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.api.client.trade.TradeClient;
 import com.tianji.api.dto.user.UserDTO;
+import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.constants.MqConstants;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.enums.UserType;
 import com.tianji.common.exceptions.BizIllegalException;
@@ -23,6 +25,7 @@ import com.tianji.user.service.IUserService;
 import com.tianji.user.utils.NameUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.tianji.user.constants.UserConstants.REGISTER_DATA;
 
 /**
  * <p>
@@ -51,6 +56,8 @@ public class StudentServiceImpl implements IStudentService {
     private final IUserDetailService detailService;
     private final TradeClient tradeClient;
     private final CodeServiceImpl codeService;
+    private final RabbitMqHelper mqHelper;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     @Transactional
@@ -69,6 +76,23 @@ public class StudentServiceImpl implements IStudentService {
         student.setName(NameUtils.getUserName());
         student.setRoleId(UserConstants.STUDENT_ROLE_ID);
         detailService.save(student);
+
+
+
+        // 将新注册用户ID添加到List
+        redisTemplate.opsForList().rightPush(REGISTER_DATA, String.valueOf(user.getId()));
+
+        // 获取当前列表长度
+        Long size = redisTemplate.opsForList().size(REGISTER_DATA);
+
+        // 达到阈值时发送MQ并清空列表
+        if (size != null && size >= 10) {
+            mqHelper.send(MqConstants.Exchange.DATA_EXCHANGE,
+                    MqConstants.Key.DATA_TODAY_NEW_STUDENT,
+                    size);
+            // 清空列表
+            redisTemplate.delete(REGISTER_DATA);
+        }
     }
 
     @Override

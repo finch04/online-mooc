@@ -79,7 +79,7 @@ public class CourseDataJobHandler {
 
         // 发送到数据微服务
         mqHelper.send(MqConstants.Exchange.DATA_EXCHANGE,
-                MqConstants.Key.COURSE_DATA_KEY, courseDataVO);
+                MqConstants.Key.DATA_COURSE_KEY, courseDataVO);
 
         log.info("课程数据统计任务完成，共处理 {} 条数据", list.size());
         log.info("统计结果：课程总数={}，上架课程={}，下架课程={}，待上架课程={}，完结课程={}",

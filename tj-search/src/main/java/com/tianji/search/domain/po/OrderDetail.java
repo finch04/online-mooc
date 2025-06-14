@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class OrderDetail {
+    @Id
     /**订单明细id*/
     private Long id;
     /**订单id*/

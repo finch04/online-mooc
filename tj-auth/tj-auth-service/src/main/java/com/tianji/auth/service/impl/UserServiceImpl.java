@@ -30,7 +30,8 @@ public class UserServiceImpl  implements IUserService {
 
     @Override
     public void register(StudentFormDTO dto) {
-        codeService.verifyCode(dto.getCellPhone(), dto.getCode());
+//        codeService.verifyCode(dto.getCellPhone(), dto.getCode());
+        //用户微服务都校验了
         studentClient.registerStudent(dto);
     }
 

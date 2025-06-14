@@ -34,6 +34,7 @@ public interface MqConstants {
 
         /*促销服务的交换机*/
         String PROMOTION_EXCHANGE ="promotion.topic";
+        
 
     }
     interface Queue {
@@ -43,21 +44,30 @@ public interface MqConstants {
         /*数据有关的 RoutingKey*/
         String DATA_TODO_KEY = "data.todo";
 
+        String DATA_COURSE_KEY = "course.data";
+        String DATA_ORDER_KEY = "order.data";
+
+        String DATA_ORDER_TODAY_AMOUNT_KEY="order.today.amount";
+        String DATA_ORDER_TODAY_COUNT_KEY="order.today.count";
+        String DATA_TODAY_NEW_STUDENT="data.today.register";
+        
+        
         /*课程有关的 RoutingKey*/
         String COURSE_NEW_KEY = "course.new";
         String COURSE_UP_KEY = "course.up";
         String COURSE_DOWN_KEY = "course.down";
         String COURSE_EXPIRE_KEY = "course.expire";
         String COURSE_DELETE_KEY = "course.delete";
-        String COURSE_DATA_KEY = "course.data";
         String COURSE_COMMENT_KEY = "course.comment";
 
         /*订单有关的RoutingKey*/
         String ORDER_PAY_KEY = "order.pay";
         String ORDER_REFUND_KEY = "order.refund";
         String ORDER_ANALYSIS_KEY = "order.analysis";
-        String ORDER_DATA_KEY = "order.data";
         String ORDER_DETAIL_ANALYSIS_KEY = "order.detail.analysis";
+        
+        
+        
 
         /*积分相关RoutingKey*/
         /* 写回答 */

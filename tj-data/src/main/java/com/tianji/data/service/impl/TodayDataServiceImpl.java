@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @ClassName TodayDataServiceImpl
@@ -45,16 +49,47 @@ public class TodayDataServiceImpl implements TodayDataService {
         return vo;
     }
 
+    //这里不需要将对象都传好，哪怕只传一个字段也能实现更新
     @Override
     public void set(TodayDataDTO todayDataDTO) {
-        // 1.数据redis存储key
-        String key = RedisConstants.KEY_TODAY + todayDataDTO.getVersion();
-        // 2.数据转化
-        TodayDataInfo todayDataInfo = BeanUtils.toBean(todayDataDTO, TodayDataInfo.class);
-        // 3.数据存储
-        redisTemplate.opsForValue().set(key, JsonUtils.toJsonStr(todayDataInfo));
-    }
+        // 获取版本号
+        Integer version = DataUtils.getVersion(1);
+        String key = RedisConstants.KEY_TODAY + version;
 
+        // 1. 从 Redis 获取现有数据
+        String jsonData = (String) redisTemplate.opsForValue().get(key);
+
+        // 2. 反序列化为对象（如果不存在则创建新对象）
+        TodayDataVO existingData = (jsonData != null)
+                ? JsonUtils.toBean(jsonData, TodayDataVO.class)
+                : new TodayDataVO();
+
+        // 3. 使用 DTO 中的非空字段更新现有数据
+        if (todayDataDTO.getOrderAmount() != null) {
+            // 处理金额字段，使用 BigDecimal 避免精度问题
+            BigDecimal amount = BigDecimal.valueOf(todayDataDTO.getOrderAmount())
+                    .setScale(2, RoundingMode.HALF_UP);
+            existingData.setOrderAmount(amount.doubleValue());
+        }
+
+        if (todayDataDTO.getVisits() != null) {
+            // 处理访问量字段，保留两位小数
+            BigDecimal visits = BigDecimal.valueOf(todayDataDTO.getVisits())
+                    .setScale(2, RoundingMode.HALF_UP);
+            existingData.setVisits(visits.doubleValue());
+        }
+
+        if (todayDataDTO.getOrderNum() != null) {
+            existingData.setOrderNum(todayDataDTO.getOrderNum());
+        }
+
+        if (todayDataDTO.getStuNewNum() != null) {
+            existingData.setStuNewNum(todayDataDTO.getStuNewNum());
+        }
+
+        // 4. 将更新后的对象转回 JSON 存入 Redis
+        redisTemplate.opsForValue().set(key, JsonUtils.toJsonStr(existingData));
+    }
     /**
      * 获取今日访问量（去重后的独立用户数）
      * @return 今日访问量

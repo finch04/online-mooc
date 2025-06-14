@@ -24,7 +24,12 @@ public class RedisConstants {
     public static final String KEY_ORDER_BOARD = "DATA:ORDER:BOARD:";
 
 
-
     //系统每日访问量
     public static final String SYSTEM_VISIT_DAILY = "SYSTEM:VISIT:DAILY:";
+    //今日订单金额
+    public static final String TODAY_ORDER_AMOUNT = "TODAY:ORDER:AMOUNT:";
+    //今日订单笔数
+    public static final String TODAY_ORDER_COUNT = "TODAY:ORDER:COUNT:";
+    //今日新增学员
+    public static final String TODAY_NEW_STUDENT = "TODAY:NEW:STUDENT:";
 }

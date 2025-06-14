@@ -15,4 +15,7 @@ public interface UserConstants {
     String USER_VERIFY_CODE_KEY = "sms:user:code:phone:";
     // 验证码有效期，5分钟
     Duration USER_VERIFY_CODE_TTL = Duration.ofMinutes(5);
+
+    // 注册发送数据微服务的Redis key前缀
+    String REGISTER_DATA = "register:nums";
 }

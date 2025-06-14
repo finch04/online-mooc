@@ -111,7 +111,7 @@ public class OrderDataJobHandler {
 
         // 发往数据微服务
         mqHelper.send(MqConstants.Exchange.DATA_EXCHANGE,
-                MqConstants.Key.ORDER_DATA_KEY, orderDataVO);
+                MqConstants.Key.DATA_ORDER_KEY, orderDataVO);
 
         log.info("订单数据统计任务完成，共处理 {} 条数据", list.size());
         log.info("统计结果：累计订单金额={}万元，待支付金额={}万元，已关闭金额={}万元，已退款金额={}万元，实收金额={}万元",

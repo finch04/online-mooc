@@ -81,14 +81,22 @@ public class OrderAnalysisJobHandler {
 
         //查出昨天的数据订单
         List<Order> orders = orderService.queryOrderBetweenTime(startTime, endTime);
+        //订单总金额  注意单位为分
+        Integer totalAmount = 0;
+
         //TODO 可能存入redis便于数据微服务调用
         List<OrderAnalysisDTO> analysisDTOList = BeanUtils.copyList(orders, OrderAnalysisDTO.class);
         for(Order order:orders){
             OrderAnalysisDTO orderAnalysisDTO = BeanUtils.copyBean(order, OrderAnalysisDTO.class);
             analysisDTOList.add(orderAnalysisDTO);
+            totalAmount += order.getTotalAmount();
         }
         //发往搜索微服务
         mqHelper.send(MqConstants.Exchange.ORDER_EXCHANGE,  MqConstants.Key.ORDER_ANALYSIS_KEY, analysisDTOList);
+        //发往数据微服务
+        //TODO 注意，这里是所有状态的订单，哪怕未支付或者已关闭订单的金额也会算入，到时候看业务想要什么即可，现在为了方便就不判断
+        mqHelper.send(MqConstants.Exchange.DATA_EXCHANGE,  MqConstants.Key.DATA_ORDER_TODAY_COUNT_KEY, orders.size());
+        mqHelper.send(MqConstants.Exchange.DATA_EXCHANGE,  MqConstants.Key.DATA_ORDER_TODAY_AMOUNT_KEY, round((double) totalAmount /100,2));
         log.info("订单分析任务检索完成，共处理 {} 条数据", orders.size());
     }
 
@@ -138,5 +146,14 @@ public class OrderAnalysisJobHandler {
         //发往搜索微服务
         mqHelper.send(MqConstants.Exchange.ORDER_EXCHANGE,  MqConstants.Key.ORDER_DETAIL_ANALYSIS_KEY, analysisDTOList);
         log.info("订单明细分析任务检索完成，共处理 {} 条数据", orderDetails.size());
+    }
+
+    // 辅助方法：四舍五入保留指定位数小数
+    private double round(double value, int precision) {
+        if (precision < 0) {
+            throw new IllegalArgumentException("精度不能为负数");
+        }
+        long factor = (long) Math.pow(10, precision);
+        return (double) Math.round(value * factor) / factor;
     }
 }
