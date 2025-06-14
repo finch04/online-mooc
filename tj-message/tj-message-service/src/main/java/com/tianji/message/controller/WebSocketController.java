@@ -3,6 +3,7 @@ package com.tianji.message.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
+import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.message.domain.dto.ChatMessageDTO;
@@ -10,6 +11,7 @@ import com.tianji.message.domain.dto.PrivateMessageDTO;
 import com.tianji.message.domain.dto.UserSimpleDTO;
 import com.tianji.message.domain.po.ChatMessage;
 import com.tianji.message.service.IChatMessageService;
+import com.tianji.message.utils.SensitiveWordDetector;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -68,6 +70,12 @@ public class WebSocketController {
         SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
         Long senderId = (Long) simpAttributes.getAttribute("userId");
 
+        boolean b = SensitiveWordDetector.containsSensitiveWord(message.getContent());
+        if (b) {
+            throw new BadRequestException("聊天消息有违禁词！");
+
+        }
+
         // 构建响应消息（包含发送者姓名和头像，需从用户微服务获取）
         UserContext.setUser(senderId);
         UserDTO sender = userClient.queryUserById(senderId);
@@ -109,6 +117,11 @@ public class WebSocketController {
     public String handleBroadcast(@Payload String message) {
         SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
         Long senderId = (Long) simpAttributes.getAttribute("userId");
+
+        boolean b = SensitiveWordDetector.containsSensitiveWord(message);
+        if (b) {
+            throw new BadRequestException("聊天消息有违禁词！");
+        }
 
         // 构建响应消息（包含发送者姓名和头像，需从用户微服务获取）
         UserContext.setUser(senderId);
@@ -201,6 +214,11 @@ public class WebSocketController {
         SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
         Long senderId = (Long) simpAttributes.getAttribute("userId");
 
+        boolean b = SensitiveWordDetector.containsSensitiveWord(message);
+        if (b) {
+            throw new BadRequestException("聊天消息有违禁词！");
+        }
+
         // 构建响应消息（包含发送者姓名和头像，需从用户微服务获取）
         UserContext.setUser(senderId);
         UserDTO sender = userClient.queryUserById(senderId);
@@ -231,4 +249,6 @@ public class WebSocketController {
 
         log.info("群组消息已发送到群组 {}，消息内容: {}", groupId, message);
     }
+
+
 }

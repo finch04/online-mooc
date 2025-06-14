@@ -21,6 +21,7 @@ import com.tianji.message.domain.vo.UserPrivateMessageVO;
 import com.tianji.message.mapper.UserPrivateMessageMapper;
 import com.tianji.message.service.IUserConversationService;
 import com.tianji.message.service.IUserPrivateMessageService;
+import com.tianji.message.utils.SensitiveWordDetector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,10 @@ public class UserPrivateMessageServiceImpl  extends ServiceImpl<UserPrivateMessa
 
     @Override
     public Boolean sendMessage(UserPrivateMessageFormDTO userPrivateMessageFormDTO) {
+        boolean b = SensitiveWordDetector.containsSensitiveWord(userPrivateMessageFormDTO.getContent());
+        if (b) {
+            throw new BadRequestException("聊天消息有违禁词！");
+        }
         UserPrivateMessage userPrivateMessage = new UserPrivateMessage();
         userPrivateMessage.setSenderId(UserContext.getUser());
         userPrivateMessage.setReceiverId(userPrivateMessageFormDTO.getUserId());

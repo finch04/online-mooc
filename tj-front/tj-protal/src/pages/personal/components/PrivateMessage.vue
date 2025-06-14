@@ -236,6 +236,8 @@ const sendMessage = async () => {
 
             // 触发重新加载私信列表
             await loadPrivateMessages(true);
+        }else{
+            ElMessage.error("发送消息失败：",res.msg);
         }
     } catch (error) {
         console.error('发送消息失败:', error);

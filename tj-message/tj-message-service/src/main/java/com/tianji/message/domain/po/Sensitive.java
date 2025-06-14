@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
-@TableName("sensitive")
+@TableName("`sensitive`")
 public class Sensitive {
     @TableId(type = IdType.ASSIGN_ID)
     private Integer id;
