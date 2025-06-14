@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 /**
  * @ClassName TodayDataServiceImpl
  * @Author wusongsong
@@ -34,7 +37,12 @@ public class TodayDataServiceImpl implements TodayDataService {
         if (originData == null) {
             return new TodayDataVO();
         }
-        return JsonUtils.toBean(originData.toString(), TodayDataVO.class);
+
+        //这里获取一下今日访问量，因为也是从redis获取数据，性能很高
+        //TODO 这里前端展示单位是万，但是除10000难看出效果，所以还是先不除了，先记着
+        TodayDataVO vo = JsonUtils.toBean(originData.toString(), TodayDataVO.class);
+        vo.setVisits(getTodayVisitCount().doubleValue());
+        return vo;
     }
 
     @Override
@@ -46,4 +54,14 @@ public class TodayDataServiceImpl implements TodayDataService {
         // 3.数据存储
         redisTemplate.opsForValue().set(key, JsonUtils.toJsonStr(todayDataInfo));
     }
+
+    /**
+     * 获取今日访问量（去重后的独立用户数）
+     * @return 今日访问量
+     */
+    public Long getTodayVisitCount() {
+        String todayKey = RedisConstants.SYSTEM_VISIT_DAILY + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        return redisTemplate.opsForHyperLogLog().size(todayKey);
+    }
+
 }

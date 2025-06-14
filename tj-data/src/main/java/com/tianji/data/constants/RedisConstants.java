@@ -22,4 +22,9 @@ public class RedisConstants {
 
     //订单模块展板
     public static final String KEY_ORDER_BOARD = "DATA:ORDER:BOARD:";
+
+
+
+    //系统每日访问量
+    public static final String SYSTEM_VISIT_DAILY = "SYSTEM:VISIT:DAILY:";
 }
