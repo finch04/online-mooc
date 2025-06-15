@@ -453,6 +453,7 @@ const getNowTime = () => {
 // 点击刷新当前时间
 const Refreshtime = () => {
   getNowTime()
+  getTodayData()
 }
 
 // 获取数据

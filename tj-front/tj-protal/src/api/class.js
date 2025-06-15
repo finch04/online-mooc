@@ -348,3 +348,18 @@ export const isCollect = (lessonId) =>
 		url: `${LEARNING_API_PREFIX}/collect/${lessonId}`,
 		method: 'get'
 	})
+
+/*课程分享 相关接口 */
+//生成课程分享链接
+export const generateShareUrl = (id) =>
+	request({
+		url: `${LEARNING_API_PREFIX}/share/generate/${id}`,
+		method: 'post'
+	})
+//解析分享链接
+export const parseShareUrl = (code) =>
+	request({
+		url: `${LEARNING_API_PREFIX}/share/${code}`,
+		method: 'get'
+	})
+	

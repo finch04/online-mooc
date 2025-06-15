@@ -69,13 +69,19 @@ export default [
     component: Layout,
     name: 'details',
     redirect: '/details/index',
-    meta: { title: '问题详情' },
+    meta: { title: '课程详情' },
     children: [
       {
         path: 'index',
         name: 'details',
         component: () => import('@/pages/classDetails/index.vue'),
-        meta: { title: '问题详情' },
+        meta: { title: '课程详情' },
+      },
+      {
+        path: 'share/:code',
+        name: 'share',
+        component: () => import('@/pages/classDetails/share.vue'),
+        meta: { title: '课程分享' },
       }
     ],
   },

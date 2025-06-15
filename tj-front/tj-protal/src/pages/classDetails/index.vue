@@ -1,6 +1,32 @@
 <!-- 课程详情 -->
 <template>
   <div class="classDetailsWrapper">
+     <!-- 分享提示悬浮窗 -->
+      <!-- 分享弹窗 -->
+      <ElDialog
+      title="课程分享"
+      v-model="shareDialogVisible"
+      :close-on-click-modal="true"
+      width="450px"
+      class="share-dialog"
+    >
+    <div class="share-content">
+      <!-- 分享者信息 -->
+      <div class="share-user-info">
+        <el-avatar 
+          class="user-avatar" 
+          :size="64" 
+          :src="shareUserIcon" 
+          :fallback-src="fallbackAvatar"
+          :fit="'cover'"
+        />
+        <div>
+          <h3 class="user-name">{{ shareUserName || '好友' }}</h3>
+          <p class="share-message">分享了一门课程给你</p>
+        </div>
+      </div>
+    </div>
+    </ElDialog>
     <div class="detailHead">
       <div class="backGround"><img :src="baseDetailsData.coverUrl" width="100%" alt=""/></div>
       <div class="container">
@@ -25,7 +51,7 @@
               </div>
               <div class="fx">
                 <div v-if="isLogin()" @click="collectionHandle" class="bt-wt bt-round marg-rt-15 ft-14" :class="{isCollection:isCollection}"> <i :class="{iconfont:true, 'zhy-btn_shoucang':!isCollection, 'zhy-btn_yishoucang':isCollection}"></i> 收藏</div>
-                <div class="bt-wt bt-round ft-14"><weixin class="wx"></weixin> 分享</div>
+                <div class="bt-wt bt-round ft-14" @click="shareCourse"><weixin class="wx" ></weixin> 分享</div>
               </div>
           </div>
         </div>
@@ -91,7 +117,7 @@ import { computed, onMounted, ref,watch } from "vue";
 import { ElMessage,ElMessageBox } from "element-plus";
 import { getClassDetails, getClassTeachers, getClassList } from "@/api/classDetails.js";
 import { enrolledFreeCourse, putCarts } from "@/api/order.js";
-import { getRecommendClassList, getCourseLearning ,addMyCollect,isCollect} from "@/api/class.js";
+import { getRecommendClassList, getCourseLearning ,addMyCollect,isCollect,generateShareUrl} from "@/api/class.js";
 import { useRoute, useRouter } from "vue-router";
 import { dataCacheStore } from "@/store"
 
@@ -160,6 +186,11 @@ const askData = [
 // 课程目录
 const classListData = ref([])
 const baseClassTeacherData = ref([])
+// 新增：分享者信息
+const shareUserName = ref('');
+const shareUserIcon = ref('');
+// 分享弹窗状态
+const shareDialogVisible = ref(false);
 
 // mounted生命周期
 onMounted(async () => {
@@ -187,6 +218,13 @@ onMounted(async () => {
     teacherData:baseClassTeacherData.value, // 讲师信息
     planData: planData.value // 学习计划信息
   })
+
+  detailsId.value = route.query.id;
+  shareUserName.value = route.query.shareUserName || '';
+  shareUserIcon.value = route.query.shareUserIcon || '';
+  if(shareUserName.value&&shareUserIcon.value){
+    shareDialogVisible.value=true;
+  }
 });
 
 /** 方法定义 **/
@@ -338,6 +376,47 @@ const getCourseIsCollect = async() => {
     }
   })
 }
+
+// import proxy from '@/config/proxy';
+// const env = import.meta.env.MODE || 'development';
+// const host =  proxy[env].host;
+const host =  window.location.host;
+//生成分享链接
+const shareCourse = async () => {
+  if (!detailsId.value) {
+    ElMessage({
+      message: '课程ID不能为空',
+      type: 'error'
+    });
+    return;
+  }
+
+  try {
+    const res = await generateShareUrl(detailsId.value);
+   
+    if (res.code === 200) {
+      const shareUrl = res.data.shortUrl;
+      // 复制链接到剪切板  http://localhost:10010/ls/share/RHoQFlwTWm
+      await navigator.clipboard.writeText(host+"/#/details/share/"+shareUrl);
+      ElMessage({
+        message: '分享链接已复制到剪切板，有效期3小时',
+        type: 'success'
+      });
+    } else {
+      ElMessage({
+        message: res.msg || '生成分享链接失败',
+        type: 'error'
+      });
+    }
+  } catch (error) {
+    console.error('生成分享链接出错', error);
+    ElMessage({
+      message: '网络错误，请稍后再试',
+      type: 'error'
+    });
+  }
+}
+
 const isSignUp = ref(false)
 // 立即报名
 const signUpHandle = async () => {
@@ -465,4 +544,49 @@ const addCarts = () => {
   });
 }
 </script>
-<style lang="scss" src="./index.scss"> </style>
+<style>
+/* 新增分享提示悬浮窗样式 */
+.share-dialog {
+  .el-dialog__header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #EBEEF5;
+  }
+  
+  .el-dialog__title {
+    font-size: 18px;
+    font-weight: 500;
+    color: #303133;
+  }
+  
+  .share-content {
+    padding: 24px;
+  }
+  
+  .share-user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .user-avatar {
+    border: 2px solid #F5F7FA;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .user-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+    margin: 0;
+  }
+  
+  .share-message {
+    font-size: 14px;
+    color: #606266;
+    margin: 4px 0 0;
+  }
+}
+</style>
+<style lang="scss" src="./index.scss">
+</style>
