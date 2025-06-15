@@ -37,7 +37,7 @@
         });
       } else {
         ElMessage({
-          message: res.message || '解析分享链接失败',
+          message: res.msg || '解析分享链接失败',
           type: 'error'
         });
       }

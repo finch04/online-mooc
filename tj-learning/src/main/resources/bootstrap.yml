@@ -42,3 +42,5 @@ tj:
   auth:
     resource:
       enable: true
+logging:
+  config: classpath:logback-spring.xml
