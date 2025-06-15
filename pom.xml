@@ -65,6 +65,7 @@
         <rocketmq-starter-version>2.2.3</rocketmq-starter-version>
         <shardingsphere-jdbc-version>5.3.2</shardingsphere-jdbc-version>
         <protostuff.version>1.7.4</protostuff.version>
+        <pinyin4j.version>2.5.0</pinyin4j.version>
     </properties>
     <!-- 对依赖包进行管理 -->
     <dependencyManagement>

@@ -10,6 +10,7 @@ import com.tianji.search.service.ISearchService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -27,10 +28,23 @@ public class CourseController {
 
 
     @ApiOperation("用户端课程搜索接口")
-    @TjRateLimiter(name= "search",permitsPerSecond = 1)
+    @TjRateLimiter(name= "search",permitsPerSecond = 5)
     @GetMapping("/portal")
     public PageDTO<CourseVO> queryCoursesForPortal(CoursePageQuery query){
         return searchService.queryCoursesForPortal(query);
+    }
+
+    /**
+     * 关键字自动补全
+     *
+     * @param keyword
+     * @return
+     */
+    @Operation(summary = "关键字自动补全")
+    @GetMapping("/completeSuggest/{keyword}")
+    public List<String> completeSuggest(@PathVariable String keyword) {
+        List<String> list = searchService.completeSuggest(keyword);
+        return list;
     }
 
 //    @ApiIgnore//swagger会忽略该接口

@@ -64,6 +64,19 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-elasticsearch</artifactId>
+            <version>4.3.4</version>
+        </dependency>
+
+        <!-- 下载：https://pinyin4j.sourceforge.net/ -->
+        <!-- 安装：mvn install:install-file "-Dfile=D:\work\tingshu_work\tools\pinyin4j-2.5.0\lib\pinyin4j-2.5.0.jar" "-DgroupId=com.belerweb" "-DartifactId=pinyin4j" "-Dversion=2.5.0" "-Dpackaging=jar" -->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>${pinyin4j.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.baomidou</groupId>

@@ -21,4 +21,6 @@ public interface ISearchService {
     List<Long> queryCoursesIdByName(String keyword);
 
     List<CourseVO> queryLikeTopN();
+
+    List<String> completeSuggest(String keyword);
 }

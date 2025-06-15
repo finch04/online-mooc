@@ -47,7 +47,12 @@ export const classSeach = (params) =>
 		method: 'get',
 		params
 	})
-
+export const completeSuggest = (params) =>
+	request({
+		url: `${SEARCH_API_PREFIX}/courses/completeSuggest/${params}`,
+		method: 'get',
+	})
+	
 
 // 学习相关接口
 export const getLearningClassDetails = (id) =>

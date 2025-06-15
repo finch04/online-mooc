@@ -1,5 +1,7 @@
 package com.tianji.search.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tianji.api.cache.CategoryCache;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
@@ -10,34 +12,53 @@ import com.tianji.common.utils.*;
 import com.tianji.search.config.InterestsProperties;
 import com.tianji.search.constants.SearchErrorInfo;
 import com.tianji.search.domain.po.Course;
+import com.tianji.search.domain.po.SuggestIndex;
 import com.tianji.search.domain.query.CoursePageQuery;
 import com.tianji.search.domain.vo.CourseVO;
 import com.tianji.search.repository.CourseRepository;
 import com.tianji.search.service.IInterestsService;
 import com.tianji.search.service.ISearchService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.search.*;
+import org.elasticsearch.client.ElasticsearchClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.reindex.ScrollableHitSource;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.completion.FuzzyOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.suggest.response.Suggest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tianji.search.repository.CourseRepository.PUBLISH_TIME;
-
+@Slf4j
 @Service
 public class SearchServiceImpl implements ISearchService {
 
@@ -328,4 +349,107 @@ public class SearchServiceImpl implements ISearchService {
         }
         return new PageDTO<>(total, totalPages, list);
     }
+
+
+
+    @Autowired
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+
+    //关键字自动补全
+    @Override
+    public List<String> completeSuggest(String keyword) {
+        // 1. 构建搜索建议请求
+        CompletionSuggestionBuilder keywordSuggestion = new CompletionSuggestionBuilder("keyword")
+                .prefix(keyword)
+                .size(10);
+
+        CompletionSuggestionBuilder pinyinSuggestion = new CompletionSuggestionBuilder("keywordPinyin")
+                .prefix(keyword)
+                .size(10);
+
+        CompletionSuggestionBuilder sequenceSuggestion = new CompletionSuggestionBuilder("keywordSequence")
+                .prefix(keyword)
+                .size(10);
+
+        SuggestBuilder suggestBuilder = new SuggestBuilder()
+                .addSuggestion("keyword_suggest", keywordSuggestion)
+                .addSuggestion("pinyin_suggest", pinyinSuggestion)
+                .addSuggestion("sequence_suggest", sequenceSuggestion);
+
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withSuggestBuilder(suggestBuilder)
+                .build();
+
+        // 2. 执行搜索 - 针对低版本的修改
+        org.springframework.data.elasticsearch.core.SearchHits<?> searchHits =
+                elasticsearchRestTemplate.search(searchQuery, SuggestIndex.class);
+
+        // 3. 获取建议结果
+        Suggest suggest = searchHits.getSuggest();
+        if (suggest == null) {
+            return List.of();
+        }
+
+        // 合并三个建议来源的结果
+        List<String> suggestions = suggest.getSuggestion("keyword_suggest").getEntries().stream()
+                .flatMap(e -> e.getOptions().stream())
+                .map(option -> {
+                    // 通过反射获取hitEntity字段
+                    try {
+                        Field hitEntityField = option.getClass().getDeclaredField("hitEntity");
+                        hitEntityField.setAccessible(true);
+                        Object hitEntity = hitEntityField.get(option);
+
+                        if (hitEntity instanceof SuggestIndex) {
+                            return ((SuggestIndex) hitEntity).getTitle();
+                        }
+                    } catch (Exception e) {
+                        log.warn("无法获取hitEntity字段", e);
+                    }
+                    return option.getText().toString(); // 回退方案
+                })
+                .collect(Collectors.toList());
+
+        suggestions.addAll(suggest.getSuggestion("pinyin_suggest").getEntries().stream()
+                .flatMap(e -> e.getOptions().stream())
+                .map(option -> {
+                    // 通过反射获取hitEntity字段
+                    try {
+                        Field hitEntityField = option.getClass().getDeclaredField("hitEntity");
+                        hitEntityField.setAccessible(true);
+                        Object hitEntity = hitEntityField.get(option);
+
+                        if (hitEntity instanceof SuggestIndex) {
+                            return ((SuggestIndex) hitEntity).getTitle();
+                        }
+                    } catch (Exception e) {
+                        log.warn("无法获取hitEntity字段", e);
+                    }
+                    return option.getText().toString(); // 回退方案
+                })
+                .collect(Collectors.toList()));
+
+        suggestions.addAll(suggest.getSuggestion("sequence_suggest").getEntries().stream()
+                .flatMap(e -> e.getOptions().stream())
+                .map(option -> {
+                    // 通过反射获取hitEntity字段
+                    try {
+                        Field hitEntityField = option.getClass().getDeclaredField("hitEntity");
+                        hitEntityField.setAccessible(true);
+                        Object hitEntity = hitEntityField.get(option);
+
+                        if (hitEntity instanceof SuggestIndex) {
+                            return ((SuggestIndex) hitEntity).getTitle();
+                        }
+                    } catch (Exception e) {
+                        log.warn("无法获取hitEntity字段", e);
+                    }
+                    return option.getText().toString(); // 回退方案
+                })
+                .collect(Collectors.toList()));
+
+        // 去重并返回
+        return suggestions.stream().distinct().collect(Collectors.toList());
+    }
+
 }
