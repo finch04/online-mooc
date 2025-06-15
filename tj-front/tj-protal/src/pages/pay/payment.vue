@@ -173,6 +173,7 @@ const handleClose = (done) => {
 }
 // 订单超时回首页去吧
 const timeOver = () => {
+  //这里也可以实现懒加载效果，前端发送超时取消订单请求，实现自动取消订单
   router.push('/main/index')
 }
 </script>

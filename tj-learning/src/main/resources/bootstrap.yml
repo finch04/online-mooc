@@ -3,6 +3,8 @@ server:
   tomcat:
     uri-encoding: UTF-8   #服务编码
 spring:
+  main:
+    allow-circular-references: true # 允许循环依赖
   profiles:
     active: dev
   application:
@@ -44,3 +46,17 @@ tj:
       enable: true
 logging:
   config: classpath:logback-spring.xml
+dubbo:
+  application:
+    name: ${spring.application.name}
+  registry:
+    address: nacos://192.168.150.101:8848
+  protocol:
+    name: dubbo
+    # 协议端口（ -1 表示自增端口，从 20880 开始）
+    port: -1
+    id: dubbo
+  scan:
+    base-packages: com.tianji.learning.dubbo.server  # 扫描服务实现类的包
+  cloud:
+    subscribed-services:    # 订阅的服务（暂无）

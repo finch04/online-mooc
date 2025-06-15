@@ -1,6 +1,7 @@
 package com.tianji.promotion.controller;
 
 
+import com.tianji.api.interfaces.learning.LearningDubboService;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.promotion.domain.dto.CouponDiscountDTO;
@@ -10,8 +11,10 @@ import com.tianji.promotion.domain.dto.OrderCourseDTO;
 import com.tianji.promotion.domain.query.UserCouponQuery;
 import com.tianji.promotion.domain.vo.CouponPageVO;
 import com.tianji.promotion.domain.vo.CouponVO;
+import com.tianji.promotion.dubbo.client.LearningClient;
 import com.tianji.promotion.enums.DiscountType;
 import com.tianji.promotion.enums.ObtainType;
+import com.tianji.promotion.service.ICouponService;
 import com.tianji.promotion.service.IDiscountService;
 import com.tianji.promotion.service.IUserCouponService;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -22,6 +25,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -99,34 +103,38 @@ public class UserCouponController {
 
 
 //    测试接口-以下均为测试
+    @Autowired
+    private LearningClient learningClient;
+    private final ICouponService couponService;
+
 
     /**
      * 测试dubbo
      */
-//    @GetMapping("/hello")
-//    public void sayhello() throws InterruptedException {
-//        String ans = learningClient.sayHello("hello");
-//        System.out.println("ans = " + ans);
-//    }
-//
+    @GetMapping("/hello")
+    public void sayhello() throws InterruptedException {
+        String ans = learningClient.sayHello("hello");
+        System.out.println("ans = " + ans);
+    }
+
     /**
      * 测试senta分布式事务
      */
-//    @PostMapping("/seata")
-//    @GlobalTransactional(rollbackFor = Exception.class)
-//    public void seata() {
-//        CouponFormDTO dto = new CouponFormDTO();
-//        dto.setId(1799677743084539999L);
-//        dto.setName("测试优惠券");
-//        dto.setDiscountType(DiscountType.PRICE_DISCOUNT);
-//        dto.setSpecific(false);
-//        dto.setDiscountValue(1000);
-//        dto.setThresholdAmount(100000);
-//        dto.setMaxDiscountAmount(0);
-//        dto.setObtainWay(ObtainType.PUBLIC);
-//        couponService.saveCoupon(dto);
-//        learningClient.testSeata();
-//    }
+    @PostMapping("/seata")
+    @GlobalTransactional(rollbackFor = Exception.class)
+    public void seata() {
+        CouponFormDTO dto = new CouponFormDTO();
+        dto.setId(1799677743084539999L);
+        dto.setName("测试优惠券");
+        dto.setDiscountType(DiscountType.PRICE_DISCOUNT);
+        dto.setSpecific(false);
+        dto.setDiscountValue(1000);
+        dto.setThresholdAmount(100000);
+        dto.setMaxDiscountAmount(0);
+        dto.setObtainWay(ObtainType.PUBLIC);
+        couponService.saveCoupon(dto);
+        learningClient.testSeata();
+    }
 
     /**
      * 测试sentinel限流
