@@ -61,10 +61,13 @@
                         <EmptyPage :isSearch="isSearch" :baseData="baseData"></EmptyPage>
                     </template>
                 </el-table>
-                <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
-                    :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize"
-                    layout="total, sizes, prev, pager, next, jumper" :total="total">
-                </el-pagination>
+                <div v-if="total > 10">
+                    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                        :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper" :total="Number(total)" 
+                        class="paginationBox">
+                    </el-pagination>
+                </div>
             </div>
         </div>
         <!-- 新增/编辑弹窗 -->

@@ -151,7 +151,7 @@ export default [
       },
       {
         path: "sensitive",
-        name: "message/sensitive",
+        name: "sensitive",
         component: () => import("@/pages/message/message/sensitive.vue"),
         meta: { title: "敏感词管理" },
       },

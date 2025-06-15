@@ -18,4 +18,11 @@ public interface RedisConstants {
      */
     String WEBSOCKET_KEY_PREFIX="ws";
 
+
+    // 敏感词库在Redis中的存储Key
+    String SENSITIVE_WORDS_KEY = "sensitive:words";
+    String SENSITIVE_DICTIONARY_KEY = "sensitive:dictionary";
+    // 敏感词库在Redis中缓存过期时间（默认2小时）
+    long SENSITIVE_CACHE_TTL = 7200;
+
 }

@@ -165,6 +165,7 @@
 import { ref, reactive, onMounted, nextTick, computed, onUnmounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Client } from '@stomp/stompjs';
+import proxy from '@/config/proxy';
 import { useUserStore } from "@/store"
 import { getOnlineCount, getAllGroups, getMyGroups, addToGroup, getHistoryMessages } from '@/api/message.js'
 import { Refresh } from '@element-plus/icons-vue';
@@ -175,9 +176,11 @@ const user = reactive({
     name: userInfo.value.name,
     icon: userInfo.value.icon
 })
-
+//如果是https记得改！！
+const env = import.meta.env.MODE || 'development';
+const host =  proxy[env].host.replace("http://", "");;
 const config = {
-    wsUrl: 'ws://localhost:10010/sms/ws',
+    wsUrl: `ws://${host}/sms/ws`,
 }
 
 const messages = ref([]);

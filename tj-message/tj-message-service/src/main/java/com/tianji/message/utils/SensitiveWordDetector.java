@@ -8,11 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.tianji.message.constants.RedisConstants.*;
 
 /**
  * 敏感词检测工具类，统一使用 StringRedisTemplate
@@ -23,9 +24,7 @@ public class SensitiveWordDetector {
     // 统一使用 StringRedisTemplate
     private static StringRedisTemplate stringRedisTemplate;
 
-    // 敏感词库在Redis中的存储Key
-    private static final String SENSITIVE_WORDS_KEY = "sensitive:words";
-    private static final String SENSITIVE_DICTIONARY_KEY = "sensitive:dictionary";
+
 
     // 敏感词字典（内存缓存），使用JSON字符串存储
     private static String dictionaryJson = "";
@@ -34,8 +33,7 @@ public class SensitiveWordDetector {
     // 敏感词列表（内存缓存）
     private static List<String> sensitiveWordsList = new ArrayList<>();
 
-    // 缓存过期时间（默认2小时）
-    private static final long CACHE_TTL = 7200;
+
 
     // 敏感词服务实例（需外部初始化）
     private static ISensitiveService sensitiveService;
@@ -223,13 +221,13 @@ public class SensitiveWordDetector {
             stringRedisTemplate.opsForValue().set(
                     SENSITIVE_DICTIONARY_KEY,
                     dictionaryJson,
-                    CACHE_TTL,
+                    SENSITIVE_CACHE_TTL,
                     TimeUnit.SECONDS
             );
             stringRedisTemplate.opsForValue().set(
                     SENSITIVE_WORDS_KEY,
                     String.join(",", sensitiveWordsList),
-                    CACHE_TTL,
+                    SENSITIVE_CACHE_TTL,
                     TimeUnit.SECONDS
             );
 

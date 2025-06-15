@@ -16,6 +16,7 @@ import com.tianji.message.utils.SensitiveWordDetector; // 假设工具类路径
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import static com.tianji.message.constants.RedisConstants.*;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,10 +27,6 @@ public class SensitiveServiceImpl extends ServiceImpl<SensitiveMapper, Sensitive
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
-    // 敏感词库在Redis中的存储Key
-    private static final String SENSITIVE_WORDS_KEY = "sensitive:words";
-    private static final String SENSITIVE_DICTIONARY_KEY = "sensitive:dictionary";
-    private static final long CACHE_TTL = 7200; // 缓存过期时间(秒)
 
     @Override
     public PageDTO<Sensitive> getAllSensitiveWords(SensitiveQuery query) {
@@ -86,7 +83,7 @@ public class SensitiveServiceImpl extends ServiceImpl<SensitiveMapper, Sensitive
 
             // 保存敏感词列表到Redis
             String wordsStr = String.join(",", sensitiveWordsList);
-            redisTemplate.opsForValue().set(SENSITIVE_WORDS_KEY, wordsStr, CACHE_TTL, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(SENSITIVE_WORDS_KEY, wordsStr, SENSITIVE_CACHE_TTL, TimeUnit.SECONDS);
 
         } catch (Exception e) {
             throw new BadRequestException("刷新敏感词缓存失败");
@@ -121,6 +118,6 @@ public class SensitiveServiceImpl extends ServiceImpl<SensitiveMapper, Sensitive
         }
 
         // 保存到Redis
-        redisTemplate.opsForValue().set(SENSITIVE_DICTIONARY_KEY, map, CACHE_TTL, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(SENSITIVE_DICTIONARY_KEY, map, SENSITIVE_CACHE_TTL, TimeUnit.SECONDS);
     }
 }

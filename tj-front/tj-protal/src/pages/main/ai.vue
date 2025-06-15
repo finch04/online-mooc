@@ -109,20 +109,22 @@ const pageSize = ref(10);
 // 是否正在加载更多历史记录
 const isLoadingMore = ref(false);
 
-
+import proxy from '@/config/proxy';
+const env = import.meta.env.MODE || 'development';
+const host =  proxy[env].host;
 // API 前缀配置
 const API_CONFIG = {
     normal: {
         name: '普通聊天',
-        prefix: 'http://localhost:10010/ct/chat/'
+        prefix: `${host}/ct/chat/`
     },
     knowledge: {
         name: '知识库问答',
-        prefix: 'http://localhost:10010/ct/chat/file'
+        prefix: `${host}/ct/chat/file`
     },
     test: {
         name: '聊天测试',
-        prefix: 'http://localhost:10010/ct/chat/test'
+        prefix: `${host}/ct/chat/test`
     }
 };
 // 当前选择的模式
