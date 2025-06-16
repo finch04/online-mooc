@@ -2,13 +2,16 @@ package com.tianji.aigc.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.tianji.aigc.config.SystemPromptConfig;
 import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.enums.ChatEventTypeEnum;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.vo.ChatEventVO;
+import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
@@ -45,12 +48,20 @@ public class ChatServiceImpl implements ChatService {
 
         // 生成请求id
         var requestId = IdUtil.fastUUID();
+
+        // 获取用户id
+        var userId = UserContext.getUser();
+
         return this.chatClient.prompt()
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get())
                         .param("now", DateUtil.now())
                 ) // 设置系统提示词
                 .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
-                .toolContext(Map.of(Constant.REQUEST_ID, requestId)) // 设置工具上下文参数，传递请求id
+                .toolContext(MapUtil.<String,Object>builder()
+                        .put(Constant.REQUEST_ID,requestId)
+                        .put(Constant.USER_ID,userId)
+                        .build()
+                ) // 设置工具上下文参数，传递请求id
                 .user(question)
                 .stream()
                 .chatResponse()
@@ -70,6 +81,14 @@ public class ChatServiceImpl implements ChatService {
 
                     // 将大模型生成的内容写入到缓存中
                     outputBuilder.append(text);
+
+                    var finishReason = response.getResult().getMetadata().getFinishReason();
+
+                    if (StrUtil.equals(finishReason,Constant.STOP)){
+                        //将消息id与请求id关联
+                        String messageId = response.getMetadata().getId();
+                        ToolResultHolder.put(messageId,Constant.REQUEST_ID,requestId);
+                    }
 
                     // 构造VO对象返回
                     return ChatEventVO.builder()

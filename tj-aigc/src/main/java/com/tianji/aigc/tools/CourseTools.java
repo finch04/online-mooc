@@ -5,7 +5,9 @@ import cn.hutool.core.util.StrUtil;
 import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.tools.result.CourseInfo;
+import com.tianji.aigc.tools.result.PrePlaceOrder;
 import com.tianji.api.client.course.CourseClient;
+import com.tianji.api.client.trade.TradeClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
@@ -22,7 +24,9 @@ import java.util.Optional;
 public class CourseTools {
 
     public static final String FIELD_NAME_FORMAT = "{}_{}";
+
     private final CourseClient courseClient;
+
 
     @Tool(description = Constant.Tools.QUERY_COURSE_BY_ID)
     public CourseInfo queryCourseById(@ToolParam(description = Constant.ToolParams.COURSE_ID) Long courseId,
@@ -45,5 +49,7 @@ public class CourseTools {
                 })
                 .orElse(null);
     }
+
+
 
 }
