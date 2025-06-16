@@ -102,18 +102,17 @@ public class OrderStateListenerImpl {
         orderMapper.updateById(order);
     }
 
-    /**
-     * 订单退款 状态流转
-     * @param message
-     */
-    @OnTransition(source = "PAYED", target = "REFUNDED")
-    public void refundTransition(Message<OrderStatusChangeEvent> message) {
-        Order order = (Order) message.getHeaders().get("order");
-        log.info("申请退款，状态机反馈信息：{}",  message.getHeaders().toString());
-        //更新订单
-        order.setStatus(OrderStatus.REFUNDED.getValue());
-        orderMapper.updateById(order);
-
-        //TODO 其他业务
-    }
+//    /**
+//     * 订单退款 状态流转
+//     * @param message
+//     */
+//    @OnTransition(source = "PAYED", target = "REFUNDED")
+//    public void refundTransition(Message<OrderStatusChangeEvent> message) {
+//        Order order = (Order) message.getHeaders().get("order");
+//        log.info("申请退款，状态机反馈信息：{}",  message.getHeaders().toString());
+//        //更新订单
+//        order.setStatus(OrderStatus.REFUNDED.getValue());
+//        orderMapper.updateById(order);
+//        //TODO 其他业务
+//    }
 }

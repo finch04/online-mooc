@@ -116,7 +116,15 @@ export const refundsApply = (data) =>
 		url: `${TRADE_API_PREFIX}/refund-apply`,
 		method: 'post',
 		data
+	})	
+
+// 再次申请退款
+export const againRefundsApply = (id) =>
+	request({
+		url: `${TRADE_API_PREFIX}/refund-apply/again/${id}`,
+		method: 'put'
 	})		
+	
 // 取消退款申请
 export const cancelRefundApply = (data) =>
 	request({

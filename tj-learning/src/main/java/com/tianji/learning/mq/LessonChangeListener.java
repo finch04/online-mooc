@@ -14,6 +14,8 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor//使用构造器 Lombok是在编译期生成相应的方法
@@ -25,7 +27,7 @@ public class LessonChangeListener {
     @RabbitListener(bindings = @QueueBinding(value = @Queue(value="learning.lesson.pay.queue",durable = "true"),
             exchange = @Exchange(name= MqConstants.Exchange.ORDER_EXCHANGE,type = ExchangeTypes.TOPIC),
             key =MqConstants.Key.ORDER_PAY_KEY ))
-    public void onMsg(OrderBasicDTO dto){
+    public void handlePayMsg(OrderBasicDTO dto){
         log.info("LessonChangeListener接收到了消息,用户：{}，课程：{}",dto.getUserId(),dto.getCourseIds());
         if(dto.getUserId()==null
                 ||dto.getOrderId()==null
@@ -37,5 +39,26 @@ public class LessonChangeListener {
         }
         //调用service，保存课程到课表 报名成功
         lessonService.addUserLesson(dto.getUserId(),dto.getCourseIds());
+    }
+
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(value="learning.lesson.refund.queue",durable = "true"),
+            exchange = @Exchange(name= MqConstants.Exchange.ORDER_EXCHANGE,type = ExchangeTypes.TOPIC),
+            key =MqConstants.Key.ORDER_REFUND_KEY ))
+    public void handleRefundMsg(OrderBasicDTO dto){
+        log.info("LessonChangeListener接收到了消息,用户：{}，课程：{}",dto.getUserId(),dto.getCourseIds());
+        if(dto.getUserId()==null
+                ||dto.getOrderId()==null
+                || CollUtils.isEmpty(dto.getCourseIds())
+        ){
+            log.error("接收到MQ消息有误，订单数据为空");
+            //此处不能抛异常，否则MQ会不停的重试。
+            return;
+        }
+        //调用service，保存课程到课表 报名成功
+        List<Long> courseIds = dto.getCourseIds();
+        for (Long courseId : courseIds) {
+            lessonService.deleteMyLessons(courseId);
+        }
+
     }
 }

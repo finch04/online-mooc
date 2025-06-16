@@ -53,8 +53,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.tianji.trade.constants.RefundStatus.AGREE;
-import static com.tianji.trade.constants.RefundStatus.REJECT;
+import static com.tianji.trade.constants.RefundStatus.*;
 
 /**
  * <p>
@@ -77,37 +76,6 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
     private final ThreadPoolTaskExecutor sendRefundRequestExecutor;
     private final RabbitMqHelper rabbitMqHelper;
     private final IOrderService orderService;
-    //订单状态机类
-    private final StateMachine<OrderStatus, OrderStatusChangeEvent> orderStateMachine;
-    private final StateMachinePersister<OrderStatus, OrderStatusChangeEvent, String> stateMachineMemPersister;
-
-    /**
-     * 发送订单状态转换事件
-     * synchronized修饰保证这个方法是线程安全的
-     *
-     * @param changeEvent
-     * @param order
-     * @return
-     */
-    private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order) {
-        boolean result = false;
-        try {
-            //启动状态机
-            orderStateMachine.start();
-            //尝试恢复状态机状态
-            stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
-            Message message = MessageBuilder.withPayload(changeEvent).setHeader("order", order).build();
-            result = orderStateMachine.sendEvent(message);
-            //持久化状态机状态
-            stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
-        } catch (Exception e) {
-            log.error("订单操作失败:{}", e);
-        } finally {
-            orderStateMachine.stop();
-        }
-        return result;
-    }
-
 
     @Override
     public List<RefundApply> queryByDetailId(Long id) {
@@ -136,18 +104,16 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         }
         // 2.查询订单
         Order order = orderMapper.getById(detail.getOrderId());
-//        if(order == null){
-//            throw new BadRequestException(TradeErrorInfo.ORDER_NOT_EXISTS);
-//        }
-//        if(!(OrderStatus.PAYED.equalsValue(order.getStatus()) || OrderStatus.REFUNDED.equalsValue(order.getStatus()))){
-//            // 订单状态未支付或已经完结，不能退款
-//            throw new BizIllegalException(TradeErrorInfo.ORDER_CANNOT_REFUND);
-//        }
-        //状态机简化判断流程 TODO 因为退款流程比较复杂，就不专门拆到状态机里进行流程简化了
-        if (!sendEvent(OrderStatusChangeEvent.REFUNDED, order)) {
-            log.error("线程名称：{},订单退款失败, 状态异常，订单信息：{}", Thread.currentThread().getName(), order);
-            throw new RuntimeException("订单退款流程流转失败, 订单状态异常");
+        if(order == null){
+            throw new BadRequestException(TradeErrorInfo.ORDER_NOT_EXISTS);
         }
+        if(!(OrderStatus.PAYED.equalsValue(order.getStatus()) || OrderStatus.REFUNDED.equalsValue(order.getStatus()))){
+            // 订单状态未支付或已经完结，不能退款
+            throw new BizIllegalException(TradeErrorInfo.ORDER_CANNOT_REFUND);
+        }
+        //TODO 因为退款流程比较复杂，为了让整个退款流程更加清晰，就不专门拆到状态机里进行流程简化了
+        order.setStatus(OrderStatus.REFUNDED.getValue());
+        orderMapper.updateById(order);
 
         // 3.查询申请人信息
         UserDTO userDTO = userClient.queryUserById(userId);
@@ -498,7 +464,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
             //TODO 因为本项目涉及拆单，优惠券是绑定一整个订单一起用的，但是有可能出现优惠券适用范围、优惠券状态等，所以判断业务会比较复杂
             //TODO 因此本项目仅取消订单时会退券！！！退款流程不退券！！！
 
-            // 4.2.发送MQ消息，通知报名成功
+            // 4.2.发送MQ消息，通知取消报名 / 搜索微服务课程报名数-1
             rabbitMqHelper.send(
                     MqConstants.Exchange.ORDER_EXCHANGE,
                     MqConstants.Key.ORDER_REFUND_KEY,
@@ -559,4 +525,15 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         sendRefundRequestExecutor.execute(() -> this.sendRefundRequest(refundApply));
     }
 
+    @Override
+    public void againApplyRefund(Long id) {
+        RefundApply refundApply = this.lambdaQuery().eq(RefundApply::getOrderDetailId, id).one();
+        if (refundApply == null) {
+            throw new BadRequestException(TradeErrorInfo.REFUND_NOT_EXISTS);
+        }
+        if (SUCCESS.equalsValue(refundApply.getStatus())) {
+            throw new BadRequestException(TradeErrorInfo.REFUND_APPROVED);
+        }
+        sendRefundRequestAsync(refundApply);
+    }
 }

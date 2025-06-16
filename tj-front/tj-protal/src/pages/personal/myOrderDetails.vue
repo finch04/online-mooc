@@ -42,6 +42,8 @@
               <div v-else>
                 <div class="font-bt1" v-if="scope.row.refundStatus === 1" @click="cancelRefundApplyReq(scope.row)">取消退款
                 </div>
+                <div class="font-bt1" v-if="scope.row.refundStatus === 6" @click="againRefundApplyReq(scope.row)">再次申请退款
+                </div>
                 <div class="font-bt1" @click="openRefundDialog('details', scope.row)">退款详情</div>
               </div>
             </template>
@@ -148,7 +150,7 @@
 /** 数据导入 **/
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { getOrderDetails, refundsApply, refundsDetails, cancelRefundApply } from "@/api/order.js";
+import { getOrderDetails, refundsApply, refundsDetails, cancelRefundApply,againRefundsApply } from "@/api/order.js";
 import { useRoute } from "vue-router";
 import { dataCacheStore } from "@/store"
 import { amountConversion } from "@/utils/tool.js"
@@ -223,6 +225,26 @@ const refundApplyReq = () => {
         type: 'error'
       });
     });
+}
+//再次申请退款
+const againRefundApplyReq = (detail) => {
+  ElMessageBox.confirm('确定再次申请退款吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    console.log('再次申请退款', detail)
+    againRefundsApply(detail.id)
+      .then((res) => {
+        if (res.code === 200) {
+            ElMessage({
+              message: "再次申请退款成功",
+              type: 'success'
+            });
+
+        }
+      })
+  })
 }
 //取消退款
 const cancelRefundApplyReq = (detail) => {

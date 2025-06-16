@@ -55,7 +55,7 @@ public class RefundOrderServiceImpl extends ServiceImpl<RefundOrderMapper, Refun
     @Override
     public RefundResultDTO applyRefund(RefundApplyDTO refundApplyDTO) {
         log.debug("准备申请退款，业务端退款订单号：{}", refundApplyDTO.getBizRefundOrderNo());
-        // 1.幂等性校验
+        // 1.幂等性校验 如果还没退款单则新创建一个
         RefundOrder refundOrder = checkIdempotent(refundApplyDTO);
         if (refundOrder == null) {
             // 为 null说明退款处理中，无需重新申请，返回false

@@ -39,6 +39,12 @@ public class RefundApplyController {
         refundApplyService.applyRefund(refundFormDTO);
     }
 
+    @ApiOperation("再次申请退款")
+    @PutMapping("/again/{id}")
+    public void againApplyRefund(@PathVariable("id") Long id) {
+        refundApplyService.againApplyRefund(id);
+    }
+
 
     @ApiOperation("审批退款申请")
     @PutMapping("/approval")
