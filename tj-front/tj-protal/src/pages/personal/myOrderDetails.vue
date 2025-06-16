@@ -37,7 +37,8 @@
           <el-table-column label="操作" align="center" width="120">
             <template #default="scope">
               <div v-if="scope.row.canRefund" class="font-bt1" @click="openRefundDialog('refund', scope.row)">申请退款</div>
-              <span v-else-if="!scope.row.refundStatus || scope.row.refundStatus === 3"> -- </span>
+              <span v-else-if="!scope.row.refundStatus"> -- </span>
+              <!-- <span v-else-if="!scope.row.refundStatus || scope.row.refundStatus === 3"> -- </span> -->
               <div v-else>
                 <div class="font-bt1" v-if="scope.row.refundStatus === 1" @click="cancelRefundApplyReq(scope.row)">取消退款
                 </div>
@@ -121,7 +122,7 @@
           <div class="row">
             <div class="ft-wt-600">操作时间</div>
             <div class="ft-cl-des fx-wp">
-              <span>下单时间：{{ refundDetailsData.orderTime }}</span><span>支付时间{{ refundDetailsData.paySuccessTime }}</span>
+              <span>下单时间：{{ refundDetailsData.orderTime }}</span><span>支付时间：{{ refundDetailsData.paySuccessTime }}</span>
               <span>退款申请时间：{{ refundDetailsData.createTime }}</span><span>退款审批时间：{{ refundDetailsData.approveTime
               }}</span>
             </div>

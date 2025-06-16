@@ -211,6 +211,8 @@ public class RefundOrderServiceImpl extends ServiceImpl<RefundOrderMapper, Refun
         // 2.查询
         Page<RefundOrder> result = lambdaQuery()
                 .eq(RefundOrder::getStatus, RefundStatus.UN_KNOWN.getValue())
+                .or()
+                .eq(RefundOrder::getStatus, RefundStatus.NOT_COMMIT.getValue())
                 .page(page);
         return PageDTO.of(result);
     }
@@ -230,6 +232,10 @@ public class RefundOrderServiceImpl extends ServiceImpl<RefundOrderMapper, Refun
         RefundResponse refundResponse = payService.queryRefundStatus(
                 refundOrder.getPayOrderNo().toString(), refundOrder.getRefundOrderNo().toString());
 
+        log.info("退款状态回复：{}",  refundResponse.toString());
+        if(refundResponse == null){
+            throw new BizIllegalException("第三方支付系统繁忙");
+        }
         if (refundResponse.getStatus().equals(refundOrder.getStatus())) {
             // 退款状态没有变化，不做处理
             return;

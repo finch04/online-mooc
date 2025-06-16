@@ -423,7 +423,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 3.3.订单进度
         vo.setProgressNodes(detailService.packageProgressNodes(order, null));
 
-        //TODO 这也许是他想要的  这里传入的couponId，但方法要求传入用户couponId
+        //要求传入用户couponId
         if(order.getCouponIds()!=null){
             // 3.4.优惠明细   我们需要将优惠券全转为long类型，Json序列号器对于211 985这种会转为Integer类型而非Long类型！
             List<String> rules = promotionClient.queryDiscountRules(order.getCouponIds());

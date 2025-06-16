@@ -35,7 +35,7 @@ public class LessonChangeListener {
             //此处不能抛异常，否则MQ会不停的重试。
             return;
         }
-        //调用service，保存课程到课表
+        //调用service，保存课程到课表 报名成功
         lessonService.addUserLesson(dto.getUserId(),dto.getCourseIds());
     }
 }

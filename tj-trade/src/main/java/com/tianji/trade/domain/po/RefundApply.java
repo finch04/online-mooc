@@ -39,6 +39,12 @@ public class RefundApply implements Serializable {
      * 订单id
      */
     private Long orderId;
+
+    /**
+     * 流水支付单号
+     */
+    private Long payOrderNo;
+
     /**
      * 退款单号，每次退款的唯一标示
      */

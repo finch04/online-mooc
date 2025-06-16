@@ -113,6 +113,7 @@ public class OrderStateListenerImpl {
         //更新订单
         order.setStatus(OrderStatus.REFUNDED.getValue());
         orderMapper.updateById(order);
+
         //TODO 其他业务
     }
 }

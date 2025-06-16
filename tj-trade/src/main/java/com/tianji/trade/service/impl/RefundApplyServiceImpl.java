@@ -173,6 +173,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         refundApply.setOrderDetailId(detail.getId()); //订单明细id
         refundApply.setOrderId(detail.getOrderId()); //订单id
         refundApply.setUserId(detail.getUserId()); //退款订单所属人
+        refundApply.setRefundOrderNo(order.getPayOrderNo());
         refundApply.setRefundAmount(detail.getRealPayAmount()); //退款金额
         refundApply.setRefundReason(refundFormDTO.getRefundReason()); //退款原因
         refundApply.setQuestionDesc(refundFormDTO.getQuestionDesc()); //退款问题说明
@@ -493,6 +494,9 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         if (status == RefundResultDTO.SUCCESS) {
             // 4.1.查询子订单信息
             OrderDetail detail = detailService.getById(refundApply.getOrderDetailId());
+            //TODO 因为本项目涉及拆单，优惠券是绑定一整个订单一起用的，但是有可能出现优惠券适用范围、优惠券状态等，所以判断业务会比较复杂
+            //TODO 因此本项目仅取消订单时会退券！！！退款流程不退券！！！
+
             // 4.2.发送MQ消息，通知报名成功
             rabbitMqHelper.send(
                     MqConstants.Exchange.ORDER_EXCHANGE,
