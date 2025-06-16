@@ -117,6 +117,12 @@ export default [
     meta: { title: "营销中心", icon: '&#xe60d;' },
     children: [
       {
+        path: "promotion",
+        name: "promotion",
+        component: () => import("@/pages/marketing/promotion/index.vue"),
+        meta: { title: "活动管理" },
+      },
+      {
         path: "index",
         name: "marketing",
         component: () => import("@/pages/marketing/index.vue"),
@@ -133,12 +139,6 @@ export default [
         name: "details",
         component: () => import("@/pages/marketing/details.vue"),
         meta: { title: "详情", hidden: true ,fmeta: {path: '/marketing/index', title: '优惠券管理'} },
-      },
-      {
-        path: "promotion",
-        name: "promotion",
-        component: () => import("@/pages/marketing/promotion/index.vue"),
-        meta: { title: "活动管理" },
       },
     ],
   },

@@ -6,6 +6,8 @@
 
 技术栈：SpringBoot、SpringCloud、Mybatis、MySQL、Redis、Redisson、Caffeine、RabbitMQ、XXL-JOB、腾讯云VOD（视频点播）、Nginx等
 
+拓展技术栈： Dubbo、Minio、Langchain4j、Qdrant、RocketMQ、SkyWalking、Sentinel、Seata等
+
 本项目中包含的技术和解决方案有：
 
 > 基于自定义注解和Redisson的分布式锁工具
@@ -64,7 +66,7 @@
 > 
 > 兼容jdk8并整合qdrant打造用户个人知识库来进行AI对话的实现方案
 > 
-> 基于DFA有穷自动机
+> 基于DFA有穷自动机算法对聊天违禁词进行高效过滤定位
 
 ## 关于项目
 

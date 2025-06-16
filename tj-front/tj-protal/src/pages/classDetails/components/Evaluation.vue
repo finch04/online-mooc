@@ -193,7 +193,7 @@ const getEvaluationListsDataes = async () => {
                 evaluationListsDataes.value = res.data.list
                 total.value = Number(res.data.total)
             } else {
-                ElMessage.error(res.data.msg || "获取评价列表失败");
+                ElMessage.error(res.msg || "获取评价列表失败");
             }
         })
         .catch(() => {

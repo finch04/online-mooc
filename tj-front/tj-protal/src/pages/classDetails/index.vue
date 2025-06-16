@@ -296,7 +296,7 @@ const getClassListData = async () => {
         classListData.value = res.data
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -317,7 +317,7 @@ const getLikeClassData = async () => {
         likeClassData.value = res.data
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
