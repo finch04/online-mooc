@@ -18,6 +18,7 @@ import java.util.List;
 @FeignClient(value = "promotion-service",fallbackFactory = PromotionClientFallback.class)
 public interface PromotionClient {
 
+    @ApiOperation("查询优惠券方案列表")
     @PostMapping("/user-coupons/available")
     public List<CouponDiscountDTO> findDiscountSolution(@RequestBody List<OrderCourseDTO> courses);
 

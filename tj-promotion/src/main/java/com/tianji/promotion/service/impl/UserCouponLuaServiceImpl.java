@@ -223,13 +223,6 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
         int totalNum = courses.stream().mapToInt(OrderCourseDTO::getPrice).sum();
         log.debug("订单总金额：{}元",totalNum);
         //校验优惠券是否可用
-//        List<Coupon> avaliableCoupons = new ArrayList<>();
-//        for (Coupon coupon : coupons) {
-//            boolean flag = DiscountStrategy.getDiscount(coupon.getDiscountType()).canUse(totalNum, coupon);
-//            if(flag){
-//                avaliableCoupons.add(coupon);
-//            }
-//        }
         List<Coupon> availableCoupons=coupons.stream().filter(coupon -> DiscountStrategy.getDiscount(coupon.getDiscountType()).canUse(totalNum, coupon)).collect(Collectors.toList());
         if(CollUtils.isEmpty(availableCoupons)){
             return CollUtils.emptyList();
@@ -269,14 +262,7 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
             List<Long> cids = solution.stream().map(Coupon::getId).collect(Collectors.toList());
             log.debug("{}",cids);
         }
-        // 计算每一种组合的优惠明细
-//        log.debug("开始计算每一种组合的优惠明细");
-//        List<CouponDiscountDTO> dtos =new ArrayList<>();
-//        for (List<Coupon> solution : solutions) {
-//            CouponDiscountDTO dto = calculateSolutionDiscount(avaMap,courses,solution);
-//            log.debug("方案最终优惠{}  方案中优惠券使用了{} 规则{}",dto.getDiscountAmount(),dto.getIds(),dto.getRules());
-//            dtos.add(dto);
-//        }
+
         //使用多线程改造 并行计算每一组合的优惠明细
         log.debug("多线程--开始计算每一种组合的优惠明细");
 //        List<CouponDiscountDTO> dtos =new ArrayList<>();//线程不安全的
@@ -579,6 +565,7 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
         return calculateSolutionDiscount(availableCouponMap, orderCouponDTO.getCourseList(), coupons);
     }
 
+    //转换优惠券ID
     @Override
     public List<Long> transformCouponIds(List<Long> couponIds) {
         // 获取用户所有优惠券的ID集合（使用HashSet提高查找效率）

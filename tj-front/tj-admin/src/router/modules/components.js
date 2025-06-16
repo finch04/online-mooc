@@ -134,6 +134,12 @@ export default [
         component: () => import("@/pages/marketing/details.vue"),
         meta: { title: "详情", hidden: true ,fmeta: {path: '/marketing/index', title: '优惠券管理'} },
       },
+      {
+        path: "promotion",
+        name: "promotion",
+        component: () => import("@/pages/marketing/promotion/index.vue"),
+        meta: { title: "活动管理" },
+      },
     ],
   },
   {
