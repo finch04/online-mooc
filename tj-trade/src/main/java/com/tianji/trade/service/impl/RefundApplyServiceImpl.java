@@ -315,6 +315,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         vo.setPayOrderNo(order.getPayOrderNo());
         vo.setPayChannel(PayChannel.desc(order.getPayChannel()));
         vo.setRefundChannel(RefundChannelEnum.desc(apply.getRefundChannel()));
+        vo.setQuestionDesc(apply.getQuestionDesc());
         vo.setOrderTime(order.getCreateTime());
         vo.setPaySuccessTime(order.getPayTime());
 

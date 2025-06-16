@@ -5,7 +5,7 @@
     <div class="tit"><span>订单信息</span></div>
     <!-- end -->
     <div class="title"><i></i>申请原因：{{ fromData.refundReason }}</div>
-    <div class="con">退款说明：{{ fromData.refundMessage }}</div>
+    <div class="con">退款说明：{{ fromData.questionDesc || '--' }}</div>
     <div class="infoItem">
       <ul>
         <li>
