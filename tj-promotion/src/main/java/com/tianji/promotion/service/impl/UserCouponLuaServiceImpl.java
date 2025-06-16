@@ -1,6 +1,8 @@
 package com.tianji.promotion.service.impl;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -285,6 +287,23 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
                 @Override
                 public CouponDiscountDTO get() {
                     CouponDiscountDTO dto = calculateSolutionDiscount(avaMap,courses,solution);
+                    // 创建优惠券ID到creator的映射
+                    Map<Long, Long> couponIdToCreatorMap = new HashMap<>();
+                    for (Coupon coupon : solution) {
+                        couponIdToCreatorMap.put(coupon.getId(), coupon.getCreater());
+                    }
+                    // 替换dto.getIds中的优惠券ID为creator
+                    List<Long> newIds = new ArrayList<>();
+                    for (Long id : dto.getIds()) {
+                        if (couponIdToCreatorMap.containsKey(id)) {
+                            newIds.add(couponIdToCreatorMap.get(id));
+                        } else {
+                            // 如果找不到匹配的creator，保留原ID或做其他处理
+                            newIds.add(id);
+                        }
+                    }
+                    // 设置返回用户券id，不能返回原始券id！！！
+                    dto.setIds(newIds);
                     return dto;
                 }
             },discountSolutionExecutor).thenAccept(new Consumer<CouponDiscountDTO>() {
@@ -299,7 +318,7 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
         try{
             latch.await(2,TimeUnit.SECONDS);//主线程最多阻塞2秒
         }catch(Exception e){
-            log.error("多线程优惠计算报错了！",e);
+            log.error("多线程优惠计算出错！",e);
         }
 
         //筛选最优解
@@ -461,6 +480,7 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
                     if (UserCouponStatus.UNUSED != coupon.getStatus()) {
                         return false;
                     }
+                    //注意校验优惠券过期时间
                     LocalDateTime now = LocalDateTime.now();
                     return !now.isBefore(coupon.getTermBeginTime()) && !now.isAfter(coupon.getTermEndTime());
                 })
@@ -469,6 +489,7 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
                     UserCoupon c = new UserCoupon();
                     c.setId(coupon.getId());
                     c.setStatus(UserCouponStatus.USED);
+                    c.setUsedTime(LocalDateTime.now());
                     return c;
                 })
                 .collect(Collectors.toList());
@@ -558,5 +579,20 @@ public class UserCouponLuaServiceImpl extends ServiceImpl<UserCouponMapper, User
         return calculateSolutionDiscount(availableCouponMap, orderCouponDTO.getCourseList(), coupons);
     }
 
+    @Override
+    public List<Long> transformCouponIds(List<Long> couponIds) {
+        // 获取用户所有优惠券的ID集合（使用HashSet提高查找效率）
+        Map<Long, Long> couponIdToCreatorMap = userCouponMapper.queryMyCoupons(UserContext.getUser())
+                .stream()
+                .collect(Collectors.toMap(
+                        Coupon::getId,       // 键：优惠券ID
+                        Coupon::getCreater,  // 值：creator
+                        (existing, replacement) -> existing  // 处理重复键的策略（保留第一个）
+                ));
 
+        // 遍历输入ID列表，替换为对应的creator（O(m)时间）
+        return couponIds.stream()
+                .map(id -> couponIdToCreatorMap.getOrDefault(id, id))  // 存在则替换为creator，否则保留原ID
+                .collect(Collectors.toList());
+    }
 }

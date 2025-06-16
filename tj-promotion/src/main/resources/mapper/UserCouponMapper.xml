@@ -14,6 +14,7 @@
         c.max_discount_amount,  uc.id AS creater
         FROM user_coupon uc
         INNER JOIN coupon c on uc.coupon_id = c.id
+#         WHERE uc.coupon_id IN
         WHERE uc.id IN
         <foreach collection="userCouponIds" separator="," item="id" open="(" close=")">
             #{id}

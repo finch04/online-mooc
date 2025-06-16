@@ -3,6 +3,7 @@ package com.tianji.promotion.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.api.cache.CategoryCache;
+import com.tianji.api.dto.promotion.CouponDetailSimpleVO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
@@ -391,5 +392,11 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             voList.add(vo);
         }
         return voList;
+    }
+
+    @Override
+    public CouponDetailSimpleVO querySimpleCouponById(Long id) {
+        Coupon coupon = this.getById(id);
+        return new CouponDetailSimpleVO(coupon.getId(), coupon.getName());
     }
 }

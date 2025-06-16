@@ -1,6 +1,7 @@
 package com.tianji.promotion.controller;
 
 
+import com.tianji.api.dto.promotion.CouponDetailSimpleVO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.promotion.domain.dto.CouponFormDTO;
 import com.tianji.promotion.domain.dto.CouponIssueFormDTO;
@@ -65,6 +66,12 @@ public class CouponController {
     @GetMapping("/{id}")
     public CouponDetailVO queryCouponById(@ApiParam("优惠券id") @PathVariable("id") Long id){
         return couponService.queryCouponById(id);
+    }
+
+    @ApiOperation("根据id查询简单优惠券接口")
+    @GetMapping("/simple/{id}")
+    public CouponDetailSimpleVO querySimpleCouponById(@ApiParam("优惠券id") @PathVariable("id") Long id){
+        return couponService.querySimpleCouponById(id);
     }
 
     @ApiOperation("暂停发放优惠券接口")

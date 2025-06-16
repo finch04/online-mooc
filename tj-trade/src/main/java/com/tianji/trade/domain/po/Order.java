@@ -2,6 +2,9 @@ package com.tianji.trade.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.tianji.trade.config.LongListDeserializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -73,7 +76,10 @@ public class Order implements Serializable {
     /**
      * 优惠券id
      */
+    //这里会出现本来需要Long类型结果因为JacksonTypeHandler序列化转为了Integer
     @TableField(typeHandler = JacksonTypeHandler.class)
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER) // 确保解析为数字类型
+    @JsonDeserialize(using = LongListDeserializer.class)
     private List<Long> couponIds;
 
     /**

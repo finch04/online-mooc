@@ -50,4 +50,6 @@ public interface IUserCouponService extends IService<UserCoupon> {
     List<String> queryDiscountRules(List<Long> userCouponIds);
 
     CouponDiscountDTO queryDiscountDetailByOrder(OrderCouponDTO orderCouponDTO);
+
+    List<Long> transformCouponIds(List<Long> couponIds);
 }

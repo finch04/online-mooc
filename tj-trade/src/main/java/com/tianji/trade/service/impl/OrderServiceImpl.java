@@ -7,6 +7,7 @@ import com.tianji.api.client.course.CourseClient;
 import com.tianji.api.client.promotion.PromotionClient;
 import com.tianji.api.constants.CourseStatus;
 import com.tianji.api.dto.course.CourseSimpleInfoDTO;
+import com.tianji.api.dto.promotion.CouponDetailSimpleVO;
 import com.tianji.api.dto.promotion.CouponDiscountDTO;
 import com.tianji.api.dto.promotion.OrderCouponDTO;
 import com.tianji.api.dto.promotion.OrderCourseDTO;
@@ -106,6 +107,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     @GlobalTransactional
     public PlaceOrderResultVO placeOrder(PlaceOrderDTO placeOrderDTO) {
+
         Long userId = UserContext.getUser();
         // 1.查询课程费用信息，如果不可购买，这里直接报错
         List<CourseSimpleInfoDTO> courseInfos = getOnShelfCourse(placeOrderDTO.getCourseIds());
@@ -122,10 +124,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             List<OrderCourseDTO> orderCourses = courseInfos.stream()
                     .map(c -> new OrderCourseDTO().setId(c.getId()).setCateId(c.getThirdCateId()).setPrice(c.getPrice()))
                     .collect(Collectors.toList());
+            //这里传入的是couponId 非用户couponId
             discount = promotionClient.queryDiscountDetailByOrder(new OrderCouponDTO(couponIds, orderCourses));
             if(discount != null) {
                 order.setDiscountAmount(discount.getDiscountAmount());
+                //这里set couponIds 是用户券id！！！
                 order.setCouponIds(discount.getIds());
+            }else{
+                throw new BadRequestException("优惠券使用异常");
             }
         }
         Integer realAmount = totalAmount - order.getDiscountAmount();
@@ -154,8 +160,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         cartService.deleteCartByUserAndCourseIds(userId, placeOrderDTO.getCourseIds());
 
         if(couponIds!=null){
-            // 6.核销优惠券
-            promotionClient.writeOffCoupon(couponIds);
+            // 6.核销优惠券  注意，这里要传入的是用户的优惠券id，非优惠券本身id
+            promotionClient.writeOffCoupon(discount.getIds());
         }
 
 
@@ -417,8 +423,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 3.3.订单进度
         vo.setProgressNodes(detailService.packageProgressNodes(order, null));
 
+        //TODO 这也许是他想要的  这里传入的couponId，但方法要求传入用户couponId
         if(order.getCouponIds()!=null){
-            // 3.4.优惠明细
+            // 3.4.优惠明细   我们需要将优惠券全转为long类型，Json序列号器对于211 985这种会转为Integer类型而非Long类型！
             List<String> rules = promotionClient.queryDiscountRules(order.getCouponIds());
             vo.setCouponDesc(String.join("/", rules));
         }

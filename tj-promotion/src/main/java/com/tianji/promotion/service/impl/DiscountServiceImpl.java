@@ -33,6 +33,7 @@ public class DiscountServiceImpl implements IDiscountService {
     @Override
     public CouponDiscountDTO queryDiscountDetailByOrder(OrderCouponDTO orderCouponDTO) {
         // 1.查询用户优惠券
+        //TODO 这里OrderCouponDTO传入的并不是用户优惠券id，而是优惠券模板id，不要搞混！！
         List<Long> userCouponIds = orderCouponDTO.getUserCouponIds();
         List<Coupon> coupons = userCouponMapper.queryCouponByUserCouponIds(userCouponIds, UserCouponStatus.UNUSED);
         if (CollUtils.isEmpty(coupons)) {
@@ -44,7 +45,10 @@ public class DiscountServiceImpl implements IDiscountService {
             return null;
         }
         // 3.查询优惠券规则
-        return userCouponService.calculateSolutionDiscount(availableCouponMap, orderCouponDTO.getCourseList(), coupons);
+        CouponDiscountDTO couponDiscountDTO = userCouponService.calculateSolutionDiscount(availableCouponMap, orderCouponDTO.getCourseList(), coupons);
+        List<Long> longs = userCouponService.transformCouponIds(couponDiscountDTO.getIds());
+        couponDiscountDTO.setIds(longs);
+        return couponDiscountDTO;
     }
 
 }

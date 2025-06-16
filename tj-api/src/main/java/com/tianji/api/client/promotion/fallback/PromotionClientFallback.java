@@ -3,6 +3,7 @@ package com.tianji.api.client.promotion.fallback;
 
 import com.tianji.api.client.promotion.PromotionClient;
 
+import com.tianji.api.dto.promotion.CouponDetailSimpleVO;
 import com.tianji.api.dto.promotion.CouponDiscountDTO;
 import com.tianji.api.dto.promotion.OrderCouponDTO;
 import com.tianji.api.dto.promotion.OrderCourseDTO;
@@ -22,6 +23,16 @@ public class PromotionClientFallback implements FallbackFactory<PromotionClient>
         return new PromotionClient() {
             @Override
             public List<CouponDiscountDTO> findDiscountSolution(List<OrderCourseDTO> courses) {
+                return null;
+            }
+
+            @Override
+            public CouponDetailSimpleVO querySimpleCouponById(Long id) {
+                return null;
+            }
+
+            @Override
+            public List<Long> transformCouponIds(List<Long> couponIds) {
                 return null;
             }
 

@@ -93,7 +93,7 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
             lambdaUpdate()
                     .set(prepayResponse.isSuccess(), PayOrder::getQrCodeUrl, prepayResponse.getPayUrl())
                     .set(prepayResponse.isSuccess(), PayOrder::getStatus, PayStatus.WAIT_BUYER_PAY.getValue())
-                    .set(prepayResponse.isSuccess(), PayOrder::getPayChannelCode, payChannel)
+                    .set(prepayResponse.isSuccess(), PayOrder::getPayChannelCode, payChannel.toString())
                     .set(prepayResponse.isSuccess(), PayOrder::getPaySuccessTime, new Date())
                     .set(!prepayResponse.isSuccess(), PayOrder::getResultCode, prepayResponse.getCode())
                     .set(!prepayResponse.isSuccess(), PayOrder::getResultMsg, prepayResponse.getMsg())
@@ -211,6 +211,8 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
         // 2.查询
         Page<PayOrder> result = lambdaQuery()
                 .eq(PayOrder::getStatus, PayStatus.WAIT_BUYER_PAY.getValue())
+                .or()
+                .eq(PayOrder::getStatus, PayStatus.NOT_COMMIT.getValue()) //这里可能有未提交支付单也被支付了
                 .page(page);
         return PageDTO.of(result);
     }

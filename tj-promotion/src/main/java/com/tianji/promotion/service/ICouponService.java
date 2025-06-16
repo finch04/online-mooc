@@ -1,5 +1,6 @@
 package com.tianji.promotion.service;
 
+import com.tianji.api.dto.promotion.CouponDetailSimpleVO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.promotion.domain.dto.CouponFormDTO;
 import com.tianji.promotion.domain.dto.CouponIssueFormDTO;
@@ -39,4 +40,6 @@ public interface ICouponService extends IService<Coupon> {
     void beginIssueBatch(List<Coupon> records);
 
     List<CouponVO> queryIssuingCoupons();
+
+    CouponDetailSimpleVO querySimpleCouponById(Long id);
 }

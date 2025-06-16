@@ -70,5 +70,5 @@ dubbo:
     id: dubbo
   cloud:
     subscribed-services: learning-service
-#  consumer:
-#    check: false  # 启动时不检查提供者是否存在
+  consumer:
+    check: false  # 启动时不检查提供者是否存在
