@@ -10,9 +10,14 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.TokenCountBatchingStrategy;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import redis.clients.jedis.JedisPooled;
 
 /**
  * 作用：用来配置SpringAI，生成ChatClient对象以及其他的相关bean
@@ -67,4 +72,22 @@ public class SpringAIConfig {
         return new MessageChatMemoryAdvisor(chatMemory);
     }
 
+
+    @Bean
+    public VectorStore RedisVectorStore(JedisPooled jedisPooled, EmbeddingModel embeddingModel) {
+        return RedisVectorStore.builder(jedisPooled, embeddingModel)
+                .indexName("tianji:")                // Optional: defaults to "spring-ai-index"
+                .prefix("tianji:embedding:")                  // Optional: defaults to "embedding:"
+                .metadataFields(                         // Optional: define metadata fields for filtering
+                        RedisVectorStore.MetadataField.tag("country"),
+                        RedisVectorStore.MetadataField.numeric("year"))
+                .initializeSchema(true)                   // Optional: defaults to false
+                .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
+                .build();
+    }
+
+    @Bean
+    public JedisPooled jedisPooled() {
+        return new JedisPooled("192.168.150.101",26379,"default","123456");
+    }
 }

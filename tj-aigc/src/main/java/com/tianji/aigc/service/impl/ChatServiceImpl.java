@@ -15,8 +15,11 @@ import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -30,6 +33,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatClient chatClient;
     private final SystemPromptConfig systemPromptConfig;
     private final ChatMemory chatMemory;
+    private final VectorStore vectorStore;
 
     // 存储大模型的生成状态，这里采用ConcurrentHashMap是确保线程安全
     // 目前的版本暂时用Map实现，如果考虑分布式环境的话，可以考虑用redis来实现
@@ -56,6 +60,7 @@ public class ChatServiceImpl implements ChatService {
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get())
                         .param("now", DateUtil.now())
                 ) // 设置系统提示词
+                .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query(question).similarityThreshold(0.6f).topK(5).build()))
                 .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
                 .toolContext(MapUtil.<String,Object>builder()
                         .put(Constant.REQUEST_ID,requestId)
