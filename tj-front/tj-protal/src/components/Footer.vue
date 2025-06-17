@@ -18,21 +18,23 @@
   </footer>
 </template>
 <script setup>
+  import { useRouter } from 'vue-router'
+  const router = useRouter()
   // 站内-友情链接
   const Links = [
-    {title: '关于我们', link: '/'},
-    {title: '管理团队', link: '/'},
-    {title: '工作机会', link: '/'},
-    {title: '客户服务', link: '/'},
-    {title: '帮助文档', link: '/'},
-    {title: '如何注册', link: '/'},
-    {title: '如何选课', link: '/'},
-    {title: '合作机构', link: '/'},
-    {title: '合作导师', link: '/'}
-  ]
+  { title: '关于我们', link: '/about-us' },
+  { title: '管理团队', link: '/management-team' },
+  { title: '工作机会', link: '/job-opportunities' },
+  { title: '客户服务', link: '/customer-service' },
+  { title: '帮助文档', link: '/help-document' },
+  { title: '如何注册', link: '/how-to-register' },
+  { title: '如何选课', link: '/how-to-select-courses' },
+  { title: '合作机构', link: '/cooperative-institutions' },
+  { title: '合作导师', link: '/cooperative-tutors' }
+]
   // 转入详情页
   const goDetails = (link) => {
-    return false;
+    router.push(link)
   }
 </script>
 <style lang="scss" scoped>
