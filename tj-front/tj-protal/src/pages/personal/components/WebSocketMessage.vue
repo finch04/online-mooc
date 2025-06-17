@@ -16,7 +16,7 @@
                 <span class="user-name">{{ recipientName }}</span>
             </div>
             <div class="current-user" v-else>
-                <img src="/src/assets/logo-small.png" class="user-avatar" />
+                <img src="/src/assets/anonymity.png" class="user-avatar" />
                 <span class="user-name">请选择一个聊天对象</span>
             </div>
 
