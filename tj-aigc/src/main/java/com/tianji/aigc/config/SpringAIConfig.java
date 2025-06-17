@@ -5,6 +5,8 @@ import com.tianji.aigc.memory.mogodb.MongoDBChatMemory;
 import com.tianji.aigc.memory.redis.RedisChatMemory;
 import com.tianji.aigc.tools.CourseTools;
 import com.tianji.aigc.tools.OrderTools;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -19,11 +21,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.JedisPooled;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 /**
  * 作用：用来配置SpringAI，生成ChatClient对象以及其他的相关bean
  */
 @Configuration
+@RequiredArgsConstructor
+@Slf4j
 public class SpringAIConfig {
+
+    private final RedisProperties redisProperties;
 
     @Bean
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder,
@@ -87,7 +96,30 @@ public class SpringAIConfig {
     }
 
     @Bean
-    public JedisPooled jedisPooled() {
-        return new JedisPooled("192.168.150.101",26379,"default","123456");
+    public JedisPooled jedisPooled() throws URISyntaxException {
+        URI uri = new URI(redisProperties.getUrl());
+
+        //获取host
+        String host = uri.getHost();
+
+        //获取port
+        var port = uri.getPort();
+
+        //获取密码
+        String password = extractPasswordFromURI(uri);
+        log.info("密码是:"+password);
+        return new JedisPooled(host,port,"default",password);
+    }
+
+    // 提取密码的辅助方法
+    private String extractPasswordFromURI(URI uri) {
+        String userInfo = uri.getUserInfo();
+        if (userInfo != null) {
+            // 处理标准格式: redis://:password@host:port
+            String[] parts = userInfo.split(":", 2);
+            // 当格式为 ":password" 时，parts[0]为空字符串，parts[1]为密码
+            return parts.length >= 2 ? parts[1] : userInfo;
+        }
+        return null;
     }
 }
