@@ -23,6 +23,9 @@ export default defineConfig((mode) => {
       svgLoader()
     ],
     server: {
+      hmr:{
+        overlay:false
+      },  
       port: 18082,
       host: '0.0.0.0',
       proxy: {

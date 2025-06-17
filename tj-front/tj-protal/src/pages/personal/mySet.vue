@@ -96,9 +96,9 @@
         <el-form-item label="新密码" prop="newPassword">
           <el-input v-model="passwordForm.newPassword" type="password" show-password></el-input>
           <div class="password-strength">
-            <span :class="{'active': passwordStrengthLevel >= 1}">弱</span>
-            <span :class="{'active': passwordStrengthLevel >= 2}">中</span>
-            <span :class="{'active': passwordStrengthLevel >= 3}">强</span>
+            <span class="weak-level" :class="{'active': passwordStrengthLevel >= 1}">弱</span>
+            <span class="middle-level" :class="{'active': passwordStrengthLevel >= 2}">中</span>
+            <span class="strong-level" :class="{'active': passwordStrengthLevel >= 3}">强</span>
           </div>
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
@@ -555,11 +555,27 @@ const updateUserInfoHandle = async () => {
         margin-right: 0;
       }
       
-      &.active {
+     
+    }
+  }
+  
+  .weak-level {
+    &.active {
+        color: #fff;
+        background: red;
+      }
+  }
+  .middle-level {
+    &.active {
+        color: #fff;
+        background: #aec23a;
+      }
+  }
+  .strong-level {
+    &.active {
         color: #fff;
         background: #67c23a;
       }
-    }
   }
   
   .verify-code-input {

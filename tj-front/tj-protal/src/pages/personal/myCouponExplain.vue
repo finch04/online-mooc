@@ -20,63 +20,8 @@
 <script setup>
 
 /** 数据导入 **/
-import { onMounted, ref } from "vue";
-import { ElMessage } from "element-plus";
-import { getMyCoupon } from "@/api/class.js";
-import { useRoute } from "vue-router";
-import { dataCacheStore } from "@/store"
-
 // 组件导入
 import BreadCrumb from './components/BreadCrumb.vue'
-
-const route = useRoute()
-const store = dataCacheStore()
-
-const tableBar = [
-  {id: 1, name: '未使用'}, 
-  {id: 2, name: '已使用'}, 
-  {id: 3, name: '已过期'},
-]
-
-// tab切换
-const actId = ref(1)
-const changeTable = id => {
-  actId.value = id
-  getMyCouponData()
-}
-
-// mounted生命周期
-onMounted(async () => {
- getMyCouponData()
-});
-
-/** 方法定义 **/
-// 我的优惠券数据获取
-const myCoupon = ref([])
-const getMyCouponData =  async () => {
-  const params = {
-    status: actId.value,
-    pageNo: 1,
-    pageSize:1000
-  }
-  await getMyCoupon(params)
-    .then((res) => {
-      if (res.code == 200 ){
-        myCoupon.value = res.data.list
-      } else {
-        ElMessage({
-        message: res.msg,
-        type: 'error'
-      });
-      }
-    })
-    .catch(() => {
-      ElMessage({
-        message: "订单列表请求失败！",
-        type: 'error'
-      });
-    });
-}
 
 </script>
 <style lang="scss" src="./index.scss"> </style>
