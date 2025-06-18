@@ -1,31 +1,19 @@
 package com.tianji.learning.service.impl;
 
-import cn.hutool.extra.qrcode.QrCodeUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.tianji.api.client.course.CourseClient;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.course.CourseSearchDTO;
 import com.tianji.api.dto.user.UserDTO;
-import com.tianji.common.utils.QrCodeUtils;
 import com.tianji.learning.constants.RedisConstants;
 import com.tianji.learning.domain.dto.ShareDetailDTO;
 import com.tianji.learning.domain.dto.ShareLinkDTO;
 import com.tianji.learning.service.IShareService;
 import com.tianji.learning.utils.ShortCodeUtil;
-import com.tianji.learning.utils.SnowflakeIdGenerator;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -40,97 +28,113 @@ public class ShareServiceImpl implements IShareService {
 
     @Override
     public ShareLinkDTO generateShareLink(Long userId, Long courseId) {
-        // 1. 生成唯一分享ID（雪花算法）
-        long shareId = SnowflakeIdGenerator.getInstance().nextId();
+        // 检查 Redis 中是否已经存在相同用户 ID 和课程 ID 的短码
+        String userCourseKey = RedisConstants.SHORT_URL_PREFIX + userId + ":" + courseId;
+        String shortCode = redisTemplate.opsForValue().get(userCourseKey);
 
-        // 2. 生成短码（62进制编码）
-        String shortCode = ShortCodeUtil.encode(shareId);
+        if (shortCode == null) {
+            // 生成短码
+            shortCode = generateUniqueShortCode(userId, courseId);
 
-        // 3. 构建短链接
+            // 存储短码映射（使用String类型）
+            // 格式：SHORT_URL_PREFIX:userId:courseId -> shortCode
+            redisTemplate.opsForValue().set(
+                    userCourseKey,
+                    shortCode,
+                    RedisConstants.EXPIRE_TIME,
+                    TimeUnit.SECONDS
+            );
+
+            // 存储短码到详情的映射
+            // 格式：SHARE_DETAIL_PREFIX:shortCode -> userId:courseId
+            String detailKey = RedisConstants.SHARE_DETAIL_PREFIX + shortCode;
+            redisTemplate.opsForValue().set(
+                    detailKey,
+                    userId + ":" + courseId,
+                    RedisConstants.EXPIRE_TIME,
+                    TimeUnit.SECONDS
+            );
+        }
+
+        // 构建短链接
         String shortUrl = buildShortUrl(shortCode);
 
-        // 4. 存储短码映射（使用String类型）
-        redisTemplate.opsForValue().set(
-                RedisConstants.SHORT_URL_PREFIX + shortCode,
-                String.valueOf(shareId), // 转换为字符串存储
-                RedisConstants.EXPIRE_TIME,
-                TimeUnit.SECONDS
-        );
-
-        // 5. 存储分享详情（使用String类型的JSON）
-        String detailJson = buildDetailJson(userId, courseId);
-        redisTemplate.opsForValue().set(
-                RedisConstants.SHARE_DETAIL_PREFIX + shareId,
-                detailJson,
-                RedisConstants.EXPIRE_TIME,
-                TimeUnit.SECONDS
-        );
-        return new ShareLinkDTO(shareId, shortUrl);
+        return new ShareLinkDTO(userId, courseId, shortUrl);
     }
 
     @Override
     public ShareDetailDTO parseShareLink(String shortCode) {
-        // 1. 通过短码获取分享ID（返回值为String）
-        String shareIdStr = redisTemplate.opsForValue().get(RedisConstants.SHORT_URL_PREFIX + shortCode);
-        if (shareIdStr == null) {
+        // 1. 通过短码获取用户ID和课程ID
+        String userCourseStr = redisTemplate.opsForValue().get(RedisConstants.SHARE_DETAIL_PREFIX + shortCode);
+        if (userCourseStr == null) {
             return null; // 链接不存在或已过期
         }
 
-        long shareId = Long.parseLong(shareIdStr);
-
-        // 2. 通过分享ID获取详情JSON
-        String detailJson = redisTemplate.opsForValue().get(RedisConstants.SHARE_DETAIL_PREFIX + shareId);
-        if (detailJson == null) {
-            return null;
+        String[] parts = userCourseStr.split(":");
+        if (parts.length != 2) {
+            return null; // 格式错误
         }
 
-        // 3. 解析JSON为对象
-        return parseDetailFromJson(detailJson, shareId);
+        Long userId = Long.parseLong(parts[0]);
+        Long courseId = Long.parseLong(parts[1]);
+
+        // 2. 构建并返回分享详情
+        return buildShareDetailDTO(userId, courseId, shortCode);
+    }
+
+    private String generateUniqueShortCode(Long userId, Long courseId) {
+        // 使用用户ID、课程ID和时间戳生成唯一哈希
+        String baseStr = userId + "-" + courseId + "-" + System.currentTimeMillis() / (24 * 60 * 60 * 1000);
+        java.security.MessageDigest digest;
+        try {
+            digest = java.security.MessageDigest.getInstance("MD5");
+            byte[] hash = digest.digest(baseStr.getBytes("UTF-8"));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            String hashStr = hexString.toString();
+
+            // 截取部分哈希作为短码（取中间部分以增加随机性）
+            int shortCodeLength = 8;
+            int start = (hashStr.length() - shortCodeLength) / 2;
+            String shortCode = hashStr.substring(start, start + shortCodeLength);
+
+            // 转换为Base62编码，进一步缩短长度
+            return ShortCodeUtil.encode(shortCode);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String buildShortUrl(String shortCode) {
+        // 这里应返回完整的短链接，例如：https://tj.com/s/{shortCode}
         return shortCode;
     }
 
-    private String buildDetailJson(Long userId, Long courseId) {
-        Map<String, Object> detailMap = new HashMap<>();
-        detailMap.put("userId", userId);
-        detailMap.put("courseId", courseId);
-        detailMap.put("createTime", System.currentTimeMillis());
+    private ShareDetailDTO buildShareDetailDTO(Long userId, Long courseId, String shortCode) {
+        ShareDetailDTO shareDetailDTO = new ShareDetailDTO();
+        shareDetailDTO.setUserId(userId);
+        shareDetailDTO.setCourseId(courseId);
+        shareDetailDTO.setShortCode(shortCode);
+        shareDetailDTO.setCreateTime(new Date());
 
-        try {
-            return new ObjectMapper().writeValueAsString(detailMap);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize share detail", e);
+        // 获取用户信息
+        UserDTO userDTO = userClient.queryUserById(userId);
+        if (userDTO != null) {
+            shareDetailDTO.setUserIcon(userDTO.getIcon());
+            shareDetailDTO.setUserName(userDTO.getName());
         }
-    }
 
-    private ShareDetailDTO parseDetailFromJson(String json, long shareId) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> detailMap = mapper.readValue(json, Map.class);
-
-            Long userId = Long.parseLong(detailMap.get("userId").toString());
-            Long courseId = Long.parseLong(detailMap.get("courseId").toString());
-
-            ShareDetailDTO shareDetailDTO = new ShareDetailDTO();
-            shareDetailDTO.setShareId(shareId);
-            shareDetailDTO.setUserId(userId);
-            shareDetailDTO.setCourseId(courseId);
-            shareDetailDTO.setCreateTime(new Date(Long.parseLong(detailMap.get("createTime").toString())));
-
-            UserDTO dto = userClient.queryUserById(userId);
-            shareDetailDTO.setUserIcon(dto.getIcon());
-            shareDetailDTO.setUserName(dto.getName());
-
-            CourseSearchDTO searchInfo = courseClient.getSearchInfo(courseId);
-            shareDetailDTO.setCourseName(searchInfo.getName());
-            shareDetailDTO.setCoverUrl(searchInfo.getCoverUrl());
-
-            return shareDetailDTO;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to deserialize share detail", e);
+        // 获取课程信息
+        CourseSearchDTO courseDTO = courseClient.getSearchInfo(courseId);
+        if (courseDTO != null) {
+            shareDetailDTO.setCourseName(courseDTO.getName());
+            shareDetailDTO.setCoverUrl(courseDTO.getCoverUrl());
         }
+
+        return shareDetailDTO;
     }
 }

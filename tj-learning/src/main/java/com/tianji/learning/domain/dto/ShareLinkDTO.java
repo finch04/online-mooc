@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ShareLinkDTO {
-    private Long shareId;
+    private Long userId;
+    private Long courseId;
     private String shortUrl;
+//    private String qrCodeUrl;
 }

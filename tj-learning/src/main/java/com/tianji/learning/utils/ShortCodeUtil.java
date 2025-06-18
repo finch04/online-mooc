@@ -1,21 +1,26 @@
 package com.tianji.learning.utils;
 
+import java.math.BigInteger;
+
 public class ShortCodeUtil {
     private static final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int BASE = CHARS.length();
 
     /**
-     * ID转短码（62进制编码）
+     * 字符串转短码（62进制编码）
      */
-    public static String encode(long id) {
-        if (id < 0) {
-            throw new IllegalArgumentException("ID must be positive");
+    public static String encode(String input) {
+        // 将字符串转换为 BigInteger
+        BigInteger num = new BigInteger(input, 16); // 假设输入是十六进制字符串
+        if (num.compareTo(BigInteger.ZERO) < 0) {
+            throw new IllegalArgumentException("Input must be positive");
         }
 
         StringBuilder sb = new StringBuilder();
-        while (id > 0) {
-            sb.append(CHARS.charAt((int) (id % BASE)));
-            id /= BASE;
+        while (num.compareTo(BigInteger.ZERO) > 0) {
+            BigInteger[] divmod = num.divideAndRemainder(BigInteger.valueOf(BASE));
+            sb.append(CHARS.charAt(divmod[1].intValue()));
+            num = divmod[0];
         }
 
         // 不足6位补前导字符（保证短码长度一致）

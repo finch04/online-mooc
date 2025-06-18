@@ -1,86 +1,93 @@
 <!-- 课程详情 -->
 <template>
   <div class="classDetailsWrapper">
-     <!-- 分享提示悬浮窗 -->
-      <!-- 分享弹窗 -->
-      <ElDialog
-      title="课程分享"
-      v-model="shareDialogVisible"
-      :close-on-click-modal="true"
-      width="450px"
-      class="share-dialog"
-    >
-    <div class="share-content">
-      <!-- 分享者信息 -->
-      <div class="share-user-info">
-        <el-avatar 
-          class="user-avatar" 
-          :size="64" 
-          :src="shareUserIcon" 
-          :fallback-src="fallbackAvatar"
-          :fit="'cover'"
-        />
-        <div>
-          <h3 class="user-name">{{ shareUserName || '好友' }}</h3>
-          <p class="share-message">分享了一门课程给你</p>
+    <!-- 分享提示悬浮窗 -->
+    <!-- 分享弹窗 -->
+    <ElDialog title="课程分享" v-model="shareDialogVisible" :close-on-click-modal="true" width="450px" class="share-dialog">
+      <div class="share-content">
+        <!-- 分享者信息 -->
+        <div class="share-user-info">
+          <el-avatar class="user-avatar" :size="64" :src="shareUserIcon" :fallback-src="fallbackAvatar"
+            :fit="'cover'" />
+          <div>
+            <h3 class="user-name">{{ shareUserName || '好友' }}</h3>
+            <p class="share-message">分享了一门课程给你</p>
+          </div>
         </div>
       </div>
-    </div>
     </ElDialog>
     <div class="detailHead">
-      <div class="backGround"><img :src="baseDetailsData.coverUrl" width="100%" alt=""/></div>
+      <div class="backGround"><img :src="baseDetailsData.coverUrl" width="100%" alt="" /></div>
       <div class="container">
         <Breadcrumb :data="baseDetailsData.cateNames && baseDetailsData.cateNames.split('/').at(-1)"></Breadcrumb>
         <div class="topInfo fx">
           <div class=""><img :src="baseDetailsData.coverUrl" width="380" height="234" alt="" /></div>
           <div class="fx-1">
-              <div class="title">{{baseDetailsData.name}}</div>
-              <div class="item fx">
-                <div class="card">
-                  <div class="tit">课程数</div>
-                  <div class="info">{{baseDetailsData.cataTotalNum}}节</div>
-                </div>
-                <div class="card">
-                  <div class="tit">有效期</div>
-                  <div class="info">{{baseDetailsData.validDuration > 99 ? '永久有效' : `${baseDetailsData.validDuration}月`}}</div>
-                </div>
-                <div class="card bd-non">
-                  <div class="tit">评分</div>
-                  <div class="info">{{baseDetailsData.score/10}}</div>
+            <div class="title">{{ baseDetailsData.name }}</div>
+            <div class="item fx">
+              <div class="card">
+                <div class="tit">课程数</div>
+                <div class="info">{{ baseDetailsData.cataTotalNum }}节</div>
+              </div>
+              <div class="card">
+                <div class="tit">有效期</div>
+                <div class="info">{{ baseDetailsData.validDuration > 99 ? '永久有效' : `${baseDetailsData.validDuration}月`
+                  }}
                 </div>
               </div>
-              <div class="fx">
-                <div v-if="isLogin()" @click="collectionHandle" class="bt-wt bt-round marg-rt-15 ft-14" :class="{isCollection:isCollection}"> <i :class="{iconfont:true, 'zhy-btn_shoucang':!isCollection, 'zhy-btn_yishoucang':isCollection}"></i> 收藏</div>
-                <div class="bt-wt bt-round ft-14" @click="shareCourse"><weixin class="wx" ></weixin> 分享</div>
+              <div class="card bd-non">
+                <div class="tit">评分</div>
+                <div class="info">{{ baseDetailsData.score / 10 }}</div>
               </div>
+            </div>
+            <div class="fx">
+              <div v-if="isLogin()" @click="collectionHandle" class="bt-wt bt-round marg-rt-15 ft-14"
+                :class="{ isCollection: isCollection }"> <i
+                  :class="{ iconfont: true, 'zhy-btn_shoucang': !isCollection, 'zhy-btn_yishoucang': isCollection }"></i>
+                收藏
+              </div>
+              <el-popover placement="right" trigger="click" style=" padding: 10px;"  :width="229" :height="220">
+                <template #reference>
+                  <div class="bt-wt bt-round ft-14" @click="shareCourse">
+                    <weixin class="wx"></weixin> 分享
+                  </div>
+                </template>
+                <div>
+                  <!-- 简化二维码显示部分 -->
+                  <qrcode-vue v-if="shareUrl" :value="shareUrl" :size="200" level="H" />
+                </div>
+                
+                <span >{{ shareUrl }}</span><span class="bt bt-round" style="margin-top: 3px;margin-right: 5px;align-content: center;" @click="copy">点击复制</span>
+              </el-popover>
+            </div>
           </div>
         </div>
         <div v-if="baseDetailsData">
-          <div class="buyCont fx-sb" v-if="baseDetailsData.price != '0'" >
-          <div class="fx-ct">
-            <span class="price">￥</span>
-            <span class="price">{{(baseDetailsData.price / 100).toFixed(2) }}</span>
-            <span class="desc">课前随时退 · 售后有保障</span> 
+          <div class="buyCont fx-sb" v-if="baseDetailsData.price != '0'">
+            <div class="fx-ct">
+              <span class="price">￥</span>
+              <span class="price">{{ (baseDetailsData.price / 100).toFixed(2) }}</span>
+              <span class="desc">课前随时退 · 售后有保障</span>
+            </div>
+            <div class="buy" v-if="!isSignUp">
+              <span class="bt-red1 bt-round marg-rt-20" @click="addCarts()">加入购物车</span>
+              <span class="bt-red bt-round" @click="payHandle()">立即购买</span>
+            </div>
+            <div class="buy" v-else @click="goLearning">
+              <span class="bt-red bt-round">马上学习</span>
+            </div>
           </div>
-          <div class="buy" v-if="!isSignUp">
-            <span class="bt-red1 bt-round marg-rt-20" @click="addCarts()">加入购物车</span>
-            <span class="bt-red bt-round" @click="payHandle()" >立即购买</span>
+          <div class="buyCont fx-sb" v-else>
+            <div class="fx-ct">
+              <span class="price">免费</span>
+            </div>
+            <div class="buy" v-if="!isSignUp" @click="signUpHandle">
+              <span class="bt-red bt-round">立即报名</span>
+            </div>
+            <div class="buy" v-else @click="goLearning">
+              <span class="bt-red bt-round">马上学习</span>
+            </div>
           </div>
-          <div class="buy" v-else @click="goLearning">
-            <span class="bt-red bt-round">马上学习</span>
-          </div>
-        </div>
-        <div class="buyCont fx-sb" v-else >
-          <div class="fx-ct">
-            <span class="price">免费</span>
-          </div>
-          <div class="buy" v-if="!isSignUp" @click="signUpHandle">
-            <span class="bt-red bt-round">立即报名</span>
-          </div>
-          <div class="buy" v-else @click="goLearning">
-            <span class="bt-red bt-round">马上学习</span>
-          </div>
-        </div>
         </div>
 
       </div>
@@ -90,15 +97,17 @@
       <div class="leftCont bg-wt">
         <TableSwitchBar :data="tableBar" @changeTable="changeTable"></TableSwitchBar>
         <!-- 课程介绍 -->
-        <ClassAbout v-show="actId == 1" :baseDetailsData="baseDetailsData" :baseClassTeacher="baseClassTeacher"></ClassAbout>
+        <ClassAbout v-show="actId == 1" :baseDetailsData="baseDetailsData" :baseClassTeacher="baseClassTeacher">
+        </ClassAbout>
         <!-- 课程目录 -->
-        <ClassCatalogue v-show="actId == 2" :data="classListData" :isSignUp="isSignUp"  :id="detailsId"></ClassCatalogue>
+        <ClassCatalogue v-show="actId == 2" :data="classListData" :isSignUp="isSignUp" :id="detailsId"></ClassCatalogue>
         <!-- 问答模块 -->
-        <ClassAsk v-if="isLogin() && isSignUp" v-show="actId == 3" :id="detailsId" :title="baseDetailsData.name"></ClassAsk>
+        <ClassAsk v-if="isLogin() && isSignUp" v-show="actId == 3" :id="detailsId" :title="baseDetailsData.name">
+        </ClassAsk>
         <!-- 笔记模块 -->
-        <Note  v-if="isLogin() &&isSignUp" v-show=" actId == 4" :id="detailsId"></Note>
+        <Note v-if="isLogin() && isSignUp" v-show="actId == 4" :id="detailsId"></Note>
         <!-- 评价模块 -->
-        <Evaluation v-if="isLogin()" v-show=" actId == 5" :id="detailsId"></Evaluation>
+        <Evaluation v-if="isLogin()" v-show="actId == 5" :id="detailsId"></Evaluation>
       </div>
       <div class="ritCont">
         <!-- 常见问题 -->
@@ -107,20 +116,20 @@
         <LikeCards :data="likeClassData"></LikeCards>
       </div>
     </div>
-    <!-- 主体部分 - end -->
   </div>
 </template>
 <script setup>
 
 /** 数据导入 **/
-import { computed, onMounted, ref,watch } from "vue";
-import { ElMessage,ElMessageBox } from "element-plus";
+import { computed, onMounted, ref, watch } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { getClassDetails, getClassTeachers, getClassList } from "@/api/classDetails.js";
 import { enrolledFreeCourse, putCarts } from "@/api/order.js";
-import { getRecommendClassList, getCourseLearning ,addMyCollect,isCollect,generateShareUrl} from "@/api/class.js";
+import { getRecommendClassList, getCourseLearning, addMyCollect, isCollect, generateShareUrl } from "@/api/class.js";
 import { useRoute, useRouter } from "vue-router";
 import { dataCacheStore } from "@/store"
 
+import QrcodeVue from 'qrcode.vue'
 // 组件导入
 import Breadcrumb from "@/components/Breadcrumb.vue";
 import TableSwitchBar from "@/components/TableSwitchBar.vue";
@@ -136,7 +145,7 @@ import { isLogin } from "@/store";
 import weixin from '@/assets/icon_weixin.svg'
 
 const route = useRoute()
-const router= useRouter()
+const router = useRouter()
 const store = dataCacheStore()
 
 // const props = defineProps({
@@ -154,8 +163,8 @@ const baseDetailsData = ref({})
 const baseClassTeacher = ref([])
 
 // table切换数据 - 静态数据
-const logData = [{id: 1, name: '课程介绍'}, {id: 2, name: '课程目录'},{id: 3, name: '问答'},{id: 4, name: '笔记'}, {id: 5, name: '用户评价'}]
-const noLogData = [{id: 1, name: '课程介绍'}, {id: 2, name: '课程目录'}]
+const logData = [{ id: 1, name: '课程介绍' }, { id: 2, name: '课程目录' }, { id: 3, name: '问答' }, { id: 4, name: '笔记' }, { id: 5, name: '用户评价' }]
+const noLogData = [{ id: 1, name: '课程介绍' }, { id: 2, name: '课程目录' }]
 const tableBar = computed(() => {
   return isLogin() && isSignUp.value ? logData : noLogData
 })
@@ -178,10 +187,10 @@ const actId = ref(1)
 
 // 常见问题 - 静态数据
 const askData = [
-  {ask:'如何查看已购课程？', answer: '请用购课账号登录，点击【我的学习】进入。'},
-  {ask:'课程购买后可以更换吗？', answer: '如需更换课程请咨询客服为您确认是否可以更换。'},
-  {ask:'无法登录怎么办？', answer: '请更换不同浏览器。'},
-  {ask:'课程过期了怎么办？', answer: '课程过期无法观看了哦，请在有效期内进行观看课程。'},
+  { ask: '如何查看已购课程？', answer: '请用购课账号登录，点击【我的学习】进入。' },
+  { ask: '课程购买后可以更换吗？', answer: '如需更换课程请咨询客服为您确认是否可以更换。' },
+  { ask: '无法登录怎么办？', answer: '请更换不同浏览器。' },
+  { ask: '课程过期了怎么办？', answer: '课程过期无法观看了哦，请在有效期内进行观看课程。' },
 ]
 // 课程目录
 const classListData = ref([])
@@ -208,22 +217,22 @@ onMounted(async () => {
   // 获取猜你喜欢
   await getLikeClassData()
   // 获取本课程的学习情况 
-  if(await isLogin()){
+  if (await isLogin()) {
     await getCourseLearningData()
     await getCourseIsCollect()
   }
 
   store.setLearingDataes({
-    classDetailsData:baseDetailsData.value, // 课程的信息
-    teacherData:baseClassTeacherData.value, // 讲师信息
+    classDetailsData: baseDetailsData.value, // 课程的信息
+    teacherData: baseClassTeacherData.value, // 讲师信息
     planData: planData.value // 学习计划信息
   })
 
   detailsId.value = route.query.id;
   shareUserName.value = route.query.shareUserName || '';
   shareUserIcon.value = route.query.shareUserIcon || '';
-  if(shareUserName.value&&shareUserIcon.value){
-    shareDialogVisible.value=true;
+  if (shareUserName.value && shareUserIcon.value) {
+    shareDialogVisible.value = true;
   }
 });
 
@@ -236,7 +245,7 @@ const getClassDetailsData = async () => {
         baseDetailsData.value = res.data
       } else {
         ElMessage({
-          message:res.data.msg,
+          message: res.data.msg,
           type: 'error'
         });
       }
@@ -260,11 +269,11 @@ const getClassTeachersData = async () => {
         let catchArr = []
         // 数据重组 展示幻灯片用
         data.forEach((n, i) => {
-          if(catchArr.length == 0){
+          if (catchArr.length == 0) {
             catchArr.push([n])
           } else {
             const lastTag = catchArr.at(-1);
-            if(lastTag.length == 2){
+            if (lastTag.length == 2) {
               catchArr.push([n])
             } else {
               lastTag.push(n)
@@ -275,7 +284,7 @@ const getClassTeachersData = async () => {
         baseClassTeacher.value = catchArr
       } else {
         ElMessage({
-          message:res.data.msg,
+          message: res.data.msg,
           type: 'error'
         });
       }
@@ -296,7 +305,7 @@ const getClassListData = async () => {
         classListData.value = res.data
       } else {
         ElMessage({
-          message:res.msg,
+          message: res.msg,
           type: 'error'
         });
       }
@@ -317,70 +326,72 @@ const getLikeClassData = async () => {
         likeClassData.value = res.data
       } else {
         ElMessage({
-          message:res.msg,
+          message: res.msg,
           type: 'error'
         });
       }
     })
     .catch(() => {
-     ElMessage({})
+      ElMessage({})
     })
 }
 // table切换 当前展示信息 课程介绍、课程目录
 const changeTable = id => {
   actId.value = id
   switch (id) {
-    case 2 : {
-      break;
-    } 
-    case 3 : {
-      break;
-    } 
-    case 4 : {
+    case 2: {
       break;
     }
-    case 5 : {
+    case 3: {
+      break;
+    }
+    case 4: {
+      break;
+    }
+    case 5: {
       break;
     }
   }
 }
 
 //收藏
-const collectionHandle =async () => {
+const collectionHandle = async () => {
   isCollection.value = !isCollection.value
   //调用收藏接口
-  if(isCollection.value){
-    await addMyCollect({courseId: detailsId.value,collected:true})
+  if (isCollection.value) {
+    await addMyCollect({ courseId: detailsId.value, collected: true })
     ElMessage({
       message: "收藏成功！",
       type: 'success'
     });
-    
+
   } else {
-    await addMyCollect({courseId: detailsId.value,collected:false})
+    await addMyCollect({ courseId: detailsId.value, collected: false })
     ElMessage({
       message: "取消收藏成功！",
       type: 'success'
     });
   }
 }
-const getCourseIsCollect = async() => {
+const getCourseIsCollect = async () => {
   isCollect(detailsId.value).then(res => {
-    if(res.code == 200){
-      if(res.data){
+    if (res.code == 200) {
+      if (res.data) {
         isCollection.value = true
-      }else{
+      } else {
         isCollection.value = false
       }
 
     }
   })
 }
-
+// 分享链接
+const shareUrl = ref('');
 // import proxy from '@/config/proxy';
 // const env = import.meta.env.MODE || 'development';
 // const host =  proxy[env].host;
-const host =  window.location.host;
+const host = window.location.host;
+//生成分享链接
 //生成分享链接
 const shareCourse = async () => {
   if (!detailsId.value) {
@@ -393,15 +404,11 @@ const shareCourse = async () => {
 
   try {
     const res = await generateShareUrl(detailsId.value);
-   
+
     if (res.code === 200) {
-      const shareUrl = res.data.shortUrl;
-      // 复制链接到剪切板  http://localhost:10010/ls/share/RHoQFlwTWm
-      await navigator.clipboard.writeText(host+"/#/details/share/"+shareUrl);
-      ElMessage({
-        message: '分享链接已复制到剪切板，有效期3小时',
-        type: 'success'
-      });
+      shareUrl.value = host + "/#/details/share/" + res.data.shortUrl;
+      // 复制链接到剪切板
+      copy();
     } else {
       ElMessage({
         message: res.msg || '生成分享链接失败',
@@ -417,61 +424,70 @@ const shareCourse = async () => {
   }
 }
 
+const copy= async ()=>{ 
+  await navigator.clipboard.writeText(shareUrl.value);
+  
+  ElMessage({
+        message: '分享链接已复制到剪切板，有效期3小时',
+        type: 'success'
+      });
+}
+
 const isSignUp = ref(false)
 // 立即报名
 const signUpHandle = async () => {
   // 校验是否登录
-  if(!validation()){
+  if (!validation()) {
     return;
   }
   // 尝试报名
   await enrolledFreeCourse(detailsId.value)
-  .then((res) => {
-    if (res.code === 200) {
+    .then((res) => {
+      if (res.code === 200) {
+        ElMessage({
+          message: '报名成功',
+          type: 'success'
+        });
+        isSignUp.value = true
+      } else {
+        ElMessage({
+          message: res.data.msg,
+          type: 'error'
+        });
+      }
+    })
+    .catch(() => {
       ElMessage({
-        message:'报名成功',
-        type: 'success'
-      });
-      isSignUp.value = true
-    } else {
-      ElMessage({
-        message:res.data.msg,
+        message: "报名失败，请联系管理员",
         type: 'error'
       });
-    }
-  })
-  .catch(() => {
-    ElMessage({
-      message: "报名失败，请联系管理员",
-      type: 'error'
     });
-  });
 }
 // 马上学习
 const goLearning = () => {
-  router.push({path: '/learning', query: {id: detailsId.value}})
+  router.push({ path: '/learning', query: { id: detailsId.value } })
 }
 
 // 查询当前用户学习的指定课程信息，返回null则代表没有购买
 const planData = ref()
 const getCourseLearningData = async () => {
   await getCourseLearning(detailsId.value)
-  .then((res) => {
-    const { data } = res
-    if (res.code === 200 && data) {
-      isSignUp.value = true
-      planData.value = data
-    } else {
-      isSignUp.value = false
-      console.log(res.msg);
-    }
-  })
-  .catch(() => {
-    ElMessage({
-      message: "用户学习信息数据请求出错！",
-      type: 'error'
+    .then((res) => {
+      const { data } = res
+      if (res.code === 200 && data) {
+        isSignUp.value = true
+        planData.value = data
+      } else {
+        isSignUp.value = false
+        console.log(res.msg);
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        message: "用户学习信息数据请求出错！",
+        type: 'error'
+      });
     });
-  });
 }
 // 立即购买
 const payHandle = () => {
@@ -480,14 +496,14 @@ const payHandle = () => {
   // }
   // store.setOrderClassInfo([baseDetailsData.value])
   // router.push({path: '/pay/settlement'})
-  if(!validation()){
+  if (!validation()) {
     return;
   }
   store.setOrderClassInfo([baseDetailsData.value]);
-  
+
   // 获取 courseIds（假设从 baseDetailsData 中获取）
   const courseIds = baseDetailsData.value?.courseIds || [];
-  
+
   // 路由跳转并携带参数
   router.push({
     path: '/pay/settlement',
@@ -499,18 +515,18 @@ const payHandle = () => {
 // TODO 没有效验 松松那边没弄好 
 // 未登录处理购买、加入购物车点击问题
 const validation = () => {
-  if ( !isLogin()) {
+  if (!isLogin()) {
     ElMessageBox.confirm(
-        `您还没有登录 请先去登录`,
-        '确认登录',
-        {
-          confirmButtonText: '登录购买',
-          cancelButtonText: '继续浏览',
-          type: 'warning',
-        }
-      )
+      `您还没有登录 请先去登录`,
+      '确认登录',
+      {
+        confirmButtonText: '登录购买',
+        cancelButtonText: '继续浏览',
+        type: 'warning',
+      }
+    )
       .then(() => {
-        router.push({path:'/login'})
+        router.push({ path: '/login' })
       })
     return false;
   }
@@ -519,29 +535,29 @@ const validation = () => {
 
 // 加入购物车
 const addCarts = () => {
-  if(!validation()){
+  if (!validation()) {
     return;
   }
-  putCarts({courseId: detailsId.value})
-  .then((res) => {
-    if (res.code === 200) {
-     ElMessage({
-        message:'已加入购物车',
-        type: 'success'
-      });
-    } else {
+  putCarts({ courseId: detailsId.value })
+    .then((res) => {
+      if (res.code === 200) {
+        ElMessage({
+          message: '已加入购物车',
+          type: 'success'
+        });
+      } else {
+        ElMessage({
+          message: res.msg,
+          type: 'error'
+        });
+      }
+    })
+    .catch(() => {
       ElMessage({
-        message:res.msg,
+        message: "添加购物车请求出错！",
         type: 'error'
       });
-    }
-  })
-  .catch(() => {
-    ElMessage({
-      message: "添加购物车请求出错！",
-      type: 'error'
     });
-  });
 }
 </script>
 <style>
@@ -551,36 +567,36 @@ const addCarts = () => {
     padding: 16px 24px;
     border-bottom: 1px solid #EBEEF5;
   }
-  
+
   .el-dialog__title {
     font-size: 18px;
     font-weight: 500;
     color: #303133;
   }
-  
+
   .share-content {
     padding: 24px;
   }
-  
+
   .share-user-info {
     display: flex;
     align-items: center;
     gap: 16px;
     margin-bottom: 24px;
   }
-  
+
   .user-avatar {
     border: 2px solid #F5F7FA;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   }
-  
+
   .user-name {
     font-size: 16px;
     font-weight: 600;
     color: #303133;
     margin: 0;
   }
-  
+
   .share-message {
     font-size: 14px;
     color: #606266;
@@ -588,5 +604,4 @@ const addCarts = () => {
   }
 }
 </style>
-<style lang="scss" src="./index.scss">
-</style>
+<style lang="scss" src="./index.scss"></style>

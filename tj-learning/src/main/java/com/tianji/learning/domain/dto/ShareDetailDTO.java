@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 public class ShareDetailDTO {
     private Long shareId;
-
+    private String shortCode;
     private Long userId;
     private String userIcon;
     private String userName;
