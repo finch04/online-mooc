@@ -37,7 +37,7 @@ public class QdrantTest {
     private EmbeddingModel embeddingModel;
     private String testCollectionName;
     private static final String AI_CHAT_COLLECTION = "ai-chat";
-    private static final int VECTOR_SIZE = 1536; // 根据您的嵌入模型调整向量维度
+    private static final int VECTOR_SIZE = 1024; // 根据您的嵌入模型调整向量维度
     @BeforeEach
     public void setUp() {
         // 生成唯一的测试集合名称

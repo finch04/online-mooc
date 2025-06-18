@@ -1,0 +1,17 @@
+seata:
+  registry: # TC服务注册中心的配置，微服务根据这些信息去注册中心获取tc服务地址
+    type: nacos # 注册中心类型 nacos
+    nacos:
+      server-addr: 192.168.150.101:8848 # nacos地址
+      namespace: "c975b6f4-de7e-40ad-9b15-4a245ce7a2ef" # namespace，默认为空
+      group: DEFAULT_GROUP # 分组，默认是DEFAULT_GROUP
+      application: seata-server # seata服务名称
+      username: nacos
+      password: nacos
+  tx-service-group: tjxt # 事务组名称
+  service:
+    vgroup-mapping: # 事务组与cluster的映射关系
+      tjxt: "default"
+  enable-auto-undo-log-creation: true  # 启用自动创建undo_log表
+  sql-dialect: mysql  # 显式指定数据库方言
+  enable-auto-data-source-proxy: true  # 启用自动数据源代理

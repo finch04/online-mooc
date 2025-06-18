@@ -1,5 +1,6 @@
 package com.tianji.learning.service.impl;
 
+import cn.hutool.extra.qrcode.QrCodeUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -8,6 +9,7 @@ import com.tianji.api.client.course.CourseClient;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.course.CourseSearchDTO;
 import com.tianji.api.dto.user.UserDTO;
+import com.tianji.common.utils.QrCodeUtils;
 import com.tianji.learning.constants.RedisConstants;
 import com.tianji.learning.domain.dto.ShareDetailDTO;
 import com.tianji.learning.domain.dto.ShareLinkDTO;
@@ -63,7 +65,6 @@ public class ShareServiceImpl implements IShareService {
                 RedisConstants.EXPIRE_TIME,
                 TimeUnit.SECONDS
         );
-
         return new ShareLinkDTO(shareId, shortUrl);
     }
 

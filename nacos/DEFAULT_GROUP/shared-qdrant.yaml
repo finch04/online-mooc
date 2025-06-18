@@ -1,0 +1,4 @@
+qdrant:
+  host: 192.168.150.101
+  port: 6334
+  secure: false
