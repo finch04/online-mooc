@@ -379,6 +379,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
 //            );
             String systemMessageContent = PromptBuilder.buildSystemMessage(context, message);
 
+
+
             // 使用 TokenStream 接收流
             TokenStream stream = knowledgeAdvisor.advise(sessionId, systemMessageContent,systemMessageContent);
 

@@ -38,23 +38,23 @@ public class QdrantTest {
     private String testCollectionName;
     private static final String AI_CHAT_COLLECTION = "ai-chat";
     private static final int VECTOR_SIZE = 1024; // 根据您的嵌入模型调整向量维度
-    @BeforeEach
-    public void setUp() {
-        // 生成唯一的测试集合名称
-        testCollectionName = "test_collection_" + UUID.randomUUID().toString().substring(0, 8);
-        // 创建 ai-chat 集合
-        createAiChatCollection();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        // 清理测试集合
-        try {
-            qdrantClient.deleteCollectionAsync(testCollectionName);
-        } catch (Exception e) {
-            // 忽略清理错误
-        }
-    }
+//    @BeforeEach
+//    public void setUp() {
+//        // 生成唯一的测试集合名称
+//        testCollectionName = "test_collection_" + UUID.randomUUID().toString().substring(0, 8);
+//        // 创建 ai-chat 集合
+//        createAiChatCollection();
+//    }
+//
+//    @AfterEach
+//    public void tearDown() {
+//        // 清理测试集合
+//        try {
+//            qdrantClient.deleteCollectionAsync(testCollectionName);
+//        } catch (Exception e) {
+//            // 忽略清理错误
+//        }
+//    }
     private void createAiChatCollection() {
         try {
             // 获取所有集合列表，检查 ai-chat 集合是否存在
