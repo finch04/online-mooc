@@ -263,6 +263,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
             }).onError(error -> {
                 isStreamCompleted.set(true);
                 log.error("生成过程发生错误", error);
+
+                log.info("数据接收完成：{}", responseBuilder.toString());
                 try {
                     emitter.send(SseEmitter.event()
                             .data(formatSseMessage("[DONE]"), MediaType.TEXT_PLAIN)
@@ -276,6 +278,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         } catch (Exception e) {
             log.error("初始化TokenStream失败", e);
             try {
+
                 emitter.send(SseEmitter.event()
                         .data(formatSseMessage("[DONE]"), MediaType.TEXT_PLAIN)
                         .name("message"));

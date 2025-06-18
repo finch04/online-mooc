@@ -219,10 +219,11 @@ public class MarkdownDocsServiceImpl extends ServiceImpl<MarkdownDocsMapper, Mar
                 .orElseThrow(() -> new BadRequestException("文件不存在"));
 
         // 获取文档切割等级, 更新数据库文档
-        int level = docs.getLevel();
+        int level = markdownDocs.getLevel();
         //这里应该传前端传入的内容
         String markdownContent = markdownDocs.getContent();
         docs.setContent(markdownContent);
+        docs.setLevel(level);
         updateById(docs);
 
         deleteSegment(docs);

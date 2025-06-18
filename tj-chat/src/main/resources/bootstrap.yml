@@ -45,7 +45,7 @@ langchain4j:
   api-key: EMPTY
   max-tokens: 1000
   timeout-seconds: 15
-  model-name: deepseek-r1:1.5b
+  model-name: qwen3:0.6b
   max-retries: 3
   chat-model-temperature: 0.4
   streaming-chat-model-temperature: 0.7

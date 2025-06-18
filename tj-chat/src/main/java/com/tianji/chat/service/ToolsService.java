@@ -7,16 +7,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class ToolsService {
 
-    @Tool("某个地区有多少个名字的")
-    public Integer getNameCount(@P("地区") String area, @P("名字") String name) {
-        System.out.println("area = " + area);
-        System.out.println("name = " + name);
-        return 100;
+    @Tool("对给定的 2 个数字求和")
+    double sum(double a, double b) {
+        return a + b;
     }
 
-    @Tool("你是finch吗")
-    public String isLike() {
-        System.out.println("isLike");
-        return "是";
+    @Tool("返回给定数字的平方根")
+    double squareRoot(double x) {
+        return Math.sqrt(x);
     }
 }

@@ -40,7 +40,7 @@ public class AiConfig {
         return AiServices.builder(AssistantRedis.class)
                 .chatLanguageModel(qwenChatModel)
                 .streamingChatLanguageModel(qwenStreamingChatModel)
-//                .tools(toolsService)
+                .tools(toolsService)
                 .chatMemoryProvider(memoryId ->
                         MessageWindowChatMemory.builder()
                                 .maxMessages(500)
@@ -81,7 +81,7 @@ public class AiConfig {
     public KnowledgeAdvisor knowledgeAdvisor(StreamingChatLanguageModel qwenStreamingChatModel) {
         return AiServices.builder(KnowledgeAdvisor.class)
                 .streamingChatLanguageModel(qwenStreamingChatModel)
-//                .tools(toolsService)
+                .tools(toolsService)
                 .chatMemoryProvider(memoryId ->
                         MessageWindowChatMemory.builder()
                                 .maxMessages(1000)

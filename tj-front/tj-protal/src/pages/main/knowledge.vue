@@ -296,7 +296,9 @@ const submitEditForm = () => {
 // 修改文件
 const updateFile = async (id) => {
     try {
-        const res = await updateMarkdown({ id, content: editFormData.value.content });
+        const res = await updateMarkdown({ id, 
+            content: editFormData.value.content,
+            level: editFormData.value.level});
         if (res.code === 200) {
             ElMessage.success('修改成功');
             isEditModalVisible.value = false;
