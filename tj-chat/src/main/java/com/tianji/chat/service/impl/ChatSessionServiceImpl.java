@@ -262,7 +262,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                 }
             }).onError(error -> {
                 isStreamCompleted.set(true);
-                log.error("生成过程发生错误", error);
+                log.error("生成过程发生错误");
 
                 log.info("数据接收完成：{}", responseBuilder.toString());
                 try {

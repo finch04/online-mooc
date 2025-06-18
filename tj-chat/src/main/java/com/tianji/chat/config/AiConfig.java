@@ -1,7 +1,6 @@
 package com.tianji.chat.config;
 
-import com.tianji.chat.config.PersistentChatMemoryStore;
-import com.tianji.chat.service.ToolsService;
+import com.tianji.chat.tools.ToolsService;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -31,12 +30,13 @@ public class AiConfig {
     @Autowired
     private PersistentChatMemoryStore store;
 
-    @Autowired
-    private ToolsService toolsService;
+//    @Autowired
+//    private ToolsService toolsService;
 
     @Bean
     public AssistantRedis assistantRedis(ChatLanguageModel qwenChatModel,
-                                         StreamingChatLanguageModel qwenStreamingChatModel) {
+                                         StreamingChatLanguageModel qwenStreamingChatModel,
+                                         ToolsService toolsService) {
         return AiServices.builder(AssistantRedis.class)
                 .chatLanguageModel(qwenChatModel)
                 .streamingChatLanguageModel(qwenStreamingChatModel)
@@ -78,7 +78,8 @@ public class AiConfig {
     }
 
     @Bean
-    public KnowledgeAdvisor knowledgeAdvisor(StreamingChatLanguageModel qwenStreamingChatModel) {
+    public KnowledgeAdvisor knowledgeAdvisor(StreamingChatLanguageModel qwenStreamingChatModel,
+                                             ToolsService toolsService) {
         return AiServices.builder(KnowledgeAdvisor.class)
                 .streamingChatLanguageModel(qwenStreamingChatModel)
                 .tools(toolsService)
