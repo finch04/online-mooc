@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmbeddingController {
 
-    @Resource(name = "RedisVectorStore")
+//    @Resource(name = "RedisVectorStore")
     private final VectorStore vectorStore;
 
     private final EmbeddingModel embeddingModel;

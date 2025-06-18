@@ -1,6 +1,5 @@
 package com.tianji;
 
-import com.tianji.aigc.config.RedisProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,7 +19,7 @@ public class AIGCApplication {
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplicationBuilder(AIGCApplication.class).build(args);
         Environment env = app.run(args).getEnvironment();
-        String protocol = "http";
+         String protocol = "http";
         if (env.getProperty("server.ssl.key-store") != null) {
             protocol = "https";
         }

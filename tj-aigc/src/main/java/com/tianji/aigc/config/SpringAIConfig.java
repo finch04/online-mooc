@@ -15,11 +15,12 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.TokenCountBatchingStrategy;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.redis.RedisVectorStore;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.JedisPooled;
+
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,7 +33,7 @@ import java.net.URISyntaxException;
 @Slf4j
 public class SpringAIConfig {
 
-    private final RedisProperties redisProperties;
+//    private final RedisProperties redisProperties;
 
     @Bean
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder,
@@ -82,44 +83,44 @@ public class SpringAIConfig {
     }
 
 
-    @Bean
-    public VectorStore RedisVectorStore(JedisPooled jedisPooled, EmbeddingModel embeddingModel) {
-        return RedisVectorStore.builder(jedisPooled, embeddingModel)
-                .indexName("tianji:")                // Optional: defaults to "spring-ai-index"
-                .prefix("tianji:embedding:")                  // Optional: defaults to "embedding:"
-                .metadataFields(                         // Optional: define metadata fields for filtering
-                        RedisVectorStore.MetadataField.tag("country"),
-                        RedisVectorStore.MetadataField.numeric("year"))
-                .initializeSchema(true)                   // Optional: defaults to false
-                .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
-                .build();
-    }
-
-    @Bean
-    public JedisPooled jedisPooled() throws URISyntaxException {
-        URI uri = new URI(redisProperties.getUrl());
-
-        //获取host
-        String host = uri.getHost();
-
-        //获取port
-        var port = uri.getPort();
-
-        //获取密码
-        String password = extractPasswordFromURI(uri);
-        log.info("密码是:"+password);
-        return new JedisPooled(host,port,"default",password);
-    }
-
-    // 提取密码的辅助方法
-    private String extractPasswordFromURI(URI uri) {
-        String userInfo = uri.getUserInfo();
-        if (userInfo != null) {
-            // 处理标准格式: redis://:password@host:port
-            String[] parts = userInfo.split(":", 2);
-            // 当格式为 ":password" 时，parts[0]为空字符串，parts[1]为密码
-            return parts.length >= 2 ? parts[1] : userInfo;
-        }
-        return null;
-    }
+//    @Bean
+//    public VectorStore RedisVectorStore(JedisPooled jedisPooled, EmbeddingModel embeddingModel) {
+//        return RedisVectorStore.builder(jedisPooled, embeddingModel)
+//                .indexName("tianji:")                // Optional: defaults to "spring-ai-index"
+//                .prefix("tianji:embedding:")                  // Optional: defaults to "embedding:"
+//                .metadataFields(                         // Optional: define metadata fields for filtering
+//                        RedisVectorStore.MetadataField.tag("country"),
+//                        RedisVectorStore.MetadataField.numeric("year"))
+//                .initializeSchema(true)                   // Optional: defaults to false
+//                .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
+//                .build();
+//    }
+//
+//    @Bean
+//    public JedisPooled jedisPooled() throws URISyntaxException {
+//        URI uri = new URI(redisProperties.getUrl());
+//
+//        //获取host
+//        String host = uri.getHost();
+//
+//        //获取port
+//        var port = uri.getPort();
+//
+//        //获取密码
+//        String password = extractPasswordFromURI(uri);
+//        log.info("密码是:"+password);
+//        return new JedisPooled(host,port,"default",password);
+//    }
+//
+//    // 提取密码的辅助方法
+//    private String extractPasswordFromURI(URI uri) {
+//        String userInfo = uri.getUserInfo();
+//        if (userInfo != null) {
+//            // 处理标准格式: redis://:password@host:port
+//            String[] parts = userInfo.split(":", 2);
+//            // 当格式为 ":password" 时，parts[0]为空字符串，parts[1]为密码
+//            return parts.length >= 2 ? parts[1] : userInfo;
+//        }
+//        return null;
+//    }
 }

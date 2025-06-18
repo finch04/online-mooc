@@ -10,6 +10,7 @@ import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.enums.ChatEventTypeEnum;
 import com.tianji.aigc.service.ChatService;
+import com.tianji.aigc.service.ChatSessionService;
 import com.tianji.aigc.vo.ChatEventVO;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class ChatServiceImpl implements ChatService {
     private final SystemPromptConfig systemPromptConfig;
     private final ChatMemory chatMemory;
     private final VectorStore vectorStore;
+    private final ChatSessionService chatSessionService;
 
     // 存储大模型的生成状态，这里采用ConcurrentHashMap是确保线程安全
     // 目前的版本暂时用Map实现，如果考虑分布式环境的话，可以考虑用redis来实现
@@ -55,6 +57,8 @@ public class ChatServiceImpl implements ChatService {
 
         // 获取用户id
         var userId = UserContext.getUser();
+
+        this.chatSessionService.update(sessionId,question,userId);
 
         return this.chatClient.prompt()
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get())

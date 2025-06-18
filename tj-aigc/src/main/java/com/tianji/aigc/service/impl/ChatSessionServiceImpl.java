@@ -1,10 +1,16 @@
 package com.tianji.aigc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.stream.StreamUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.aigc.config.SessionProperties;
 import com.tianji.aigc.constants.Constant;
@@ -14,6 +20,7 @@ import com.tianji.aigc.mapper.ChatSessionMapper;
 import com.tianji.aigc.memory.MyAssistantMessage;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
+import com.tianji.aigc.vo.ChatSessionVO;
 import com.tianji.aigc.vo.MessageVO;
 import com.tianji.aigc.vo.SessionVO;
 import com.tianji.common.utils.UserContext;
@@ -22,9 +29,14 @@ import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +98,112 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                             .build();
                 })
                 .toList();
+    }
+
+
+    /**
+     * 异步更新聊天会话的标题
+     *
+     * @param sessionId 会话ID，用于标识特定的聊天会话
+     * @param title     新的会话标题，如果为空则不进行更新
+     * @param userId    用户ID
+     */
+    @Async
+    @Override
+    public void update(String sessionId, String title, Long userId) {
+        //查询符合条件的聊天记录
+        ChatSession chatSession = this.lambdaQuery()
+                .eq(ChatSession::getSessionId, sessionId)
+                .eq(ChatSession::getUserId, userId)
+                .one();
+
+        if(ObjectUtil.isEmpty(chatSession)){
+            return;
+        }
+        //原来的标题字段为空，现在对话的标题不为空
+        if(StrUtil.isEmpty(chatSession.getTitle()) && StrUtil.isNotEmpty(title)){
+            chatSession.setTitle(StrUtil.sub(title,0,100));
+        }
+        // 设置更新字段为updateTime为当前时间
+        chatSession.setUpdateTime(LocalDateTimeUtil.now());
+        // 更新数据库中的聊天会话信息
+        super.updateById(chatSession);
+
+    }
+
+    @Override
+    public Map<String, List<ChatSessionVO>> queryHistorySession() {
+        Long userId = UserContext.getUser();
+
+        //查询符合条件的ChatSession
+        List<ChatSession> list = super.lambdaQuery()
+                .eq(ChatSession::getUserId, userId)
+                .isNotNull(ChatSession::getTitle)
+                .orderByDesc(ChatSession::getUpdateTime)
+                .last("LIMIT 30")
+                .list();
+
+        if(CollUtil.isEmpty(list)){
+            return Map.of();
+        }
+
+        //转换为ChatSessionVO
+        List<ChatSessionVO> chatSessionVOS = CollStreamUtil.toList(list, chatSession -> ChatSessionVO.builder()
+                .sessionId(chatSession.getSessionId())
+                .title(chatSession.getTitle())
+                .updateTime(chatSession.getUpdateTime())
+                .build()
+        );
+
+        //定义时间
+        final String TODAY = "当天";
+        final String LAST_30_DAYS = "最近30天";
+        final String LAST_YEAR = "最近1年";
+        final String MORE_THAN_YEAR = "1年以上";
+
+
+        //当前日期
+        LocalDate now = LocalDateTime.now().toLocalDate();
+
+        return CollStreamUtil.groupByKey(chatSessionVOS, chatSessionVO -> {
+            long between = Math.abs(ChronoUnit.DAYS.between(chatSessionVO.getUpdateTime().toLocalDate(), now));//计算时间差
+            if(between == 0){
+                return TODAY;
+            }else if (between <= 30){
+                return LAST_30_DAYS;
+            }else if (between <= 365){
+                return LAST_YEAR;
+            }else{
+                return MORE_THAN_YEAR;
+            }
+        });
+
+    }
+
+    @Override
+    public void deleteHistorySession(String sessionId) {
+
+        LambdaQueryWrapper<ChatSession> lambdaQuery = new LambdaQueryWrapper<>();
+                lambdaQuery.eq(ChatSession::getSessionId, sessionId)
+                           .eq(ChatSession::getUserId, UserContext.getUser());
+        //删除数据库中的会话信息
+        super.remove(lambdaQuery);
+
+        //删除数据库中的历史记录
+        String conversationId = ChatService.getConversationId(sessionId);
+        this.chatMemory.clear(conversationId);
+    }
+
+    @Override
+    public void updateTitle(String sessionId, String title) {
+        //查询出符合条件的那一条历史会话
+        ChatSession chatSession = super.lambdaQuery()
+                .eq(ChatSession::getSessionId, sessionId)
+                .one();
+        //设置历史会话的标题
+        chatSession.setTitle(title);
+
+        super.updateById(chatSession);
     }
 
 }
