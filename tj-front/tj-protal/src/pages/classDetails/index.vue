@@ -56,8 +56,7 @@
                   <!-- 简化二维码显示部分 -->
                   <qrcode-vue v-if="shareUrl" :value="shareUrl" :size="200" level="H" />
                 </div>
-                
-                <span >{{ shareUrl }}</span><span class="bt bt-round" style="margin-top: 3px;margin-right: 5px;align-content: center;" @click="copy">点击复制</span>
+                <span >{{ shareUrl }}</span><span class="bt bt-round" style="margin-top: 3px;margin-right: 5px;align-content: center;" @click="copy">点击复制链接</span>
               </el-popover>
             </div>
           </div>
