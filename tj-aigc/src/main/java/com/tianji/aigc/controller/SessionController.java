@@ -59,8 +59,16 @@ public class SessionController {
     /**
      * 更新历史会话标题
      */
-    @PutMapping("history")
+    @PutMapping("/history")
     public void updateTitle(@RequestParam("sessionId")String sessionId,@RequestParam("title")String title){
         this.chatSessionService.updateTitle(sessionId,title);
+    }
+
+    /**
+     * 根据ai总结动态更改标题  测试
+     */
+    @PutMapping("/auto/history")
+    public void autoUpdateTitle(@RequestParam("sessionId")String sessionId){
+        this.chatSessionService.autoUpdateTitle1(sessionId);
     }
 }

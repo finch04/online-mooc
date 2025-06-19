@@ -21,6 +21,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -29,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
+@Lazy
 public class ChatServiceImpl implements ChatService {
 
     private final ChatClient chatClient;
@@ -58,11 +60,12 @@ public class ChatServiceImpl implements ChatService {
         // 获取用户id
         var userId = UserContext.getUser();
 
-        this.chatSessionService.update(sessionId,question,userId);
-
+        this.chatSessionService.autoUpdateTitle(sessionId,question);
+//        this.chatSessionService.autoUpdateTitle1(sessionId); //结合之前的所有问答动态更新标题
         return this.chatClient.prompt()
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get())
                         .param("now", DateUtil.now())
+                        .param("message",question)
                 ) // 设置系统提示词
                 .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().query(question).similarityThreshold(0.6f).topK(5).build()))
                 .advisors(advisor -> advisor.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))

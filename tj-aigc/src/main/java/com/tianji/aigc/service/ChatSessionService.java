@@ -37,6 +37,8 @@ public interface ChatSessionService extends IService<ChatSession> {
      */
     void update(String sessionId,String title,Long userId);
 
+    public void autoUpdate(String sessionId, String title, Long userId);
+
     /**
      * 查询历史会话列表
      */
@@ -45,4 +47,8 @@ public interface ChatSessionService extends IService<ChatSession> {
     void deleteHistorySession(String sessionId);
 
     void updateTitle(String sessionId, String title);
+
+    void autoUpdateTitle(String sessionId,String question);
+
+    void autoUpdateTitle1(String sessionId);
 }

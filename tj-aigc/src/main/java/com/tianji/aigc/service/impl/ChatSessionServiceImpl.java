@@ -3,6 +3,7 @@ package com.tianji.aigc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.stream.StreamUtil;
 import cn.hutool.core.util.IdUtil;
@@ -13,6 +14,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.aigc.config.SessionProperties;
+import com.tianji.aigc.config.SystemPromptConfig;
 import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.entity.ChatSession;
 import com.tianji.aigc.enums.MessageTypeEnum;
@@ -25,6 +27,7 @@ import com.tianji.aigc.vo.MessageVO;
 import com.tianji.aigc.vo.SessionVO;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
@@ -45,6 +48,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     private final SessionProperties sessionProperties;
 
     private final ChatMemory chatMemory;
+    private final ChatClient chatClient;
+    private final SystemPromptConfig systemPromptConfig;
 
     @Override
     public SessionVO createSession(Integer num) {
@@ -131,6 +136,29 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
 
     }
 
+    @Async
+    @Override
+    public void autoUpdate(String sessionId, String title, Long userId) {
+        //查询符合条件的聊天记录
+        ChatSession chatSession = this.lambdaQuery()
+                .eq(ChatSession::getSessionId, sessionId)
+                .eq(ChatSession::getUserId, userId)
+                .one();
+
+        if(ObjectUtil.isEmpty(chatSession)){
+            return;
+        }
+        //原来的标题字段为空，现在对话的标题不为空
+        if(StrUtil.isNotEmpty(title)){
+            chatSession.setTitle(StrUtil.sub(title,0,100));
+        }
+        // 设置更新字段为updateTime为当前时间
+        chatSession.setUpdateTime(LocalDateTimeUtil.now());
+        // 更新数据库中的聊天会话信息
+        super.updateById(chatSession);
+
+    }
+
     @Override
     public Map<String, List<ChatSessionVO>> queryHistorySession() {
         Long userId = UserContext.getUser();
@@ -204,6 +232,40 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         chatSession.setTitle(title);
 
         super.updateById(chatSession);
+
+    }
+
+
+    /**
+     * 根据第一个回答动态生成标题
+     * @param sessionId
+     */
+    @Override
+    public void autoUpdateTitle(String sessionId,String question) {
+        var userId = UserContext.getUser();
+        String autoTitle = chatClient.prompt()
+                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get()).param("now",DateUtil.now()).param("message",question))
+                .user("帮我根据用户问题总结一个标题出来")
+                .call()
+                .content();
+        this.autoUpdate(sessionId,autoTitle,userId);
+    }
+
+
+    /**
+     * 根据所有的对话动态生成最新标题
+     * @param sessionId
+     */
+    @Override
+    public void autoUpdateTitle1(String sessionId) {
+        var userId = UserContext.getUser();
+        List<MessageVO> messageVOS = this.queryBySessionId(sessionId);
+        String autoTitle = chatClient.prompt()
+                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get()).param("now",DateUtil.now()).param("message",messageVOS))
+                .user("帮我根据对话总结一个标题出来")
+                .call()
+                .content();
+        this.autoUpdate(sessionId,autoTitle,userId);
     }
 
 }
