@@ -62,6 +62,17 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
+        <!--influxDB-->
+<!--        <dependency>-->
+<!--            <groupId>org.influxdb</groupId>-->
+<!--            <artifactId>influxdb-java</artifactId>-->
+<!--            <version>2.18</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.influxdb</groupId>
+            <artifactId>influxdb-client-java</artifactId>
+            <version>6.6.0</version>
+        </dependency>
         <!--mq-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

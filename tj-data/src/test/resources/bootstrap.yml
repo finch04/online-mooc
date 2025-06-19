@@ -31,6 +31,8 @@ spring:
             refresh: false
           - data-id: shared-xxljob.yaml # 共享job配置
             refresh: false
+#          - data-id: shared-influxdb.yaml # 共享job配置
+#            refresh: false
 tj:
   swagger:
     enable: true

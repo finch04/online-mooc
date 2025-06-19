@@ -43,7 +43,7 @@ public interface MqConstants {
     interface Key{
         /*数据有关的 RoutingKey*/
         String DATA_TODO_KEY = "data.todo";
-
+        String DATA_LOG_KEY = "data.log";
         String DATA_COURSE_KEY = "course.data";
         String DATA_ORDER_KEY = "order.data";
 
