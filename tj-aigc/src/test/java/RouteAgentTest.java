@@ -1,6 +1,6 @@
-package com.tianji.aigc.agent;
 
 import cn.hutool.core.lang.Assert;
+import com.tianji.aigc.agent.RouteAgent;
 import com.tianji.aigc.enums.AgentTypeEnum;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
