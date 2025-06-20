@@ -3,6 +3,7 @@ package com.tianji.data.influxdb.domain;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.ToString;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 
@@ -11,6 +12,7 @@ import org.influxdb.annotation.Measurement;
  * @describe: 数据埋点实体类--入库时间序列数据库
  */
 @Data
+@ToString
 @Measurement(database = "point_data", name = "log")
 public class BusinessLog {
 

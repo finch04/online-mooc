@@ -28,10 +28,14 @@ public class QueryTest {
     @Test
     public void testQuery() {
         //统计当天所有注册用户
-        List<String> strings = businessLogMapper.allDauForUserId(TimeHandlerUtils.getTodayTime().getBegin(), TimeHandlerUtils.getTodayTime().getEnd() );
-        for (String string : strings) {
-            System.out.println(string);
+        List<BusinessLog> businessLogs = businessLogMapper.login(TimeHandlerUtils.getTodayTime().getBegin(), TimeHandlerUtils.getTodayTime().getEnd());
+        for (BusinessLog businessLog : businessLogs) {
+            System.out.println(businessLog);
         }
+//        List<String> strings = businessLogMapper.allDauForUserId(TimeHandlerUtils.getTodayTime().getBegin(), TimeHandlerUtils.getTodayTime().getEnd() );
+//        for (String string : strings) {
+//            System.out.println(string);
+//        }
     }
 
 }
