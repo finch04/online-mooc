@@ -6,7 +6,9 @@ package com.tianji.data.handler;/**
 import com.tianji.api.dto.data.OrderDataVO;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.domain.vo.LogBusinessVO;
-import com.tianji.data.influxdb.service.LogBusinessService;
+import com.tianji.data.influxdb.domain.BusinessLog;
+import com.tianji.data.influxdb.service.IBusinessLogService;
+import com.tianji.data.utils.BeanConv;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -28,7 +30,7 @@ import org.springframework.stereotype.Component;
 public class LogHandler {
 
     @Autowired
-    private LogBusinessService logBusinessService;
+    private IBusinessLogService businessLogService;
 
 
     // 监听订单数据统计消息
@@ -40,7 +42,8 @@ public class LogHandler {
     public void listenLog(LogBusinessVO vo) {
         try {
             log.info("收到日志数据：{}",vo);
-            logBusinessService.saveLog(vo);
+            Boolean businessLog = businessLogService.createBusinessLog(BeanConv.toBean(vo, BusinessLog.class));
+            log.info("存储日志数据成功：{}",businessLog);
         } catch (Exception e) {
             log.error("处理日志数据失败", e);
             // 可添加重试或补偿逻辑

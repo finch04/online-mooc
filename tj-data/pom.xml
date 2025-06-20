@@ -69,9 +69,15 @@
 <!--            <version>2.18</version>-->
 <!--        </dependency>-->
         <dependency>
-            <groupId>com.influxdb</groupId>
-            <artifactId>influxdb-client-java</artifactId>
-            <version>6.6.0</version>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+            <version>2.18</version>
+        </dependency>
+        <!--orika 拷贝工具 -->
+        <dependency>
+            <groupId>ma.glasnost.orika</groupId>
+            <artifactId>orika-core</artifactId>
+            <version>${orika-core.version}</version>
         </dependency>
         <!--mq-->
         <dependency>
