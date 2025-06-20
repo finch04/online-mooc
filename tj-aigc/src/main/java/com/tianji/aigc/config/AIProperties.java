@@ -13,7 +13,9 @@ public class AIProperties {
 
     @Data
     public static class System {
-        private Chat chat; // 系统提示语，用于课程推荐、购买业务
+        private Chat chat; //系统提示语，用于课程推荐、购买业务
+        private Chat title; //用于提取标题
+        private Chat routeAgent; // 路由智能体系统提示词
 
         @Data
         public static class Chat {

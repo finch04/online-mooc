@@ -32,6 +32,7 @@ import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     private final ChatMemory chatMemory;
     private final ChatClient chatClient;
     private final SystemPromptConfig systemPromptConfig;
+    private final ChatModel chatModel;
 
     @Override
     public SessionVO createSession(Integer num) {
@@ -127,7 +129,19 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         }
         //原来的标题字段为空，现在对话的标题不为空
         if(StrUtil.isEmpty(chatSession.getTitle()) && StrUtil.isNotEmpty(title)){
-            chatSession.setTitle(StrUtil.sub(title,0,100));
+            String userText = StrUtil.format("""
+                    对话内容:
+                    {}
+                    """,title);
+            String titleContent = ChatClient.builder(this.chatModel)
+                    .build()
+                    .prompt()
+                    .system(this.systemPromptConfig.getChatTitleMessage().get())
+                    .user(userText)
+                    .call()
+                    .content();
+            chatSession.setTitle(titleContent);
+//            chatSession.setTitle(StrUtil.sub(title,0,100));
         }
         // 设置更新字段为updateTime为当前时间
         chatSession.setUpdateTime(LocalDateTimeUtil.now());
@@ -149,7 +163,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
             return;
         }
         //原来的标题字段为空，现在对话的标题不为空
-        if(StrUtil.isNotEmpty(title)){
+        if(StrUtil.isNotEmpty(title) && ObjectUtil.isEmpty(chatSession.getTitle())){
             chatSession.setTitle(StrUtil.sub(title,0,100));
         }
         // 设置更新字段为updateTime为当前时间

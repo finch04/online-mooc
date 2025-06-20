@@ -22,11 +22,15 @@ public class SystemPromptConfig {
 
     // 使用原子引用，保证线程安全
     private final AtomicReference<String> chatSystemMessage = new AtomicReference<>();
+    private final AtomicReference<String> chatTitleMessage = new AtomicReference<>();
+    private final AtomicReference<String> routeAgentSystemMessage = new AtomicReference<>();
 
     @PostConstruct // 初始化时加载配置
     public void init() {
         // 读取配置文件
         loadConfig(aiProperties.getSystem().getChat(), chatSystemMessage);
+        loadConfig(aiProperties.getSystem().getTitle(), chatTitleMessage);
+        loadConfig(aiProperties.getSystem().getRouteAgent(), routeAgentSystemMessage);
     }
 
     private void loadConfig(AIProperties.System.Chat chatConfig, AtomicReference<String> target) {

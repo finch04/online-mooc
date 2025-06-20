@@ -33,3 +33,11 @@ tj:
           data-id: system-chat-message.txt
           group: DEFAULT_GROUP
           timeout-ms: 20000
+        title:
+          data-id: system-chat-title-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000
+        route-agent:
+          data-id: route-agent-system-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000

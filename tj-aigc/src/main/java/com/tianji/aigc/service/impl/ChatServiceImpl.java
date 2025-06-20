@@ -60,7 +60,7 @@ public class ChatServiceImpl implements ChatService {
         // 获取用户id
         var userId = UserContext.getUser();
 
-        this.chatSessionService.autoUpdateTitle(sessionId,question);
+//        this.chatSessionService.autoUpdateTitle(sessionId,question);
 //        this.chatSessionService.autoUpdateTitle1(sessionId); //结合之前的所有问答动态更新标题
         return this.chatClient.prompt()
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get())
@@ -83,6 +83,16 @@ public class ChatServiceImpl implements ChatService {
                 .doOnCancel(() -> {
                     // 这里如果执行到，就说明流被中断了，手动调用ChatMemory中的add方法，存储 中断之前 大模型生成的内容
                     this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
+                })
+                .doFinally(signalType -> {
+                        //需要更新对话的标题或更新时间
+                        var content = StrUtil.format("""
+                        --------
+                        USER:{}\n
+                        ASSISTANT:{}
+                        --------
+                        """,question, outputBuilder.toString());
+                        this.chatSessionService.update(sessionId,content,userId);
                 })
                 .takeWhile(response -> { // 通过返回值来控制Flux流是否继续，true：继续，false：终止
                     return GENERATE_STATUS.getOrDefault(sessionId, false);
