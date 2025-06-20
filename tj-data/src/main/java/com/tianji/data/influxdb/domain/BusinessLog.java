@@ -13,7 +13,7 @@ import org.influxdb.annotation.Measurement;
  */
 @Data
 @ToString
-@Measurement(database = "point_data", name = "log")
+@Measurement(database = "point_data", name = "log",retentionPolicy = "rp_point")
 public class BusinessLog {
 
     @ApiModelProperty(value = "请求id")

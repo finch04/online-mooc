@@ -24,7 +24,7 @@ public class MetricTest {
     @Test
     public void testMetric(){
             // 分析注册URL的访问情况
-            String url = "/login";
+            String url = "/accounts/login";
             String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
             String beginTime = today + " 00:00:00";
             String endTime = today + " 23:59:59";
@@ -35,6 +35,9 @@ public class MetricTest {
 
             System.out.println("Total Visits: " + metrics.size());
             System.out.println("Successful Visits: " + metrics.stream().filter(log -> log.getResponseCode().equals("200")).count());
+            for (BusinessLog metric : metrics) {
+                System.out.println(metric.toString());
+            }
     }
 
     @Test

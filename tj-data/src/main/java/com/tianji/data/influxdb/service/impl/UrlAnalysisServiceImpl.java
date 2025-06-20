@@ -26,9 +26,7 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
      * @return 包含访问指标的结果对象
      */
     public List<BusinessLog> analyzeUrl(String url, String beginTime, String endTime) {
-        // 转换URL为InfluxDB正则表达式
-//        String regex = UrlRegexConverter.convertToInfluxRegex(url);
-        
+        //示例 URL：/accounts/login
         // 调用Mapper方法执行查询
         return businessLogMapper.findLogsByUrl(url, beginTime, endTime);
     }
@@ -41,6 +39,8 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
      * @return 包含访问指标的结果对象
      */
     public List<BusinessLog> analyzeUrlByLike(String url, String beginTime, String endTime) {
+        //示例URL:/login
+
         // 将URL转换为InfluxDB正则表达式格式：/\/accounts/
         // 1. 转义URL中的斜杠：/login → \/login
         String escapedUrl = url.replace("/", "\\\\/"); // 四个反斜杠表示一个\/

@@ -73,7 +73,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             @Param("end") String end);
 
     /**
-     * 统计URL在指定时间范围内的总访问量
+     * 模糊统计URL在指定时间范围内的总访问量
      * @param urlRegex 要匹配的URL正则表达式
      * @param begin 开始时间
      * @param end 结束时间
@@ -90,7 +90,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             @Param("end") String end);
 
     /**
-     * 统计URL在指定时间范围内的访问失败数
+     * 模糊统计URL在指定时间范围内的访问失败数
      * @param urlRegex 要匹配的URL正则表达式
      * @param begin 开始时间
      * @param end 结束时间
@@ -109,7 +109,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             @Param("end") String end);
 
     /**
-     * 查询URL在指定时间范围内的详细日志记录
+     * 模糊查询URL在指定时间范围内的详细日志记录
      * @param urlRegex 要匹配的URL正则表达式
      * @param begin 开始时间
      * @param end 结束时间
@@ -182,11 +182,11 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
     Integer duv(@Param("begin")String begin, @Param("end")String end);
 
     /**
-     * 每日点击首页业务记录
+     * 日报错次数
      * @param begin
      * @param end
      * @return
      */
-    @Select(value = "SELECT * FROM log WHERE response_code = '200' and  time > #{begin} and time < #{end} and request_uri =~/find-index-category-product/",resultType = BusinessLog.class,bucket = "point_data")
-    List<BusinessLog> dpvForIndex(@Param("begin")String begin, @Param("end")String end);
+    @Select(value = "SELECT COUNT(request_id) FROM  log  WHERE  time > #{begin} and time < #{end} and response_code != 200",resultType = BusinessLog.class,bucket = "point_data")
+    Integer dpvForIndex(@Param("begin")String begin, @Param("end")String end);
 }

@@ -9,9 +9,9 @@ spring:
     name: data-service
   influx:
     url: http://192.168.150.101:8006
-    token: tp7ccd_pID7eLccBkzsXoae3uoMRfbrh-ZYNQeY8O4FuRjSXZCmdVQ4JHMjARqmmMHgaIU84UBVjhymjY9DQ7Q==
-    org: tj
-    bucket: points
+    #    password: 123456
+    #    user: admin
+    mapper-location: com.tianji.data.influxdb.mapper
   cloud:
     nacos:
       config:
