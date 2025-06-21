@@ -126,7 +126,7 @@ export default [
         path: "log",
         name: "log",
         component: () => import("@/pages/data/log/index.vue"),
-        meta: { title: "日志管理" },
+        meta: { title: "URL指标分析" },
       },
     ],
   },

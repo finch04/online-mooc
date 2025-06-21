@@ -9,6 +9,8 @@ import com.tianji.common.domain.R;
 import com.tianji.common.domain.dto.LoginUserDTO;
 import com.tianji.common.domain.vo.LogBusinessVO;
 import com.tianji.gateway.config.AuthProperties;
+import com.tianji.gateway.utils.LogCollector;
+import com.tianji.gateway.utils.RequestHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -18,6 +20,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -32,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -47,15 +51,31 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
     private final AuthUtil authUtil;
     private final AuthProperties authProperties;
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
-    private final StringRedisTemplate redisTemplate;
-    private final RabbitMqHelper mqHelper;
-    private final ObjectMapper objectMapper; // JSON序列化工具
+    private final LogCollector logCollector;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // 处理文件上传:如果是文件上传则不记录日志
+        MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
+        boolean flag = RequestHelper.isUploadFile(mediaType);
+
+        // 忽略路径处理:获得请求路径然后与logProperties的路进行匹配，匹配上则不记录日志
+        String path = exchange.getRequest().getURI().getPath();
+        Set<String> ignoreTestUrl = authProperties.getExcludePath();
+        for (String testUrl : ignoreTestUrl) {
+            if (antPathMatcher.match(testUrl, path)) {
+                flag = true;
+                break;
+            }
+        }
+
+        // 无需记录日志：直接放过请求
+        if (flag) {
+            return chain.filter(exchange);
+        }
+
         // 1.获取请求信息
         ServerHttpRequest request = exchange.getRequest();
-        String path = request.getPath().toString();
         String method = request.getMethodValue();
         String antPath = method + ":" + path;
 
@@ -72,10 +92,10 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                 .flatMap(cachedExchange -> {
                     // 4.处理用户信息
                     List<String> authHeaders = request.getHeaders().get(AUTHORIZATION_HEADER);
-                    String token = authHeaders == null ? "" : authHeaders.get(0);
+                    String token = authHeaders == null? "" : authHeaders.get(0);
                     R<LoginUserDTO> r = authUtil.parseToken(token);
 
-                    if(r.success()) {
+                    if (r.success()) {
                         LoginUserDTO user = r.getData();
                         vo.setUserId(user.getUserId());
                     }
@@ -88,23 +108,24 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                             .doOnSuccess(v -> {
                                 // 处理成功响应
                                 ServerHttpResponse response = cachedExchange.getResponse();
-                                logResponse(vo, response, startTime, null);
+                                logCollector.logResponse(vo, response, startTime, null);
                             })
                             .doOnError(throwable -> {
                                 // 处理错误响应
                                 ServerHttpResponse response = cachedExchange.getResponse();
-                                logResponse(vo, response, startTime, throwable);
+                                logCollector.logResponse(vo, response, startTime, throwable);
                             })
                             .onErrorResume(throwable -> {
                                 // 确保错误被捕获但继续传播
-                                return Mono.error(throwable);
+                                ServerHttpResponse response = cachedExchange.getResponse();
+                                return logCollector.logException(vo, response, throwable);
                             });
                 });
     }
 
     private Mono<ServerWebExchange> cacheRequestBody(ServerWebExchange exchange, LogBusinessVO vo) {
-        ServerHttpRequest request = exchange.getRequest();
 
+        ServerHttpRequest request = exchange.getRequest();
         // 处理GET请求（没有请求体）
         if (request.getMethodValue().equalsIgnoreCase("GET")) {
             vo.setRequestBody("");
@@ -145,84 +166,9 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                 .defaultIfEmpty(exchange); // 如果没有请求体，直接返回原始exchange
     }
 
-
-    private void logResponse(LogBusinessVO vo, ServerHttpResponse response, long startTime, Throwable throwable) {
-        long endTime = System.currentTimeMillis();
-        // 设置响应状态码
-        vo.setResponseCode(response.getStatusCode() != null ? response.getStatusCode().value() : 500);
-        // 设置响应消息
-        vo.setResponseMsg(throwable == null ? "SUCCESS" : throwable.getMessage());
-        // 设置响应时间
-        vo.setResponseTime(endTime - startTime);
-
-        // 将日志存入Redis List而非直接发送MQ
-        try {
-            String logJson = objectMapper.writeValueAsString(vo);
-            redisTemplate.opsForList().rightPush(LOG_QUEUE_KEY, logJson);
-            // 设置过期时间，防止内存溢出
-            redisTemplate.expire(LOG_QUEUE_KEY, 24, TimeUnit.HOURS);
-        } catch (Exception e) {
-            // 记录异常但不影响主流程
-            log.error("Failed to serialize log: {}", vo, e);
-        }
-    }
-
-    // 定时任务：批量发送日志
-    @Scheduled(fixedDelayString = batchTime)
-    public void sendBatchLogs() {
-        try {
-            // 批量获取日志并删除
-            List<String> logsJson = redisTemplate.execute((RedisCallback<List<String>>) connection -> {
-                List<String> result = new ArrayList<>();
-                connection.openPipeline();
-                connection.lRange(LOG_QUEUE_KEY.getBytes(), 0, batchSize - 1);
-                connection.lTrim(LOG_QUEUE_KEY.getBytes(), batchSize, -1);
-                List<Object> responses = connection.closePipeline();
-
-                if (responses.size() > 0 && responses.get(0) instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<byte[]> bytesList = (List<byte[]>) responses.get(0);
-                    for (byte[] bytes : bytesList) {
-                        if (bytes != null) {
-                            result.add(new String(bytes, StandardCharsets.UTF_8));
-                        }
-                    }
-                }
-                return result;
-            });
-
-            // 发送日志到MQ
-            if (!logsJson.isEmpty()) {
-                // 将JSON字符串列表转换为对象列表
-                List<LogBusinessVO> logs = logsJson.stream()
-                        .map(json -> {
-                            try {
-                                return objectMapper.readValue(json, LogBusinessVO.class);
-                            } catch (JsonProcessingException e) {
-                                log.error("Failed to parse log: {}", json, e);
-                                return null;
-                            }
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-
-                if (!logs.isEmpty()) {
-                    // 发送对象列表
-                    mqHelper.sendAsync(
-                            MqConstants.Exchange.DATA_EXCHANGE,
-                            MqConstants.Key.DATA_LOG_KEY,
-                            logs
-                    );
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed to send batch logs", e);
-        }
-    }
-
     @Override
     public int getOrder() {
-        // 确保在AccountAuthFilter之后执行
-        return Ordered.LOWEST_PRECEDENCE;
+        // 设置为较高优先级，但低于RequestIdRelayFilter
+        return Ordered.HIGHEST_PRECEDENCE + 1;
     }
 }

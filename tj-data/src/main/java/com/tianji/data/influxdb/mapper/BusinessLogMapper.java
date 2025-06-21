@@ -6,6 +6,7 @@ import com.tianji.data.influxdb.anno.Select;
 import com.tianji.data.influxdb.domain.BusinessLog;
 import com.tianji.data.influxdb.domain.UrlMetrics;
 import org.apache.ibatis.annotations.Mapper;
+import retrofit2.http.Query;
 
 import java.util.List;
 
@@ -36,7 +37,25 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             @Param("end") String end);
 
     /**
-     * 统计URL在指定时间范围内的访问失败数
+     * 统计URL在指定时间范围内的每日访问量
+     * @param urlRegex 要匹配的URL
+     * @param begin 开始时间
+     * @param end 结束时间
+     * @return 每日访问量列表
+     */
+    @Select(value = "SELECT COUNT(request_id) FROM log " +
+            "WHERE time > #{begin} AND time < #{end} AND request_uri = #{urlRegex} " +
+            "GROUP BY time(1d) ",
+            resultType = Long.class,
+            bucket = "point_data")
+    List<Long> countDailyVisits(
+            @Param("urlRegex") String urlRegex,
+            @Param("begin") String begin,
+            @Param("end") String end
+    );
+
+    /**
+     * 统计URL在指定时间范围内的每日访问失败数
      * @param urlRegex 要匹配的URL正则表达式
      * @param begin 开始时间
      * @param end 结束时间
@@ -46,10 +65,11 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             "FROM log " +
             "WHERE time > #{begin} AND time < #{end} " +
             "AND request_uri =#{urlRegex}" +
-            "AND response_code != '200'",
+            "AND response_code != '200'"+
+            "GROUP BY time(1d) ",
             resultType = Long.class,
             bucket = "point_data")
-    Long countFailedVisits(
+    List<Long> countFailedVisits(
             @Param("urlRegex") String urlRegex,
             @Param("begin") String begin,
             @Param("end") String end);

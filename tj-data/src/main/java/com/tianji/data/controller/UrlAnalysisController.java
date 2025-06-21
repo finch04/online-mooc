@@ -33,16 +33,16 @@ public class UrlAnalysisController {
     @Autowired
     private IUrlAnalysisService urlAnalysisService;
 
-    @GetMapping("/analysis")
+    @GetMapping("/page/log")
     @ApiOperation("根据url获取日志")
-    public PageDTO<BusinessLog> getLogsByUrl(UrlPageQuery query) {
-        return urlAnalysisService.analyzeUrl(query);
+    public PageDTO<BusinessLog> getLogsPageByUrl(UrlPageQuery query) {
+        return urlAnalysisService.getLogsPageByUrl(query);
     }
 
-    @GetMapping("/analysis/like")
+    @GetMapping("/page/log/like")
     @ApiOperation("根据模糊url获取日志")
-    public PageDTO<BusinessLog> getLogsByUrlByLike(UrlPageQuery query) {
-        return urlAnalysisService.analyzeUrlByLike(query);
+    public PageDTO<BusinessLog> getLogsPageByUrlByLike(UrlPageQuery query) {
+        return urlAnalysisService.getLogsPageByUrlByLike(query);
     }
 
     @GetMapping("/metric")

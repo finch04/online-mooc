@@ -68,7 +68,7 @@ public class ResultSetHandler {
             }else {
                 // 查找第一个非time的字段
                 Object value = findFirstNonTimeValue(mapHandler);
-                if (value != null) {
+                if (value != null && !"null".equals(String.valueOf(value))) {
                     String target = String.valueOf(value).replace(".0","");
                     return convertStringToObject(resultType, target);
                 }
@@ -92,7 +92,7 @@ public class ResultSetHandler {
                 for (Map<String, Object> mapHandler : listHandler) {
                     // 查找第一个非time的字段
                     Object value = findFirstNonTimeValue(mapHandler);
-                    if (value != null) {
+                    if (value != null && !"null".equals(String.valueOf(value))) {
                         String target = String.valueOf(value).replace(".0","");
                         listResult.add(convertStringToObject(resultType, target));
                     } else {
@@ -108,7 +108,7 @@ public class ResultSetHandler {
     // 查找Map中第一个非time的字段值
     private Object findFirstNonTimeValue(Map<String, Object> map) {
         for (String key : map.keySet()) {
-            if (!key.equals("time") && !EmptyUtil.isNullOrEmpty(map.get(key))) {
+            if (!key.equals("time") && !EmptyUtil.isNullOrEmpty(map.get(key)) && !"null".equals(String.valueOf(map.get(key)))) {
                 return map.get(key);
             }
         }
@@ -180,6 +180,9 @@ public class ResultSetHandler {
 
     @SneakyThrows
     public static <T> T convertStringToObject(Class<?> clazz, String str){
+        if (str == null || "null".equals(str)) {
+            return null;
+        }
         if (clazz == String.class) {
             return (T)str; // 如果目标类型是 String，则直接返回字符串
         } else if (isTargetClass(clazz)){

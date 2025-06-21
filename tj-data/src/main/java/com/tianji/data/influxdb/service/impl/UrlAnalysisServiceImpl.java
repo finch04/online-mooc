@@ -3,6 +3,7 @@ package com.tianji.data.influxdb.service.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.common.domain.dto.PageDTO;
+import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.NumberUtils;
 import com.tianji.data.influxdb.domain.BusinessLog;
 import com.tianji.data.influxdb.domain.UrlMetrics;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,19 +38,34 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
      * 分析URL的访问指标
      * @return 包含访问指标的结果对象
      */
-    public PageDTO<BusinessLog> analyzeUrl(UrlPageQuery query) {
+    public PageDTO<BusinessLog> getLogsPageByUrl(UrlPageQuery query) {
+        if(query.getUrl()==null){
+            throw new BizIllegalException("请输入URL");
+        }
         //示例 URL：/accounts/login
         // 调用Mapper方法执行查询
         String url = query.getUrl();
-        String beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
-        String endTime = TimeHandlerUtils.localDateTimeToString(query.getEndTime(), null);
+
+        String beginTime = TimeHandlerUtils.getYesterdayTime().getBegin();
+        String endTime = TimeHandlerUtils.getTodayTime().getEnd();
+        if(query.getBeginTime()!=null && query.getEndTime()!=null){
+            beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
+            endTime = TimeHandlerUtils.localDateTimeToString(query.getEndTime(), null);
+        }
+
         int pageNum = query.getPageNo();
         int pageSize = query.getPageSize();
         int offset = (pageNum - 1) * pageSize;
 
-        List<BusinessLog> list = businessLogMapper.findLogsByUrl(url, beginTime, endTime, pageSize, offset);
-        // 统计总记录数
-        Long total = businessLogMapper.countLogsByUrlToday(url, beginTime, endTime);
+        List<BusinessLog> list = null;
+        Long total = null;
+        try {
+            list = businessLogMapper.findLogsByUrl(url, beginTime, endTime, pageSize, offset);
+            // 统计总记录数
+            total = businessLogMapper.countLogsByUrlToday(url, beginTime, endTime);
+        } catch (Exception e) {
+            throw new BizIllegalException("搜索url不合法");
+        }
 
         // 创建 MyBatis-Plus 的 Page 对象
         Page<BusinessLog> page = new Page<>(pageNum, pageSize, total);
@@ -62,7 +79,7 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
      * 分析URL的访问指标(模糊搜索url)---注意SQL注入---
      * @return 包含访问指标的结果对象
      */
-    public PageDTO<BusinessLog> analyzeUrlByLike(UrlPageQuery query) {
+    public PageDTO<BusinessLog> getLogsPageByUrlByLike(UrlPageQuery query) {
         //示例URL:/login
 
         // 将URL转换为InfluxDB正则表达式格式：/\/accounts/
@@ -72,15 +89,26 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
         // 2. 用/包裹整个正则：/\/login/
         String regex = "/" + escapedUrl + "/";
 
-        String beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
-        String endTime = TimeHandlerUtils.localDateTimeToString(query.getEndTime(), null);
+        String beginTime = TimeHandlerUtils.getYesterdayTime().getBegin();
+        String endTime = TimeHandlerUtils.getTodayTime().getEnd();
+        if(query.getBeginTime()!=null && query.getEndTime()!=null){
+            beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
+            endTime = TimeHandlerUtils.localDateTimeToString(query.getEndTime(), null);
+        }
+
         int pageNum = query.getPageNo();
         int pageSize = query.getPageSize();
         int offset = (pageNum - 1) * pageSize;
 
-        List<BusinessLog> list = businessLogMapper.findLogsByUrlByLike(regex, beginTime, endTime, pageSize, offset);
-        // 统计总记录数
-        Long total = businessLogMapper.countLogsByUrlTodayByLike(regex, beginTime, endTime);
+        List<BusinessLog> list = null;
+        Long total = null;
+        try {
+            list = businessLogMapper.findLogsByUrlByLike(regex, beginTime, endTime, pageSize, offset);
+            // 统计总记录数
+            total = businessLogMapper.countLogsByUrlTodayByLike(regex, beginTime, endTime);
+        } catch (Exception e) {
+            throw new BizIllegalException("搜索url不合法");
+        }
 
         // 创建 MyBatis-Plus 的 Page 对象
         Page<BusinessLog> page = new Page<>(pageNum, pageSize, total);
@@ -92,50 +120,89 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
     @Override
     public EchartsVO getMetricByUrl(UrlQuery query) {
         String url = query.getUrl();
-        String beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
-        String endTime = TimeHandlerUtils.localDateTimeToString(query.getEndTime(), null);
 
-        Long totalVisits = businessLogMapper.countTotalVisits(url, beginTime, endTime);
-        Long failedVisits = businessLogMapper.countFailedVisits(url, beginTime, endTime);
+        String beginTime = TimeHandlerUtils.getYesterdayTime().getBegin();
+        String endTime = TimeHandlerUtils.getTodayTime().getEnd();
+        if (query.getBeginTime() != null && query.getEndTime() != null) {
+            beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
+            endTime = TimeHandlerUtils.localDateTimeToString(query.getEndTime(), null);
+        }
+
+        // 假设这两个方法已返回每日统计数组（例如7天数据对应7个元素）
+        List<Long> totalVisits = null;
+        List<Long> failedVisits = null;
+        try {
+            totalVisits = businessLogMapper.countDailyVisits(url, beginTime, endTime);
+            failedVisits = businessLogMapper.countFailedVisits(url, beginTime, endTime);
+        } catch (Exception e) {
+            throw new BizIllegalException("搜索url不合法");
+        }
 
         // 封装数据
         EchartsVO echartsVO = new EchartsVO();
         List<AxisVO> yAxis = new ArrayList<>();
         List<SerierVO> series = new ArrayList<>();
 
-        // 总访问量数据
-        List<Double> totalVisitsData = Collections.singletonList(totalVisits.doubleValue());
-        Double totalVisitsMax = totalVisits.doubleValue();
-        Double totalVisitsMin = totalVisits.doubleValue();
-        series.add(new SerierVO("总访问量", "value", totalVisitsData, totalVisitsMax + "次", totalVisitsMin + "次"));
+        // ------------------- 修正总访问量数据映射 -------------------
+        // 将Long数组转换为Double数组
+        List<Double> totalVisitsData = totalVisits.stream()
+                .map(Long::doubleValue)
+                .collect(Collectors.toList());
+        // 计算实际最大值和最小值
+        Double totalVisitsMax = totalVisitsData.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        Double totalVisitsMin = totalVisitsData.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+
+        series.add(new SerierVO(
+                "总访问量",
+                "value",
+                totalVisitsData,
+                totalVisitsMax + "次",
+                totalVisitsMin + "次"
+        ));
         yAxis.add(AxisVO.builder()
                 .max(totalVisitsMax)
                 .min(totalVisitsMin * 0.9)
-                .interval(((int) NumberUtils.div((totalVisitsMax - totalVisitsMin * 0.9), 10.0) + 1) * 1.0)
+                .interval(calculateInterval(totalVisitsMax, totalVisitsMin * 0.9))
                 .average(NumberUtils.setScale(NumberUtils.null2Zero(NumberUtils.average(totalVisitsData))))
                 .type(AxisVO.TYPE_VALUE)
                 .build());
 
-        // 总报错量数据
-        List<Double> failedVisitsData = Collections.singletonList(failedVisits.doubleValue());
-        Double failedVisitsMax = failedVisits.doubleValue();
-        Double failedVisitsMin = failedVisits.doubleValue();
-        series.add(new SerierVO("总报错量", "value", failedVisitsData, failedVisitsMax + "次", failedVisitsMin + "次"));
+        // ------------------- 修正总报错量数据映射 -------------------
+        List<Double> failedVisitsData = failedVisits.stream()
+                .map(Long::doubleValue)
+                .collect(Collectors.toList());
+        Double failedVisitsMax = failedVisitsData.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        Double failedVisitsMin = failedVisitsData.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+
+        series.add(new SerierVO(
+                "总报错量",
+                "value",
+                failedVisitsData,
+                failedVisitsMax + "次",
+                failedVisitsMin + "次"
+        ));
         yAxis.add(AxisVO.builder()
                 .max(failedVisitsMax)
                 .min(failedVisitsMin * 0.9)
-                .interval(((int) NumberUtils.div((failedVisitsMax - failedVisitsMin * 0.9), 10.0) + 1) * 1.0)
+                .interval(calculateInterval(failedVisitsMax, failedVisitsMin * 0.9))
                 .average(NumberUtils.setScale(NumberUtils.null2Zero(NumberUtils.average(failedVisitsData))))
                 .type(AxisVO.TYPE_VALUE)
                 .build());
 
         // x轴数据
-        echartsVO.setXAxis(Collections.singletonList(AxisVO.last15Day()));
+        echartsVO.setXAxis(Collections.singletonList(AxisVO.ofDateRange(beginTime, endTime)));
         // y轴数据
         echartsVO.setYAxis(yAxis);
         // series数据
         echartsVO.setSeries(series);
 
         return echartsVO;
+    }
+
+    // 计算Y轴间隔的辅助方法
+    private double calculateInterval(double max, double min) {
+        double range = max - min;
+        if (range <= 0) return 1;
+        return ((int) Math.ceil(range / 10.0) + 1) * 1.0;
     }
 }

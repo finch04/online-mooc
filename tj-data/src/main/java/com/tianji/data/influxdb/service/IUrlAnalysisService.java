@@ -21,14 +21,14 @@ public interface IUrlAnalysisService {
      * @param query
      * @return
      */
-    PageDTO<BusinessLog> analyzeUrl(UrlPageQuery  query);
+    PageDTO<BusinessLog> getLogsPageByUrl(UrlPageQuery  query);
 
     /**
      * 分析模糊url的访问数据
      * @param query
      * @return
      */
-    PageDTO<BusinessLog> analyzeUrlByLike(UrlPageQuery query);
+    PageDTO<BusinessLog> getLogsPageByUrlByLike(UrlPageQuery query);
 
     /**
      * 获取指定url的指标数据
