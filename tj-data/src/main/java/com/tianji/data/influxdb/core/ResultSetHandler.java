@@ -44,10 +44,12 @@ public class ResultSetHandler {
                 return convertStringToObject(resultType,"0");
             }
         }
+
         //当前method声明返回结果不为list,且resultType与method声明返回结果类型不匹配
         if (returnTypeTarget!= List.class&&resultType!=returnTypeTarget){
             throw  new RuntimeException("返回类型与声明返回类型不匹配");
         }
+
         //当前method声明返回结果不为list,且resultType与method声明返回结果类型匹配
         if (returnTypeTarget!= List.class&&resultType==returnTypeTarget){
             //结果不唯一则抛出异常
@@ -64,17 +66,16 @@ public class ResultSetHandler {
                 return BeanConv.toBean(mapHandler, resultType);
                 //单个JDK提供指定类型
             }else {
-                if (mapHandler.size()!=2){
-                    throw  new RuntimeException("返回结果非单值");
+                // 查找第一个非time的字段
+                Object value = findFirstNonTimeValue(mapHandler);
+                if (value != null) {
+                    String target = String.valueOf(value).replace(".0","");
+                    return convertStringToObject(resultType, target);
                 }
-                for (String key : mapHandler.keySet()) {
-                    if (!key.equals("time")&&!EmptyUtil.isNullOrEmpty((mapHandler.get(key)))){
-                        String target = String.valueOf(mapHandler.get(key)).replace(".0","");
-                        return convertStringToObject(resultType,target);
-                    }
-                }
+                return convertStringToObject(resultType, "0");
             }
         }
+
         //当前method声明返回结果为list
         if (returnTypeTarget== List.class){
             //驼峰处理
@@ -88,21 +89,30 @@ public class ResultSetHandler {
                 //list的内部为JDK提供指定类型
             }else {
                 List<Object> listResult = Lists.newArrayList();
-                listHandler.forEach(mapHandler->{
-                    if (mapHandler.size()!=2){
-                        throw  new RuntimeException("返回结果非单值");
+                for (Map<String, Object> mapHandler : listHandler) {
+                    // 查找第一个非time的字段
+                    Object value = findFirstNonTimeValue(mapHandler);
+                    if (value != null) {
+                        String target = String.valueOf(value).replace(".0","");
+                        listResult.add(convertStringToObject(resultType, target));
+                    } else {
+                        listResult.add(convertStringToObject(resultType, "0"));
                     }
-                    for (String key : mapHandler.keySet()) {
-                        if (!key.equals("time")&&!EmptyUtil.isNullOrEmpty((mapHandler.get(key)))){
-                            String target = String.valueOf(mapHandler.get(key)).replace(".0","");
-                            listResult.add(convertStringToObject(resultType,target));
-                        }
-                    }
-                });
+                }
                 return listResult;
             }
         }
         return  null;
+    }
+
+    // 查找Map中第一个非time的字段值
+    private Object findFirstNonTimeValue(Map<String, Object> map) {
+        for (String key : map.keySet()) {
+            if (!key.equals("time") && !EmptyUtil.isNullOrEmpty(map.get(key))) {
+                return map.get(key);
+            }
+        }
+        return null;
     }
 
     // 检查类是否是目标类型

@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,41 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public class TimeHandlerUtils {
+
+    // 定义默认的日期时间格式
+    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * 将 LocalDateTime 转换为字符串
+     * @param localDateTime 要转换的 LocalDateTime 对象
+     * @param formatter 日期时间格式化器，如果为 null 则使用默认格式化器
+     * @return 格式化后的字符串
+     */
+    public static String localDateTimeToString(LocalDateTime localDateTime, DateTimeFormatter formatter) {
+        if (localDateTime == null) {
+            return null;
+        }
+        if (formatter == null) {
+            formatter = DEFAULT_FORMATTER;
+        }
+        return localDateTime.format(formatter);
+    }
+
+    /**
+     * 将字符串转换为 LocalDateTime
+     * @param timeStr 要转换的字符串
+     * @param formatter 日期时间格式化器，如果为 null 则使用默认格式化器
+     * @return 转换后的 LocalDateTime 对象
+     */
+    public static LocalDateTime stringToLocalDateTime(String timeStr, DateTimeFormatter formatter) {
+        if (timeStr == null || timeStr.isEmpty()) {
+            return null;
+        }
+        if (formatter == null) {
+            formatter = DEFAULT_FORMATTER;
+        }
+        return LocalDateTime.parse(timeStr, formatter);
+    }
 
     /**
      * 获取昨日时间段

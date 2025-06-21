@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @ClassName BusinessLogServiceImple.java
  * @Description 日志服务接口
@@ -29,6 +31,18 @@ public class BusinessLogServiceImpl implements IBusinessLogService {
             return true;
         } catch (Exception e) {
             log.error("数据埋点日志插入异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new CommonException(LogBusinessEnum.SAVE_FAIL.getMsg());
+        }
+    }
+
+    @Override
+    public Boolean createBusinessLogBatch(List<BusinessLog>  voList) {
+        try {
+            //插入到influxDB中
+            businessLogMapper.insertBatch(voList);
+            return true;
+        } catch (Exception e) {
+            log.error("数据埋点日志批量插入异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new CommonException(LogBusinessEnum.SAVE_FAIL.getMsg());
         }
     }

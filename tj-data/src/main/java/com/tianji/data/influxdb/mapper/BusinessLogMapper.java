@@ -54,6 +54,26 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             @Param("begin") String begin,
             @Param("end") String end);
 
+
+    /**
+     * 统计指定URL在今天的日志数量
+     * @param urlRegex 要匹配的URL正则表达式
+     * @param begin 今天的开始时间
+     * @param end 今天的结束时间
+     * @return 日志数量
+     */
+    @Select(value = "SELECT COUNT(*) " +
+            "FROM log " +
+            "WHERE time > #{begin} AND time < #{end} " +
+            "AND request_uri = #{urlRegex}",
+            resultType = Long.class,
+            bucket = "point_data")
+    Long countLogsByUrlToday(
+            @Param("urlRegex") String urlRegex,
+            @Param("begin") String begin,
+            @Param("end") String end
+    );
+
     /**
      * 查询URL在指定时间范围内的详细日志记录
      * @param urlRegex 要匹配的URL正则表达式
@@ -64,49 +84,37 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
     @Select(value = "SELECT * " +
             "FROM log " +
             "WHERE time > #{begin} AND time < #{end} " +
-            "AND request_uri =#{urlRegex}",
+            "AND request_uri = #{urlRegex} " +
+            "LIMIT #{pageSize} OFFSET #{offset}",
             resultType = BusinessLog.class,
             bucket = "point_data")
     List<BusinessLog> findLogsByUrl(
             @Param("urlRegex") String urlRegex,
             @Param("begin") String begin,
-            @Param("end") String end);
+            @Param("end") String end,
+            @Param("pageSize") int pageSize,
+            @Param("offset") int offset
+    );
+
 
     /**
-     * 模糊统计URL在指定时间范围内的总访问量
+     * 统计模糊URL在今天的日志数量
      * @param urlRegex 要匹配的URL正则表达式
-     * @param begin 开始时间
-     * @param end 结束时间
-     * @return 总访问量
+     * @param begin 今天的开始时间
+     * @param end 今天的结束时间
+     * @return 日志数量
      */
-    @Select(value = "SELECT COUNT(request_id) AS total_visits " +
-            "FROM log " +
-            "WHERE time > #{begin} AND time < #{end} AND request_uri =~${urlRegex}",
-            resultType = Long.class,
-            bucket = "point_data")
-    Long countTotalVisitsByLike(
-            @Param("urlRegex") String urlRegex,
-            @Param("begin") String begin,
-            @Param("end") String end);
-
-    /**
-     * 模糊统计URL在指定时间范围内的访问失败数
-     * @param urlRegex 要匹配的URL正则表达式
-     * @param begin 开始时间
-     * @param end 结束时间
-     * @return 失败访问量
-     */
-    @Select(value = "SELECT COUNT(request_id) AS failed_visits " +
+    @Select(value = "SELECT COUNT(*) " +
             "FROM log " +
             "WHERE time > #{begin} AND time < #{end} " +
-            "AND request_uri =~${urlRegex}" +
-            "AND response_code != '200'",
+            "AND request_uri =~${urlRegex}",
             resultType = Long.class,
             bucket = "point_data")
-    Long countFailedVisitsByLike(
+    Long countLogsByUrlTodayByLike(
             @Param("urlRegex") String urlRegex,
             @Param("begin") String begin,
-            @Param("end") String end);
+            @Param("end") String end
+    );
 
     /**
      * 模糊查询URL在指定时间范围内的详细日志记录
@@ -118,13 +126,17 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
     @Select(value = "SELECT * " +
             "FROM log " +
             "WHERE time > #{begin} AND time < #{end} " +
-            "AND request_uri =~${urlRegex}",
+            "AND request_uri =~${urlRegex} " +
+            "LIMIT #{pageSize} OFFSET #{offset}",
             resultType = BusinessLog.class,
             bucket = "point_data")
     List<BusinessLog> findLogsByUrlByLike(
             @Param("urlRegex") String urlRegex,
             @Param("begin") String begin,
-            @Param("end") String end);
+            @Param("end") String end,
+            @Param("pageSize") int pageSize,
+            @Param("offset") int offset
+    );
 
 
     /**

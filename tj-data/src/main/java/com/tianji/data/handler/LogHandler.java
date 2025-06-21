@@ -19,6 +19,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @Author: fsq
  * @Date: 2025/6/19 14:39
@@ -33,16 +36,17 @@ public class LogHandler {
     private IBusinessLogService businessLogService;
 
 
-    // 监听订单数据统计消息
+    // 监听日志数据统计消息
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = "data.log.queue", durable = "true"),
             exchange = @Exchange(name = MqConstants.Exchange.DATA_EXCHANGE, type = ExchangeTypes.TOPIC),
             key = MqConstants.Key.DATA_LOG_KEY
     ))
-    public void listenLog(LogBusinessVO vo) {
+    public void listenLog(List<LogBusinessVO> voList) {
         try {
-            log.info("收到日志数据：{}",vo);
-            Boolean businessLog = businessLogService.createBusinessLog(BeanConv.toBean(vo, BusinessLog.class));
+            Boolean businessLog = businessLogService.createBusinessLogBatch(voList
+                    .stream().map(i-> BeanConv.toBean(i, BusinessLog.class)).collect(Collectors.toList())
+            );
             log.info("存储日志数据成功：{}",businessLog);
         } catch (Exception e) {
             log.error("处理日志数据失败", e);
