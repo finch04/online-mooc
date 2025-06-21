@@ -14,16 +14,7 @@ export default [
         name: "index",
         component: () => import("@/pages/main/index.vue"),
         meta: { title: "首页", hidden: false },
-      },
-      {
-        path: "dashboard",
-        name: "dashboard",
-        component: () => import("@/pages/main/dashboard.vue"),
-        meta: {
-          title: "数据大屏", 
-          hidden: false
-        },
-      },
+      }
     ],
   },
 ];
