@@ -26,9 +26,27 @@ export const getMetricByUrlByLike = (params) =>
       params
   });
 /**流量统计接口 */    
-export const getBaseFlow = (params) =>
+export const getDnu = (params) =>
   request({
-      url: `/ds/data/flow/base`,
+      url: `/ds/data/flow/dnu`,
+      method: "get",
+      params
+  });
+export const getDuv = (params) =>
+  request({
+      url: `/ds/data/flow/duv`,
+      method: "get",
+      params
+  });
+export const getDpv = (params) =>
+  request({
+      url: `/ds/data/flow/dpv`,
+      method: "get",
+      params
+  });
+export const getDau = (params) =>
+  request({
+      url: `/ds/data/flow/dau`,
       method: "get",
       params
   });

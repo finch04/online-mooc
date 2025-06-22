@@ -1,0 +1,196 @@
+:deep(.contentBox), :deep(.contentBox) {
+  padding: 20px 0px;
+}
+
+:deep(.contentBox) .head, :deep(.contentBox) .head {
+  color: var(--color-font1);
+  line-height: 20px;
+  padding: 0 30px;
+}
+
+:deep(.contentBox) .head img, :deep(.contentBox) .head img {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  margin-right: 5px;
+}
+
+:deep(.contentBox) .con, :deep(.contentBox) .con {
+  padding: 3px 50px 0 58px;
+}
+
+:deep(.contentBox) .title, :deep(.contentBox) .title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-font1);
+  display: flex;
+  align-items: center;
+}
+
+:deep(.contentBox) .title .info, :deep(.contentBox) .title .info {
+  flex: 1;
+}
+
+:deep(.contentBox) .title .info .time, :deep(.contentBox) .title .info .time {
+  font-size: 14px;
+  font-weight: normal;
+  padding: 0;
+}
+
+:deep(.contentBox) .title .btn, :deep(.contentBox) .title .btn {
+  padding: 0;
+}
+
+:deep(.contentBox) .title .btn .button, :deep(.contentBox) .title .btn .button {
+  padding: 0 17px;
+  min-width: 90px;
+}
+
+:deep(.contentBox) .time, :deep(.contentBox) .time {
+  padding: 8px 0 0;
+  color: var(--color-font9);
+}
+
+:deep(.contentBox) .description, :deep(.contentBox) .description {
+  line-height: 24px;
+  padding-top: 24px;
+}
+
+:deep(.contentBox) .food, :deep(.contentBox) .repliesFood, :deep(.contentBox) .food, :deep(.contentBox) .repliesFood {
+  border-top: 1px solid var(--color-tabborder);
+  margin-top: 20px;
+  padding: 20px 50px 3px 58px;
+}
+
+:deep(.contentBox) .food ul, :deep(.contentBox) .repliesFood ul, :deep(.contentBox) .food ul, :deep(.contentBox) .repliesFood ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+:deep(.contentBox) .food ul li, :deep(.contentBox) .repliesFood ul li, :deep(.contentBox) .food ul li, :deep(.contentBox) .repliesFood ul li {
+  display: flex;
+  width: 33%;
+  color: var(--color-font5);
+  line-height: 20px;
+  padding: 4px 0;
+}
+
+:deep(.contentBox) .repliesFood, :deep(.contentBox) .repliesFood {
+  display: flex;
+}
+
+:deep(.contentBox) .repliesFood .text, :deep(.contentBox) .repliesFood .text {
+  color: var(--color-font5);
+  line-height: 20px;
+}
+
+:deep(.contentBox) .repliesFood .praise, :deep(.contentBox) .repliesFood .praise {
+  padding-right: 33px;
+}
+
+:deep(.contentBox) .con {
+  padding-top: 23px;
+}
+
+:deep(.contentBox) .head {
+  display: flex;
+  position: relative;
+}
+
+:deep(.contentBox) .head .info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.contentBox) .head .btn {
+  position: absolute;
+  top: 2px;
+  right: 50px;
+  padding-top: 0;
+}
+
+:deep(.contentBox) .head .btn .el-button {
+  padding: 0 17px;
+  width: 90px;
+}
+
+:deep(.contentBox) .title {
+  display: inline-block;
+}
+
+:deep(.contentBox) .time {
+  padding: 5px 50px 0 58px;
+}
+
+:deep(.contentBox) .description {
+  padding-top: 0;
+}
+
+:deep(.tab .el-tabs .el-tabs__item) {
+  float: left;
+  text-align: center;
+  padding: 0 12px !important;
+  height: 32px;
+  line-height: 32px;
+}
+
+:deep(.tab .el-tabs .el-tabs__item.is-active) {
+  text-align: center;
+  height: 32px;
+  line-height: 32px;
+}
+
+:deep(.tab .el-tabs__nav) {
+  padding: 4px;
+  height: 40px;
+}
+
+.bg-wt {
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+.boarddata {
+  height: 514px;
+  margin-top: 10px;
+}
+
+.boarddata .boarddatahead {
+  display: flex;
+  justify-content: space-between;
+  font-family: PingFangSC-S0pxibold;
+  font-weight: 600;
+  font-size: 16px;
+  color: #830b0b;
+  padding: 14px 20px;
+  padding-bottom: 30px;
+  float: right;
+}
+
+.boarddata .tab {
+  margin-top: 0;
+  height: 40px;
+  width: 100%;
+}
+
+.Popularcourses {
+  height: 561px;
+  padding: 21px 19px 15px 19px;
+}
+
+.Popularcourses .Popularcoursestitle {
+  font-family: PingFangSC-S0pxibold;
+  font-weight: 600;
+  font-size: 16px;
+  color: #332929;
+}
+
+.Popularcourses :deep(.el-table__inner-wrapper::before) {
+  display: none;
+}
+
+.Popularcourses :deep(.el-table__header-wrapper) {
+  margin-bottom: 15px;
+}

@@ -1,4 +1,4 @@
-:deep(.questionBox),:deep(.repliesBox) {
+:deep(.contentBox),:deep(.contentBox) {
   padding: 20px 0px;
   .head {
     color: var(--color-font1);
@@ -73,7 +73,7 @@
     }
   }
 }
-:deep(.repliesBox){
+:deep(.contentBox){
   .con{
     padding-top: 23px;
     
@@ -106,5 +106,66 @@
   }
   .description {
     padding-top: 0;
+  }
+  
+}
+:deep(.tab .el-tabs .el-tabs__item) {
+  float: left;
+  text-align: center;
+  padding: 0 12px !important;
+  height: 32px;
+  line-height: 32px;
+}
+:deep(.tab .el-tabs .el-tabs__item.is-active) {
+  text-align: center;
+  height: 32px;
+  line-height: 32px;
+}
+:deep(.tab .el-tabs__nav) {
+  padding: 4px;
+  height: 40px;
+}
+.bg-wt {
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+.boarddata {
+  height: 514px;
+  margin-top: 10px;
+
+  .boarddatahead {
+    display: flex;
+    justify-content: space-between;
+    font-family: PingFangSC-S0pxibold;
+    font-weight: 600;
+    font-size: 16px;
+    color: #830b0b;
+    padding: 14px 20px;
+    padding-bottom: 30px;
+    float: right;
+  }
+  
+  .tab {
+    margin-top: 0;
+    height: 40px;
+    width: 100%; // 新增：确保tab容器占满父容器宽度
+  }
+}
+.Popularcourses {
+  height: 561px;
+  padding: 21px 19px 15px 19px;
+
+  .Popularcoursestitle {
+    font-family: PingFangSC-S0pxibold;
+    font-weight: 600;
+    font-size: 16px;
+    color: #332929;
+  }
+  :deep(.el-table__inner-wrapper::before){
+    display: none;
+  }
+  :deep(.el-table__header-wrapper){
+    margin-bottom: 15px;
   }
 }

@@ -13,7 +13,10 @@ import com.tianji.data.model.vo.EchartsVO;
  */
 public interface IFlowService {
 
-    EchartsVO base(FlowQuery query);
+    EchartsVO dnu(FlowQuery query);
+    EchartsVO dpv(FlowQuery query);
+    EchartsVO duv(FlowQuery query);
+    EchartsVO dau(FlowQuery query);
     EchartsVO urlVisits(FlowQuery query);
     EchartsVO urlErrors(FlowQuery query);
 

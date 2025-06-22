@@ -25,24 +25,51 @@ public class FlowController {
     private IFlowService flowService;
 
     /**
-     * 数据展示：
-     * 7日|每日新增用户数
-     * 7日|活跃用户数趋势
-     * 7日|日访问量趋势
-     * 7日|日用户访问量趋势（去重用户数）
+     * 数据展示：7日|新用户数趋势
      * @param query 查询参数
-     * @return DnuVO
+     * @return EchartsVO
      */
-    @GetMapping("/base")
-    @ApiOperation(value = "查询基础流量数据")
-    public EchartsVO base(FlowQuery query) {
-        return flowService.base(query);
+    @GetMapping("/dnu")
+    @ApiOperation(value = "查询每日新增用户数")
+    public EchartsVO dnu(FlowQuery query) {
+        return flowService.dnu(query);
     }
 
+    /**
+     * 数据展示：7日|页面浏览量趋势
+     * @param query 查询参数
+     * @return EchartsVO
+     */
+    @GetMapping("/dpv")
+    @ApiOperation(value = "查询页面浏览量趋势")
+    public EchartsVO dpv(FlowQuery query) {
+        return flowService.dpv(query);
+    }
 
     /**
-     * 数据展示：
-     * 7日|URL访问量前10名
+     * 数据展示：7日|独立访客数趋势
+     * @param query 查询参数
+     * @return EchartsVO
+     */
+    @GetMapping("/duv")
+    @ApiOperation(value = "查询独立访客数趋势")
+    public EchartsVO duv(FlowQuery query) {
+        return flowService.duv(query);
+    }
+
+    /**
+     * 数据展示：7日|活跃用户数趋势
+     * @param query 查询参数
+     * @return EchartsVO
+     */
+    @GetMapping("/dau")
+    @ApiOperation(value = "查询日活跃用户数趋势")
+    public EchartsVO dau(FlowQuery query) {
+        return flowService.dau(query);
+    }
+
+    /**
+     * 数据展示：7日|URL访问量前10名
      * @param query 查询参数
      * @return 每日报错次数列表
      */
@@ -53,8 +80,7 @@ public class FlowController {
     }
 
     /**
-     * 数据展示：
-     * 7日|URL总体概览
+     * 数据展示：7日|URL总体概览
      * 7日|URL报错量前10名
      * @param query 查询参数
      * @return 每日报错次数列表
@@ -64,16 +90,4 @@ public class FlowController {
     public EchartsVO urlErrors(FlowQuery query) {
         return flowService.urlErrors(query);
     }
-
-//
-//    /**
-//     * 数据展示：7日|新注册用户详情（RequestBody）
-//     * @param query 查询参数
-//     * @return 新注册用户请求体列表
-//     */
-//    @PostMapping("/dnu/body")
-//    @ApiOperation(value = "7日|新注册用户详情", notes = "按日获取7天内新注册用户的请求体数据")
-//    public EchartsVO dnuBody(FlowQuery query) {
-//        return flowService.dnuBody(query);
-//    }
 }
