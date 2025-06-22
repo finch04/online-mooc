@@ -3,6 +3,8 @@ server:
   tomcat:
     uri-encoding: UTF-8   #服务编码
 spring:
+  codec:
+    max-in-memory-size: 5MB  # 根据需要调整
   profiles:
     active: dev
   application:
@@ -111,7 +113,9 @@ spring:
             allowedHeaders: "*" # 允许在请求中携带的头信息
             allowCredentials: true # 是否允许携带cookie
             maxAge: 360000 # 这次跨域检测的有效期
-
+      httpclient:
+        connect-timeout: 1000
+        response-timeout: 20s
 logging:
   level:
     com.tianji: debug

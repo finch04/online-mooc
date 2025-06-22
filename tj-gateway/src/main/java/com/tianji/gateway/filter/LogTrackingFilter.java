@@ -13,35 +13,30 @@ import com.tianji.gateway.utils.LogCollector;
 import com.tianji.gateway.utils.RequestHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Publisher;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static com.tianji.auth.common.constants.JwtConstants.AUTHORIZATION_HEADER;
-import static com.tianji.gateway.constants.RedisConstants.*;
 
 @Component
 @RequiredArgsConstructor
@@ -52,6 +47,7 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
     private final AuthProperties authProperties;
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final LogCollector logCollector;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -91,8 +87,7 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
         return cacheRequestBody(exchange, vo)
                 .flatMap(cachedExchange -> {
                     // 4.处理用户信息
-                    List<String> authHeaders = request.getHeaders().get(AUTHORIZATION_HEADER);
-                    String token = authHeaders == null? "" : authHeaders.get(0);
+                    String token = Objects.requireNonNullElse(request.getHeaders().get(AUTHORIZATION_HEADER), List.of("")).get(0);
                     R<LoginUserDTO> r = authUtil.parseToken(token);
 
                     if (r.success()) {
@@ -103,28 +98,73 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                     // 5.记录请求时间
                     long startTime = System.currentTimeMillis();
 
+                    ServerHttpResponse originalResponse = cachedExchange.getResponse();
+                    DataBufferFactory bufferFactory = originalResponse.bufferFactory();
+                    ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
+                        @Override
+                        public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+                            if (body instanceof Flux) {
+                                Flux<? extends DataBuffer> fluxBody = (Flux<? extends DataBuffer>) body;
+                                return super.writeWith(fluxBody.map(dataBuffer -> {
+                                    byte[] content = new byte[dataBuffer.readableByteCount()];
+                                    dataBuffer.read(content);
+                                    DataBufferUtils.release(dataBuffer);
+                                    String s = new String(content, Charset.forName("UTF-8"));
+
+                                    try {
+                                        // 使用 readTree 方法解析 JSON
+                                        com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(s);
+
+                                        // 提取通用字段
+                                        Integer code = rootNode.path("code").asInt();
+                                        String msg = rootNode.path("msg").asText();
+                                        String requestId = rootNode.path("requestId").asText();
+
+                                        vo.setResponseCode(code);
+                                        vo.setResponseMsg(msg);
+
+                                        // 使用 R 对象中的 requestId
+                                        if (!requestId.isEmpty()) {
+                                            vo.setRequestId(requestId);
+                                        }
+
+                                        // 处理响应数据
+                                        if (code == 200 && rootNode.has("data")) {
+                                            // 将 data 字段作为原始字符串存储，限制最大长度
+//                                            String dataStr = rootNode.get("data").toString();
+//                                            if (dataStr.length() > 100) {
+//                                                dataStr = dataStr.substring(0, 100) + "...[truncated]";
+//                                            }
+//                                            vo.setResponseBody(dataStr);
+                                        }
+                                    } catch (JsonProcessingException e) {
+                                        log.error("Failed to parse response JSON: {}", s, e);
+
+//                                        // 如果解析失败，将整个响应内容作为字符串存储（限制长度）
+//                                        if (s.length() > 100) {
+//                                            s = s.substring(0, 100) + "...[truncated]";
+//                                        }
+//                                        vo.setResponseBody(s);
+                                    }
+                                    byte[] uppedContent = s.getBytes();
+                                    return bufferFactory.wrap(uppedContent);
+                                }));
+                            }
+                            return super.writeWith(body);
+                        }
+                    };
+
                     // 6.继续处理请求并记录响应信息
-                    return chain.filter(cachedExchange)
-                            .doOnSuccess(v -> {
-                                // 处理成功响应
-                                ServerHttpResponse response = cachedExchange.getResponse();
-                                logCollector.logResponse(vo, response, startTime, null);
-                            })
-                            .doOnError(throwable -> {
-                                // 处理错误响应
-                                ServerHttpResponse response = cachedExchange.getResponse();
-                                logCollector.logResponse(vo, response, startTime, throwable);
-                            })
-                            .onErrorResume(throwable -> {
-                                // 确保错误被捕获但继续传播
-                                ServerHttpResponse response = cachedExchange.getResponse();
-                                return logCollector.logException(vo, response, throwable);
+                    return chain.filter(cachedExchange.mutate().response(decoratedResponse).build())
+                            .doFinally(signalType -> {
+                                long endTime = System.currentTimeMillis();
+                                vo.setResponseTime(endTime - startTime);
+                                logCollector.logResponse(vo);
                             });
                 });
     }
 
     private Mono<ServerWebExchange> cacheRequestBody(ServerWebExchange exchange, LogBusinessVO vo) {
-
         ServerHttpRequest request = exchange.getRequest();
         // 处理GET请求（没有请求体）
         if (request.getMethodValue().equalsIgnoreCase("GET")) {
@@ -169,6 +209,6 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         // 设置为较高优先级，但低于RequestIdRelayFilter
-        return Ordered.HIGHEST_PRECEDENCE + 1;
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

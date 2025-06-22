@@ -38,18 +38,11 @@ public class LogCollector {
     /**
      * 记录请求响应日志
      */
-    public void logResponse(LogBusinessVO vo, ServerHttpResponse response, long startTime, Throwable throwable) {
-        long endTime = System.currentTimeMillis();
-        // 设置响应状态码
-        vo.setResponseCode(response.getStatusCode() != null ? response.getStatusCode().value() : 500);
-        // 设置响应消息
-        vo.setResponseMsg(throwable == null ? "SUCCESS" : throwable.getMessage());
-        // 设置响应时间
-        vo.setResponseTime(endTime - startTime);
-
+    public void logResponse(LogBusinessVO vo) {
         // 存入Redis
         saveLogToRedis(vo);
     }
+
 
     /**
      * 将日志存入Redis
@@ -118,11 +111,5 @@ public class LogCollector {
         }
     }
 
-    /**
-     * 在异常处理器中记录日志
-     */
-    public Mono<Void> logException(LogBusinessVO vo, ServerHttpResponse response, Throwable ex) {
-        logResponse(vo, response, System.currentTimeMillis(), ex);
-        return response.setComplete();
-    }
+
 }

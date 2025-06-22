@@ -91,14 +91,15 @@ const handleSearch = async () => {
         logs.value.data = response.data.list;
         logs.value.total = parseInt(response.data.total) || 0;
 
-        // 获取指标数据，即使 url 为空
-        const metricResponse = await getMetricByUrl({
-            url: searchForm.url,
-            beginTime: searchForm.beginTime,
-            endTime: searchForm.endTime
-        });
-        metrics.value = metricResponse.data;
-
+        if (searchForm.matchType === 'exact') {
+            // 获取指标数据，即使 url 为空
+            const metricResponse = await getMetricByUrl({
+                url: searchForm.url,
+                beginTime: searchForm.beginTime,
+                endTime: searchForm.endTime
+            });
+            metrics.value = metricResponse.data;
+        }
         loading.value = false;
     } catch (error) {
         ElMessage.error('查询失败: ' + error.message);

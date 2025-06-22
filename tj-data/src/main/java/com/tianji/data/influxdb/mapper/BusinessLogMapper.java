@@ -65,7 +65,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             "FROM log " +
             "WHERE time > #{begin} AND time < #{end} " +
             "AND request_uri =#{urlRegex}" +
-            "AND response_code != '200'"+
+            "AND response_msg != 'SUCCESS'"+
             "GROUP BY time(1d) ",
             resultType = Long.class,
             bucket = "point_data")

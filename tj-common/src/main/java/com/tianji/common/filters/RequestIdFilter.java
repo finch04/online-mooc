@@ -11,7 +11,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE+1)
 @WebFilter(filterName = "requestIdFilter", urlPatterns = "/**")
 public class RequestIdFilter implements Filter {
     @Override
