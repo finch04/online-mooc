@@ -32,6 +32,7 @@ public class Executor {
     }
 
     public List<Map<String,Object>> select(String sql,String database) {
+        log.info("查询SQL:{}",sql);
         QueryResult queryResult = influxDB.query(new Query(sql, database));
         List<Map<String,Object>> resultList = new ArrayList<>();
         queryResult.getResults().forEach(result -> {

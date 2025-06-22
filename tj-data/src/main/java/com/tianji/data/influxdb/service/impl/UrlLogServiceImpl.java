@@ -1,15 +1,12 @@
 package com.tianji.data.influxdb.service.impl;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.NumberUtils;
 import com.tianji.data.influxdb.domain.BusinessLog;
-import com.tianji.data.influxdb.domain.UrlMetrics;
 import com.tianji.data.influxdb.mapper.BusinessLogMapper;
-import com.tianji.data.influxdb.service.IUrlAnalysisService;
-import com.tianji.data.influxdb.tool.UrlRegexConverter;
+import com.tianji.data.influxdb.service.IUrlLogService;
 import com.tianji.data.model.query.UrlPageQuery;
 import com.tianji.data.model.query.UrlQuery;
 import com.tianji.data.model.vo.AxisVO;
@@ -18,20 +15,17 @@ import com.tianji.data.model.vo.SerierVO;
 import com.tianji.data.utils.TimeHandlerUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import retrofit2.http.Url;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
+public class UrlLogServiceImpl implements IUrlLogService {
     
     private final BusinessLogMapper businessLogMapper;
 
@@ -48,7 +42,7 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
         // 调用Mapper方法执行查询
         String url = query.getUrl();
 
-        String beginTime = TimeHandlerUtils.getYesterdayTime().getBegin();
+        String beginTime = TimeHandlerUtils.getSevenDaysAgoTime().getBegin();
         String endTime = TimeHandlerUtils.getTodayTime().getEnd();
         if(query.getBeginTime()!=null && query.getEndTime()!=null){
             beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
@@ -96,7 +90,7 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
         // 2. 用/包裹整个正则：/\/login/
         String regex = "/" + escapedUrl + "/";
 
-        String beginTime = TimeHandlerUtils.getYesterdayTime().getBegin();
+        String beginTime = TimeHandlerUtils.getSevenDaysAgoTime().getBegin();
         String endTime = TimeHandlerUtils.getTodayTime().getEnd();
         if(query.getBeginTime()!=null && query.getEndTime()!=null){
             beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
@@ -133,7 +127,7 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
     public EchartsVO getMetricByUrl(UrlQuery query) {
         String url = query.getUrl();
 
-        String beginTime = TimeHandlerUtils.getYesterdayTime().getBegin();
+        String beginTime = TimeHandlerUtils.getSevenDaysAgoTime().getBegin();
         String endTime = TimeHandlerUtils.getTodayTime().getEnd();
         if (query.getBeginTime() != null && query.getEndTime() != null) {
             beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
@@ -146,6 +140,95 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
         try {
             totalVisits = businessLogMapper.countDailyVisits(url, beginTime, endTime);
             failedVisits = businessLogMapper.countFailedVisits(url, beginTime, endTime);
+        } catch (Exception e) {
+            log.info("influxdb搜索异常",e);
+            throw new BizIllegalException("搜索url不合法");
+        }
+
+        // 封装数据
+        EchartsVO echartsVO = new EchartsVO();
+        List<AxisVO> yAxis = new ArrayList<>();
+        List<SerierVO> series = new ArrayList<>();
+
+        // ------------------- 修正总访问量数据映射 -------------------
+        // 将Long数组转换为Double数组
+        List<Double> totalVisitsData = totalVisits.stream()
+                .map(Long::doubleValue)
+                .collect(Collectors.toList());
+        // 计算实际最大值和最小值
+        Double totalVisitsMax = totalVisitsData.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        Double totalVisitsMin = totalVisitsData.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+
+        series.add(new SerierVO(
+                "访问量",
+                "bar",
+                totalVisitsData,
+                totalVisitsMax + "次",
+                totalVisitsMin + "次"
+        ));
+        yAxis.add(AxisVO.builder()
+                .max(totalVisitsMax)
+                .min(totalVisitsMin * 0.9)
+                .interval(calculateInterval(totalVisitsMax, totalVisitsMin * 0.9))
+                .average(NumberUtils.setScale(NumberUtils.null2Zero(NumberUtils.average(totalVisitsData))))
+                .type(AxisVO.TYPE_VALUE)
+                .build());
+
+        // ------------------- 修正总报错量数据映射 -------------------
+        List<Double> failedVisitsData = failedVisits.stream()
+                .map(Long::doubleValue)
+                .collect(Collectors.toList());
+        Double failedVisitsMax = failedVisitsData.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        Double failedVisitsMin = failedVisitsData.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+
+        series.add(new SerierVO(
+                "报错量",
+                "line",
+                failedVisitsData,
+                failedVisitsMax + "次",
+                failedVisitsMin + "次"
+        ));
+        yAxis.add(AxisVO.builder()
+                .max(failedVisitsMax)
+                .min(failedVisitsMin * 0.9)
+                .interval(calculateInterval(failedVisitsMax, failedVisitsMin * 0.9))
+                .average(NumberUtils.setScale(NumberUtils.null2Zero(NumberUtils.average(failedVisitsData))))
+                .type(AxisVO.TYPE_VALUE)
+                .build());
+
+        // x轴数据
+        echartsVO.setXAxis(Collections.singletonList(AxisVO.ofDateRange(beginTime, endTime)));
+        // y轴数据
+        echartsVO.setYAxis(yAxis);
+        // series数据
+        echartsVO.setSeries(series);
+
+        return echartsVO;
+    }
+
+    @Override
+    public EchartsVO getMetricByUrlByLike(UrlQuery query) {
+        String url = query.getUrl();
+        // 将URL转换为InfluxDB正则表达式格式：/\/accounts/
+        // 1. 转义URL中的斜杠：/login → \/login
+        String escapedUrl = query.getUrl().replace("/", "\\\\/"); // 四个反斜杠表示一个\/
+
+        // 2. 用/包裹整个正则：/\/login/
+        String regex = "/" + escapedUrl + "/";
+
+        String beginTime = TimeHandlerUtils.getSevenDaysAgoTime().getBegin();
+        String endTime = TimeHandlerUtils.getTodayTime().getEnd();
+        if (query.getBeginTime() != null && query.getEndTime() != null) {
+            beginTime = TimeHandlerUtils.localDateTimeToString(query.getBeginTime(), null);
+            endTime = TimeHandlerUtils.localDateTimeToString(query.getEndTime(), null);
+        }
+
+        // 假设这两个方法已返回每日统计数组（例如7天数据对应7个元素）
+        List<Long> totalVisits = null;
+        List<Long> failedVisits = null;
+        try {
+            totalVisits = businessLogMapper.countDailyVisitsByLike(regex, beginTime, endTime);
+            failedVisits = businessLogMapper.countFailedVisitsByLike(regex, beginTime, endTime);
         } catch (Exception e) {
             log.info("influxdb搜索异常",e);
             throw new BizIllegalException("搜索url不合法");

@@ -26,7 +26,7 @@
                 start-placeholder="开始时间"
                 end-placeholder="结束时间"
                 clearable
-                @change="handleDate" 
+                @change="handleDate($event)"
               />
             </el-form-item>
           </el-col>
@@ -76,7 +76,7 @@ const props = defineProps({
 const emit = defineEmits(['handleSearch', 'handleReset', 'getTime']);
 const ruleFormRef = ref(null);
 // 双向绑定日期范围（数组形式）
-const datePicker = ref(props.searchForm.datePicker ? [props.searchForm.beginTime, props.searchForm.endTime] : []);
+let datePicker = ref([]) //时间，数组形式
 
 const handleSearch = () => {
   emit('handleSearch');
@@ -84,15 +84,8 @@ const handleSearch = () => {
 
 // 处理日期变化
 const handleDate = (val) => {
-  // 拆分开始和结束时间
-  if (val && val.length === 2) {
-    props.searchForm.beginTime = val[0];
-    props.searchForm.endTime = val[1];
-  } else {
-    props.searchForm.beginTime = null;
-    props.searchForm.endTime = null;
-  }
-  emit('getTime', { min: props.searchForm.beginTime, max: props.searchForm.endTime });
+  console.log('日期变化',val)
+  emit('getTime',val);
 };
 
 // 重置搜索表单
@@ -110,6 +103,8 @@ const handleReset = () => {
   emit("handleReset"); // 重置表单
   emit("handleSearch"); // 刷新列表
 };
+// 向父组件暴露方法
+defineExpose({});
 </script>
 
 <style scoped lang="scss">

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +52,29 @@ public class TimeHandlerUtils {
     }
 
     /**
+     * 计算两个日期字符串之间的天数
+     * @param startDateStr 开始日期字符串 (格式: yyyy-MM-dd)
+     * @param endDateStr 结束日期字符串 (格式: yyyy-MM-dd)
+     * @return 天数差
+     */
+    public static int getDaysBetween(String startDateStr, String endDateStr) {
+        if (startDateStr == null || endDateStr == null) {
+            return 0;
+        }
+
+        try {
+            LocalDate startDate = LocalDate.parse(startDateStr, DEFAULT_FORMATTER);
+            LocalDate endDate = LocalDate.parse(endDateStr, DEFAULT_FORMATTER);
+
+            // 计算两个日期之间的天数差（包含结束日期）
+            return (int) startDate.until(endDate, java.time.temporal.ChronoUnit.DAYS) + 1;
+        } catch (DateTimeParseException e) {
+            // 日期格式解析失败时返回0
+            return 0;
+        }
+    }
+
+    /**
      * 将 LocalDateTime 转换为字符串
      * @param localDateTime 要转换的 LocalDateTime 对象
      * @param formatter 日期时间格式化器，如果为 null 则使用默认格式化器
@@ -80,6 +104,36 @@ public class TimeHandlerUtils {
             formatter = DEFAULT_FORMATTER;
         }
         return LocalDateTime.parse(timeStr, formatter);
+    }
+
+    /**
+     * 获取7天前的时间段
+     *
+     * @return 包含7天前日期范围的TimeDTO对象
+     */
+    public static TimeDTO getSevenDaysAgoTime() {
+        try {
+            TimeDTO timeDTO = new TimeDTO();
+            // 获取7天前的日期
+            LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(6L);
+            LocalDateTime maxTime = LocalDateTime.of(sevenDaysAgo.toLocalDate(), LocalTime.MAX);
+            LocalDateTime minTime = LocalDateTime.of(sevenDaysAgo.toLocalDate(), LocalTime.MIN);
+
+            // 设置开始时间和结束时间
+            timeDTO.setBeginTime(minTime);
+            timeDTO.setEndTime(maxTime);
+
+            // 封装字符串格式的开始时间和结束时间
+            timeDTO.setBegin(timeDTO.getTimeFormatter().format(minTime));
+            timeDTO.setEnd(timeDTO.getTimeFormatter().format(maxTime));
+
+            // 设置目标日期（7天前的日期）
+            timeDTO.setTargetDate(sevenDaysAgo.toLocalDate());
+            return timeDTO;
+        } catch (Exception e) {
+            log.error("7天前日期计算异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new RuntimeException("7天前日期数据获取失败");
+        }
     }
 
     /**

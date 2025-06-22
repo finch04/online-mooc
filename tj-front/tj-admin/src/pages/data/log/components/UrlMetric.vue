@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch,nextTick } from 'vue';
 import * as echarts from 'echarts';
 
 // 定义柔和的配色方案
@@ -61,7 +61,9 @@ const props = defineProps({
 const chartContainer = ref(null);
 
 // 初始化图表
-const initChart = () => {
+const initChart =async () => {
+  // 等待 DOM 更新后再初始化图表
+  await nextTick();
   if (!chartContainer.value || !props.metrics) return;
   
   const myChart = echarts.init(chartContainer.value);
@@ -147,9 +149,9 @@ watch(() => props.metrics, () => {
   initChart();
 }, { immediate: true });
 
-onMounted(() => {
-  initChart();
-});
+onMounted(async () => {
+    await initChart();
+  });
 </script>
 
 <style scoped>

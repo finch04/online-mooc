@@ -20,23 +20,6 @@ import java.util.List;
 public interface BusinessLogMapper extends InfluxDBBaseMapper {
 
     /**
-     * 统计URL在指定时间范围内的总访问量
-     * @param urlRegex 要匹配的URL正则表达式
-     * @param begin 开始时间
-     * @param end 结束时间
-     * @return 总访问量
-     */
-    @Select(value = "SELECT COUNT(request_id) AS total_visits " +
-            "FROM log " +
-            "WHERE time > #{begin} AND time  <= #{end} AND request_uri =#{urlRegex}",
-            resultType = Long.class,
-            bucket = "point_data")
-    Long countTotalVisits(
-            @Param("urlRegex") String urlRegex,
-            @Param("begin") String begin,
-            @Param("end") String end);
-
-    /**
      * 统计URL在指定时间范围内的每日访问量
      * @param urlRegex 要匹配的URL
      * @param begin 开始时间
@@ -116,6 +99,44 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             @Param("offset") int offset
     );
 
+    /**
+     * 统计URL在指定时间范围内的每日访问量
+     * @param urlRegex 要匹配的URL
+     * @param begin 开始时间
+     * @param end 结束时间
+     * @return 每日访问量列表
+     */
+    @Select(value = "SELECT COUNT(request_id) FROM log " +
+            "WHERE request_uri =~${urlRegex} " +
+            "AND time > #{begin} AND time <= #{end} " +
+            "GROUP BY time(1d) ",
+            resultType = Long.class,
+            bucket = "point_data")
+    List<Long> countDailyVisitsByLike(
+            @Param("urlRegex") String urlRegex,
+            @Param("begin") String begin,
+            @Param("end") String end
+    );
+
+    /**
+     * 统计URL在指定时间范围内的每日访问失败数
+     * @param urlRegex 要匹配的URL正则表达式
+     * @param begin 开始时间
+     * @param end 结束时间
+     * @return 失败访问量
+     */
+    @Select(value = "SELECT COUNT(request_id) AS failed_visits " +
+            "FROM log " +
+            "WHERE time > #{begin} AND time  <= #{end} " +
+            "AND request_uri =~${urlRegex} " +
+            "AND response_code != '200'"+
+            "GROUP BY time(1d) ",
+            resultType = Long.class,
+            bucket = "point_data")
+    List<Long> countFailedVisitsByLike(
+            @Param("urlRegex") String urlRegex,
+            @Param("begin") String begin,
+            @Param("end") String end);
 
     /**
      * 统计模糊URL在今天的日志数量
@@ -127,7 +148,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
     @Select(value = "SELECT COUNT(*) " +
             "FROM log " +
             "WHERE time > #{begin} AND time  <= #{end} " +
-            "AND request_uri =~${urlRegex}",
+            "AND request_uri =~${urlRegex} ",
             resultType = Long.class,
             bucket = "point_data")
     Long countLogsByUrlTodayByLike(

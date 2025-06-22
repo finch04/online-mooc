@@ -1,6 +1,6 @@
 import request from "@/utils/request.js";
 
-// 获取统计数据
+/**URL日志接口 */    
 export const getLogsPageByUrl = (params) =>
   request({
     url: `/ds/data/url/page/log`,
@@ -19,4 +19,29 @@ export const getMetricByUrl = (params) =>
         method: "get",
         params
     });
-
+export const getMetricByUrlByLike = (params) =>
+  request({
+      url: `/ds/data/url/metric/like`,
+      method: "get",
+      params
+  });
+/**流量统计接口 */    
+export const getBaseFlow = (params) =>
+  request({
+      url: `/ds/data/flow/base`,
+      method: "get",
+      params
+  });
+export const getVisitsUrlFlow = (params) =>
+  request({
+      url: `/ds/data/flow/url/visits`,
+      method: "get",
+      params
+  });
+export const getErrorsUrlFlow = (params) =>
+  request({
+      url: `/ds/data/flow/url/errors`,
+      method: "get",
+      params
+  });
+    

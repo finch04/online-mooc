@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch,nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
 
 // 导入组件
@@ -40,6 +40,7 @@ import {
     getLogsPageByUrl,
     getLogsPageByUrlByLike,
     getMetricByUrl,
+    getMetricByUrlByLike
     // exportLog 
 } from '@/api/data';
 
@@ -85,17 +86,18 @@ const handleSearch = async () => {
         logs.value.data = response.data.list;
         logs.value.total = parseInt(response.data.total) || 0;
 
+        console.log('获取指标数据',searchForm)
+        let metricResponse;
         if (searchForm.matchType === 'exact') {
-            console.log('获取指标数据',searchForm)
-            // 获取指标数据，即使 url 为空
-            const metricResponse = await getMetricByUrl({
-                url: searchForm.url,
-                beginTime: searchForm.beginTime,
-                endTime: searchForm.endTime
-            });
-            metrics.value = metricResponse.data;
+            metricResponse = await getMetricByUrl(searchForm);
+        } else {
+            metricResponse = await getMetricByUrlByLike(searchForm);
         }
+        metrics.value = metricResponse.data;
+
         loading.value = false;
+         // 等待 DOM 更新后再触发图表更新
+         await nextTick();
     } catch (error) {
         ElMessage.error('查询失败: ' + error.message);
         loading.value = false;
@@ -127,10 +129,10 @@ const handleReset = () => {
 
 // 获取时间
 const getTime = (val) => {
-    searchForm.beginTime = val.min;
-    searchForm.endTime = val.max;
+    console.log('时间选择',val)
+  searchForm.beginTime = val[0];
+  searchForm.endTime = val[1];
 };
-
 // 导出日志
 const exportLogs = async () => {
     try {
@@ -141,8 +143,8 @@ const exportLogs = async () => {
     }
 };
 
-onMounted(() => {
-    handleSearch();
+onMounted(async () => {
+    await handleSearch();
 });
 </script>
 
