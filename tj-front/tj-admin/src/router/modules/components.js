@@ -123,10 +123,22 @@ export default [
         meta: { title: "数据大屏" },
       },
       {
+        path: "flow",
+        name: "flow",
+        component: () => import("@/pages/data/flow/index.vue"),
+        meta: { title: "流量统计" },
+      },
+      {
         path: "log",
         name: "log",
         component: () => import("@/pages/data/log/index.vue"),
-        meta: { title: "URL指标分析" },
+        meta: { title: "URL日志" },
+      },
+      {
+        path: "analysis",
+        name: "analysis",
+        component: () => import("@/pages/data/analysis/index.vue"),
+        meta: { title: "数据分析" },
       },
     ],
   },

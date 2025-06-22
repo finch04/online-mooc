@@ -1,11 +1,19 @@
 package com.tianji.data.influxdb.domain;
 
 
+import com.tianji.data.utils.TimeHandlerUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
+import org.influxdb.annotation.TimeColumn;
+import org.springframework.data.annotation.Transient;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
  * BusinessLog.java
@@ -79,5 +87,10 @@ public class BusinessLog {
     @ApiModelProperty(value = "市")
     @Column(name = "city")
     public String city;
+
+    @ApiModelProperty(value = "数据时间戳（纳秒级）")
+    @TimeColumn
+    @Column(name = "time")
+    private String time;
 
 }

@@ -28,7 +28,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      */
     @Select(value = "SELECT COUNT(request_id) AS total_visits " +
             "FROM log " +
-            "WHERE time > #{begin} AND time < #{end} AND request_uri =#{urlRegex}",
+            "WHERE time > #{begin} AND time  <= #{end} AND request_uri =#{urlRegex}",
             resultType = Long.class,
             bucket = "point_data")
     Long countTotalVisits(
@@ -44,7 +44,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      * @return 每日访问量列表
      */
     @Select(value = "SELECT COUNT(request_id) FROM log " +
-            "WHERE time > #{begin} AND time < #{end} AND request_uri = #{urlRegex} " +
+            "WHERE time > #{begin} AND time  <= #{end} AND request_uri = #{urlRegex} " +
             "GROUP BY time(1d) ",
             resultType = Long.class,
             bucket = "point_data")
@@ -63,9 +63,9 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      */
     @Select(value = "SELECT COUNT(request_id) AS failed_visits " +
             "FROM log " +
-            "WHERE time > #{begin} AND time < #{end} " +
+            "WHERE time > #{begin} AND time  <= #{end} " +
             "AND request_uri =#{urlRegex}" +
-            "AND response_msg != 'SUCCESS'"+
+            "AND response_code != '200'"+
             "GROUP BY time(1d) ",
             resultType = Long.class,
             bucket = "point_data")
@@ -84,7 +84,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      */
     @Select(value = "SELECT COUNT(*) " +
             "FROM log " +
-            "WHERE time > #{begin} AND time < #{end} " +
+            "WHERE time > #{begin} AND time  <= #{end} " +
             "AND request_uri = #{urlRegex}",
             resultType = Long.class,
             bucket = "point_data")
@@ -103,7 +103,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      */
     @Select(value = "SELECT * " +
             "FROM log " +
-            "WHERE time > #{begin} AND time < #{end} " +
+            "WHERE time > #{begin} AND time  <= #{end} " +
             "AND request_uri = #{urlRegex} " +
             "LIMIT #{pageSize} OFFSET #{offset}",
             resultType = BusinessLog.class,
@@ -126,7 +126,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      */
     @Select(value = "SELECT COUNT(*) " +
             "FROM log " +
-            "WHERE time > #{begin} AND time < #{end} " +
+            "WHERE time > #{begin} AND time  <= #{end} " +
             "AND request_uri =~${urlRegex}",
             resultType = Long.class,
             bucket = "point_data")
@@ -145,7 +145,7 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      */
     @Select(value = "SELECT * " +
             "FROM log " +
-            "WHERE time > #{begin} AND time < #{end} " +
+            "WHERE time > #{begin} AND time  <= #{end} " +
             "AND request_uri =~${urlRegex} " +
             "LIMIT #{pageSize} OFFSET #{offset}",
             resultType = BusinessLog.class,
@@ -158,67 +158,4 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
             @Param("offset") int offset
     );
 
-
-    /**
-     * 每日登录用户
-     * @param begin
-     * @param end
-     * @return
-     */
-    @Select(value = "SELECT * FROM log WHERE response_code = '200' and  time > #{begin} and time < #{end} and request_uri =~/\\/login/", resultType = BusinessLog.class, bucket = "point_data")
-    List<BusinessLog> login(@Param("begin") String begin, @Param("end")String end);
-
-    /**
-     * 每日新注册用户
-     * @param begin
-     * @param end
-     * @return
-     */
-    @Select(value = "SELECT * FROM log WHERE response_code = '200' and  time > #{begin} and time < #{end} and request_uri =~/\\\\/students\\\\/register\\\\//", resultType = BusinessLog.class, bucket = "point_data")
-    List<BusinessLog> dnu(@Param("begin") String begin, @Param("end")String end);
-
-    /**
-     * 每日所有活跃用户userIds
-     * @param begin
-     * @param end
-     * @return
-     */
-    @Select(value = "SELECT DISTINCT(user_id)  FROM  log  WHERE  time > #{begin} and time < #{end} ",resultType = String.class,bucket = "point_data")
-    List<String> allDauForUserId(@Param("begin")String begin, @Param("end")String end);
-
-    /**
-     * 每日新注册用户request_body
-     * @param begin
-     * @param end
-     * @return
-     */
-    @Select(value = "SELECT response_body FROM log WHERE response_code = '200' and  time > #{begin} and time < #{end} and request_uri =~/\\\\/students\\\\/register\\\\//",resultType = String.class,bucket = "point_data")
-    List<String> newDnuForResponseBody(@Param("begin")String begin, @Param("end")String end);
-
-    /**
-     * 日访问量
-     * @param begin
-     * @param end
-     * @return
-     */
-    @Select(value = "SELECT COUNT(request_id) FROM  log  WHERE  time > #{begin} and time < #{end} ",resultType = Integer.class,bucket = "point_data")
-    Integer dpv(@Param("begin")String begin, @Param("end")String end);
-
-    /**
-     * 日用户访问量
-     * @param begin
-     * @param end
-     * @return
-     */
-    @Select(value = "SELECT COUNT(DISTINCT(user_id)) FROM  log  WHERE  time > #{begin} and time < #{end} ",resultType = Integer.class,bucket = "point_data")
-    Integer duv(@Param("begin")String begin, @Param("end")String end);
-
-    /**
-     * 日报错次数
-     * @param begin
-     * @param end
-     * @return
-     */
-    @Select(value = "SELECT COUNT(request_id) FROM  log  WHERE  time > #{begin} and time < #{end} and response_code != 200",resultType = BusinessLog.class,bucket = "point_data")
-    Integer dpvForIndex(@Param("begin")String begin, @Param("end")String end);
 }

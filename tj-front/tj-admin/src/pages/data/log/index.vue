@@ -1,8 +1,7 @@
 <template>
     <div class="contentBox">
         <!-- 搜索 -->
-        <Search :searchForm="searchForm" ref="searchInfo" @getTime="getTime" @handleSearch="handleSearch"
-            @handleReset="handleReset"></Search>
+        <Search :searchForm="searchForm" ref="searchInfo" @getTime="getTime" @handleSearch="handleSearch" @handleReset="handleReset"></Search>
         <!-- end -->
         <div class="bg-wt radius marg-tp-20">
             <div class="tableBox">
@@ -72,11 +71,6 @@ const handleSearch = async () => {
     isSearch.value = true;
     loading.value = true;
     try {
-        // 验证时间范围
-        if (searchForm.beginTime && searchForm.endTime && searchForm.beginTime > searchForm.endTime) {
-            ElMessage.warning('开始时间不能大于结束时间');
-            return;
-        }
         let response;
         // 根据匹配类型选择不同的 API
         if (searchForm.matchType === 'exact') {
@@ -92,6 +86,7 @@ const handleSearch = async () => {
         logs.value.total = parseInt(response.data.total) || 0;
 
         if (searchForm.matchType === 'exact') {
+            console.log('获取指标数据',searchForm)
             // 获取指标数据，即使 url 为空
             const metricResponse = await getMetricByUrl({
                 url: searchForm.url,

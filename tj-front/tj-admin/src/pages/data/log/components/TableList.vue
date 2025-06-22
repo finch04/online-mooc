@@ -10,6 +10,7 @@
       empty-text="暂无数据"
     >
       <el-table-column prop="requestId" label="请求ID" width="180"></el-table-column>
+      <el-table-column prop="time" label="创建时间" width="200"></el-table-column>
       <el-table-column prop="requestUri" label="请求路径" min-width="200"></el-table-column>
       <el-table-column prop="requestMethod" label="请求方式" width="100"></el-table-column>
       <el-table-column prop="host" label="请求主机" width="150"></el-table-column>

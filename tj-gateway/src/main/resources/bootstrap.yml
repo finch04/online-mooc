@@ -4,7 +4,7 @@ server:
     uri-encoding: UTF-8   #服务编码
 spring:
   codec:
-    max-in-memory-size: 5MB  # 根据需要调整
+    max-in-memory-size: 10MB  # 根据需要调整
   profiles:
     active: dev
   application:

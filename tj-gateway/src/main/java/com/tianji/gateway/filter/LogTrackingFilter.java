@@ -9,6 +9,7 @@ import com.tianji.common.domain.R;
 import com.tianji.common.domain.dto.LoginUserDTO;
 import com.tianji.common.domain.vo.LogBusinessVO;
 import com.tianji.gateway.config.AuthProperties;
+import com.tianji.gateway.config.LogProperties;
 import com.tianji.gateway.utils.LogCollector;
 import com.tianji.gateway.utils.RequestHelper;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
 
     private final AuthUtil authUtil;
     private final AuthProperties authProperties;
+    private final LogProperties logProperties;
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final LogCollector logCollector;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -57,7 +59,7 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
 
         // 忽略路径处理:获得请求路径然后与logProperties的路进行匹配，匹配上则不记录日志
         String path = exchange.getRequest().getURI().getPath();
-        Set<String> ignoreTestUrl = authProperties.getExcludePath();
+        Set<String> ignoreTestUrl = logProperties.getExcludePath();
         for (String testUrl : ignoreTestUrl) {
             if (antPathMatcher.match(testUrl, path)) {
                 flag = true;

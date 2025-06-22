@@ -6,9 +6,7 @@ import com.tianji.data.influxdb.domain.dto.TimeDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +26,29 @@ public class TimeHandlerUtils {
 
     // 定义默认的日期时间格式
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+
+    public static String formatIsoTime(String isoTime) {
+        return formatIsoTime(isoTime, "Asia/Shanghai", "yyyy-MM-dd HH:mm:ss");
+    }
+
+    // 将ISO 8601时间字符串转换为本地时间字符串
+    public static String formatIsoTime(String isoTime, String zoneId, String formatPattern) {
+        if (isoTime == null) {
+            return "";
+        }
+        try {
+            // 解析ISO时间字符串为Instant（UTC时间）
+            Instant instant = Instant.parse(isoTime);
+            // 转换为指定时区的LocalDateTime
+            LocalDateTime localDateTime = localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of(zoneId));
+            // 格式化为指定格式
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatPattern);
+            return localDateTime.format(formatter);
+        } catch (Exception e) {
+            return isoTime; // 转换失败时返回原始字符串
+        }
+    }
 
     /**
      * 将 LocalDateTime 转换为字符串

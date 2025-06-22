@@ -17,6 +17,7 @@ import com.tianji.data.model.vo.EchartsVO;
 import com.tianji.data.model.vo.SerierVO;
 import com.tianji.data.utils.TimeHandlerUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.http.Url;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
     
     private final BusinessLogMapper businessLogMapper;
@@ -64,12 +66,17 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
             // 统计总记录数
             total = businessLogMapper.countLogsByUrlToday(url, beginTime, endTime);
         } catch (Exception e) {
+            log.info("influxdb搜索异常",e);
             throw new BizIllegalException("搜索url不合法");
         }
 
         // 创建 MyBatis-Plus 的 Page 对象
         Page<BusinessLog> page = new Page<>(pageNum, pageSize, total);
-        page.setRecords(list);
+        // 或者保持 Stream 链式调用（但返回的列表元素与原列表相同）
+        List<BusinessLog> result = list.stream()
+                .peek(i -> i.setTime(TimeHandlerUtils.formatIsoTime(i.getTime())))
+                .collect(Collectors.toList());
+        page.setRecords(result);
 
         // 将 IPage 转换为 PageDTO
         return PageDTO.of(page);
@@ -107,12 +114,17 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
             // 统计总记录数
             total = businessLogMapper.countLogsByUrlTodayByLike(regex, beginTime, endTime);
         } catch (Exception e) {
+            log.info("influxdb搜索异常",e);
             throw new BizIllegalException("搜索url不合法");
         }
 
         // 创建 MyBatis-Plus 的 Page 对象
         Page<BusinessLog> page = new Page<>(pageNum, pageSize, total);
-        page.setRecords(list);
+        // 或者保持 Stream 链式调用（但返回的列表元素与原列表相同）
+        List<BusinessLog> result = list.stream()
+                .peek(i -> i.setTime(TimeHandlerUtils.formatIsoTime(i.getTime())))
+                .collect(Collectors.toList());
+        page.setRecords(result);
         // 将 IPage 转换为 PageDTO
         return PageDTO.of(page);
     }
@@ -135,6 +147,7 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
             totalVisits = businessLogMapper.countDailyVisits(url, beginTime, endTime);
             failedVisits = businessLogMapper.countFailedVisits(url, beginTime, endTime);
         } catch (Exception e) {
+            log.info("influxdb搜索异常",e);
             throw new BizIllegalException("搜索url不合法");
         }
 
@@ -153,8 +166,8 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
         Double totalVisitsMin = totalVisitsData.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
 
         series.add(new SerierVO(
-                "总访问量",
-                "value",
+                "访问量",
+                "bar",
                 totalVisitsData,
                 totalVisitsMax + "次",
                 totalVisitsMin + "次"
@@ -175,8 +188,8 @@ public class UrlAnalysisServiceImpl implements IUrlAnalysisService {
         Double failedVisitsMin = failedVisitsData.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
 
         series.add(new SerierVO(
-                "总报错量",
-                "value",
+                "报错量",
+                "line",
                 failedVisitsData,
                 failedVisitsMax + "次",
                 failedVisitsMin + "次"
