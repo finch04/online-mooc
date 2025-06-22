@@ -64,7 +64,7 @@ public class BusinessLog {
     @Column(name = "response_time", tag = true)
     private String responseTime;
 
-    @ApiModelProperty(value = "用户")
+    @ApiModelProperty(value = "用户id")
     @Column(name = "user_id")
     public String userId;
 
@@ -72,13 +72,17 @@ public class BusinessLog {
     @Column(name = "user_name")
     public String userName;
 
-    @ApiModelProperty(value = "业务类型")
-    @Column(name = "business_type")
-    public String businessType;
+    @ApiModelProperty(value = "角色id")
+    @Column(name = "role_id")
+    public String roleId;
 
     @ApiModelProperty(value = "数据标志位")
     @Column(name = "data_state", tag = true)
     public String dataState ="0";
+
+    @ApiModelProperty(value = "性别")
+    @Column(name = "sex")
+    public String sex;
 
     @ApiModelProperty(value = "省")
     @Column(name = "province")

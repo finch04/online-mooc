@@ -95,6 +95,7 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                     if (r.success()) {
                         LoginUserDTO user = r.getData();
                         vo.setUserId(user.getUserId());
+                        vo.setRoleId(user.getRoleId());
                     }
 
                     // 5.记录请求时间
@@ -141,12 +142,8 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                                         }
                                     } catch (JsonProcessingException e) {
                                         log.error("Failed to parse response JSON: {}", s, e);
-
-//                                        // 如果解析失败，将整个响应内容作为字符串存储（限制长度）
-//                                        if (s.length() > 100) {
-//                                            s = s.substring(0, 100) + "...[truncated]";
-//                                        }
-//                                        vo.setResponseBody(s);
+                                        //如果返回内容太多导致json被截断，走正则匹配
+                                        parseKeyInfo(s, vo);
                                     }
                                     byte[] uppedContent = s.getBytes();
                                     return bufferFactory.wrap(uppedContent);
@@ -164,6 +161,32 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                                 logCollector.logResponse(vo);
                             });
                 });
+    }
+
+    //降级方案  如果返回内容太多导致json被截断，走正则匹配，拿到code和msg就行
+    private LogBusinessVO parseKeyInfo(String response, LogBusinessVO logBusinessVO) {
+        // 解析code
+        if (response.contains("\"code\":")) {
+            int start = response.indexOf("\"code\":") + 7;
+            int end = response.indexOf(",", start);
+            if (end > start) {
+                try {
+                    logBusinessVO.setResponseCode(Integer.parseInt(response.substring(start, end)));
+                } catch (NumberFormatException e) {
+                    logBusinessVO.setResponseMsg("code格式错误");
+                }
+            }
+        }
+
+        // 解析msg
+        if (response.contains("\"msg\":\"")) {
+            int start = response.indexOf("\"msg\":\"") + 7;
+            int end = response.indexOf("\"", start);
+            if (end > start) {
+                logBusinessVO.setResponseMsg(response.substring(start, end));
+            }
+        }
+        return logBusinessVO;
     }
 
     private Mono<ServerWebExchange> cacheRequestBody(ServerWebExchange exchange, LogBusinessVO vo) {

@@ -51,10 +51,7 @@ public class LogBusinessVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
 
-    @ApiModelProperty(value = "用户名称")
-    private String userName;
-
-    @ApiModelProperty(value = "上次浏览页面")
-    private String lastReadUrl;
+    @ApiModelProperty(value = "角色id")
+    private Long roleId;
 
 }

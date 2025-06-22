@@ -49,7 +49,7 @@ public interface UserClient {
 
 
     /**
-     * 根据id查询单个学生信息
+     * 根据id查询单个用户信息
      * @param id 用户id
      * @return 学生
      */
