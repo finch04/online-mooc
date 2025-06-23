@@ -51,7 +51,20 @@ public class LogBusinessVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
 
+    @ApiModelProperty(value = "用户名称")
+    public String userName;
+
+    @ApiModelProperty(value = "性别")
+    public String sex;
+
+    @ApiModelProperty(value = "省")
+    public String province;
+
+    @ApiModelProperty(value = "市")
+    public String city;
+
     @ApiModelProperty(value = "角色id")
     private Long roleId;
+
 
 }

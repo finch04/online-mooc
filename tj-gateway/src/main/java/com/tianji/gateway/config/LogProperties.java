@@ -26,8 +26,9 @@ public class LogProperties implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         // 添加默认不拦截的路径
+        excludePath.add("/as/accounts/refresh");
         excludePath.add("/jwks");
-        excludePath.add("/data/url/page/log/like");
-        excludePath.add("/data/url/page/log");
+        excludePath.add("/ds/data/url/page/log/like");
+        excludePath.add("/ds/data/url/page/log");
     }
 }

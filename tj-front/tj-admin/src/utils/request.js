@@ -27,12 +27,25 @@ const instance = axios.create({
 
 instance.interceptors.request.use((config) => {
   const TOKEN = sessionStorage.getItem(TOKEN_NAME);
+ // 从sessionStorage获取并解析用户信息
+ const userInfoStr = sessionStorage.getItem(USER_KEY);
+ const userInfo = userInfoStr ? JSON.parse(userInfoStr) : {};
+  
+   // 安全地获取用户信息
+ const userName = userInfo.name || '';
+ const userGender = userInfo.gender === 0 ? '男' : (userInfo.gender === 1 ? '女' : '');
+ // 对可能包含非ASCII字符的值进行编码
+ const encodedUserName = encodeURIComponent(userName);
+ const encodedUserGender = encodeURIComponent(userGender);
   config.headers = {
     "Content-Type": "application/json",
-    "authorization": TOKEN
+    "authorization": TOKEN,
+    "X-User-Name": encodedUserName,
+    "X-User-Gender": encodedUserGender
   }
   return config
 });
+
 
 instance.defaults.timeout = 5000;
 async function refreshToken(err){

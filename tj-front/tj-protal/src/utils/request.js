@@ -25,10 +25,28 @@ const instance = axios.create({
 
 instance.interceptors.request.use((config) => {
   const TOKEN = sessionStorage.getItem('token');
+ // 从sessionStorage获取并解析用户信息
+ const userInfoStr = sessionStorage.getItem('userInfo');
+ const userInfo = userInfoStr ? JSON.parse(userInfoStr) : {};
+  
+   // 安全地获取用户信息
+ const userName = userInfo.name || '';
+ const userGender = userInfo.gender === 0 ? '男' : (userInfo.gender === 1 ? '女' : '');
+ const userProvince = userInfo.province || '';
+ const userCity = userInfo.city || '';
+ // 对可能包含非ASCII字符的值进行编码
+ const encodedUserName = encodeURIComponent(userName);
+ const encodedUserGender = encodeURIComponent(userGender);
+ const encodedUserProvince = encodeURIComponent(userProvince);
+ const encodedUserCity = encodeURIComponent(userCity);
   config.headers = {
     "Content-Type": "application/json",
-    "authorization": TOKEN
-  }  
+    "authorization": TOKEN,
+    "X-User-Name": encodedUserName,
+    "X-User-Gender": encodedUserGender,
+    "X-User-Province": encodedUserProvince,
+    "X-User-City": encodedUserCity,
+  }
   return config
 });
 
@@ -98,6 +116,7 @@ instance.interceptors.response.use(
     throw new Error(response.data.msg);*/
   },
    async (err) => {
+    console.log(err)
     if(err.response.status === 401 && isLogin){
       // 登录异常或超时，刷新token
       return refreshToken(err);

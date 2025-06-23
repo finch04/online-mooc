@@ -32,12 +32,13 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.tianji.auth.common.constants.JwtConstants.AUTHORIZATION_HEADER;
+import static com.tianji.auth.common.constants.JwtConstants.*;
 
 @Component
 @RequiredArgsConstructor
@@ -84,6 +85,21 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
         vo.setHostAddress(request.getRemoteAddress().getAddress().getHostAddress());
         vo.setRequestUri(path);
         vo.setRequestMethod(method);
+
+        //拿到header里的内容  --用户名称  用户性别内容
+        if(request.getHeaders().containsKey(USER_NAME_HEADER)&&
+                request.getHeaders().containsKey(USER_GENDER_HEADER)&&
+                request.getHeaders().containsKey(USER_PROVINCE_HEADER)&&
+                request.getHeaders().containsKey(USER_CITY_HEADER)
+        ){
+            vo.setUserName(URLDecoder.decode(request.getHeaders().getFirst(USER_NAME_HEADER)));
+            vo.setSex(URLDecoder.decode(request.getHeaders().getFirst(USER_GENDER_HEADER)));
+            //省市区直接存的是区域代码
+            vo.setProvince(request.getHeaders().getFirst(USER_PROVINCE_HEADER));
+            vo.setCity(request.getHeaders().getFirst(USER_CITY_HEADER));
+        }
+
+
 
         // 3.获取并缓存请求体
         return cacheRequestBody(exchange, vo)
