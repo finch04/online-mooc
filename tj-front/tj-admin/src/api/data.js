@@ -25,6 +25,15 @@ export const getMetricByUrlByLike = (params) =>
       method: "get",
       params
   });
+export const exportLog = () =>
+  request({
+      url: `/ds/data/url/export/logs`,
+      method: "get",
+      headers: {
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      },
+      responseType: 'blob' // 设置响应类型为二进制流
+  });
 /**流量统计接口 */    
 export const getDnu = (params) =>
   request({

@@ -78,6 +78,10 @@ function alertLoginMessage() {
 // const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 instance.interceptors.response.use(
   async (response) => {
+    // 如果响应类型是 blob，直接返回响应对象
+    if (response.config.responseType === 'blob') {
+      return response;
+    }
     // 1.获取业务状态码
     let code = response.data.code;
     // 2.业务状态码为200，直接返回

@@ -67,6 +67,7 @@
         <protostuff.version>1.7.4</protostuff.version>
         <pinyin4j.version>2.5.0</pinyin4j.version>
         <orika-core.version>1.5.4</orika-core.version>
+        <poi-version>4.1.2</poi-version>
     </properties>
     <!-- 对依赖包进行管理 -->
     <dependencyManagement>

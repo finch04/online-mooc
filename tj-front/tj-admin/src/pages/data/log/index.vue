@@ -9,7 +9,7 @@
                     <h3 class="font-bold text-lg mb-4">URL日志</h3>
                     <!-- 导出日志 -->
                     <el-button class="button primary" style="margin-bottom: 10px;float: right;" @click="exportLogs"
-                        :text="text">导出日志</el-button>
+                        :text="text">导出全部日志</el-button>
                     <!-- end -->
                 </div>
                 <!-- 表格数据 -->
@@ -40,8 +40,8 @@ import {
     getLogsPageByUrl,
     getLogsPageByUrlByLike,
     getMetricByUrl,
-    getMetricByUrlByLike
-    // exportLog 
+    getMetricByUrlByLike,
+    exportLog 
 } from '@/api/data';
 
 // 搜索表单
@@ -133,16 +133,37 @@ const getTime = (val) => {
   searchForm.beginTime = val[0];
   searchForm.endTime = val[1];
 };
-// 导出日志
 const exportLogs = async () => {
     try {
-        // await exportLog(searchForm);
-        ElMessage.success('导出成功');
+        const response = await exportLog();
+        
+        // 调试用
+        console.log("Received blob data:", response.data);
+        
+        const blob = new Blob([response.data], {
+            type: response.headers['content-type']
+        });
+        
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = response.headers['content-disposition'] 
+            ? response.headers['content-disposition'].split('filename=')[1] 
+            : 'logs_export.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        
+        // 清理
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+        }, 100);
+        
     } catch (error) {
-        ElMessage.error('导出失败: ' + error.message);
+        console.error('Export failed:', error);
+        ElMessage.error(`导出失败: ${error.response?.data?.message || error.message}`);
     }
 };
-
 onMounted(async () => {
     await handleSearch();
 });

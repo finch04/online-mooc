@@ -1,5 +1,7 @@
 package com.tianji.data.influxdb.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BizIllegalException;
@@ -15,8 +17,15 @@ import com.tianji.data.model.vo.SerierVO;
 import com.tianji.data.utils.TimeHandlerUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -300,5 +309,32 @@ public class UrlLogServiceImpl implements IUrlLogService {
         double range = max - min;
         if (range <= 0) return 1;
         return ((int) Math.ceil(range / 10.0) + 1) * 1.0;
+    }
+
+
+    @Override
+    public void exportLogs(HttpServletResponse response) throws IOException {
+        // 设置Excel文件的MIME类型
+        response.setHeader("Content-Disposition", "attachment; filename=export.xlsx");
+        response.setHeader("X-Skip-Logging", "true"); // 设置跳过日志的标识
+        // 响应类型,编码
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setCharacterEncoding("utf-8");
+
+        // 写入Excel数据
+        try (OutputStream out = response.getOutputStream()) {
+            EasyExcel.write(out, BusinessLog.class)
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                    .sheet("日志数据")
+                    .doWrite(businessLogMapper.exportLogs().stream()
+                                    .peek(i -> i.setTime(TimeHandlerUtils.formatIsoTime(i.getTime())))
+                                    .collect(Collectors.toList()));
+            // 确保数据全部写出
+            out.flush();
+        } catch (Exception e) {
+            // 错误处理
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "导出失败");
+        }
     }
 }

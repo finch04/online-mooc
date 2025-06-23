@@ -106,6 +106,15 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                     ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
                         @Override
                         public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+
+                            // 检查响应头是否包含 X-Skip-Logging 且值为 true
+                            boolean skipLogging = originalResponse.getHeaders().containsKey("X-Skip-Logging") &&
+                                    "true".equalsIgnoreCase(originalResponse.getHeaders().getFirst("X-Skip-Logging"));
+
+                            if (skipLogging) {
+                                // 跳过日志记录，直接返回
+                                return super.writeWith(body);
+                            }
                             if (body instanceof Flux) {
                                 Flux<? extends DataBuffer> fluxBody = (Flux<? extends DataBuffer>) body;
                                 return super.writeWith(fluxBody.map(dataBuffer -> {
@@ -113,7 +122,6 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
                                     dataBuffer.read(content);
                                     DataBufferUtils.release(dataBuffer);
                                     String s = new String(content, Charset.forName("UTF-8"));
-
                                     try {
                                         // 使用 readTree 方法解析 JSON
                                         com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(s);
@@ -141,7 +149,8 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
 //                                            vo.setResponseBody(dataStr);
                                         }
                                     } catch (JsonProcessingException e) {
-                                        log.error("Failed to parse response JSON: {}", s, e);
+//                                        log.error("Failed to parse response JSON: {}", s);
+                                        log.info("走JSON解析降级逻辑");
                                         //如果返回内容太多导致json被截断，走正则匹配
                                         parseKeyInfo(s, vo);
                                     }

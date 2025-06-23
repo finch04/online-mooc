@@ -1,10 +1,16 @@
 package com.tianji.data.influxdb.service;
 
+import com.tianji.common.domain.R;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.data.influxdb.domain.BusinessLog;
 import com.tianji.data.model.query.UrlPageQuery;
 import com.tianji.data.model.query.UrlQuery;
 import com.tianji.data.model.vo.EchartsVO;
+import org.springframework.http.ResponseEntity;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @ClassName IBusinessLogService.java
@@ -39,4 +45,10 @@ public interface IUrlLogService {
      * @return
      */
     EchartsVO getMetricByUrlByLike(UrlQuery query);
+
+    /**
+     * 导出全部日志数据
+     * @return
+     */
+    void exportLogs(HttpServletResponse response) throws IOException;
 }
