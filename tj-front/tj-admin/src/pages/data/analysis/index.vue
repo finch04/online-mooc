@@ -10,16 +10,16 @@
                 <div class="tab">
                     <el-tabs v-model="activeTab" @tab-change="onTabChange">
                         <el-tab-pane name="courseConversion" label="课程转换漏斗" />
-                        <el-tab-pane name="courseDetailGender" label="课程详情性别分布" />
-                        <el-tab-pane name="courseDetailProvince" label="课程详情省排名" />
+                        <el-tab-pane name="courseDetailGender" label="课程访问量性别分布" />
+                        <el-tab-pane name="courseDetailProvince" label="课程访问量省排名" />
                     </el-tabs>
                 </div>
             </div>
 
             <!-- 根据当前标签显示对应图表 -->
             <EchartsFunnel v-if="activeTab === 'courseConversion'" :metrics="courseConversionMetrics" />
-            <BaseMetric v-if="activeTab === 'courseDetailGender'" :metrics="courseDetailGenderMetrics" title="课程详情性别分布" />
-            <BaseMetric v-if="activeTab === 'courseDetailProvince'" :metrics="courseDetailProvinceMetrics" title="课程详情省排名" />
+            <BaseMetric v-if="activeTab === 'courseDetailGender'" :metrics="courseDetailGenderMetrics" title="课程访问量性别分布" />
+            <BaseMetric v-if="activeTab === 'courseDetailProvince'" :metrics="courseDetailProvinceMetrics" title="课程访问量省排名" />
         </div>
     </div>
 </template>

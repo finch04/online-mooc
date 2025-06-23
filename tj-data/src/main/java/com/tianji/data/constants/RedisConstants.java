@@ -35,10 +35,13 @@ public class RedisConstants {
 
 
     //用户画像
-    public static final String KEY_USER_PROFILE = "DATA:PROFILE:";
+    public static final String KEY_USER_PROFILE = "DATA:ANALYSIS:PROFILE:";
     //性别维度热门课程键
-    public static final String KEY_HOT_COURSES_BY_SEX = "DATA:HOT:COURSES:SEX:";
+    public static final String KEY_HOT_COURSES_BY_SEX = "DATA:ANALYSIS:COURSES:SEX:";
     //省份维度热门课程键
-    public static final String KEY_HOT_COURSES_BY_PROVINCE = "DATA:HOT:COURSES:PROVINCE:";
+    public static final String KEY_HOT_COURSES_BY_PROVINCE = "DATA:ANALYSIS:COURSES:PROVINCE:";
+
+    public static final String KEY_PROCESSING_STATUS = "DATA:ANALYSIS:PROCESSED:";
+    public static final String KEY_ANALYSIS_RESULT = "DATA:ANALYSIS:RESULT:";
 
 }

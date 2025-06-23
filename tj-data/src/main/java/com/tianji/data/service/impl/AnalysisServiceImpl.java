@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -155,6 +157,15 @@ public class AnalysisServiceImpl implements IAnalysisService {
             return new LogAnalysisResult();
         }
 
+        // 获取今天的日期字符串 (格式: yyyy-MM-dd)
+        String today = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+
+        // 检查今天是否已经处理过
+        if (isProcessedToday(today)) {
+            log.info("今天的数据已经处理过，跳过处理: {}", today);
+            return loadCachedResult(today);
+        }
+
         LogAnalysisResult result = new LogAnalysisResult();
         Map<String, UserProfile> userProfileMap = new HashMap<>();
         Map<String, Map<String, Long>> courseVisitBySex = new HashMap<>();
@@ -183,12 +194,15 @@ public class AnalysisServiceImpl implements IAnalysisService {
 
             // 更新用户画像
             userProfileMap.computeIfAbsent(userId, k -> {
-                UserProfile profile = new UserProfile();
-                profile.setUserId(userId);
-                profile.setUserName(userName);
-                profile.setSex(sex);
-                profile.setProvince(province);
-                profile.setCourseVisitCounts(new HashMap<>());
+                UserProfile profile = loadUserProfileFromRedis(userId); // 从Redis加载现有数据
+                if (profile == null) {
+                    profile = new UserProfile();
+                    profile.setUserId(userId);
+                    profile.setUserName(userName);
+                    profile.setSex(sex);
+                    profile.setProvince(province);
+                    profile.setCourseVisitCounts(new HashMap<>());
+                }
                 return profile;
             });
 
@@ -209,62 +223,137 @@ public class AnalysisServiceImpl implements IAnalysisService {
         result.setCourseVisitBySex(courseVisitBySex);
         result.setCourseVisitByProvince(courseVisitByProvince);
 
-        cacheToRedis(result);
+        // 保存分析结果并标记为已处理
+        cacheToRedis(result, today);
+        markAsProcessed(today);
+
         return result;
+    }
+    /**
+     * 从Redis加载用户画像
+     */
+    private UserProfile loadUserProfileFromRedis(String userId) {
+        String redisKey = KEY_USER_PROFILE + userId;
+        String jsonValue = redisTemplate.opsForValue().get(redisKey);
+
+        if (jsonValue != null) {
+            try {
+                return JSON.parseObject(jsonValue, UserProfile.class);
+            } catch (Exception e) {
+                log.error("解析用户画像失败, userId: {}", userId, e);
+            }
+        }
+        return null;
     }
 
     /**
-     * 将分析结果缓存到Redis
+     * 检查今天是否已经处理过
      */
-    private void cacheToRedis(LogAnalysisResult result) {
+    private boolean isProcessedToday(String date) {
+        String redisKey = KEY_PROCESSING_STATUS + date;
+        return redisTemplate.hasKey(redisKey);
+    }
+
+    /**
+     * 从缓存加载分析结果
+     */
+    private LogAnalysisResult loadCachedResult(String date) {
+        String redisKey = KEY_ANALYSIS_RESULT + date;
+        String jsonValue = redisTemplate.opsForValue().get(redisKey);
+
+        if (jsonValue != null) {
+            try {
+                return JSON.parseObject(jsonValue, LogAnalysisResult.class);
+            } catch (Exception e) {
+                log.error("从缓存加载分析结果失败, date: {}", date, e);
+            }
+        }
+        return new LogAnalysisResult();
+    }
+
+    /**
+     * 标记日期为已处理
+     */
+    private void markAsProcessed(String date) {
+        String redisKey = KEY_PROCESSING_STATUS + date;
+        redisTemplate.opsForValue().set(redisKey, "processed", 25, TimeUnit.HOURS);
+    }
+
+    /**
+     * 将分析结果缓存到Redis（增量更新）
+     */
+    private void cacheToRedis(LogAnalysisResult result, String date) {
         try {
-            // 缓存用户画像数据
+            // 保存完整的分析结果
+            String resultKey = KEY_ANALYSIS_RESULT + date;
+            String jsonValue = JSON.toJSONString(result);
+            redisTemplate.opsForValue().set(resultKey, jsonValue, 7, TimeUnit.DAYS);
+
+            // 增量更新用户画像数据
             List<UserProfile> userProfiles = result.getUserProfiles();
             for (UserProfile profile : userProfiles) {
-                String redisKey = KEY_USER_PROFILE+profile.getUserId();
-                String jsonValue = JSON.toJSONString(profile);
-                redisTemplate.opsForValue().set(redisKey, jsonValue, 1, TimeUnit.DAYS);
+                String redisKey = KEY_USER_PROFILE + profile.getUserId();
+
+                // 获取现有数据
+                UserProfile existingProfile = loadUserProfileFromRedis(profile.getUserId());
+                if (existingProfile != null) {
+                    // 合并课程访问记录
+                    Map<String, Long> existingCounts = existingProfile.getCourseVisitCounts();
+                    Map<String, Long> newCounts = profile.getCourseVisitCounts();
+
+                    newCounts.forEach((courseId, count) -> {
+                        existingCounts.merge(courseId, count, Long::sum);
+                    });
+
+                    // 使用现有数据的其他字段，只更新课程访问记录
+                    profile.setCourseVisitCounts(existingCounts);
+                }
+
+                // 保存更新后的数据
+                jsonValue = JSON.toJSONString(profile);
+                redisTemplate.opsForValue().set(redisKey, jsonValue, 30, TimeUnit.DAYS); // 延长用户画像缓存时间
             }
 
-            // 缓存热门课程数据 - 性别维度
+            // 增量更新热门课程数据 - 性别维度
             Map<String, Map<String, Long>> courseVisitBySex = result.getCourseVisitBySex();
             for (Map.Entry<String, Map<String, Long>> sexEntry : courseVisitBySex.entrySet()) {
                 String sex = sexEntry.getKey();
                 Map<String, Long> courseCounts = sexEntry.getValue();
 
-                String redisKey =KEY_HOT_COURSES_BY_SEX+sex;
-                // 清空旧数据
-                redisTemplate.delete(redisKey);
-                // 存入新数据
-                for (Map.Entry<String, Long> courseEntry : courseCounts.entrySet()) {
-                    redisTemplate.opsForZSet().add(redisKey, courseEntry.getKey(), courseEntry.getValue());
-                }
+                String redisKey = KEY_HOT_COURSES_BY_SEX + sex;
+
+                // 增量更新ZSet分数
+                courseCounts.forEach((courseId, count) -> {
+                    redisTemplate.opsForZSet().incrementScore(redisKey, courseId, count);
+                });
+
                 // 设置过期时间
-                redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
+                redisTemplate.expire(redisKey, 30, TimeUnit.DAYS); // 延长缓存时间
             }
 
-            // 缓存热门课程数据 - 省份维度
+            // 增量更新热门课程数据 - 省份维度
             Map<String, Map<String, Long>> courseVisitByProvince = result.getCourseVisitByProvince();
             for (Map.Entry<String, Map<String, Long>> provinceEntry : courseVisitByProvince.entrySet()) {
                 String province = provinceEntry.getKey();
                 Map<String, Long> courseCounts = provinceEntry.getValue();
 
-                String redisKey = KEY_HOT_COURSES_BY_PROVINCE+province;
-                // 清空旧数据
-                redisTemplate.delete(redisKey);
-                // 存入新数据
-                for (Map.Entry<String, Long> courseEntry : courseCounts.entrySet()) {
-                    redisTemplate.opsForZSet().add(redisKey, courseEntry.getKey(), courseEntry.getValue());
-                }
+                String redisKey = KEY_HOT_COURSES_BY_PROVINCE + province;
+
+                // 增量更新ZSet分数
+                courseCounts.forEach((courseId, count) -> {
+                    redisTemplate.opsForZSet().incrementScore(redisKey, courseId, count);
+                });
+
                 // 设置过期时间
-                redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
+                redisTemplate.expire(redisKey, 30, TimeUnit.DAYS); // 延长缓存时间
             }
 
-            log.info("日志分析结果已缓存到Redis");
+            log.info("日志分析结果已增量更新到Redis, date: {}", date);
         } catch (Exception e) {
-            log.error("缓存分析结果到Redis失败", e);
+            log.error("增量更新分析结果到Redis失败", e);
         }
     }
+
 
     /**
      * 从请求URI中提取课程ID
