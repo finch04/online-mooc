@@ -1,16 +1,13 @@
-package com.tianji.data.influxdb.service.impl;
+package com.tianji.data.service.impl;
 
-import com.tianji.api.client.user.UserClient;
-import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.ExceptionsUtil;
 import com.tianji.data.constants.LogBusinessEnum;
 import com.tianji.data.influxdb.domain.BusinessLog;
-import com.tianji.data.influxdb.mapper.BusinessLogMapper;
-import com.tianji.data.influxdb.service.IBusinessLogService;
+import com.tianji.data.mapper.BusinessLogMapper;
+import com.tianji.data.service.IBusinessLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

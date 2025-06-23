@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * TimeDTO
  *
- * @author: wgl
+ * @author: fsq
  * @describe: 日期对象类
  * @date: 2022/12/28 10:10
  */

@@ -3,23 +3,19 @@ package com.tianji.data.controller;/**
  * @date 2025/6/21 10:28
  */
 
-import com.tianji.common.domain.R;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.data.influxdb.domain.BusinessLog;
-import com.tianji.data.influxdb.service.IUrlLogService;
+import com.tianji.data.service.IUrlLogService;
 import com.tianji.data.model.query.UrlPageQuery;
 import com.tianji.data.model.query.UrlQuery;
 import com.tianji.data.model.vo.EchartsVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 /**
  * @Author: fsq

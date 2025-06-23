@@ -17,7 +17,7 @@ import java.util.Random;
 /**
  * CityParamBuild
  *
- * @author: wgl
+ * @author: fsq
  * @describe: 城市参数封装--请求百度地图
  * @date: 2022/12/28 10:10
  */

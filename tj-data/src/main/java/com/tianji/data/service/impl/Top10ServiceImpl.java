@@ -4,7 +4,7 @@ import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.JsonUtils;
 import com.tianji.data.constants.RedisConstants;
 import com.tianji.data.model.dto.Top10DataSetDTO;
-import com.tianji.data.model.po.CourseInfo;
+import com.tianji.data.model.vo.CourseInfo;
 import com.tianji.data.model.vo.Top10DataVO;
 import com.tianji.data.service.Top10Service;
 import com.tianji.data.utils.DataUtils;

@@ -1,4 +1,4 @@
-package com.tianji.data.influxdb.service;
+package com.tianji.data.service;
 
 import com.tianji.data.influxdb.domain.BusinessLog;
 

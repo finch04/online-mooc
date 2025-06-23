@@ -1,6 +1,5 @@
 package com.tianji.data.model.vo;
 
-import com.tianji.data.model.po.CourseInfo;
 import lombok.Data;
 
 import java.util.List;

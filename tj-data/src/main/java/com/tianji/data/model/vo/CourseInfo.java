@@ -1,4 +1,4 @@
-package com.tianji.data.model.po;
+package com.tianji.data.model.vo;
 
 import lombok.Data;
 

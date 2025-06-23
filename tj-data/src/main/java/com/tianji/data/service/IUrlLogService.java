@@ -1,4 +1,4 @@
-package com.tianji.data.influxdb.service;
+package com.tianji.data.service;
 
 import com.tianji.common.domain.R;
 import com.tianji.common.domain.dto.PageDTO;

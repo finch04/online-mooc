@@ -3,7 +3,7 @@ package com.tianji.data; /**
  * @date 2025/6/21 17:17
  */
 
-import com.tianji.data.influxdb.mapper.BusinessLogMapper;
+import com.tianji.data.mapper.BusinessLogMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

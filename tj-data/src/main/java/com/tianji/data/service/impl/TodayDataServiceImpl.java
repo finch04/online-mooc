@@ -1,10 +1,8 @@
 package com.tianji.data.service.impl;
 
-import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.JsonUtils;
 import com.tianji.data.constants.RedisConstants;
 import com.tianji.data.model.dto.TodayDataDTO;
-import com.tianji.data.model.po.TodayDataInfo;
 import com.tianji.data.model.vo.TodayDataVO;
 import com.tianji.data.service.TodayDataService;
 import com.tianji.data.utils.DataUtils;
@@ -16,8 +14,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @ClassName TodayDataServiceImpl

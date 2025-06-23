@@ -1,4 +1,4 @@
-package com.tianji.data.influxdb.mapper;
+package com.tianji.data.mapper;
 
 import com.tianji.data.influxdb.InfluxDBBaseMapper;
 import com.tianji.data.influxdb.anno.Param;

@@ -1,8 +1,8 @@
-package com.tianji.data.influxdb.service.impl;
+package com.tianji.data.service.impl;
 
 import com.tianji.common.utils.NumberUtils;
-import com.tianji.data.influxdb.mapper.FlowMapper;
-import com.tianji.data.influxdb.service.IFlowService;
+import com.tianji.data.mapper.FlowMapper;
+import com.tianji.data.service.IFlowService;
 import com.tianji.data.model.query.FlowQuery;
 import com.tianji.data.model.vo.AxisVO;
 import com.tianji.data.model.vo.EchartsVO;
@@ -11,7 +11,6 @@ import com.tianji.data.utils.TimeHandlerUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 

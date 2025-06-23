@@ -4,8 +4,8 @@
 // */
 //
 //import com.tianji.data.influxdb.domain.BusinessLog;
-//import com.tianji.data.influxdb.mapper.BusinessLogMapper;
-//import com.tianji.data.influxdb.service.IBusinessLogService;
+//import com.tianji.data.mapper.BusinessLogMapper;
+//import com.tianji.data.service.IBusinessLogService;
 //import com.tianji.data.utils.TimeHandlerUtils;
 //import org.checkerframework.checker.units.qual.A;
 //import org.junit.jupiter.api.Test;

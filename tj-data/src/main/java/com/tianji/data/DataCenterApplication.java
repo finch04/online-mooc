@@ -11,7 +11,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @SpringBootApplication
-@MapperScan("com.tianji.data.influxdb.mapper")
+@MapperScan("com.tianji.data.mapper")
 @Slf4j
 public class DataCenterApplication {
     public static void main(String[] args) throws UnknownHostException {

@@ -1,4 +1,4 @@
-package com.tianji.data.influxdb.service.impl;
+package com.tianji.data.service.impl;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
@@ -7,8 +7,8 @@ import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.NumberUtils;
 import com.tianji.data.influxdb.domain.BusinessLog;
-import com.tianji.data.influxdb.mapper.BusinessLogMapper;
-import com.tianji.data.influxdb.service.IUrlLogService;
+import com.tianji.data.mapper.BusinessLogMapper;
+import com.tianji.data.service.IUrlLogService;
 import com.tianji.data.model.query.UrlPageQuery;
 import com.tianji.data.model.query.UrlQuery;
 import com.tianji.data.model.vo.AxisVO;
@@ -17,15 +17,10 @@ import com.tianji.data.model.vo.SerierVO;
 import com.tianji.data.utils.TimeHandlerUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

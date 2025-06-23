@@ -1,13 +1,12 @@
 package com.tianji.data.controller;
 
-import com.tianji.data.influxdb.service.IFlowService;
+import com.tianji.data.service.IFlowService;
 import com.tianji.data.model.query.FlowQuery;
 import com.tianji.data.model.vo.EchartsVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
