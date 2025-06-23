@@ -32,4 +32,13 @@ public class RedisConstants {
     public static final String TODAY_ORDER_COUNT = "TODAY:ORDER:COUNT:";
     //今日新增学员
     public static final String TODAY_NEW_STUDENT = "TODAY:NEW:STUDENT:";
+
+
+    //用户画像
+    public static final String KEY_USER_PROFILE = "DATA:PROFILE:";
+    //性别维度热门课程键
+    public static final String KEY_HOT_COURSES_BY_SEX = "DATA:HOT:COURSES:SEX:";
+    //省份维度热门课程键
+    public static final String KEY_HOT_COURSES_BY_PROVINCE = "DATA:HOT:COURSES:PROVINCE:";
+
 }

@@ -116,7 +116,7 @@ public interface FlowMapper extends InfluxDBBaseMapper {
      * @param end
      * @return
      */
-    @Select(value = "SELECT * FROM  log  WHERE  time > #{begin} and time < #{end} and request_uri =~/\\\\/orders\\\\/placeOrder/ ",resultType = BusinessLog.class,bucket = "point_data")
+    @Select(value = "SELECT * FROM  log  WHERE  time > #{begin} and time < #{end} and response_code = '200' and request_uri =~/\\\\/orders\\\\/placeOrder/ ",resultType = BusinessLog.class,bucket = "point_data")
     List<BusinessLog> buyCourseList(@Param("begin")String begin, @Param("end")String end);
 
 
@@ -127,6 +127,6 @@ public interface FlowMapper extends InfluxDBBaseMapper {
      * @param end
      * @return
      */
-    @Select(value = "SELECT * FROM  log  WHERE  time > #{begin} and time < #{end} and request_uri =~/\\\\/courses\\\\/baseInfo/ ",resultType = BusinessLog.class,bucket = "point_data")
+    @Select(value = "SELECT * FROM  log  WHERE  time > #{begin} and time < #{end} and response_code = '200' and request_uri =~/\\\\/courses\\\\/baseInfo/ ",resultType = BusinessLog.class,bucket = "point_data")
     List<BusinessLog> courseDetailList(@Param("begin")String begin, @Param("end")String end);
 }

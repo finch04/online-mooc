@@ -46,6 +46,7 @@ public interface MqConstants {
         String DATA_LOG_KEY = "data.log";
         String DATA_COURSE_KEY = "course.data";
         String DATA_ORDER_KEY = "order.data";
+        String DATA_ANALYSIS_LOG_KEY = "data.analysis.log";
 
         String DATA_ORDER_TODAY_AMOUNT_KEY="order.today.amount";
         String DATA_ORDER_TODAY_COUNT_KEY="order.today.count";
