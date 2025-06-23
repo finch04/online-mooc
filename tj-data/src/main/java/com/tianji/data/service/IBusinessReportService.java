@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface IBusinessReportService {
 
-
+    void saveLogs(List<BusinessLog> list);
 }

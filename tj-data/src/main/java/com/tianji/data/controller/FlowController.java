@@ -67,26 +67,4 @@ public class FlowController {
         return flowService.dau(query);
     }
 
-    /**
-     * 数据展示：7日|URL访问量前10名
-     * @param query 查询参数
-     * @return 每日报错次数列表
-     */
-    @GetMapping("/url/visits")
-    @ApiOperation(value = "查询url访问数据")
-    public EchartsVO urlVisits(FlowQuery query) {
-        return flowService.urlVisits(query);
-    }
-
-    /**
-     * 数据展示：7日|URL总体概览
-     * 7日|URL报错量前10名
-     * @param query 查询参数
-     * @return 每日报错次数列表
-     */
-    @GetMapping("/url/errors")
-    @ApiOperation(value = "查询url报错数据")
-    public EchartsVO urlErrors(FlowQuery query) {
-        return flowService.urlErrors(query);
-    }
 }

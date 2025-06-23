@@ -48,22 +48,6 @@ public class FlowServiceImpl implements IFlowService {
         return createTimeSeriesChart("日活跃用户数趋势", "用户数", "bar", data, timeRange);
     }
 
-    @Override
-    public EchartsVO urlVisits(FlowQuery query) {
-        TimeRange timeRange = getTimeRange(query);
-        List<String> visitData = flowMapper.top10UrlsByVisits(timeRange.begin, timeRange.end);
-        Map<String, Long> urlVisitMap = parseUrlData(visitData);
-        return buildUrlChart(urlVisitMap, "URL访问量前10", "访问量");
-    }
-
-    @Override
-    public EchartsVO urlErrors(FlowQuery query) {
-        TimeRange timeRange = getTimeRange(query);
-        List<String> errorData = flowMapper.top10UrlsByErrors(timeRange.begin, timeRange.end);
-        Map<String, Long> urlErrorMap = parseUrlData(errorData);
-        return buildUrlChart(urlErrorMap, "URL错误量前10", "错误量");
-    }
-
     /**
      * 创建时间序列图表
      */

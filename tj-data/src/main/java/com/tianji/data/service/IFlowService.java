@@ -17,7 +17,5 @@ public interface IFlowService {
     EchartsVO dpv(FlowQuery query);
     EchartsVO duv(FlowQuery query);
     EchartsVO dau(FlowQuery query);
-    EchartsVO urlVisits(FlowQuery query);
-    EchartsVO urlErrors(FlowQuery query);
 
 }

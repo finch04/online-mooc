@@ -24,13 +24,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * @Description：日新增用户数
+ * @Description：省日课程详情用户访问数
  */
 @Data
 @NoArgsConstructor
-@TableName("tab_dnu")
-@ApiModel(value="Dnu对象", description="日新增用户数")
-public class Dnu {
+@TableName("tab_course_detail_province_duv")
+@ApiModel(value="CourseDetailProvinceDuv对象", description="省日课程用户访问数")
+public class CourseDetailProvinceDuv {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +38,11 @@ public class Dnu {
     @ApiModelProperty(value = "主键 ID")
     private Long id;
 
-    @ApiModelProperty(value = "日新增用户数")
-    private Long dnu;
+    @ApiModelProperty(value = "省")
+    private String provinceName;
+
+    @ApiModelProperty(value = "省日课程用户访问数")
+    private Long duv;
 
     @ApiModelProperty(value = "统计时间")
     @JsonDeserialize(using = LocalDateDeserializer.class)

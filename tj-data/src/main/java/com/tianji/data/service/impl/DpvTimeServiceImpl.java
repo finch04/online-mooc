@@ -1,9 +1,9 @@
 package com.tianji.data.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tianji.data.mapper.DauTimeMapper;
-import com.tianji.data.model.po.DauTime;
-import com.tianji.data.service.IDauTimeService;
+import com.tianji.data.mapper.DpvTimeMapper;
+import com.tianji.data.model.po.DpvTime;
+import com.tianji.data.service.IDpvTimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +12,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class DauTimeServiceImpl extends ServiceImpl<DauTimeMapper, DauTime> implements IDauTimeService {
+public class DpvTimeServiceImpl extends ServiceImpl<DpvTimeMapper, DpvTime> implements IDpvTimeService {
 
 }

@@ -24,13 +24,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * @Description：日新增用户数
+ * @Description：课程转换率
  */
 @Data
 @NoArgsConstructor
-@TableName("tab_dnu")
-@ApiModel(value="Dnu对象", description="日新增用户数")
-public class Dnu {
+@TableName("tab_course_conversion_dpv")
+@ApiModel(value="CourseConversionDpv对象", description="课程转换率")
+public class CourseConversionDpv {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +38,14 @@ public class Dnu {
     @ApiModelProperty(value = "主键 ID")
     private Long id;
 
-    @ApiModelProperty(value = "日新增用户数")
-    private Long dnu;
+    @ApiModelProperty(value = "课程浏览次数")
+    private Long doBrowseDpv;
+
+    @ApiModelProperty(value = "课程下单次数")
+    private Long doOrderDpv;
+
+    @ApiModelProperty(value = "课程转化率")
+    private double conversionRate;
 
     @ApiModelProperty(value = "统计时间")
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -48,7 +54,7 @@ public class Dnu {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate reportTime;
 
-    // 创建时间:INSERT 代表只在插入时填充
+
     public LocalDateTime createTime;
 
     // 修改时间：INSERT_UPDATE 首次插入、其次更新时填充(或修改)
