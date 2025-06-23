@@ -22,20 +22,20 @@
             <BaseMetric v-if="baseActiveTab === 'dnu'" :metrics="dnuMetrics" title="DNU 新用户趋势" />
         </div>
 
-        <!-- URL数据看板 -->
+        <!-- 数据看板 -->
         <div class="boarddata bg-wt">
             <div class="boarddatahead" >
                 <div class="tab">
                     <el-tabs v-model="urlActiveTab" @tab-change="onUrlTabChange" >
-                        <el-tab-pane name="visits" label="URL访问量TOP10" />
-                        <el-tab-pane name="errors" label="URL报错量TOP10" />
+                        <el-tab-pane name="dpvTime" label="活跃访问数时段" />
+                        <el-tab-pane name="dauProvince" label="活跃用户省分布排名" />
                     </el-tabs>
                 </div>
             </div>
             
             <!-- 根据当前标签显示对应图表，使用BaseMetric组件 -->
-            <BaseMetric v-if="urlActiveTab === 'visits'" :metrics="visitsMetrics" title="URL访问量TOP10" />
-            <BaseMetric v-if="urlActiveTab === 'errors'" :metrics="errorsMetrics" title="URL报错量TOP10" />
+            <BaseMetric v-if="urlActiveTab === 'dpvTime'" :metrics="dpvTimeMetrics" title="活跃访问数时段" />
+            <BaseMetric v-if="urlActiveTab === 'dauProvince'" :metrics="dauProvinceMetrics" title="活跃用户省分布排名" />
         </div>
     </div>
 </template>
@@ -54,8 +54,8 @@ import {
     getDuv,
     getDpv,
     getDau,
-    getVisitsUrlFlow,
-    getErrorsUrlFlow
+    getDpvTime,
+    getDauProvince
 } from '@/api/data';
 
 // 搜索表单
@@ -73,7 +73,7 @@ const baseChartTabs = ref([
 ]);
 
 // URL数据看板活跃标签
-const urlActiveTab = ref('visits');
+const urlActiveTab = ref('dpvTime');
 // 基础数据看板活跃标签
 const baseActiveTab = ref('dpv');
 
@@ -84,9 +84,9 @@ const dpvMetrics = ref(null);
 const dauMetrics = ref(null);
 
 // URL访问量前10数据
-const visitsMetrics = ref(null);
+const dpvTimeMetrics = ref(null);
 // URL报错量前10数据
-const errorsMetrics = ref(null);
+const dauProvinceMetrics = ref(null);
 
 // 搜索流量数据
 const handleSearch = async () => {
@@ -105,11 +105,11 @@ const handleSearch = async () => {
         dauMetrics.value = dauResponse.data;
         
         // 获取URL相关数据
-        const visitsResponse = await getVisitsUrlFlow(searchForm);
-        visitsMetrics.value = visitsResponse.data;
+        const dpvTimeResponse = await getDpvTime(searchForm);
+        dpvTimeMetrics.value = dpvTimeResponse.data;
         
-        const errorsResponse = await getErrorsUrlFlow(searchForm);
-        errorsMetrics.value = errorsResponse.data;
+        const dauProvinceResponse = await getDauProvince(searchForm);
+        dauProvinceMetrics.value = dauProvinceResponse.data;
         
         console.log('所有数据获取完成');
         // 等待 DOM 更新后再触发图表更新

@@ -5,6 +5,7 @@ import com.tianji.data.influxdb.domain.BusinessLog;
 import com.tianji.data.mapper.*;
 import com.tianji.data.model.po.*;
 import com.tianji.data.service.*;
+import com.tianji.data.utils.TimeHandlerUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class BusinessReportServiceImpl implements IBusinessReportService {
     private final DpvMapper dpvMapper;
     private final DauMapper dauMapper;
     private final DauRangeMapper dauRangeMapper;
-    private final DnuProvinceMapper dnuProvinceMapper;
+    private final DauProvinceMapper dauProvinceMapper;
     private final CourseConversionDpvMapper courseConversionDpvMapper;
     private final CourseDetailGenderDuvMapper courseDetailGenderDuvMapper;
     private final CourseDetailProvinceDuvMapper courseDetailProvinceDuvMapper;
@@ -57,7 +58,7 @@ public class BusinessReportServiceImpl implements IBusinessReportService {
         saveDpvStatistics(list, reportDate);
         saveDauStatistics(begin, end, reportDate);
         saveDauRangeStatistics(begin, end, reportDate);
-        saveDnuProvinceStatistics(list, reportDate);
+        saveDauProvinceStatistics(list, reportDate);
         saveCourseAccessStatistics(begin, end, reportDate);//这里统计课程性别、省市、转化率
         saveDpvTimeStatistics(list, reportDateTime);
     }
@@ -177,37 +178,33 @@ public class BusinessReportServiceImpl implements IBusinessReportService {
 
 
     /**
-     * 统计新增用户所属省份（DNU Province）
+     * 统计活跃用户所属省份（DAU Province）
      */
-    private void saveDnuProvinceStatistics(List<BusinessLog> list, LocalDate reportDate) {
-        // 直接使用Mapper检查DnuProvince表是否已有当天数据
-        if (existsDnuProvinceByReportTime(reportDate)) {
-            log.info("DnuProvince statistics already exist for date: {}", reportDate);
-            return;
-        }
+    private void saveDauProvinceStatistics(List<BusinessLog> list, LocalDate reportDate) {
 
-        List<String> newUserIds = flowMapper.newDnuForResponseBody(
-                reportDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toString(),
-                reportDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toString()
-        );
-        Set<String> newUserSet = new HashSet<>(newUserIds);
-
-        Map<String, Integer> provinceDnuMap = new HashMap<>();
+        String begin = TimeHandlerUtils.getYesterdayTime().getBegin();
+        String end = TimeHandlerUtils.getYesterdayTime().getEnd();
+        Set<String> activeUserIds = new HashSet<>(flowMapper.allDauForUserId(begin, end));
+        // 统计每个省份的活跃用户数
+        Map<String, Integer> provinceDauMap = new HashMap<>();
         for (BusinessLog log : list) {
-            if (newUserSet.contains(log.getUserId()) && log.getProvince() != null) {
-                provinceDnuMap.put(log.getProvince(), provinceDnuMap.getOrDefault(log.getProvince(), 0) + 1);
+            if (activeUserIds.contains(log.getUserId()) && log.getProvince() != null) {
+                provinceDauMap.put(log.getProvince(), provinceDauMap.getOrDefault(log.getProvince(), 0) + 1);
             }
         }
 
-        for (Map.Entry<String, Integer> entry : provinceDnuMap.entrySet()) {
+        // 保存统计结果
+        for (Map.Entry<String, Integer> entry : provinceDauMap.entrySet()) {
             // 直接使用Mapper检查该省份是否已有记录
-            if (!existsDnuProvinceByProvinceAndReportTime(entry.getKey(), reportDate)) {
-                DnuProvince dnuProvince = new DnuProvince();
-                dnuProvince.setDnu((long) entry.getValue());
-                dnuProvince.setProvince(entry.getKey());
-                dnuProvince.setReportTime(reportDate);
-                dnuProvinceMapper.insert(dnuProvince);
-                log.info("Saved DnuProvince: {}", dnuProvince);
+            if (!existsDauProvinceByProvinceAndReportTime(entry.getKey(), reportDate)) {
+                DauProvince dauProvince = new DauProvince();
+                dauProvince.setDau((long) entry.getValue());
+                dauProvince.setProvince(entry.getKey());
+                dauProvince.setReportTime(reportDate);
+                dauProvinceMapper.insert(dauProvince);
+                log.info("Saved DauProvince: {}", dauProvince);
+            } else {
+                log.info("DauProvince already exists for province: {}, reportTime: {}", entry.getKey(), reportDate);
             }
         }
     }
@@ -360,15 +357,10 @@ public class BusinessReportServiceImpl implements IBusinessReportService {
     }
 
 
-    private boolean existsDnuProvinceByReportTime(LocalDate reportTime) {
-        return dnuProvinceMapper.selectCount(new LambdaQueryWrapper<DnuProvince>()
-                .eq(DnuProvince::getReportTime, reportTime)) > 0;
-    }
-
-    private boolean existsDnuProvinceByProvinceAndReportTime(String province, LocalDate reportTime) {
-        return dnuProvinceMapper.selectCount(new LambdaQueryWrapper<DnuProvince>()
-                .eq(DnuProvince::getProvince, province)
-                .eq(DnuProvince::getReportTime, reportTime)) > 0;
+    private boolean existsDauProvinceByProvinceAndReportTime(String province, LocalDate reportTime) {
+        return dauProvinceMapper.selectCount(new LambdaQueryWrapper<DauProvince>()
+                .eq(DauProvince::getProvince, province)
+                .eq(DauProvince::getReportTime, reportTime)) > 0;
     }
 
     private boolean existsCourseConversionDpvByReportTime(LocalDate reportTime) {

@@ -33,20 +33,6 @@ const props = defineProps({
     metrics: {
         type: Object,
         default: () => ({
-            xaxis: [
-                {
-                    type: 'category',
-                    data: []
-                }
-            ],
-            yaxis: [
-                {
-                    type: 'value',
-                    max: 0,
-                    min: 0,
-                    interval: 0
-                }
-            ],
             series: [
                 {
                     name: '总访问量',
@@ -74,65 +60,95 @@ const initChart = async () => {
 
     const myChart = echarts.init(chartContainer.value);
 
-    const option = {
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'cross',
-                crossStyle: {
-                    color: '#999'
-                }
-            }
-        },
-        legend: {
-            data: props.metrics.series.map(item => item.name)
-        },
-        xAxis: {
-            type: props.metrics.xaxis[0].type,
-            data: props.metrics.xaxis[0].data
-        },
-        yAxis: props.metrics.yaxis.map(item => ({
-            type: item.type,
-            max: item.max,
-            min: item.min,
-            interval: item.interval
-        })),
-        series: props.metrics.series.map((item, index) => {
-            // 根据索引从配色方案中选择颜色
-            let color = softColors[index % softColors.length];
+    // 处理系列数据
+    const series = props.metrics.series.map((item, index) => {
+        // 根据索引从配色方案中选择颜色
+        let color = softColors[index % softColors.length];
 
-            // 根据后端返回的 type 字段设置图表类型
-            const seriesItem = {
-                name: item.name,
-                type: item.type || 'bar', // 默认使用柱状图
-                data: item.data,
+        const seriesItem = {
+            name: item.name,
+            type: item.type || 'bar', // 默认使用柱状图
+            data: item.data,
+        };
+
+        // 饼图特殊配置
+        if (item.type === 'pie') {
+            seriesItem.radius = '50%';
+            seriesItem.itemStyle = {
+                color: (params) => softColors[params.dataIndex % softColors.length]
             };
+            seriesItem.label = {
+                show: true,
+                formatter: '{b}: {c} ({d}%)'
+            };
+            seriesItem.emphasis = {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            };
+        } 
+        // 柱状图特殊配置
+        else if (item.type === 'bar') {
+            seriesItem.itemStyle = {
+                color: `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.7)`
+            };
+            seriesItem.barWidth = '40%'; // 柱状图宽度
+        } 
+        // 折线图特殊配置
+        else if (item.type === 'line') {
+            color = deepLineColors[index % deepLineColors.length];
+            seriesItem.smooth = true;
+            seriesItem.lineStyle = {
+                width: 2,
+                color: color
+            };
+            seriesItem.itemStyle = {
+                color: color
+            };
+            seriesItem.areaStyle = {
+                opacity: 0.1,
+                color: color
+            };
+        }
 
-            if (item.type === 'bar') {
-                // 对于柱状图，降低颜色透明度使其变浅
-                seriesItem.itemStyle = {
-                    color: `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.7)`
-                };
-            } else if (item.type === 'line') {
-                // 对于折线图，使用更深的颜色
-                color = deepLineColors[index % deepLineColors.length];
-                seriesItem.smooth = true;
-                seriesItem.lineStyle = {
-                    width: 2,
-                    color: color
-                };
-                seriesItem.itemStyle = {
-                    color: color
-                };
-                // 移除区域填充样式
-                // seriesItem.areaStyle = {
-                //   opacity: 0.2,
-                //   color: color
-                // };
+        return seriesItem;
+    });
+
+    // 处理坐标轴
+    const xAxis = props.metrics.xaxis || [{ type: 'category', data: [] }];
+    const yAxis = props.metrics.yaxis || [{ type: 'value' }];
+
+    // 根据图表类型调整 tooltip
+    const hasPieChart = props.metrics.series.some(item => item.type === 'pie');
+    const tooltip = {
+        trigger: hasPieChart ? 'item' : 'axis',
+        axisPointer: {
+            type: 'cross',
+            crossStyle: {
+                color: '#999'
             }
+        }
+    };
 
-            return seriesItem;
-        })
+    // 配置图例
+    const legend = {
+        data: props.metrics.series.map(item => item.name)
+    };
+
+    const option = {
+        tooltip,
+        legend,
+        xAxis,
+        yAxis,
+        series,
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        }
     };
 
     myChart.setOption(option);

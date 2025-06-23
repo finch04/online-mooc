@@ -24,13 +24,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * @Description：新增用户所属省份
+ * @Description：活跃用户所属省份
  */
 @Data
 @NoArgsConstructor
-@TableName("tab_dnu_province")
-@ApiModel(value="DnuProvince对象", description="新增用户所属省份")
-public class DnuProvince {
+@TableName("tab_dau_province")
+@ApiModel(value="DauProvince对象", description="活跃用户所属省份")
+public class DauProvince {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +38,8 @@ public class DnuProvince {
     @ApiModelProperty(value = "主键 ID")
     private Long id;
 
-    @ApiModelProperty(value = "新增用户数")
-    private Long dnu;
+    @ApiModelProperty(value = "活跃用户数")
+    private Long dau;
 
     @ApiModelProperty(value = "省")
     private String province;

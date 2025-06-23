@@ -59,15 +59,15 @@ export const getDau = (params) =>
       method: "get",
       params
   });
-export const getVisitsUrlFlow = (params) =>
+export const getDpvTime = (params) =>
   request({
-      url: `/ds/data/flow/url/visits`,
+      url: `/ds/data/flow/dpv/time`,
       method: "get",
       params
   });
-export const getErrorsUrlFlow = (params) =>
+export const getDauProvince = (params) =>
   request({
-      url: `/ds/data/flow/url/errors`,
+      url: `/ds/data/flow/dau/province`,
       method: "get",
       params
   });

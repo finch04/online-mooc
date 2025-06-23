@@ -67,4 +67,27 @@ public class FlowController {
         return flowService.dau(query);
     }
 
+    /**
+     * 数据展示：7日|活跃访问数时段
+     * @param query 查询参数
+     * @return EchartsVO
+     */
+    @GetMapping("/dpv/time")
+    @ApiOperation(value = "查询日活跃访问数时段分布")
+    public EchartsVO dpvTime(FlowQuery query) {
+        return flowService.dpvTime(query);
+    }
+
+    /**
+     * 数据展示：7日|活跃用户省分布排名
+     * @param query 查询参数
+     * @return EchartsVO
+     */
+    @GetMapping("/dau/province")
+    @ApiOperation(value = "查询日活跃用户省分布排名")
+    public EchartsVO dauProvince(FlowQuery query) {
+        return flowService.dauProvince(query);
+    }
+
+
 }

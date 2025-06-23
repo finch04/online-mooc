@@ -18,4 +18,7 @@ public interface IFlowService {
     EchartsVO duv(FlowQuery query);
     EchartsVO dau(FlowQuery query);
 
+    EchartsVO dpvTime(FlowQuery query);
+
+    EchartsVO dauProvince(FlowQuery query);
 }
