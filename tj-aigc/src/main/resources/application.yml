@@ -41,3 +41,19 @@ tj:
           data-id: route-agent-system-message.txt
           group: DEFAULT_GROUP
           timeout-ms: 20000
+        recommend-agent:
+          data-id: recommend-agent-system-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000
+        buy-agent:
+          data-id: buy-agent-system-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000
+        consult-agent:
+          data-id: consult-agent-system-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000
+        knowledge-agent:
+          data-id: knowledge-agent-system-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000

@@ -1,12 +1,13 @@
 
 import cn.hutool.core.lang.Assert;
+import com.tianji.AIGCApplication;
 import com.tianji.aigc.agent.RouteAgent;
 import com.tianji.aigc.enums.AgentTypeEnum;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = AIGCApplication.class)
 class RouteAgentTest {
 
     @Resource

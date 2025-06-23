@@ -3,6 +3,7 @@ package com.tianji.aigc.memory.redis;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.tianji.aigc.memory.MessageUtil;
+import com.tianji.aigc.memory.MyChatMemory;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
@@ -10,7 +11,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
 
-public class RedisChatMemory implements ChatMemory {
+public class RedisChatMemory implements ChatMemory, MyChatMemory {
 
     // 思考问题：如何把消息存到redis中？关键是使用什么样的数据结构来存储聊天对话数据？ 1. list 2. hash 3. string 4. set
 
@@ -74,5 +75,19 @@ public class RedisChatMemory implements ChatMemory {
     public void clear(String conversationId) {
         var redisKey = this.getKey(conversationId);
         this.stringRedisTemplate.delete(redisKey);
+    }
+
+    /**
+     * 根据对话ID优化对话记录，删除最后的2条消息，因为这2条消息是从路由智能体存储的，请求由后续的智能体处理
+     * 为了确保历史消息的完整性，所以需要将中间转发的消息清理掉
+     *
+     * @param conversationId 对话的唯一标识符
+     */
+    @Override
+    public void optimization(String conversationId) {
+        var redisKey = this.getKey(conversationId);
+        var listOps = this.stringRedisTemplate.boundListOps(redisKey);
+        // 从Redis列表右侧弹出2个元素
+        listOps.rightPop(2);
     }
 }

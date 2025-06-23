@@ -1,5 +1,7 @@
 package com.tianji.aigc.config;
 
+import com.tianji.aigc.advisor.RecordOptimizationAdvisor;
+import com.tianji.aigc.memory.MyChatMemory;
 import com.tianji.aigc.memory.jdbc.JdbcChatMemory;
 import com.tianji.aigc.memory.mogodb.MongoDBChatMemory;
 import com.tianji.aigc.memory.redis.RedisChatMemory;
@@ -80,6 +82,11 @@ public class SpringAIConfig {
     @Bean
     public Advisor messageChatMemoryAdvisor(ChatMemory chatMemory) {
         return new MessageChatMemoryAdvisor(chatMemory);
+    }
+
+    @Bean
+    public Advisor recordOptimizationAdvisor(MyChatMemory myChatMemory){
+        return new RecordOptimizationAdvisor(myChatMemory);
     }
 
 

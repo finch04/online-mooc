@@ -86,7 +86,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     public List<MessageVO> queryBySessionId(String sessionId) {
         String conversationId = ChatService.getConversationId(sessionId);
         List<Message> messageList = chatMemory.get(conversationId, AbstractChatMemoryAdvisor.DEFAULT_CHAT_MEMORY_RESPONSE_SIZE);
-        CollUtil.reverse(messageList);
+//        CollUtil.reverse(messageList);
         return StreamUtil.of(messageList)
                 .filter(message ->
                      message.getMessageType() == MessageType.USER || message.getMessageType() == MessageType.ASSISTANT

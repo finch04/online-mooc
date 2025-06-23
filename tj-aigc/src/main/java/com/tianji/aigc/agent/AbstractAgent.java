@@ -14,11 +14,13 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import reactor.core.publisher.Flux;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,12 +33,14 @@ public abstract class AbstractAgent implements Agent {
     private ChatMemory chatMemory;
     @Resource
     private ChatSessionService chatSessionService;
+    @Resource
+    private Advisor loggerAdvisor;
 
     // 存储大模型的生成状态，这里采用ConcurrentHashMap是确保线程安全
     // 目前的版本暂时用Map实现，如果考虑分布式环境的话，可以考虑用redis来实现
     private static final Map<String, Boolean> GENERATE_STATUS = new ConcurrentHashMap<>();
     // 结束标识
-    private static final ChatEventVO STOP_EVENT = ChatEventVO.builder().eventType(ChatEventTypeEnum.STOP.getValue()).build();
+    public static final ChatEventVO STOP_EVENT = ChatEventVO.builder().eventType(ChatEventTypeEnum.STOP.getValue()).build();
 
     @Override
     public String process(String question, String sessionId) {
@@ -138,7 +142,8 @@ public abstract class AbstractAgent implements Agent {
                         .text(this.systemMessage())
                         .params(this.systemMessageParams()))
                 .advisors(advisor -> advisor
-                        .advisors(this.advisors())
+                        .advisors(this.defaultAdvisors(question)) //添加默认的增强器
+                        .advisors(this.advisors(question))  //添加自定义的增强器
                         .params(this.advisorParams(sessionId, requestId)))
                 .tools(this.tools())
                 .toolContext(this.toolContext(sessionId, requestId))
@@ -165,4 +170,10 @@ public abstract class AbstractAgent implements Agent {
         var conversationId = ChatService.getConversationId(sessionId);
         return Map.of(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId);
     }
+    @Override
+    public List<Advisor> defaultAdvisors(String question) {
+        return List.of(this.loggerAdvisor);
+    }
+
+
 }

@@ -81,7 +81,14 @@ public interface Agent {
     /**
      * Advisor列表，默认返回空对象
      */
-    default List<Advisor> advisors() {
+    default List<Advisor> advisors(String question) {
+        return List.of();
+    }
+
+    /**
+     * Advisor列表，默认的Advisors
+     */
+    default List<Advisor> defaultAdvisors(String question) {
         return List.of();
     }
 
@@ -102,5 +109,7 @@ public interface Agent {
     default Map<String, Object> systemMessageParams() {
         return Map.of();
     }
+
+
 
 }

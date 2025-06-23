@@ -28,7 +28,7 @@ import reactor.core.publisher.Flux;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
+//@Service
 @RequiredArgsConstructor
 @Lazy
 public class ChatServiceImpl implements ChatService {
