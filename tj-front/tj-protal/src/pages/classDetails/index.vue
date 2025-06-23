@@ -244,7 +244,7 @@ const getClassDetailsData = async () => {
         baseDetailsData.value = res.data
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error'
         });
       }

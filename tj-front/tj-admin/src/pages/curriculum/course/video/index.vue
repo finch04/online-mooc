@@ -202,6 +202,8 @@ let getDetailData = async () => {
     .then((res) => {
       if (res.code === 200) {
         free.value = res.data.free
+      }else{
+        ElMessage.error(res.msg);
       }
     })
     .catch((err) => { })

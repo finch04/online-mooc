@@ -486,6 +486,8 @@ let getDetailData = async () => {
         // 处理价格
         fromData.value.price = fromData.value.price / 100;
         fromData.value.price = decimalsReplenish(Number(fromData.value.price));
+      }else{
+        ElMessage.error(res.msg);
       }
     })
     .catch((err) => {});

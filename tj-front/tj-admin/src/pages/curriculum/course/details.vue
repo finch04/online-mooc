@@ -141,6 +141,7 @@ import { formatTimeOrdinary } from "@/utils/index";
 import { useUserStore } from "@/store"
 // 公用数据
 
+import { ElMessage } from "element-plus";
 // 接口api
 import { getCourseDetail, getcourseTeacher, getcoursesListData } from "@/api/curriculum"
 // 导入组件
@@ -195,7 +196,7 @@ const getcourseDetailData = async () => {
       }
       else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error',
           showClose: false,
         })

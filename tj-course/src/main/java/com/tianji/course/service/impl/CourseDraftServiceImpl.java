@@ -255,7 +255,7 @@ public class CourseDraftServiceImpl extends ServiceImpl<CourseDraftMapper, Cours
             }
         }
         if(courseBaseInfoVO == null){
-            return new CourseBaseInfoVO();
+            throw new BizIllegalException("课程id非法");
         }
 
         //3.查询创建者，更新者姓名
