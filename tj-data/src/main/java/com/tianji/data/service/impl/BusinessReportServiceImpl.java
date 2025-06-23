@@ -225,13 +225,16 @@ public class BusinessReportServiceImpl implements IBusinessReportService {
         double conversionRate = courseDetailDpv == 0 ? 0 : (double) buyCourseDpv / courseDetailDpv;
 
         // 保存转化率数据（直接使用Mapper检查是否已有记录）
+        CourseConversionDpv courseConversionDpv = new CourseConversionDpv();
+        courseConversionDpv.setDoBrowseDpv(courseDetailDpv); // 设置浏览量，确保不为null
+        courseConversionDpv.setDoOrderDpv(buyCourseDpv);    // 设置下单量，确保不为null
+        courseConversionDpv.setConversionRate(conversionRate);
+        courseConversionDpv.setReportTime(reportDate);
+
         if (!existsCourseConversionDpvByReportTime(reportDate)) {
-            CourseConversionDpv courseConversionDpv = new CourseConversionDpv();
-            courseConversionDpv.setConversionRate(conversionRate);
-            courseConversionDpv.setReportTime(reportDate);
             courseConversionDpvMapper.insert(courseConversionDpv);
             log.info("Saved CourseConversionDpv: {}", courseConversionDpv);
-        }else{
+        } else {
             log.info("CourseConversionDpv statistics already exist for date: {}", reportDate);
         }
 
@@ -249,15 +252,16 @@ public class BusinessReportServiceImpl implements IBusinessReportService {
         }
 
         // 保存性别访问数数据（直接使用Mapper检查是否已有记录）
+        CourseDetailGenderDuv courseDetailGenderDuv = new CourseDetailGenderDuv();
+        courseDetailGenderDuv.setManDpv(genderDuvMap.get("man")); // 确保不为null
+        courseDetailGenderDuv.setWomanDpv(genderDuvMap.get("woman")); // 确保不为null
+        courseDetailGenderDuv.setReportTime(reportDate);
+
         if (!existsCourseDetailGenderDuvByReportTime(reportDate)) {
-            CourseDetailGenderDuv courseDetailGenderDuv = new CourseDetailGenderDuv();
-            courseDetailGenderDuv.setManDpv(genderDuvMap.get("man"));
-            courseDetailGenderDuv.setWomanDpv(genderDuvMap.get("woman"));
-            courseDetailGenderDuv.setReportTime(reportDate);
             courseDetailGenderDuvMapper.insert(courseDetailGenderDuv);
             log.info("Saved CourseDetailGenderDuv: {}", courseDetailGenderDuv);
-        }else{
-            log.info("CourseDetailGenderDpv statistics already exist for date: {}", reportDate);
+        } else {
+            log.info("CourseDetailGenderDuv statistics already exist for date: {}", reportDate);
         }
 
         // 统计课程详情按省份访问数
@@ -270,14 +274,15 @@ public class BusinessReportServiceImpl implements IBusinessReportService {
 
         // 保存省份访问数数据（直接使用Mapper检查是否已有记录）
         for (Map.Entry<String, Long> entry : provinceDuvMap.entrySet()) {
+            CourseDetailProvinceDuv courseDetailProvinceDuv = new CourseDetailProvinceDuv();
+            courseDetailProvinceDuv.setProvinceName(entry.getKey());
+            courseDetailProvinceDuv.setDuv(entry.getValue()); // 确保不为null
+            courseDetailProvinceDuv.setReportTime(reportDate);
+
             if (!existsCourseDetailProvinceDuvByProvinceNameAndReportTime(entry.getKey(), reportDate)) {
-                CourseDetailProvinceDuv courseDetailProvinceDuv = new CourseDetailProvinceDuv();
-                courseDetailProvinceDuv.setProvinceName(entry.getKey());
-                courseDetailProvinceDuv.setDuv(entry.getValue());
-                courseDetailProvinceDuv.setReportTime(reportDate);
                 courseDetailProvinceDuvMapper.insert(courseDetailProvinceDuv);
                 log.info("Saved CourseDetailProvinceDuv: {}", courseDetailProvinceDuv);
-            }else{
+            } else {
                 log.info("CourseDetailProvinceDuv statistics already exist for date: {}", reportDate);
             }
         }

@@ -71,4 +71,23 @@ export const getDauProvince = (params) =>
       method: "get",
       params
   });
+/**数据分析接口 */     
+export const getCourseConversionDpv = (params) =>
+  request({
+      url: `/ds/data/analysis/course/conversion`,
+      method: "get",
+      params
+  });
+export const getCourseDetailGenderDuv = (params) =>
+  request({
+      url: `/ds/data/analysis/course/gender`,
+      method: "get",
+      params
+  });
+export const getCourseDetailProvinceDuv = (params) =>
+  request({
+      url: `/ds/data/analysis/course/province`,
+      method: "get",
+      params
+  });
     

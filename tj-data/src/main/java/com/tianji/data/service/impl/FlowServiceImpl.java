@@ -5,6 +5,7 @@ import com.tianji.data.mapper.FlowMapper;
 import com.tianji.data.model.po.DauProvince;
 import com.tianji.data.model.po.DpvTime;
 import com.tianji.data.model.query.FlowQuery;
+import com.tianji.data.model.query.TimeRange;
 import com.tianji.data.model.vo.AxisVO;
 import com.tianji.data.model.vo.EchartsVO;
 import com.tianji.data.model.vo.SerierVO;
@@ -29,28 +30,28 @@ public class FlowServiceImpl implements IFlowService {
     @Override
     public EchartsVO dnu(FlowQuery query) {
         TimeRange timeRange = getTimeRange(query);
-        List<Long> data = flowMapper.dnuByDay(timeRange.begin, timeRange.end);
+        List<Long> data = flowMapper.dnuByDay(timeRange.getBegin(), timeRange.getEnd());
         return createTimeSeriesChart("每日新增用户数", "用户数", "bar", data, timeRange);
     }
 
     @Override
     public EchartsVO dpv(FlowQuery query) {
         TimeRange timeRange = getTimeRange(query);
-        List<Long> data = flowMapper.dpvByDay(timeRange.begin, timeRange.end);
+        List<Long> data = flowMapper.dpvByDay(timeRange.getBegin(), timeRange.getEnd());
         return createTimeSeriesChart("页面浏览量趋势", "浏览量", "line", data, timeRange);
     }
 
     @Override
     public EchartsVO duv(FlowQuery query) {
         TimeRange timeRange = getTimeRange(query);
-        List<Long> data = flowMapper.duvByDay(timeRange.begin, timeRange.end);
+        List<Long> data = flowMapper.duvByDay(timeRange.getBegin(), timeRange.getEnd());
         return createTimeSeriesChart("独立访客数趋势", "访客数", "line", data, timeRange);
     }
 
     @Override
     public EchartsVO dau(FlowQuery query) {
         TimeRange timeRange = getTimeRange(query);
-        List<Long> data = flowMapper.allDauForUserIdByDay(timeRange.begin, timeRange.end);
+        List<Long> data = flowMapper.allDauForUserIdByDay(timeRange.getBegin(), timeRange.getEnd());
         return createTimeSeriesChart("日活跃用户数趋势", "用户数", "bar", data, timeRange);
     }
 
@@ -58,8 +59,8 @@ public class FlowServiceImpl implements IFlowService {
     public EchartsVO dpvTime(FlowQuery query) {
         TimeRange timeRange = getTimeRange(query);
         List<DpvTime> list = dpvTimeService.lambdaQuery()
-                .gt(DpvTime::getReportTime, timeRange.begin)
-                .le(DpvTime::getReportTime, timeRange.end)
+                .gt(DpvTime::getReportTime, timeRange.getBegin())
+                .le(DpvTime::getReportTime, timeRange.getEnd())
                 .list();
 
         // 统计每个时段的总活跃访问量
@@ -102,8 +103,8 @@ public class FlowServiceImpl implements IFlowService {
     public EchartsVO dauProvince(FlowQuery query) {
         TimeRange timeRange = getTimeRange(query);
         List<DauProvince> list = dauProvinceService.lambdaQuery()
-                .gt(DauProvince::getReportTime, timeRange.begin)
-                .le(DauProvince::getReportTime, timeRange.end)
+                .gt(DauProvince::getReportTime, timeRange.getBegin())
+                .le(DauProvince::getReportTime, timeRange.getEnd())
                 .list();
 
         // 按省份分组统计活跃用户数
@@ -171,7 +172,7 @@ public class FlowServiceImpl implements IFlowService {
         EchartsVO chart = new EchartsVO();
 
         // 设置 X 轴为日期范围
-        AxisVO xAxis = AxisVO.ofDateRange(timeRange.begin, timeRange.end);
+        AxisVO xAxis = AxisVO.ofDateRange(timeRange.getBegin(), timeRange.getEnd());
 
         // 处理数据并设置 Y 轴
         List<AxisVO> yAxis = new ArrayList<>();
@@ -310,18 +311,5 @@ public class FlowServiceImpl implements IFlowService {
         }
 
         return new TimeRange(beginTime, endTime);
-    }
-
-    /**
-     * 时间范围内部类
-     */
-    private static class TimeRange {
-        String begin;
-        String end;
-
-        public TimeRange(String begin, String end) {
-            this.begin = begin;
-            this.end = end;
-        }
     }
 }
