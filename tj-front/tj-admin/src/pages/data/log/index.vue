@@ -9,7 +9,7 @@
                     <h3 class="font-bold text-lg mb-4">URL日志</h3>
                     <!-- 导出日志 -->
                     <el-button class="button primary" style="margin-bottom: 10px;float: right;" @click="exportLogs"
-                        :text="text">导出全部日志</el-button>
+                        :text="text">导出7天内全部日志</el-button>
                     <!-- end -->
                 </div>
                 <!-- 表格数据 -->

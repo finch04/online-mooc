@@ -103,10 +103,13 @@ public interface BusinessLogMapper extends InfluxDBBaseMapper {
      * 导出全部日志
      * @return 详细日志列表
      */
-    @Select(value = "SELECT * FROM log ",
+    @Select(value = "SELECT * FROM log WHERE time > #{begin} AND time  <= #{end} ",
             resultType = BusinessLog.class,
             bucket = "point_data")
-    List<BusinessLog> exportLogs();
+    List<BusinessLog> getAllLogsByTime(
+            @Param("begin") String begin,
+            @Param("end") String end
+    );
 
     /**
      * 统计URL在指定时间范围内的每日访问量

@@ -95,8 +95,8 @@ public class LogTrackingFilter implements GlobalFilter, Ordered {
             vo.setUserName(URLDecoder.decode(request.getHeaders().getFirst(USER_NAME_HEADER)));
             vo.setSex(URLDecoder.decode(request.getHeaders().getFirst(USER_GENDER_HEADER)));
             //省市区直接存的是区域代码
-            vo.setProvince(request.getHeaders().getFirst(USER_PROVINCE_HEADER));
-            vo.setCity(request.getHeaders().getFirst(USER_CITY_HEADER));
+            vo.setProvince(URLDecoder.decode(request.getHeaders().getFirst(USER_PROVINCE_HEADER)));
+            vo.setCity(URLDecoder.decode(request.getHeaders().getFirst(USER_CITY_HEADER)));
         }
 
 

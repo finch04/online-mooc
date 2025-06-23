@@ -321,14 +321,20 @@ public class UrlLogServiceImpl implements IUrlLogService {
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
         response.setCharacterEncoding("utf-8");
 
+        //默认是导出7天内日志
+        String beginTime = TimeHandlerUtils.getSevenDaysAgoTime().getBegin();
+        String endTime = TimeHandlerUtils.getTodayTime().getEnd();
+
         // 写入Excel数据
         try (OutputStream out = response.getOutputStream()) {
             EasyExcel.write(out, BusinessLog.class)
                     .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
                     .sheet("日志数据")
-                    .doWrite(businessLogMapper.exportLogs().stream()
+                    .doWrite(
+                            businessLogMapper.getAllLogsByTime(beginTime, endTime).stream()
                                     .peek(i -> i.setTime(TimeHandlerUtils.formatIsoTime(i.getTime())))
-                                    .collect(Collectors.toList()));
+                                    .collect(Collectors.toList())
+                    );
             // 确保数据全部写出
             out.flush();
         } catch (Exception e) {
