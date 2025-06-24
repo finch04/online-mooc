@@ -106,7 +106,7 @@ public interface FlowMapper extends InfluxDBBaseMapper {
      * @param end
      * @return
      */
-    @Select(value = "SELECT response_body FROM log WHERE response_code = '200' and  time > #{begin} and time <=  #{end} and request_uri =~/\\\\/students\\\\/register\\\\//",resultType = String.class,bucket = "point_data")
+    @Select(value = "SELECT response_body FROM log WHERE response_code = '200' and  time > #{begin} and time <=  #{end} and response_code = '200' and  request_uri =~/\\\\/students\\\\/register\\\\//",resultType = String.class,bucket = "point_data")
     List<String> newDnuForResponseBody(@Param("begin")String begin, @Param("end")String end);
 
 

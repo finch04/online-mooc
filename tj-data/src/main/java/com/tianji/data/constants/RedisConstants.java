@@ -35,7 +35,9 @@ public class RedisConstants {
 
 
     //用户画像
-    public static final String KEY_USER_PROFILE = "DATA:ANALYSIS:PROFILE:";
+    public static final String KEY_USER_PROFILE = "DATA:ANALYSIS:USER:PROFILE:";
+    //课程画像
+    public static final String KEY_COURSE_PROFILE = "DATA:ANALYSIS:COURSE:PROFILE:";
     //性别维度热门课程键
     public static final String KEY_HOT_COURSES_BY_SEX = "DATA:ANALYSIS:COURSES:SEX:";
     //省份维度热门课程键

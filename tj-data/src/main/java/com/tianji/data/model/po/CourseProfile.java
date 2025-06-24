@@ -13,34 +13,30 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName(value = "user_profile", autoResultMap = true)
-@ApiModel(value="UserProfile对象", description="用户画像")
-public class UserProfile {
+@TableName(value = "course_profile", autoResultMap = true)
+@ApiModel(value="CourseProfile对象", description="课程画像")
+public class CourseProfile {
 
     @TableId(type = IdType.ASSIGN_ID)
     @ApiModelProperty(value = "主键 ID")
     private Long id;
-    @ApiModelProperty(value = "用户id")
-    private Long userId;
-    @ApiModelProperty(value = "用户名称")
-    private String userName;
-    @ApiModelProperty(value = "性别：0-男性，1-女性")
-    private Integer sex;
-    @ApiModelProperty(value = "省")
-    private String province;
-    //用户偏好  常访问课程id 前5
-    @ApiModelProperty(value = "用户偏好  常访问课程id 前5")
+    @ApiModelProperty(value = "课程id")
+    private Long courseId;
+    //课程画像  访问用户的性别标签
+    @ApiModelProperty(value = "访问用户的性别标签")
+    private String sexLabel;
+    //课程画像  访问用户的省份标签 只存储前5个
+    @ApiModelProperty(value = "访问用户的省份标签")
+    @JsonFormat(shape = JsonFormat.Shape.STRING) // 确保解析为字符类型
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<Long> courseLabels;
-    //用户偏好  付费课程还是免费课程
-    @ApiModelProperty(value = "用户偏好  付费课程还是免费课程 0免费1付费")
-    private Integer freeLabel;
+    private List<String> provinceLabels;
 
     private LocalDateTime createTime;
 

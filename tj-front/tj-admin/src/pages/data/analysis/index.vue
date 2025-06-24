@@ -4,7 +4,7 @@
         <Search :searchForm="searchForm" @getTime="getTime" @handleSearch="handleSearch"></Search>
         <!-- end -->
 
-        <!-- 数据看板 -->
+        <!-- 数据看板 - 原三个图表 -->
         <div class="boarddata bg-wt">
             <div class="boarddatahead">
                 <div class="tab">
@@ -16,10 +16,24 @@
                 </div>
             </div>
 
-            <!-- 根据当前标签显示对应图表 -->
+            <!-- 根据当前标签显示对应图表或表格 -->
             <EchartsFunnel v-if="activeTab === 'courseConversion'" :metrics="courseConversionMetrics" />
-            <BaseMetric v-if="activeTab === 'courseDetailGender'" :metrics="courseDetailGenderMetrics" title="课程访问量性别分布" />
-            <BaseMetric v-if="activeTab === 'courseDetailProvince'" :metrics="courseDetailProvinceMetrics" title="课程访问量省排名" />
+            <BaseMetric v-if="activeTab === 'courseDetailGender'" :metrics="courseDetailGenderMetrics"
+                title="课程访问量性别分布" />
+            <BaseMetric v-if="activeTab === 'courseDetailProvince'" :metrics="courseDetailProvinceMetrics"
+                title="课程访问量省排名" />
+        </div>
+
+        <!-- 数据看板 - 用户画像和课程画像 -->
+        <div class="bg-wt radius marg-tp-20">
+            <el-tabs v-model="activeUserTab" @tab-change="onUserTabChange" style="float: right;margin-right: 20px;">
+                <el-tab-pane name="userProfile" label="用户画像" />
+                <el-tab-pane name="courseProfile" label="课程画像" />
+            </el-tabs>
+            <div class="tableBox">
+                <UserProfileTable v-if="activeUserTab === 'userProfile'" :tableData="userProfileMetrics" />
+                <CourseProfileTable v-if="activeUserTab === 'courseProfile'" :tableData="courseProfileMetrics" />
+            </div>
         </div>
     </div>
 </template>
@@ -32,27 +46,36 @@ import { ElMessage } from 'element-plus';
 import Search from './components/Search.vue';
 import BaseMetric from './components/BaseMetric.vue';
 import EchartsFunnel from './components/EchartsFunnel.vue';
+import UserProfileTable from './components/UserProfileTable.vue';
+import CourseProfileTable from './components/CourseProfileTable.vue';
 
 // 导入 API
 import {
     getCourseConversionDpv,
     getCourseDetailGenderDuv,
-    getCourseDetailProvinceDuv
+    getCourseDetailProvinceDuv,
+    getAnalysisResultByUser,
+    getAnalysisResultByCourse
 } from '@/api/data';
 
 // 搜索表单
 const searchForm = reactive({
     beginTime: null,
-    endTime: null
+    endTime: null,
+    pageNo: 1,
+    pageSize: 10
 });
 
 // 活跃标签
 const activeTab = ref('courseConversion');
+const activeUserTab = ref('userProfile');
 
 // 展示数据
 const courseConversionMetrics = ref(null);
 const courseDetailGenderMetrics = ref(null);
 const courseDetailProvinceMetrics = ref(null);
+const userProfileMetrics = ref(null);
+const courseProfileMetrics = ref(null);
 
 // 搜索流量数据
 const handleSearch = async () => {
@@ -69,6 +92,14 @@ const handleSearch = async () => {
         const courseDetailProvinceResponse = await getCourseDetailProvinceDuv(searchForm);
         courseDetailProvinceMetrics.value = courseDetailProvinceResponse.data;
 
+        // 获取用户画像数据
+        const userProfileResponse = await getAnalysisResultByUser(searchForm);
+        userProfileMetrics.value = userProfileResponse.data.list;
+
+        // 获取课程画像数据
+        const courseProfileResponse = await getAnalysisResultByCourse(searchForm);
+        courseProfileMetrics.value = courseProfileResponse.data.list;
+
         console.log('所有数据获取完成');
     } catch (error) {
         ElMessage.error('查询失败: ' + error.message);
@@ -78,6 +109,10 @@ const handleSearch = async () => {
 // 标签切换事件
 const onTabChange = (tab) => {
     console.log('数据标签切换', tab.name);
+};
+
+const onUserTabChange = (tab) => {
+    console.log('用户数据标签切换', tab.name);
 };
 
 // 获取时间
@@ -106,23 +141,23 @@ onMounted(async () => {
 }
 
 .boarddata {
-  margin-top: 10px;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  
-  .boarddatahead {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    font-size: 16px;
-    color: #333;
-    padding: 14px 20px;
-    border-bottom: 1px solid #ebeef5;
-  }
-  
-  .tab {
-    width: 100%;
-  }
+    margin-top: 10px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    .boarddatahead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+        padding: 14px 20px;
+        border-bottom: 1px solid #ebeef5;
+    }
+
+    .tab {
+        width: 100%;
+    }
 }
 </style>

@@ -1,32 +1,36 @@
 package com.tianji.data.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tianji.api.client.course.CourseClient;
+import com.tianji.api.client.user.UserClient;
+import com.tianji.api.dto.course.CourseSearchDTO;
+import com.tianji.api.dto.course.CourseSimpleInfoDTO;
+import com.tianji.api.dto.user.UserDTO;
+import com.tianji.common.domain.dto.PageDTO;
+import com.tianji.common.domain.query.PageQuery;
+import com.tianji.common.exceptions.BizIllegalException;
+import com.tianji.common.utils.BeanUtils;
+import com.tianji.common.utils.CollUtils;
 import com.tianji.data.influxdb.domain.BusinessLog;
+import com.tianji.data.mapper.CourseProfileMapper;
+import com.tianji.data.mapper.UserProfileMapper;
 import com.tianji.data.model.po.*;
 import com.tianji.data.model.query.FlowQuery;
 import com.tianji.data.model.query.TimeRange;
-import com.tianji.data.model.vo.AxisVO;
-import com.tianji.data.model.vo.EchartsVO;
-import com.tianji.data.model.vo.FunnelPlotChartsIndexVO;
-import com.tianji.data.model.vo.FunnelPlotChartsVO;
-import com.tianji.data.model.vo.SerierVO;
-import com.tianji.data.service.IAnalysisService;
-import com.tianji.data.service.ICourseConversionDpvService;
-import com.tianji.data.service.ICourseDetailGenderDuvService;
-import com.tianji.data.service.ICourseDetailProvinceDuvService;
+import com.tianji.data.model.vo.*;
+import com.tianji.data.service.*;
 import com.tianji.data.utils.TimeHandlerUtils;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.tianji.data.constants.RedisConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +40,10 @@ public class AnalysisServiceImpl implements IAnalysisService {
     private final ICourseConversionDpvService courseConversionDpvService;
     private final ICourseDetailGenderDuvService courseDetailGenderDuvService;
     private final ICourseDetailProvinceDuvService courseDetailProvinceDuvService;
-    private final StringRedisTemplate redisTemplate;
+    private final UserClient userClient;
+    private final CourseClient courseClient;
+    private final IUserProfileService userProfileService;
+    private final ICourseProfileService courseProfileService;
 
     @Override
     public FunnelPlotChartsVO courseConversionDpv(FlowQuery query) {
@@ -150,26 +157,16 @@ public class AnalysisServiceImpl implements IAnalysisService {
         return echartsVO;
     }
 
-
     @Override
+    @Transactional
     public LogAnalysisResult analyzeLogs(List<BusinessLog> logs) {
         if (logs == null || logs.isEmpty()) {
             return new LogAnalysisResult();
         }
 
-        // 获取今天的日期字符串 (格式: yyyy-MM-dd)
-        String today = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-
-        // 检查今天是否已经处理过
-        if (isProcessedToday(today)) {
-            log.info("今天的数据已经处理过，跳过处理: {}", today);
-            return loadCachedResult(today);
-        }
-
         LogAnalysisResult result = new LogAnalysisResult();
         Map<String, UserProfile> userProfileMap = new HashMap<>();
-        Map<String, Map<String, Long>> courseVisitBySex = new HashMap<>();
-        Map<String, Map<String, Long>> courseVisitByProvince = new HashMap<>();
+        Map<String, CourseProfile> courseProfileMap = new HashMap<>();
 
         for (BusinessLog log : logs) {
             // 检查关键字段是否为空，任一为空则跳过
@@ -194,166 +191,107 @@ public class AnalysisServiceImpl implements IAnalysisService {
 
             // 更新用户画像
             userProfileMap.computeIfAbsent(userId, k -> {
-                UserProfile profile = loadUserProfileFromRedis(userId); // 从Redis加载现有数据
-                if (profile == null) {
-                    profile = new UserProfile();
-                    profile.setUserId(userId);
-                    profile.setUserName(userName);
-                    profile.setSex(sex);
-                    profile.setProvince(province);
-                    profile.setCourseVisitCounts(new HashMap<>());
-                }
+                UserProfile profile = new UserProfile();
+                profile.setUserId(Long.valueOf(userId));
+                profile.setUserName(userName);
+                profile.setSex("男".equals(sex) ? 0 : 1);
+                profile.setProvince(province);
+                profile.setCourseLabels(new ArrayList<>());
+                //TODO 先写死免费课程
+                profile.setFreeLabel(0);
                 return profile;
             });
 
-            // 更新用户课程访问量
-            userProfileMap.get(userId).getCourseVisitCounts()
-                    .merge(courseId, 1L, Long::sum);
+            // 更新用户常访问课程ID
+            List<Long> courseLabels = userProfileMap.get(userId).getCourseLabels();
+            if (!courseLabels.contains(Long.valueOf(courseId))) {
+                if (courseLabels.size() >= 5) {
+                    courseLabels.remove(0);
+                }
+                courseLabels.add(Long.valueOf(courseId));
+            }
 
-            // 更新性别维度统计
-            courseVisitBySex.computeIfAbsent(sex, k -> new HashMap<>())
-                    .merge(courseId, 1L, Long::sum);
+            // 更新课程画像
+            courseProfileMap.computeIfAbsent(courseId, k -> {
+                CourseProfile profile = new CourseProfile();
+                profile.setCourseId(Long.valueOf(courseId));
+                profile.setSexLabel("");
+                profile.setProvinceLabels(new ArrayList<>());
+                return profile;
+            });
 
-            // 更新省份维度统计
-            courseVisitByProvince.computeIfAbsent(province, k -> new HashMap<>())
-                    .merge(courseId, 1L, Long::sum);
+            // 更新课程访问用户的性别标签
+            String sexLabel = courseProfileMap.get(courseId).getSexLabel();
+            if (!sexLabel.contains(sex)) {
+                if (sexLabel.length() > 0) {
+                    sexLabel += ",";
+                }
+                sexLabel += sex;
+                courseProfileMap.get(courseId).setSexLabel(sexLabel);
+            }
+
+            // 更新课程访问用户的省份标签
+            List<String> provinceLabels = courseProfileMap.get(courseId).getProvinceLabels();
+            if (!provinceLabels.contains(province)) {
+                if (provinceLabels.size() >= 5) {
+                    provinceLabels.remove(0);
+                }
+                provinceLabels.add(province);
+            }
         }
 
         result.setUserProfiles(new ArrayList<>(userProfileMap.values()));
-        result.setCourseVisitBySex(courseVisitBySex);
-        result.setCourseVisitByProvince(courseVisitByProvince);
+        result.setCourseProfiles(new ArrayList<>(courseProfileMap.values()));
 
-        // 保存分析结果并标记为已处理
-        cacheToRedis(result, today);
-        markAsProcessed(today);
+        // 保存分析结果
+        saveProfilesToDB(result);
 
         return result;
     }
-    /**
-     * 从Redis加载用户画像
-     */
-    private UserProfile loadUserProfileFromRedis(String userId) {
-        String redisKey = KEY_USER_PROFILE + userId;
-        String jsonValue = redisTemplate.opsForValue().get(redisKey);
 
-        if (jsonValue != null) {
-            try {
-                return JSON.parseObject(jsonValue, UserProfile.class);
-            } catch (Exception e) {
-                log.error("解析用户画像失败, userId: {}", userId, e);
+    /**
+     * 将用户画像和课程画像保存到数据库
+     */
+    @Transactional
+    public void saveProfilesToDB(LogAnalysisResult result) {
+        List<UserProfile> userProfiles = result.getUserProfiles();
+        for (UserProfile userProfile : userProfiles) {
+            // 使用Service方法查询用户画像
+            UserProfile existingUserProfile = userProfileService.getOne(
+                    new LambdaQueryWrapper<UserProfile>()
+                            .eq(UserProfile::getUserId, userProfile.getUserId())
+            );
+
+            if (existingUserProfile != null) {
+                userProfile.setId(existingUserProfile.getId());
+                // 使用Service方法更新用户画像
+                userProfileService.updateById(userProfile);
+            } else {
+                // 使用Service方法插入用户画像
+                userProfileService.save(userProfile);
             }
         }
-        return null;
-    }
 
-    /**
-     * 检查今天是否已经处理过
-     */
-    private boolean isProcessedToday(String date) {
-        String redisKey = KEY_PROCESSING_STATUS + date;
-        return redisTemplate.hasKey(redisKey);
-    }
-
-    /**
-     * 从缓存加载分析结果
-     */
-    private LogAnalysisResult loadCachedResult(String date) {
-        String redisKey = KEY_ANALYSIS_RESULT + date;
-        String jsonValue = redisTemplate.opsForValue().get(redisKey);
-
-        if (jsonValue != null) {
-            try {
-                return JSON.parseObject(jsonValue, LogAnalysisResult.class);
-            } catch (Exception e) {
-                log.error("从缓存加载分析结果失败, date: {}", date, e);
+        List<CourseProfile> courseProfiles = result.getCourseProfiles();
+        for (CourseProfile courseProfile : courseProfiles) {
+            CourseSearchDTO searchInfo = courseClient.getSearchInfo(courseProfile.getCourseId());// 使用Service方法查询课程画像
+            if(searchInfo == null){
+                continue;
+            }
+            CourseProfile existingCourseProfile = courseProfileService.getOne(
+                    new LambdaQueryWrapper<CourseProfile>()
+                            .eq(CourseProfile::getCourseId, courseProfile.getCourseId())
+            );
+            if (existingCourseProfile != null) {
+                courseProfile.setId(existingCourseProfile.getId());
+                // 使用Service方法更新课程画像
+                courseProfileService.updateById(courseProfile);
+            } else {
+                // 使用Service方法插入课程画像
+                courseProfileService.save(courseProfile);
             }
         }
-        return new LogAnalysisResult();
     }
-
-    /**
-     * 标记日期为已处理
-     */
-    private void markAsProcessed(String date) {
-        String redisKey = KEY_PROCESSING_STATUS + date;
-        redisTemplate.opsForValue().set(redisKey, "processed", 25, TimeUnit.HOURS);
-    }
-
-    /**
-     * 将分析结果缓存到Redis（增量更新）
-     */
-    private void cacheToRedis(LogAnalysisResult result, String date) {
-        try {
-            // 保存完整的分析结果
-            String resultKey = KEY_ANALYSIS_RESULT + date;
-            String jsonValue = JSON.toJSONString(result);
-            redisTemplate.opsForValue().set(resultKey, jsonValue, 7, TimeUnit.DAYS);
-
-            // 增量更新用户画像数据
-            List<UserProfile> userProfiles = result.getUserProfiles();
-            for (UserProfile profile : userProfiles) {
-                String redisKey = KEY_USER_PROFILE + profile.getUserId();
-
-                // 获取现有数据
-                UserProfile existingProfile = loadUserProfileFromRedis(profile.getUserId());
-                if (existingProfile != null) {
-                    // 合并课程访问记录
-                    Map<String, Long> existingCounts = existingProfile.getCourseVisitCounts();
-                    Map<String, Long> newCounts = profile.getCourseVisitCounts();
-
-                    newCounts.forEach((courseId, count) -> {
-                        existingCounts.merge(courseId, count, Long::sum);
-                    });
-
-                    // 使用现有数据的其他字段，只更新课程访问记录
-                    profile.setCourseVisitCounts(existingCounts);
-                }
-
-                // 保存更新后的数据
-                jsonValue = JSON.toJSONString(profile);
-                redisTemplate.opsForValue().set(redisKey, jsonValue, 30, TimeUnit.DAYS); // 延长用户画像缓存时间
-            }
-
-            // 增量更新热门课程数据 - 性别维度
-            Map<String, Map<String, Long>> courseVisitBySex = result.getCourseVisitBySex();
-            for (Map.Entry<String, Map<String, Long>> sexEntry : courseVisitBySex.entrySet()) {
-                String sex = sexEntry.getKey();
-                Map<String, Long> courseCounts = sexEntry.getValue();
-
-                String redisKey = KEY_HOT_COURSES_BY_SEX + sex;
-
-                // 增量更新ZSet分数
-                courseCounts.forEach((courseId, count) -> {
-                    redisTemplate.opsForZSet().incrementScore(redisKey, courseId, count);
-                });
-
-                // 设置过期时间
-                redisTemplate.expire(redisKey, 30, TimeUnit.DAYS); // 延长缓存时间
-            }
-
-            // 增量更新热门课程数据 - 省份维度
-            Map<String, Map<String, Long>> courseVisitByProvince = result.getCourseVisitByProvince();
-            for (Map.Entry<String, Map<String, Long>> provinceEntry : courseVisitByProvince.entrySet()) {
-                String province = provinceEntry.getKey();
-                Map<String, Long> courseCounts = provinceEntry.getValue();
-
-                String redisKey = KEY_HOT_COURSES_BY_PROVINCE + province;
-
-                // 增量更新ZSet分数
-                courseCounts.forEach((courseId, count) -> {
-                    redisTemplate.opsForZSet().incrementScore(redisKey, courseId, count);
-                });
-
-                // 设置过期时间
-                redisTemplate.expire(redisKey, 30, TimeUnit.DAYS); // 延长缓存时间
-            }
-
-            log.info("日志分析结果已增量更新到Redis, date: {}", date);
-        } catch (Exception e) {
-            log.error("增量更新分析结果到Redis失败", e);
-        }
-    }
-
 
     /**
      * 从请求URI中提取课程ID
@@ -376,6 +314,68 @@ public class AnalysisServiceImpl implements IAnalysisService {
         }
 
         return null;
+    }
+
+    @Override
+    public PageDTO<UserProfileVO> getAnalysisResultByUser(PageQuery query) {
+        // 1.分页条件
+        Page<UserProfile> profilePage = new Page<>(query.getPageNo(), query.getPageSize());
+        Page<UserProfile> page = userProfileService.lambdaQuery().page(profilePage);
+
+        Set<Long> userIds = new HashSet<>();
+        for (UserProfile record : page.getRecords()) {
+            userIds.add(record.getUserId());
+        }
+        List<UserDTO> userDTOs = userClient.queryUserByIds(userIds);
+        Map<Long, String> userMap = CollUtils.isEmpty(userDTOs) ?
+                new HashMap<>() :
+                userDTOs.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getIcon));
+        List<UserProfileVO> list = page.getRecords().stream().map(profile -> {
+            UserProfileVO vo = new UserProfileVO();
+            BeanUtils.copyProperties(profile, vo);
+            vo.setIcon(userMap.get(profile.getUserId()));
+            return vo;
+        }).collect(Collectors.toList());
+
+        return PageDTO.of(page, list);
+    }
+
+    @Override
+    public PageDTO<CourseProfileVO> getAnalysisResultByCourse(PageQuery query) {
+        Page<CourseProfile> profilePage = new Page<>(query.getPageNo(), query.getPageSize());
+        Page<CourseProfile> page = courseProfileService.lambdaQuery().page(profilePage);
+        List<CourseProfile> records = page.getRecords();
+        // 课程id
+        Set<Long> courseIds = new HashSet<>();
+        for (CourseProfile record : records) {
+            courseIds.add(record.getCourseId());
+        }
+        // 获取课程信息列表
+        List<CourseSimpleInfoDTO> courseInfos = courseClient.getSimpleInfoList(courseIds);
+        // 将课程信息列表转换为 Map<Long, CourseSimpleInfoDTO>
+        Map<Long, CourseSimpleInfoDTO> courseMap = courseInfos.stream()
+                .collect(Collectors.toMap(
+                        CourseSimpleInfoDTO::getId,  // 键：课程ID
+                        info -> info,                // 值：课程信息对象本身
+                        (existing, replacement) -> existing  // 处理键冲突的策略（保留现有值）
+                ));
+
+        // 转换为VO
+        List<CourseProfileVO> list = records.stream().map(courseProfile -> {
+            CourseProfileVO courseProfileVO = BeanUtil.copyProperties(courseProfile, CourseProfileVO.class);
+
+            // 从Map中获取课程信息
+            CourseSimpleInfoDTO courseInfo = courseMap.get(courseProfile.getCourseId());
+            if (courseInfo != null) {
+                courseProfileVO.setName(courseInfo.getName());
+                courseProfileVO.setCoverUrl(courseInfo.getCoverUrl());
+                courseProfileVO.setPrice(courseInfo.getPrice()/100);
+                courseProfileVO.setFree(courseInfo.getFree());
+            }
+            return courseProfileVO;
+        }).collect(Collectors.toList());
+
+        return PageDTO.of(page, list);
     }
 
     /**

@@ -3,9 +3,14 @@ package com.tianji.data.controller;/**
  * @date 2025/6/22 15:49
  */
 
+import com.tianji.common.domain.dto.PageDTO;
+import com.tianji.common.domain.query.PageQuery;
+import com.tianji.data.model.po.CourseProfile;
 import com.tianji.data.model.query.FlowQuery;
+import com.tianji.data.model.vo.CourseProfileVO;
 import com.tianji.data.model.vo.EchartsVO;
 import com.tianji.data.model.vo.FunnelPlotChartsVO;
+import com.tianji.data.model.vo.UserProfileVO;
 import com.tianji.data.service.IAnalysisService;
 import com.tianji.data.service.IFlowService;
 import io.swagger.annotations.Api;
@@ -63,6 +68,24 @@ public class AnalysisController {
         return analysisService.courseDetailProvinceDuv(query);
     }
 
+    /**
+     * 数据展示：分页查看课程画像
+     * @return
+     */
+    @GetMapping("/course/profile")
+    @ApiOperation(value = "分页查看课程画像", notes = "分页查看课程画像")
+    public PageDTO<CourseProfileVO> getAnalysisResultByCourse(PageQuery query) {
+        return analysisService.getAnalysisResultByCourse(query);
+    }
 
+    /**
+     * 数据展示：分页查看用户画像
+     * @return
+     */
+    @GetMapping("/user/profile")
+    @ApiOperation(value = "分页查看用户画像", notes = "分页查看用户画像")
+    public PageDTO<UserProfileVO> getAnalysisResultByUser(PageQuery query) {
+        return analysisService.getAnalysisResultByUser(query);
+    }
 
 }

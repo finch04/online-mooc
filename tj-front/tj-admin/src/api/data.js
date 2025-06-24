@@ -90,4 +90,15 @@ export const getCourseDetailProvinceDuv = (params) =>
       method: "get",
       params
   });
-    
+export const getAnalysisResultByCourse = (params) =>
+  request({
+      url: `/ds/data/analysis/course/profile`,
+      method: "get",
+      params
+  });    
+export const getAnalysisResultByUser = (params) =>
+  request({
+      url: `/ds/data/analysis/user/profile`,
+      method: "get",
+      params
+  });  
