@@ -85,7 +85,12 @@ public class SearchServiceImpl implements ISearchService {
 
     @Override
     public List<CourseVO> queryLikeTopN() {
-        List<CourseVO> courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
+        List<CourseVO> courseVOS = null;
+        if(UserContext.getUser() == null){
+            courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
+        }else{
+
+        }
         //只要三个就行
         return courseVOS.stream().limit(3).collect(Collectors.toList());
     }
