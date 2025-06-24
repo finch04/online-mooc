@@ -31,8 +31,8 @@
                 <el-tab-pane name="courseProfile" label="课程画像" />
             </el-tabs>
             <div class="tableBox">
-                <UserProfileTable v-if="activeUserTab === 'userProfile'" :tableData="userProfileMetrics" />
-                <CourseProfileTable v-if="activeUserTab === 'courseProfile'" :tableData="courseProfileMetrics" />
+                <UserProfileTable v-if="activeUserTab === 'userProfile'" :pageNo="userPageNo" :pageSize="userPageSize" />
+                <CourseProfileTable v-if="activeUserTab === 'courseProfile'" :pageNo="coursePageNo" :pageSize="coursePageSize" />
             </div>
         </div>
     </div>
@@ -53,9 +53,7 @@ import CourseProfileTable from './components/CourseProfileTable.vue';
 import {
     getCourseConversionDpv,
     getCourseDetailGenderDuv,
-    getCourseDetailProvinceDuv,
-    getAnalysisResultByUser,
-    getAnalysisResultByCourse
+    getCourseDetailProvinceDuv
 } from '@/api/data';
 
 // 搜索表单
@@ -74,8 +72,12 @@ const activeUserTab = ref('userProfile');
 const courseConversionMetrics = ref(null);
 const courseDetailGenderMetrics = ref(null);
 const courseDetailProvinceMetrics = ref(null);
-const userProfileMetrics = ref(null);
-const courseProfileMetrics = ref(null);
+
+// 用户画像和课程画像分页参数
+const userPageNo = ref(1);
+const userPageSize = ref(10);
+const coursePageNo = ref(1);
+const coursePageSize = ref(10);
 
 // 搜索流量数据
 const handleSearch = async () => {
@@ -91,14 +93,6 @@ const handleSearch = async () => {
         // 获取课程详情省排名数据
         const courseDetailProvinceResponse = await getCourseDetailProvinceDuv(searchForm);
         courseDetailProvinceMetrics.value = courseDetailProvinceResponse.data;
-
-        // 获取用户画像数据
-        const userProfileResponse = await getAnalysisResultByUser(searchForm);
-        userProfileMetrics.value = userProfileResponse.data.list;
-
-        // 获取课程画像数据
-        const courseProfileResponse = await getAnalysisResultByCourse(searchForm);
-        courseProfileMetrics.value = courseProfileResponse.data.list;
 
         console.log('所有数据获取完成');
     } catch (error) {

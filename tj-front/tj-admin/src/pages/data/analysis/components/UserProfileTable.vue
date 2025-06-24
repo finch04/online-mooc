@@ -2,7 +2,7 @@
     <div class="contentBox">
         <el-table :data="tableData" stripe>
             <el-table-column prop="userId" label="用户ID"></el-table-column>
-            <el-table-column prop="userName" label="用户名"  >
+            <el-table-column prop="userName" label="用户名" min-width="150" >
                 <template #default="scope">
                     <div class="head" style="justify-content: left ;">
                         <span @click="handleMagnify(scope.row.icon)">
@@ -14,17 +14,12 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="sex" label="性别">
+            <el-table-column prop="sex" label="性别" >
                 <template #default="scope">
-                    {{ scope.row.sex === 0 ? '男性' : '女性' }}
+                    {{ scope.row.sex === 0 ? '男' : '女' }}
                 </template>
             </el-table-column>
             <el-table-column prop="province" label="省份"></el-table-column>
-            <!-- <el-table-column prop="icon" label="头像">
-                <template #default="scope">
-                    <img :src="scope.row.icon" alt="头像" width="50" height="50">
-                </template>
-            </el-table-column> -->
             <el-table-column prop="courseLabels" label="常访问课程ID">
                 <template #default="scope">
                     {{ scope.row.courseLabels?.join(', ') }}
@@ -35,29 +30,55 @@
                     {{ scope.row.freeLabel === 0 ? '免费课程' : '付费课程' }}
                 </template>
             </el-table-column>
+            <!-- <el-table-column prop="createTime" label="创建时间"></el-table-column> -->
+            <el-table-column prop="updateTime" label="更新时间"></el-table-column>
         </el-table>
-          <!-- 放大图片弹层 -->
-    <ImageMagnify
-      :dialogPicVisible="dialogPicVisible"
-      :pic="pic"
-      @handleMagnifyClose="handleMagnifyClose"
-    ></ImageMagnify>
-    <!-- end -->
+        <!-- 放大图片弹层 -->
+        <ImageMagnify
+          :dialogPicVisible="dialogPicVisible"
+          :pic="pic"
+          @handleMagnifyClose="handleMagnifyClose"
+        ></ImageMagnify>
+        <!-- end -->
+        <!-- 分页组件 -->
+        <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pageNo"
+            :page-sizes="[10, 20, 30]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="Number(total)"
+            class="paginationBox">
+        </el-pagination>
     </div>
 </template>
 
 <script setup>
-import { defineProps,ref } from 'vue';
+import { defineProps, ref, onMounted } from 'vue';
 // 图片放大弹层
 import ImageMagnify from "@/components/ImageMagnify/index.vue";
+import { getAnalysisResultByUser } from '@/api/data';
+import { ElMessage } from 'element-plus';
+
 let dialogPicVisible = ref(false); //控制放大图片弹层显示隐藏
 let pic = ref(""); //要放大的图片
 const props = defineProps({
-    tableData: {
-        type: Array,
-        default: () => []
+    pageNo: {
+        type: Number,
+        default: 1
+    },
+    pageSize: {
+        type: Number,
+        default: 10
     }
 });
+
+const tableData = ref([]);
+const total = ref(0);
+const pageNo = ref(props.pageNo);
+const pageSize = ref(props.pageSize);
+
 //打开放大图弹层
 const handleMagnify = (val) => {
   dialogPicVisible.value = true;
@@ -72,12 +93,42 @@ const handleMagnifyClose = () => {
 const handleEsc = (e) => {
   if (e.keyCode === 27) {
     dialogPicVisible.value = false;
-    dialogResetVisible.value = false;
-    dialogStatusVisible.value = false;
     pic.value = ""
   }
 };
+
+// 搜索用户画像数据
+const handleSearch = async () => {
+    try {
+        const searchParams = {
+            pageNo: pageNo.value,
+            pageSize: pageSize.value
+        };
+        const userProfileResponse = await getAnalysisResultByUser(searchParams);
+        tableData.value = userProfileResponse.data.list;
+        total.value = userProfileResponse.data.total;
+        console.log('用户画像数据获取完成');
+    } catch (error) {
+        ElMessage.error('查询失败: ' + error.message);
+    }
+};
+
+// 分页事件
+const handleSizeChange = (newSize) => {
+    pageSize.value = newSize;
+    handleSearch();
+};
+
+const handleCurrentChange = (newPage) => {
+    pageNo.value = newPage;
+    handleSearch();
+};
+
+onMounted(async () => {
+    await handleSearch();
+});
 </script>
+
 <style scoped lang="scss">
 @import '../../index.scss';
 

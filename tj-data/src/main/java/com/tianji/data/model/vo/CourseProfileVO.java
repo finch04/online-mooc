@@ -20,7 +20,7 @@ public class CourseProfileVO {
     @ApiModelProperty(value = "封面url")
     private String coverUrl;
     @ApiModelProperty(value = "价格")
-    private Integer price;
+    private Double price;
     @ApiModelProperty(value = "是否是免费课程")
     private Boolean free;
     //课程画像  访问用户的性别标签

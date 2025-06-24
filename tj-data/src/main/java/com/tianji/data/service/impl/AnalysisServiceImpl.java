@@ -27,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -369,7 +371,12 @@ public class AnalysisServiceImpl implements IAnalysisService {
             if (courseInfo != null) {
                 courseProfileVO.setName(courseInfo.getName());
                 courseProfileVO.setCoverUrl(courseInfo.getCoverUrl());
-                courseProfileVO.setPrice(courseInfo.getPrice()/100);
+                //保留两位小数  安全地处理价格转换
+                if (courseInfo.getPrice() != null) {
+                    BigDecimal priceInYuan = new BigDecimal(courseInfo.getPrice())
+                            .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+                    courseProfileVO.setPrice(priceInYuan.doubleValue());
+                }
                 courseProfileVO.setFree(courseInfo.getFree());
             }
             return courseProfileVO;
