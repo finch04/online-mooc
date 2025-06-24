@@ -3,6 +3,7 @@ package com.tianji.search.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tianji.api.cache.CategoryCache;
+import com.tianji.api.client.data.RecommendClient;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.constants.ErrorInfo;
@@ -20,8 +21,7 @@ import com.tianji.search.service.IInterestsService;
 import com.tianji.search.service.ISearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.get.*;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.ElasticsearchClient;
 import org.elasticsearch.client.RequestOptions;
@@ -77,6 +77,9 @@ public class SearchServiceImpl implements ISearchService {
     @Autowired
     private InterestsProperties interestsProperties;
 
+    @Autowired
+    private RecommendClient recommendClient;
+
     @Override
     public List<CourseVO> queryCourseByCateId(Long cateLv2Id) {
         return queryTopNByCategoryIdLv2sAndFree(
@@ -89,11 +92,78 @@ public class SearchServiceImpl implements ISearchService {
         if(UserContext.getUser() == null){
             courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
         }else{
-
+            List<Long> courseIds = recommendClient.featureRecommend();
+            // 根据课程id返回课程VO
+            if (CollUtils.isNotEmpty(courseIds)) {
+                try {
+                    // 使用Elasticsearch查询课程
+                    courseVOS = queryCoursesByIds(courseIds);
+                } catch (IOException e) {
+                    log.error("查询推荐课程失败", e);
+                    // 查询失败时使用默认推荐
+                    courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
+                }
+            }
+            // 如果没有推荐结果，使用默认推荐
+            if (CollUtils.isEmpty(courseVOS)) {
+                courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
+            }
         }
         //只要三个就行
         return courseVOS.stream().limit(3).collect(Collectors.toList());
     }
+
+
+    /**
+     * 根据课程ID列表查询课程信息
+     */
+    private List<CourseVO> queryCoursesByIds(List<Long> courseIds) throws IOException {
+        // 创建MultiGet请求
+        MultiGetRequest request = new MultiGetRequest();
+        for (Long courseId : courseIds) {
+            request.add(new MultiGetRequest.Item(CourseRepository.INDEX_NAME, courseId.toString()));
+        }
+
+        // 执行批量查询
+        MultiGetResponse response = restClient.multiGet(request, RequestOptions.DEFAULT);
+
+        // 处理结果
+        List<CourseVO> courses = new ArrayList<>(courseIds.size());
+        Set<Long> teacherIds = new HashSet<>();
+
+        for (MultiGetItemResponse itemResponse : response.getResponses()) {
+            if (itemResponse.isFailed()) {
+                log.warn("查询课程失败: {}", itemResponse.getFailure().getMessage());
+                continue;
+            }
+
+            GetResponse getResponse = itemResponse.getResponse();
+            if (getResponse.isExists()) {
+                // 转换为CourseVO
+                CourseVO vo = JsonUtils.toBean(getResponse.getSourceAsString(), CourseVO.class);
+                courses.add(vo);
+                // 收集教师ID
+                if (vo.getTeacher() != null) {
+                    teacherIds.add(Long.valueOf(vo.getTeacher()));
+                }
+            }
+        }
+
+        // 查询教师信息
+        if (!teacherIds.isEmpty()) {
+            List<UserDTO> teachers = userClient.queryUserByIds(new ArrayList<>(teacherIds));
+            Map<String, String> teacherMap = teachers.stream()
+                    .collect(Collectors.toMap(t -> t.getId().toString(), UserDTO::getName));
+
+            // 设置教师名称
+            for (CourseVO course : courses) {
+                course.setTeacher(teacherMap.getOrDefault(course.getTeacher(), "未知"));
+            }
+        }
+
+        return courses;
+    }
+
 
     @Override
     public List<CourseVO> queryBestTopN() {
