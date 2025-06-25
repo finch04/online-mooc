@@ -308,6 +308,8 @@ public class AnalysisServiceImpl implements IAnalysisService {
             // 提取最后一个斜杠后的部分作为课程ID
             int lastSlashIndex = requestUri.lastIndexOf('/');
             if (lastSlashIndex != -1 && lastSlashIndex < requestUri.length() - 1) {
+                //TODO 这里可以调用课程微服务查询课程详情，比如是否付费、价格等信息存储到课程画像，
+                // 这样可以根据丰富课程画像内容，使得判断付费课程等标签较为容易
                 return requestUri.substring(lastSlashIndex + 1);
             }
         } catch (Exception e) {
