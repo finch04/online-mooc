@@ -49,14 +49,17 @@ import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.suggest.response.Suggest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.tianji.search.constants.RedisConstants.*;
 import static com.tianji.search.repository.CourseRepository.PUBLISH_TIME;
 @Slf4j
 @Service
@@ -79,6 +82,9 @@ public class SearchServiceImpl implements ISearchService {
 
     @Autowired
     private RecommendClient recommendClient;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @Override
     public List<CourseVO> queryCourseByCateId(Long cateLv2Id) {
@@ -268,6 +274,9 @@ public class SearchServiceImpl implements ISearchService {
 
     @Override
     public PageDTO<CourseVO> queryCoursesForPortal(CoursePageQuery query) {
+        if(UserContext.getUser()!=null){
+            saveSearchHistory(query.getKeyword());
+        }
         // 1.搜索数据
         SearchResponse response = searchForResponse(query, CourseVO.EXCLUDE_FIELDS);
         // 2.解析响应
@@ -525,6 +534,66 @@ public class SearchServiceImpl implements ISearchService {
 
         // 去重并返回
         return suggestions.stream().distinct().collect(Collectors.toList());
+    }
+
+
+    public void saveSearchHistory(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return;
+        }
+        String key = getHistoryKey();
+        keyword = keyword.trim();
+
+        // 使用 ZSet 存储搜索历史，分数为当前时间戳，确保最新搜索在前面
+        redisTemplate.opsForZSet().add(key, keyword, System.currentTimeMillis());
+
+        // 限制历史记录数量，移除最旧的记录
+        Long size = redisTemplate.opsForZSet().zCard(key);
+        if (size != null && size > MAX_HISTORY_SIZE) {
+            // 获取需要移除的最旧元素
+            Set<String> oldValues = redisTemplate.opsForZSet().range(key, 0, size - MAX_HISTORY_SIZE - 1);
+            if (oldValues != null && !oldValues.isEmpty()) {
+                redisTemplate.opsForZSet().remove(key, oldValues.toArray());
+            }
+        }
+    }
+
+    @Override
+    public List<String> getSearchHistory() {
+        if(UserContext.getUser()==null){
+            return new ArrayList<>();
+        }
+        String key = getHistoryKey();
+        // 按分数（时间戳）倒序获取，最新的搜索在前面
+        Set<String> historySet = redisTemplate.opsForZSet().reverseRange(key, 0, -1);
+        return historySet != null ? new ArrayList<>(historySet) : new ArrayList<>();
+    }
+
+    @Override
+    public void deleteSearchHistory(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty() || UserContext.getUser() == null) {
+            return;
+        }
+
+        String key = getHistoryKey();
+        keyword = keyword.trim();
+
+        // 从ZSet中移除指定关键字的搜索历史
+        redisTemplate.opsForZSet().remove(key, keyword);
+    }
+    @Override
+    public void clearSearchHistory() {
+        if(UserContext.getUser()==null){
+            return;
+        }
+        String key = getHistoryKey();
+        redisTemplate.delete(key);
+    }
+
+    // 获取当前用户的搜索历史键
+    private String getHistoryKey() {
+        Long userId = UserContext.getUser(); // 获取当前用户ID
+        return SEARCH_HISTORY_KEY_PREFIX + userId;
     }
 
 }

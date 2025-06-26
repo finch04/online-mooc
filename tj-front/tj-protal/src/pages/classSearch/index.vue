@@ -40,7 +40,7 @@
 
 import { onBeforeMount, onUnmounted, onMounted, ref, watchEffect } from "vue";
 import { ElMessage } from "element-plus";
-import { getClassCategorys, classSeach } from "@/api/class.js";
+import { getClassCategorys, classSeach} from "@/api/class.js";
 // 组件导入
 import SearchKey from './components/SearchKey.vue'
 import SortBar from './components/SortBar.vue'

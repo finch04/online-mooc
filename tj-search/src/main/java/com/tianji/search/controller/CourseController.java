@@ -70,4 +70,22 @@ public class CourseController {
             courseService.handleCourseDeletes(courseIds);
         }
     }
+
+    @ApiOperation("查询全部用户搜索历史")
+    @GetMapping("/history")
+    public List<String> getSearchHistory() {
+        return searchService.getSearchHistory();
+    }
+
+    @ApiOperation("清空用户搜索历史")
+    @DeleteMapping("/history/{keyword}")
+    public void deleteSearchHistory(@PathVariable("keyword") String keyword) {
+        searchService.deleteSearchHistory(keyword);
+    }
+
+    @ApiOperation("清空用户搜索历史")
+    @DeleteMapping("/history/clear")
+    public void clearSearchHistory() {
+        searchService.clearSearchHistory();
+    }
 }

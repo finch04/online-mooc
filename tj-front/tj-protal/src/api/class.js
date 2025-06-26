@@ -52,7 +52,24 @@ export const completeSuggest = (params) =>
 		url: `${SEARCH_API_PREFIX}/courses/completeSuggest/${params}`,
 		method: 'get',
 	})
-	
+//查询全部用户搜索历史
+export const getSearchHistory = () =>
+	request({
+		url: `${SEARCH_API_PREFIX}/courses/history`,
+		method: 'get',
+	})	
+//删除单条搜索历史
+export const deleteSearchHistory = (keyword) =>
+	request({
+		url: `${SEARCH_API_PREFIX}/courses/history/${keyword}`,
+		method: 'delete',
+	})
+//清空搜索历史
+export const clearSearchHistory = () =>
+	request({
+		url: `${SEARCH_API_PREFIX}/courses/history/clear`,
+		method: 'delete',
+	})
 
 // 学习相关接口
 export const getLearningClassDetails = (id) =>

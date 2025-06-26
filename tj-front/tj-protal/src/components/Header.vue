@@ -22,6 +22,7 @@
             class="headerSearch "
             size="large"
             placeholder="请输入关键字"
+            @focus="showSuggestions"
             @input="handleInput"
             @keyup.enter="SearchHandle"
         >
@@ -77,31 +78,66 @@
       </div>
     </div>
   </header>
+
+<!-- 自动补全建议列表 -->
+<div
+  v-show="showSuggestionList"
+  class="suggestion-list fixed z-50 bg-white rounded shadow-lg"
+  :style="{
+    top: `${searchBoxTop + searchBoxHeight}px`,
+    left: `${searchBoxLeft}px`,
+    width: `${searchBoxWidth}px`,
+  }"
+>
+  <!-- 搜索历史区域 - 无滚动条，自动扩展 -->
+  <div v-if="searchHistory.length > 0" class="search-history-container">
+    <div class="history-header flex justify-between items-center px-4 py-2 border-b">
+      <span class="text-sm font-medium text-gray-700"  style="font-size: 12px;">搜索历史</span>
+      <button 
+        class="flex items-center text-red-500 text-sm hover:underline" 
+        @click="clearSearchHistoryHandle"
+      >
+        <i class="iconfont mr-1">×</i> 清空历史
+      </button>
+    </div>
+    <div class="search-history px-4 py-2">
+      <span 
+        v-for="(history, index) in searchHistory" 
+        :key="index" 
+        class="history-tag inline-flex items-center bg-gray-100 px-3 py-1 rounded-full text-sm mr-2 mb-2 cursor-pointer hover:bg-gray-200 transition-colors"
+        @click="searchByHistory(history)"
+      >
+        {{ history }}
+        <button 
+          class="ml-1 text-gray-500 hover:text-red-500" 
+          @click.stop="deleteHistory(history)"
+        >
+          <i class="iconfont">×</i>
+        </button>
+      </span>
+    </div>
+  </div>
   
-  <!-- 自动补全建议列表 - 移至header组件外部 -->
-  <div
-    v-show="suggestions.length > 0 && input.length > 0"
-    class="suggestion-list fixed z-50 bg-white rounded shadow-lg"
-    :style="{
-      top: `${searchBoxTop + searchBoxHeight}px`,
-      left: `${searchBoxLeft}px`,
-      width: `${searchBoxWidth}px`,
-      maxHeight: '200px', // 设置最大高度限制
-      height: suggestionListHeight // 应用动态计算的高度
-    }"
-  >
-    <ul>
+  <!-- 搜索建议区域 - 有滚动条，固定高度 -->
+  <div v-if="suggestions.length > 0" class="suggestions-container">
+    <div class="suggestions-header px-4 py-2 border-b">
+      <span class="text-sm font-medium text-gray-700" style="font-size: 12px;">搜索建议</span>
+    </div>
+    <ul class="suggestions-list px-4 py-2 max-h-[280px] overflow-y-auto">
       <li
         v-for="(suggestion, index) in suggestions"
         :key="index"
         :class="{'bg-gray-100': suggestion === activeSuggestion}"
         @mouseenter="activeSuggestion = suggestion"
         @click="selectSuggestion(suggestion)"
+        class="flex items-center py-2 px-2 rounded hover:bg-gray-100 cursor-pointer transition-colors"
       >
+        <i class="iconfont mr-2" style="color: #999;">&#xe61f;</i>
         {{ suggestion }}
       </li>
     </ul>
   </div>
+</div>
 </template>
 
 <script setup>
@@ -114,7 +150,7 @@ import router from "../router";
 import {useRoute} from "vue-router";
 import {ElMessage} from "element-plus";
 import ClassCategory from "./ClassCategory.vue";
-import {getMyLearning, getClassCategorys, completeSuggest} from '@/api/class.js'
+import {getMyLearning, getClassCategorys, completeSuggest,getSearchHistory,clearSearchHistory,deleteSearchHistory} from '@/api/class.js'
 import {tryRefreshToken} from '../utils/refreshToken'
 import { getNotRead } from '../api/message';
 import { debounce } from 'lodash'; // 引入防抖函数
@@ -134,6 +170,8 @@ const learningShow = ref(false) // 学习中心hover模块展示
 const suggestions = ref([]); // 自动补全建议
 const activeSuggestion = ref(''); // 当前选中的建议
 const isLoading = ref(false); // 加载状态
+const searchHistory = ref([]); // 搜索历史
+const showSuggestionList = ref(false); // 显示建议列表
 
 // 搜索框位置信息
 const searchBoxTop = ref(0);
@@ -141,18 +179,19 @@ const searchBoxLeft = ref(0);
 const searchBoxWidth = ref(0);
 const searchBoxHeight = ref(0);
 
-// 计算建议列表的高度
+// 计算建议列表的高度 - 保持总高度不超过400px
 const suggestionListHeight = computed(() => {
-  if (suggestions.value.length === 0) return '0px';
+  // 搜索历史最大高度120px，搜索建议最大高度280px
+  const hasHistory = searchHistory.value.length > 0;
+  const hasSuggestions = suggestions.value.length > 0;
   
-  // 每个列表项的高度 + 垂直内边距
-  const itemHeight = 40; // 可根据实际样式调整
-  const totalHeight = suggestions.value.length * itemHeight;
+  if (!hasHistory && !hasSuggestions) return '0px';
   
-  // 设置最大高度限制，避免过多条目导致界面过长
-  const maxHeight = 200; // 最大高度，与CSS中保持一致
+  let height = 0;
+  if (hasHistory) height += 120;
+  if (hasSuggestions) height += 280;
   
-  return totalHeight > maxHeight ? `${maxHeight}px` : `${totalHeight}px`;
+  return `${Math.min(height, 400)}px`;
 });
 
 // 使用防抖处理输入事件，将防抖延迟缩短为 150ms
@@ -161,7 +200,7 @@ const debouncedFetchSuggestions = debounce(async (query) => {
     suggestions.value = [];
     return;
   }
-  
+
   isLoading.value = true;
   try {
     const res = await completeSuggest(query);
@@ -207,6 +246,86 @@ const updateSuggestionPosition = () => {
   });
 };
 
+// 显示建议列表
+const showSuggestions = async () => {
+  showSuggestionList.value = true;
+  await getSearchHistoryHandle();
+  updateSuggestionPosition();
+};
+
+// 获取搜索历史
+const getSearchHistoryHandle = async () => {
+  try {
+    const res = await getSearchHistory();
+    if (res.code === 200 && res.data && res.data.length > 0) {
+      searchHistory.value = res.data;
+    } else {
+      searchHistory.value = [];
+    }
+  } catch (error) {
+    console.error('获取搜索历史失败', error);
+    searchHistory.value = [];
+  }
+};
+
+// 清空搜索历史
+const clearSearchHistoryHandle = async () => {
+  try {
+    const res = await clearSearchHistory();
+    if (res.code === 200) {
+      searchHistory.value = [];
+      ElMessage({
+        message: '搜索历史已清空',
+        type: 'success'
+      });
+    } else {
+      ElMessage({
+        message: res.msg,
+        type: 'error'
+      });
+    }
+  } catch (error) {
+    console.error('清空搜索历史失败', error);
+    ElMessage({
+      message: '清空搜索历史出错！',
+      type: 'error'
+    });
+  }
+};
+
+// 删除单条搜索历史
+const deleteHistory = async (keyword) => {
+  try {
+    const res = await deleteSearchHistory(keyword);
+    if (res.code === 200) {
+      searchHistory.value = searchHistory.value.filter(item => item !== keyword);
+      ElMessage({
+        message: '已删除该搜索历史',
+        type: 'success'
+      });
+    } else {
+      ElMessage({
+        message: res.data.msg,
+        type: 'error'
+      });
+    }
+  } catch (error) {
+    console.error('删除搜索历史失败', error);
+    ElMessage({
+      message: '删除搜索历史出错！',
+      type: 'error'
+    });
+  }
+};
+
+// 根据搜索历史进行搜索
+const searchByHistory = (history) => {
+  input.value = history;
+  suggestions.value = [];
+  dataCache.setSearchKey(input.value)
+  router.push({path: '/search', query: {"key": input.value}})
+};
+
 onBeforeMount(async () => {
   // 尝试获取用户信息
   const ui = store.getUserInfo;
@@ -244,18 +363,22 @@ onBeforeMount(async () => {
 onMounted(() => {
   // 初始化建议列表位置
   updateSuggestionPosition();
-  
+
   // 监听窗口大小变化，更新建议列表位置
   window.addEventListener('resize', updateSuggestionPosition);
-  
+
   // 监听滚动事件，更新建议列表位置
   window.addEventListener('scroll', updateSuggestionPosition);
+
+  // 添加点击监听
+  document.addEventListener('click', closeSuggestionsOnClickOutside);
 });
 
 onBeforeMount(() => {
   // 移除事件监听
   window.removeEventListener('resize', updateSuggestionPosition);
   window.removeEventListener('scroll', updateSuggestionPosition);
+  document.removeEventListener('click', closeSuggestionsOnClickOutside);
 });
 
 // 监听路由 清空搜索框的值
@@ -263,6 +386,7 @@ watchEffect(() => {
   if (route.path !== '/search/index') {
     input.value = '';
     suggestions.value = [];
+    showSuggestionList.value = false;
   } else {
     input.value = dataCache.getSearchKey;
   }
@@ -355,26 +479,19 @@ const SearchHandle = () => {
 const closeSuggestionsOnClickOutside = (event) => {
   const searchBox = document.querySelector('.headerSearch');
   const suggestionList = document.querySelector('.suggestion-list');
-  
+
+  // 如果点击发生在搜索框和建议列表之外的区域，则关闭建议列表
   if (
     searchBox && 
     suggestionList && 
     !searchBox.contains(event.target) && 
     !suggestionList.contains(event.target)
   ) {
-    suggestions.value = [];
+    showSuggestionList.value = false; // 直接控制整个建议列表的显示状态
+    suggestions.value = []; // 清空建议
   }
 };
 
-// 添加点击监听
-onMounted(() => {
-  document.addEventListener('click', closeSuggestionsOnClickOutside);
-});
-
-// 移除点击监听
-onBeforeMount(() => {
-  document.removeEventListener('click', closeSuggestionsOnClickOutside);
-});
 </script>
 
 <style lang="scss" scoped>
@@ -527,28 +644,107 @@ header {
   background-color: #fff;
   box-shadow: 0 4px 6px 2px rgba(108, 112, 118, 0.17);
   border: 1px solid #eee;
-  overflow: auto; // 当内容超出高度时显示滚动条
+  overflow: hidden; // 隐藏超出内容
+
+  // 搜索历史容器样式
+  .search-history-container {
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      
+      button {
+        display: flex;
+        align-items: center;
+        color: #ff4d4f;
+        font-size: 12px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    
+    .search-history {
+      padding: 8px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
   
-  // 确保列表项之间有分隔线
-  ul {
+  // 搜索建议容器样式
+  .suggestions-container {
+    .suggestions-header {
+      padding: 8px 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .suggestions-list {
+      padding: 8px 16px;
+    }
+  }
+  
+  // 搜索历史标签样式优化
+  .history-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f5f5f5;
+    padding: 4px 12px;
+    border-radius: 16px;
+    margin: 2px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .iconfont {
+      margin-right: 4px;
+    }
+    
+    button {
+      margin-left: 4px;
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+  }
+  
+  // 搜索建议列表样式优化
+  .suggestions-list {
     list-style: none;
     margin: 0;
     padding: 0;
     
     li {
-      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
       cursor: pointer;
       transition: background-color 0.2s;
-      border-bottom: 1px solid #f0f0f0;
+      border-radius: 4px;
       
-      &:last-child {
-        border-bottom: none;
+      &:hover, &.bg-gray-100 {
+        background-color: #f5f5f5;
       }
       
-      &:hover {
-        background-color: #f5f5f5;
+      .iconfont {
+        margin-right: 8px;
+        color: #999;
       }
     }
   }
 }
-</style>
+</style>  

@@ -11,10 +11,12 @@ import com.tianji.search.repository.CourseRepository;
 import com.tianji.search.repository.SuggestIndexRepository;
 import com.tianji.search.service.ICourseService;
 import org.springframework.data.elasticsearch.core.suggest.Completion;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+
 
 @Service
 public class CourseServiceImpl implements ICourseService {

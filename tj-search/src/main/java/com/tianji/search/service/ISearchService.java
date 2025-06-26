@@ -23,4 +23,11 @@ public interface ISearchService {
     List<CourseVO> queryLikeTopN();
 
     List<String> completeSuggest(String keyword);
+
+
+    List<String> getSearchHistory();
+
+    void clearSearchHistory();
+
+    void deleteSearchHistory(String keyword);
 }

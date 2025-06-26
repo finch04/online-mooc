@@ -16,4 +16,5 @@ public interface ICourseService {
 
     //新增提词库索引文档
     void saveSuggestDoc(CourseSearchDTO dto);
+
 }
