@@ -132,7 +132,6 @@
         @click="selectSuggestion(suggestion)"
         class="flex items-center py-2 px-2 rounded hover:bg-gray-100 cursor-pointer transition-colors"
       >
-        <i class="iconfont mr-2" style="color: #999;">&#xe61f;</i>
         {{ suggestion }}
       </li>
     </ul>

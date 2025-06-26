@@ -571,13 +571,14 @@ public class SearchServiceImpl implements ISearchService {
 
     @Override
     public void deleteSearchHistory(String keyword) {
+        if(UserContext.getUser()==null){
+            return;
+        }
         if (keyword == null || keyword.trim().isEmpty() || UserContext.getUser() == null) {
             return;
         }
-
         String key = getHistoryKey();
         keyword = keyword.trim();
-
         // 从ZSet中移除指定关键字的搜索历史
         redisTemplate.opsForZSet().remove(key, keyword);
     }
