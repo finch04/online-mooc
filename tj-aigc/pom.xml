@@ -122,7 +122,31 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-redis-store-spring-boot-starter</artifactId>
         </dependency>
+
+
+        <!--调用百炼平台制作的智能体-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dashscope-sdk-java</artifactId>
+            <version>2.19.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.victools</groupId>
+                    <artifactId>jsonschema-generator</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-simple</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
+
+
 
     <build>
         <finalName>${project.artifactId}</finalName>
