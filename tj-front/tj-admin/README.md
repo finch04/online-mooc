@@ -1,30 +1,18 @@
 # 智慧MOOC
-#### 项目简介
-> 由学成在线项目升级 为智慧MOOC 主要包含课程录播、销售（优惠券）、评论、笔记、等相关功能实现。升级之后包含用户端和管理后台两个部分
-项目迭代日志：
-- v1 迭代时间2022.7月11日 - 2022.7.31号
-- 主要实现主要流程 包含用户（老师）、课程、搜索、购买、课程学习、优惠券 、财务 等相关功能
-#### 产品原型及设计
 
-- 产品原型
-    - 用户端 - 魏帅明： https://codesign.qq.com/app/design/ALwE9V58VljX1Dp/axure/O6ym7ZRVvqZAYED
-    - 管理后台 - 刘烁：https://codesign.qq.com/s/zm5q0XqWX7ZRBb6/preview/prototype/bOEvq0r2Bm03PAY
+## 项目简介
 
-- 设计稿：
-    - 用户端 - 李芳华： https://codesign.qq.com/app/design/ALwE9V58VljX1Dp/Yyg5Zp2QdxN92lK/inspect
+基于SpringCloud Alibaba的智慧教育平台，整合课程交易、社交化学习、AI辅助及数据分析。支持高并发抢券、动态优惠、数据分析、异步公告推送、实时聊天、AI 问答及个人知识库图谱。
 
-    - 管理后台 - 王静： https://codesign.qq.com/s/zm5q0XqWX7ZRBb6/GPEpZGAprra9w3z/inspect
-
-#### 访问地址
-#### 运行环境 - 初始开发环境及工具
+## 运行环境 - 初始开发环境及工具
 
 - 项目开发环境: Mac + node: v17.8.0 + npm: 8.5.5 || pnpm: 6.32.8 
 
-#### 技术栈应用
+## 技术栈应用
 
 - Vue3 + vite + Tdesign + pinia + vue-router
 
-#### 项目结构
+## 项目结构
 ```html
 java-eaglemap  
 │
@@ -149,8 +137,7 @@ java-eaglemap
 │    └── README.md
 
 ```
-#### 数据结构设计
-#### 安装运行
+## 安装运行
 
 ``` bash
 ## 安装依赖
@@ -167,7 +154,6 @@ npm run start
 npm run build
 
 ```
-#### 相关资料
-#### 参考文档（项目开发过程中用到的所有技术难点 涉及到的相关参考）
+## 参考文档（项目开发过程中用到的所有技术难点 涉及到的相关参考）
 - vite配置: https://vitejs.dev/config/
-#### 包含的三方技术 简介（如果有的话需要写明）
+## 包含的三方技术 简介（如果有的话需要写明）

@@ -1,18 +1,13 @@
-# 智慧MOOC - 智慧MOOC
-#### 项目简介
-> 由学成在线项目升级 为智慧MOOC 主要包含课程录播、销售（优惠券）、评论、笔记、等相关功能实现。升级之后包含用户端和管理后台两个部分
-#### 技术栈应用
+# 智慧MOOC 
+
+## 项目简介
+基于SpringCloud Alibaba的智慧教育平台，整合课程交易、社交化学习、AI辅助及数据分析。支持高并发抢券、动态优惠、数据分析、异步公告推送、实时聊天、AI 问答及个人知识库图谱。
+
+## 技术栈应用
 
 - Vue3 + vite + Tdesign + pinia + vue-router
-#### 项目迭代日志：
-    - v1.1 迭代时间2022.7月11日 - 2022.7.31号
-    - 主要实现主要流程 包含用户（老师）、课程、搜索、购买、课程学习、优惠券 、财务 等相关功能
-    - v1.2 迭代时间2022.8.4 - 2022.8.12
-    - 主要实现 免费课程课程播放 包含点击课程购买(免费-加入学习计划)、视频播放（目录-实现学习计划及目录对应、问答、笔记-随着播放时间记录当前笔记）
-    - v1.3 迭代时间2022.8.12 - 2022.9.20
-    - 主要实现 个人中心【包含我的课程、学习计划、考试、订单、优惠券、积分、设置(2.x内容接口未联调)】、课程购买相关内容【购物车、支付、优惠券】
  
-#### 安装运行
+## 安装运行
 
 ``` bash
 ## 安装依赖 
@@ -25,34 +20,16 @@ npm run dev
 # 启动链接测试环境
 npm run start
 
-## 构建正式环境 - 打包 松松的环境打包 配置文件子啊config > proxy
+## 构建正式环境 - 打包 
 npm run build 
 
 ```
-#### 产品原型及设计
 
-- 产品原型
-    - 用户端 - 魏帅明： https://codesign.qq.com/app/design/ALwE9V58VljX1Dp/axure/O6ym7ZRVvqZAYED
-    - 管理后台 - 刘烁： https://codesign.qq.com/s/zm5q0XqWX7ZRBb6/preview/prototype/bOEvq0r2Bm03PAY
-
-- 设计稿：
-    - 用户端 - 李芳华： https://codesign.qq.com/app/design/ALwE9V58VljX1Dp/Yyg5Zp2QdxN92lK/inspect
-
-    - 管理后台 - 王静： https://codesign.qq.com/s/zm5q0XqWX7ZRBb6/GPEpZGAprra9w3z/inspect
-
-#### 访问地址
-- 用户端 
-    - 测试地址一：http://172.17.2.134/tianji-test 松松（自己申请服务器部署）项目结束释放
-    - 测试地址二：https://tjxt-user-t.itheima.net 运维部署
-- 管理后台
-    - 测试地址一：http://172.17.2.134/tianji-admin-test
-    - 测试地址二：https://tjxt-admin-t.itheima.net 运维部署
-
-#### 运行环境 - 初始开发环境及工具
+## 运行环境 - 初始开发环境及工具
 
 - 项目开发环境: Mac + node: v17.8.0 + npm: 8.5.5 || pnpm: 6.32.8
 
-#### 项目结构
+## 项目结构
 ```html
 java-eaglemap  
 │
@@ -124,10 +101,10 @@ java-eaglemap
 
 ```
 
-#### 相关资料
+## 相关资料
 Vue3: https://cn.vuejs.org/guide/introduction.html
-#### 参考文档（项目开发过程中用到的所有技术难点 涉及到的相关参考）
+## 参考文档（项目开发过程中用到的所有技术难点 涉及到的相关参考）
 - vite配置: https://vitejs.dev/config/
-#### 包含的三方技术 简介（如果有的话需要写明）
+## 包含的三方技术 简介（如果有的话需要写明）
 - 腾讯视频播放器：https://cloud.tencent.com/document/product/266/58773
 - https://tcplayer.vcube.tencent.com/
