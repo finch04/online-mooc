@@ -33,9 +33,9 @@ tj:
     package-path: com.tianji.data.controller
     title: 天机学堂 - 直播中心接口文档
     description: 该服务包含课程直播的功能
-    contact-name: 传智教育·研究院
+    contact-name: 研究院
     contact-url: http://www.itcast.cn/
-    contact-email: zhanghuyi@itcast.cn
+    contact-email: 1418875140@qq.com
     version: v1.0
   jdbc:
     database: tj_live

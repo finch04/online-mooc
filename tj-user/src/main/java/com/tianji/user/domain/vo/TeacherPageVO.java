@@ -19,7 +19,7 @@ public class TeacherPageVO {
     private String cellPhone;
     @ApiModelProperty(value = "岗位", example = "讲师")
     private String job;
-    @ApiModelProperty(value = "介绍", example = "黑马高级Java讲师")
+    @ApiModelProperty(value = "介绍", example = "高级Java讲师")
     private String intro;
     @ApiModelProperty(value = "负责的课程数量", example = "10")
     private Integer courseAmount;

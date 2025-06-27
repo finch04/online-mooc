@@ -30,7 +30,7 @@ public class StudentUpdateDTO {
     private String name;
     @ApiModelProperty(value = "头像", example = "default-user-icon.jpg")
     private String icon;
-    @ApiModelProperty(value = "个人介绍", example = "黑马高级Java讲师")
+    @ApiModelProperty(value = "个人介绍", example = "高级Java讲师")
     private String intro;
     @ApiModelProperty(value = "形象照地址", example = "default-teacher-photo.jpg")
     private String photo;
