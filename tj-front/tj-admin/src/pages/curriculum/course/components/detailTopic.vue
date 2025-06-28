@@ -157,7 +157,7 @@ const handleSubmit = async (str) => {
       } else {
         ElMessage({
 
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
           showClose: false,
         });

@@ -213,7 +213,7 @@ const getcourseTeacherData = async () => {
       }
       else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error',
           showClose: false,
 
@@ -231,7 +231,7 @@ const getcourseListData = async () => {
         // console.log(courseListData.value);
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error',
           showClose: false,
 

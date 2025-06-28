@@ -274,7 +274,7 @@ const handleDescend = async () => {
       } else {
         ElMessage({
 
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
           showClose: false,
         });
@@ -293,7 +293,7 @@ const handleDescend = async () => {
       } else {
         ElMessage({
 
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
           showClose: false,
         });
@@ -326,7 +326,7 @@ const handleOpenDescend = async (row) => {
         } else {
           ElMessage({
             showClose: true,
-            message: res.data.msg,
+            message: res.msg,
             type: "error",
             showClose: false,
           });

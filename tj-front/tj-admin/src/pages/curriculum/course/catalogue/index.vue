@@ -303,7 +303,7 @@ const handleSubmit = async (str) => {
           } else {
             ElMessage({
               showClose: true,
-              message: res.data.msg,
+              message: res.msg,
               type: "error",
               showClose: false,
             });

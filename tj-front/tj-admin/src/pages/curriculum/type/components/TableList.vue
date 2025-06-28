@@ -176,7 +176,7 @@ const handleStatus = async (status) => {
       } else {
         ElMessage({
 
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
           showClose:false,
         })
@@ -194,7 +194,7 @@ const handleDelete = async () => {
       } else {
         ElMessage({
 
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
           showClose:false,
         })
