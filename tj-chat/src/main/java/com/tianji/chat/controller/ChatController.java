@@ -3,6 +3,7 @@ package com.tianji.chat.controller;
 import com.tianji.chat.domain.po.ChatSession;
 import com.tianji.chat.domain.query.RecordQuery;
 import com.tianji.chat.service.IChatSessionService;
+import com.tianji.common.annotations.NoWrapper;
 import com.tianji.common.domain.dto.PageDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,6 +36,7 @@ public class ChatController {
         return chatSessionService.chat(sessionId, message);
     }
 
+    @NoWrapper // 不进行包装，直接返回数据  这里可以通过原本Flux返回数据（通过自定义非包装注解使得不会返回data）
     @ApiOperation("流式聊天")
     @GetMapping(value = "/",  produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter memoryChatRedisStream(@RequestParam(defaultValue = "我叫finch，你叫什么名字？") String message,

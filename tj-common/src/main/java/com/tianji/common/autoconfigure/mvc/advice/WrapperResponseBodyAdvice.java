@@ -1,9 +1,11 @@
 package com.tianji.common.autoconfigure.mvc.advice;
 
+import com.tianji.common.annotations.NoWrapper;
 import com.tianji.common.constants.Constant;
 import com.tianji.common.domain.R;
 import com.tianji.common.utils.WebUtils;
 import org.slf4j.MDC;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -14,10 +16,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 @RestControllerAdvice
+@ConditionalOnClass({ResponseBodyAdvice.class})
 public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     @Override
-    public boolean supports(MethodParameter returnType, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
-        return returnType.getParameterType() != R.class && WebUtils.isGatewayRequest();
+    public boolean supports(MethodParameter methodParameter, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
+        if(methodParameter.hasMethodAnnotation(NoWrapper.class)){
+            // 如果方法上标注了NoWrapper注解，则不进行包装
+            return false;
+        }
+        return methodParameter.getParameterType() != R.class && WebUtils.isGatewayRequest();
     }
 
     @Override
@@ -25,9 +32,7 @@ public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             Object body, @NonNull MethodParameter returnType, @NonNull MediaType selectedContentType,
             @NonNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
             @NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response) {
-        if (request.getURI().getPath().equals("/v2/api-docs")
-       || MediaType.TEXT_EVENT_STREAM.includes(selectedContentType)){
-            //如果是文档接口或SSE接口，就不管。（主要是为AI对话配置）
+        if (request.getURI().getPath().equals("/v2/api-docs")){
             return body;
         }
         if (body == null) {
