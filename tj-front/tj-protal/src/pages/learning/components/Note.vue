@@ -134,7 +134,7 @@ const getAskListsDataes = async () => {
         total.value =  Number(res.data.total)
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -166,7 +166,7 @@ await notesGathers(item.id)
         item.isGathered = !item.isGathered
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -184,7 +184,7 @@ await unNotesGathers(item.id)
         item.isGathered = !item.isGathered
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -208,7 +208,7 @@ await delNote(item.id)
         getAskListsDataes()
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -230,7 +230,7 @@ await likeed(item.id, !item.liked)
         item.liked = !item.liked
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -265,7 +265,7 @@ const submitForm = async () => {
         getAskListsDataes()
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

@@ -112,7 +112,7 @@ const getAskListsDataes = async () => {
         total.value =  Number(res.data.total)
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -137,7 +137,7 @@ await delNote(id)
         getAskListsDataes()
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -163,7 +163,7 @@ await notesGathers(item.id)
         item.isGathered = !item.isGathered
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -185,7 +185,7 @@ await unNotesGathers(item.id)
         item.isGathered = !item.isGathered
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -208,7 +208,7 @@ const getClassChapterData = async (id) => {
         chapterData.value = [{id:'all', index: '全部'},...res.data]
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -240,7 +240,7 @@ const likedHandle = async (item) => {
         item.liked ? item.likedTimes++ : item.likedTimes--
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

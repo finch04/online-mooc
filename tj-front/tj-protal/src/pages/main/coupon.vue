@@ -58,7 +58,7 @@ const getCollectableCouponData = async () => {
         couponData.value = res.data;
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -86,7 +86,7 @@ const getCouponData = async (item) => {
         });
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

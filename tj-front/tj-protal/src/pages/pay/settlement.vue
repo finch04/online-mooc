@@ -86,7 +86,7 @@ const comfirePageInfoHandle = async () => {
         orderInfo.value = res.data
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -115,7 +115,7 @@ const orderHandle = async () => {
         router.push({path:'/pay/payment',query:{orderId: res.data.orderId}})
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

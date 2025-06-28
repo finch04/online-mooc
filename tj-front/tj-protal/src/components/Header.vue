@@ -97,7 +97,7 @@
         class="flex items-center text-red-500 text-sm hover:underline" 
         @click="clearSearchHistoryHandle"
       >
-        <i class="iconfont mr-1">×</i> 清空历史
+        清空历史
       </button>
     </div>
     <div class="search-history px-4 py-2">
@@ -304,7 +304,7 @@ const deleteHistory = async (keyword) => {
       });
     } else {
       ElMessage({
-        message: res.data.msg,
+        message: res.msg,
         type: 'error'
       });
     }
@@ -399,7 +399,7 @@ const getNotReadCount = async () => {
           notReadCount.value = res.data;
         } else {
           ElMessage({
-            message: res.data.msg,
+            message: res.msg,
             type: "error",
           });
         }
@@ -420,7 +420,7 @@ const getLearnClassInfoHandle = async () => {
           learnClassInfo.value = res.data;
         } else {
           ElMessage({
-            message: res.data.msg,
+            message: res.msg,
             type: "error",
           });
         }
@@ -442,7 +442,7 @@ const getCourseClassHandle = async () => {
           dataCache.setCourseClassDataes(res.data)
         } else {
           ElMessage({
-            message: res.data.msg,
+            message: res.msg,
             type: "error",
           });
         }

@@ -283,7 +283,7 @@ const getClassTeachersData = async () => {
         baseClassTeacher.value = catchArr
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error'
         });
       }
@@ -450,7 +450,7 @@ const signUpHandle = async () => {
         isSignUp.value = true
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error'
         });
       }

@@ -101,7 +101,7 @@ const getPayMethodList = async () => {
         payMethodList.value = res.data
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -130,7 +130,7 @@ const getPayUrlData = async val => {
         }, 5000)
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -160,7 +160,7 @@ const getPayStateData = async () => {
         }
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

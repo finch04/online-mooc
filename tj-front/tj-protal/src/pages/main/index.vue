@@ -117,7 +117,7 @@ const getClassCategoryData = async () => {
         dataCache.setCourseClassDataes(res.data)
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
         });
       }
@@ -142,7 +142,7 @@ const getFreeClassListData = async () => {
         freeClassData.value = res.data;
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
         });
       }
@@ -245,7 +245,7 @@ const saveInterest = async () => {
         interestDialog.value = false;
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
         });
       }

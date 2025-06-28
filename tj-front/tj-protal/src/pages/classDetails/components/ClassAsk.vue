@@ -119,7 +119,7 @@ const getAskListsDataes = async () => {
         total.value = Number(res.data.total)
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -144,7 +144,7 @@ await delQuestions(id)
         getAskListsDataes()
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -172,7 +172,7 @@ const getClassChapterData = async (id) => {
         chapterData.value = [{id:'', index: '全部'},...res.data]
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

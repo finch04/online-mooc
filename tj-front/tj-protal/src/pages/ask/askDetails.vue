@@ -153,7 +153,7 @@ const getQuestionsDetailsData = async () => {
         askInfo.value = data
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -197,7 +197,7 @@ const getAllQuestionsData = async (val) => {
         loading.value = false
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -275,7 +275,7 @@ const getReplyData = async (id, st) => {
        isReplay.value = id
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -343,7 +343,7 @@ const answerHandle = async (type) => {
         isSend.value = false
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -364,7 +364,7 @@ await putLiked({bizId:item.id, liked:!item.liked, bizType: "QA"})
         item.liked ? item.likedTimes++ : item.likedTimes--
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

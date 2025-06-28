@@ -86,7 +86,7 @@ const getClassListData = async (id) => {
         teacherInfo.value = res.data[0];
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: "error",
         });
       }

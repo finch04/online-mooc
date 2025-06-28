@@ -177,7 +177,7 @@ await postQuestions(quest)
         getAskListsDataes()
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

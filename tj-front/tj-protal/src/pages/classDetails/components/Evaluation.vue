@@ -308,7 +308,7 @@ const helpfulHandle = async item => {
         item.isHelpful ? item.helpCount++ : item.helpCount--
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

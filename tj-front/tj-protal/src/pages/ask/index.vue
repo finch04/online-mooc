@@ -105,7 +105,7 @@ const getClassCoursesDataes = async () => {
         options.value = opt
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error'
         });
       }
@@ -133,7 +133,7 @@ const getQuestionsDetailsData = async () => {
         value.value = [data.chapterId, data.sectionId]
       } else {
         ElMessage({
-          message: res.data.msg,
+          message: res.msg,
           type: 'error'
         });
       }
@@ -180,7 +180,7 @@ const submitForm = (formEl) => {
             router.push({ path: '/result/success', query: '查看我的问题' })
           } else {
             ElMessage({
-              message: res.data.msg,
+              message: res.msg,
               type: 'error'
             });
           }
@@ -197,7 +197,7 @@ const submitForm = (formEl) => {
             router.push({ path: '/result/success', query: '查看我的问题' })
           } else {
             ElMessage({
-              message: res.data.msg,
+              message: res.msg,
               type: 'error'
             });
           }

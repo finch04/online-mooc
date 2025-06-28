@@ -112,7 +112,7 @@ const getClassCategoryData = async () => {
         searchType.value.searchKeys = [{id:'all', name: '全部'}, ...res.data]
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -179,7 +179,7 @@ async function search (){
         count.value =  Number(res.data.total)
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

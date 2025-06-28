@@ -99,7 +99,7 @@ const getCartsData = async () => {
         carts.value = data
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }
@@ -151,7 +151,7 @@ const delHandle = (item) => {
         getCartsData()
       } else {
         ElMessage({
-          message:res.data.msg,
+          message:res.msg,
           type: 'error'
         });
       }

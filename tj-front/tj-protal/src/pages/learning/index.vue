@@ -174,7 +174,7 @@ const getLearningClassDetailsData = async () => {
           playId.value = currentPlayData.sectionId || ""
         } else {
           ElMessage({
-            message: res.data.msg,
+            message: res.msg,
             type: 'error'
           });
         }
