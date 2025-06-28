@@ -43,4 +43,5 @@ public interface TradeClient {
      */
     @GetMapping("/order-details/purchaseInfo")
     CoursePurchaseInfoDTO getPurchaseInfoOfCourse(@RequestParam("courseId") Long courseId);
+
 }
