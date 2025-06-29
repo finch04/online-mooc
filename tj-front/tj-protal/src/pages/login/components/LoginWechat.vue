@@ -46,7 +46,6 @@ const loadWxLoginScript = () => {
             resolve();
             return;
         }
-
         const script = document.createElement('script');
         script.src = 'https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js';
         script.onload = resolve;

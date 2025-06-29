@@ -104,7 +104,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button @click="passwordDialogVisible = false" style="color: white;">取消</el-button>
         <el-button type="primary" @click="submitPasswordChange">确定</el-button>
       </template>
     </el-dialog>
@@ -132,7 +132,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="phoneDialogVisible = false">取消</el-button>
+        <el-button @click="phoneDialogVisible = false" style="color: white;">取消</el-button>
         <el-button type="primary" @click="submitPhoneChange">确认{{user.cellPhone ? '修改' : '绑定'}}</el-button>
       </template>
     </el-dialog>
