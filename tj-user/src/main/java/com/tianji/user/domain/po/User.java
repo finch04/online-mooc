@@ -61,6 +61,11 @@ public class User implements Serializable {
     private UserType type;
 
     /**
+     * 微信唯一id
+     */
+    private String wxUnionid;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

@@ -100,6 +100,13 @@ public class UserController {
         return BeanUtils.copyBean(userDetail, UserDTO.class, (d, u) -> u.setType(d.getType().getValue()));
     }
 
+//    @ApiOperation("根据微信unionid查询用户信息")
+//    @PostMapping("/{unionid}")
+//    public LoginUserDTO queryUserByUnionid(
+//            @ApiParam("用户id") @PathVariable("unionid") Long unionid) {
+//        UserDetail userDetail = userService.queryByUnionid(unionid);
+//    }
+
     /**
      * 登录结构
      * @param loginDTO 登录表单

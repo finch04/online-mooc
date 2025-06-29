@@ -47,5 +47,11 @@ tj:
       includeLoginPaths:
         - /menus/me
         - /accounts/logout
+    weixin:
+#      appid: wxed9954c01bb89b47
+#      secret: a7482517235173ddb4083788de60b90e
+      appid: wx17655f8047b85150
+      secret: 68918d65287802a19b1905cbda7eaa93
+      expire: 120
   jdbc:
     database: tj_auth

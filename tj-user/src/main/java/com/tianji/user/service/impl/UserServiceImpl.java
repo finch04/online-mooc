@@ -81,6 +81,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (type == 2) {
             user = loginByVerifyCode(loginDTO.getCellPhone(), loginDTO.getPassword());
         }
+        // 4.微信登录  这里借用password字段存储wxUnioinid
+        if (type == 3) {
+            user = loginByWxLogin(loginDTO.getPassword());
+        }
         // 4.错误的登录方式
         if (user == null) {
             throw new BadRequestException(ILLEGAL_LOGIN_TYPE);
@@ -94,6 +98,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         userDTO.setUserId(user.getId());
         userDTO.setRoleId(handleRoleId(user));
         return userDTO;
+    }
+
+    private User loginByWxLogin(String unionid) {
+        // 2.根据微信unionid查询
+        User user = lambdaQuery().eq(User::getWxUnionid, unionid).one();
+        if (user == null) {
+            throw new BadRequestException(WXUNIONID_NOT_EXISTS);
+        }
+        // 3.校验是否禁用
+        if (user.getStatus() == UserStatus.FROZEN) {
+            throw new ForbiddenException(USER_FROZEN);
+        }
+        return user;
     }
 
     @Override

@@ -1,8 +1,38 @@
 import request from "@/utils/request.js"
 const USER_API_PREFIX = "/us"
 const AUTH_API_PREFIX = "/as"
+const WX_LOGIN_TYPE = 3;
 const PHONE_LOGIN_TYPE = 2;
 const PW_LOGIN_TYPE = 1;
+// 微信登录
+export const wxLogins = (data) => {
+	// data.type = WX_LOGIN_TYPE;
+	return request({
+		url: `${AUTH_API_PREFIX}/accounts/wxLogin`,
+		method: "post",
+		data,
+		withCredentials: true
+	});
+}
+//微信登录 保存UUID到Redis
+export const saveWxUuid = (uuid) => {
+    return request({
+        url: `${AUTH_API_PREFIX}/accounts/wx/saveUuid`,
+        method: "post",
+        data: { uuid },
+        withCredentials: true
+    });
+}
+
+//微信登录 检查微信登录状态
+export const checkWxLoginStatus = (uuid) => {
+    return request({
+        url: `${AUTH_API_PREFIX}/accounts/wx/check`,
+        method: "get",
+        params: { uuid },
+        withCredentials: true
+    });
+}
 // 手机号验证码登录
 export const phoneLogins = (data) => {
 	data.type = PHONE_LOGIN_TYPE;

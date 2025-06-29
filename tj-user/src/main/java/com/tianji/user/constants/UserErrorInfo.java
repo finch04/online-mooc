@@ -6,6 +6,7 @@ public interface UserErrorInfo {
         String INVALID_UN = "用户名或手机号不能为空";
         String INVALID_USER_TYPE = "无效的用户类型";
         String PHONE_NOT_EXISTS = "手机号不存在";
+        String WXUNIONID_NOT_EXISTS = "微信unionid不存在";
         String ILLEGAL_LOGIN_TYPE = "无效的登录方式";
         String USER_ID_NOT_EXISTS = "用户id不存在";
         String INVALID_OLD_PASSWORD = "原密码与输入不一致";
