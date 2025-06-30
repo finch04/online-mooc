@@ -33,6 +33,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -47,11 +48,10 @@ import java.util.Map;
 public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatSession> implements ChatSessionService {
 
     private final SessionProperties sessionProperties;
-
     private final ChatMemory chatMemory;
-    private final ChatClient chatClient;
+    private final ChatClient dashScopeChatClient;
     private final SystemPromptConfig systemPromptConfig;
-    private final ChatModel chatModel;
+    private final ChatModel dashscopeChatModel;
 
     @Override
     public SessionVO createSession(Integer num) {
@@ -133,7 +133,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                     对话内容:
                     {}
                     """,title);
-            String titleContent = ChatClient.builder(this.chatModel)
+            String titleContent = ChatClient.builder(this.dashscopeChatModel)
                     .build()
                     .prompt()
                     .system(this.systemPromptConfig.getChatTitleMessage().get())
@@ -257,7 +257,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     @Override
     public void autoUpdateTitle(String sessionId,String question) {
         var userId = UserContext.getUser();
-        String autoTitle = chatClient.prompt()
+        String autoTitle = dashScopeChatClient.prompt()
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get()).param("now",DateUtil.now()).param("message",question))
                 .user("帮我根据用户问题总结一个标题出来")
                 .call()
@@ -274,7 +274,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     public void autoUpdateTitle1(String sessionId) {
         var userId = UserContext.getUser();
         List<MessageVO> messageVOS = this.queryBySessionId(sessionId);
-        String autoTitle = chatClient.prompt()
+        String autoTitle = dashScopeChatClient.prompt()
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get()).param("now",DateUtil.now()).param("message",messageVOS))
                 .user("帮我根据对话总结一个标题出来")
                 .call()

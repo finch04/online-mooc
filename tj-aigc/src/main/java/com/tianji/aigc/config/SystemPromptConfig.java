@@ -28,6 +28,7 @@ public class SystemPromptConfig {
     private final AtomicReference<String> buyAgentSystemMessage = new AtomicReference<>();
     private final AtomicReference<String> consultAgentSystemMessage = new AtomicReference<>();
     private final AtomicReference<String> knowledgeAgentSystemMessage = new AtomicReference<>();
+    private final AtomicReference<String> textSystemMessage = new AtomicReference<>();
 
     @PostConstruct // 初始化时加载配置
     public void init() {
@@ -39,6 +40,7 @@ public class SystemPromptConfig {
         loadConfig(aiProperties.getSystem().getBuyAgent(), buyAgentSystemMessage);
         loadConfig(aiProperties.getSystem().getConsultAgent(), consultAgentSystemMessage);
         loadConfig(aiProperties.getSystem().getKnowledgeAgent(), knowledgeAgentSystemMessage);
+        loadConfig(aiProperties.getSystem().getText(), textSystemMessage);
 
     }
 

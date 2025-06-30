@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AbstractAgent implements Agent {
 
     @Resource
-    private ChatModel chatModel;
+    private ChatModel dashscopeChatModel;
     @Resource
     private ChatMemory chatMemory;
     @Resource
@@ -136,7 +136,7 @@ public abstract class AbstractAgent implements Agent {
     }
 
     private ChatClient.ChatClientRequestSpec getChatClient(String question, String sessionId, String requestId) {
-        return ChatClient.builder(this.chatModel).build()
+        return ChatClient.builder(this.dashscopeChatModel).build()
                 .prompt()
                 .system(promptSystem -> promptSystem
                         .text(this.systemMessage())

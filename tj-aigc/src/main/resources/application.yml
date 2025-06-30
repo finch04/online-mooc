@@ -57,3 +57,7 @@ tj:
           data-id: knowledge-agent-system-message.txt
           group: DEFAULT_GROUP
           timeout-ms: 20000
+        text:
+          data-id: text-system-chat-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000

@@ -1,17 +1,28 @@
 package com.tianji.aigc.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.dashscope.app.Application;
 import com.alibaba.dashscope.app.ApplicationParam;
 import com.alibaba.dashscope.app.ApplicationResult;
 import com.alibaba.dashscope.utils.JsonUtils;
 import com.tianji.aigc.config.DashScopeProperties;
+import com.tianji.aigc.config.SystemPromptConfig;
+import com.tianji.aigc.config.ToolResultHolder;
+import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.enums.ChatEventTypeEnum;
 import com.tianji.aigc.service.ChatService;
+import com.tianji.aigc.service.ChatSessionService;
 import com.tianji.aigc.vo.ChatEventVO;
 import com.tianji.common.utils.TokenContext;
+import com.tianji.common.utils.UserContext;
 import io.reactivex.Flowable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -20,11 +31,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
+//@Service
 @RequiredArgsConstructor
 public class AppAgentChatService implements ChatService {
 
     private final DashScopeProperties dashScopeProperties;
+    private final ChatMemory chatMemory;
+    private final ChatSessionService chatSessionService;
+    private final ChatClient openAiChatClient;
+    private final SystemPromptConfig systemPromptConfig;
 
     // 存储大模型的生成状态，这里采用ConcurrentHashMap是确保线程安全
     // 目前的版本暂时用Map实现，如果考虑分布式环境的话，可以考虑用redis来实现
@@ -34,6 +49,12 @@ public class AppAgentChatService implements ChatService {
 
     @Override
     public Flux<ChatEventVO> chat(String question, String sessionId) {
+        // 收集大模型生成的内容
+        var outputBuilder = new StringBuilder();
+
+        // 获取用户id
+        var userId = UserContext.getUser();
+
         // 获取对话id
         var conversationId = ChatService.getConversationId(sessionId);
         String token = TokenContext.getToken();
@@ -60,27 +81,41 @@ public class AppAgentChatService implements ChatService {
 
             // 将Flowable 转化为 Flux 进行处理输出
             return Flux.from(result)
-                    .doFirst(() -> { //输出开始，标记正在输出
-                        GENERATE_STATUS.put(sessionId, true);
+                    .doFirst(() -> GENERATE_STATUS.put(sessionId, true)) // 第一次输出内容时执行
+                    .doOnError(throwable -> GENERATE_STATUS.remove(sessionId)) // 出现异常时，删除标识
+                    .doOnComplete(() -> GENERATE_STATUS.remove(sessionId)) // 完成时执行，删除标识
+                    .doOnCancel(() -> {
+                        // 这里如果执行到，就说明流被中断了，手动调用ChatMemory中的add方法，存储 中断之前 大模型生成的内容
+                        this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
                     })
-                    .doOnComplete(() -> { //输出结束，清除标记
-                        GENERATE_STATUS.remove(sessionId);
+                    .doFinally(signalType -> {
+                        //需要更新对话的标题或更新时间
+                        var content = StrUtil.format("""
+                                --------
+                                USER:{}\n
+                                ASSISTANT:{}
+                                --------
+                                """, question, outputBuilder.toString());
+                        this.chatSessionService.update(sessionId, content, userId);
                     })
-                    .doOnError(throwable -> GENERATE_STATUS.remove(sessionId)) // 错误时清除标记
-                    // 输出过程中，判断是否正在输出，如果正在输出，则继续输出，否则结束输出
-                    .takeWhile(s -> Optional.ofNullable(GENERATE_STATUS.get(sessionId)).orElse(false))
-                    .map(applicationResult -> {
-                        // 获取大模型的输出的内容
-                        String text = applicationResult.getOutput().getText();
-                        // 封装响应对象
+                    .takeWhile(response -> { // 通过返回值来控制Flux流是否继续，true：继续，false：终止
+                        return GENERATE_STATUS.getOrDefault(sessionId, false);
+                    })
+                    .map(response -> {
+                        // AI大模型响应的文本内容
+                        String text = response.getOutput().getText();
+
+                        // 将大模型生成的内容写入到缓存中
+                        outputBuilder.append(text);
+
+                        // 构造VO对象返回
                         return ChatEventVO.builder()
                                 .eventData(text)
                                 .eventType(ChatEventTypeEnum.DATA.getValue())
                                 .build();
                     })
                     .concatWith(Flux.just(STOP_EVENT));
-
-        } catch (Exception e) {
+        }catch (Exception e){
             throw new RuntimeException(e);
         }
     }
@@ -89,5 +124,19 @@ public class AppAgentChatService implements ChatService {
     public void stop(String sessionId) {
         // 移除标记
         GENERATE_STATUS.remove(sessionId);
+    }
+
+    @Override
+    public String chatText(String question) {
+        return this.openAiChatClient.prompt()
+                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemMessage().get()))
+                .user(question)
+                .call()
+                .content();
+    }
+
+    private void saveStopHistoryRecord(String conversationId, String text) {
+        // 手动封装AssistantMessage对象，存储到redis中
+        this.chatMemory.add(conversationId, new AssistantMessage(text));
     }
 }

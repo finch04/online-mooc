@@ -37,16 +37,43 @@ public class SpringAIConfig {
 
 //    private final RedisProperties redisProperties;
 
+//    @Bean
+//    public ChatClient chatClient(ChatClient.Builder chatClientBuilder,
+//                                 Advisor loggerAdvisor, // 日志增强器
+//                                 Advisor messageChatMemoryAdvisor, // 对话记忆的增强器
+//                                 CourseTools courseTools, // 课程工具
+//                                 OrderTools orderTools // 预下单工具
+//    ) {
+//        return chatClientBuilder
+//                .defaultAdvisors(loggerAdvisor, messageChatMemoryAdvisor) // 设置默认的增强器
+//                .defaultTools(courseTools,orderTools) // 设置默认的tools
+//                .build();
+//    }
+
+
+    /**
+     * 配置 ChatClient
+     */
     @Bean
-    public ChatClient chatClient(ChatClient.Builder chatClientBuilder,
-                                 Advisor loggerAdvisor, // 日志增强器
-                                 Advisor messageChatMemoryAdvisor, // 对话记忆的增强器
-                                 CourseTools courseTools, // 课程工具
-                                 OrderTools orderTools // 预下单工具
+    public ChatClient dashScopeChatClient(ChatClient.Builder dashScopeChatClientBuilder,
+                                          Advisor loggerAdvisor,
+                                          Advisor messageChatMemoryAdvisor,
+                                          Advisor recordOptimizationAdvisor, // 记录优化
+                                          CourseTools courseTools, // 课程工具
+                                          OrderTools orderTools // 预下单工具
+    ) {  // 日志记录器
+        return dashScopeChatClientBuilder
+                .defaultAdvisors(loggerAdvisor, messageChatMemoryAdvisor, recordOptimizationAdvisor) //添加 Advisor 功能增强
+                // .defaultTools(courseTools, orderTools) //添加默认工具
+                .build();
+    }
+
+    @Bean
+    public ChatClient openAiChatClient(ChatClient.Builder openAiChatClientBuilder,
+                                       Advisor loggerAdvisor  // 日志记录器
     ) {
-        return chatClientBuilder
-                .defaultAdvisors(loggerAdvisor, messageChatMemoryAdvisor) // 设置默认的增强器
-                .defaultTools(courseTools,orderTools) // 设置默认的tools
+        return openAiChatClientBuilder
+                .defaultAdvisors(loggerAdvisor)
                 .build();
     }
 

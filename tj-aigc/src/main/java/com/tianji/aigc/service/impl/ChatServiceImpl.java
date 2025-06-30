@@ -29,16 +29,17 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-//@Service
+@Service
 @RequiredArgsConstructor
 @Lazy
 public class ChatServiceImpl implements ChatService {
 
-    private final ChatClient chatClient;
+    private final ChatClient dashScopeChatClient;
     private final SystemPromptConfig systemPromptConfig;
     private final ChatMemory chatMemory;
     private final VectorStore vectorStore;
     private final ChatSessionService chatSessionService;
+    private final ChatClient openAiChatClient;
 
     // 存储大模型的生成状态，这里采用ConcurrentHashMap是确保线程安全
     // 目前的版本暂时用Map实现，如果考虑分布式环境的话，可以考虑用redis来实现
@@ -63,7 +64,7 @@ public class ChatServiceImpl implements ChatService {
 
 //        this.chatSessionService.autoUpdateTitle(sessionId,question);
 //        this.chatSessionService.autoUpdateTitle1(sessionId); //结合之前的所有问答动态更新标题
-        return this.chatClient.prompt()
+        return this.dashScopeChatClient.prompt()
                 .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getChatSystemMessage().get())
                         .param("now", DateUtil.now())
                         .param("message",question)
@@ -146,5 +147,13 @@ public class ChatServiceImpl implements ChatService {
     private void saveStopHistoryRecord(String conversationId, String text) {
         // 手动封装AssistantMessage对象，存储到redis中
         this.chatMemory.add(conversationId, new AssistantMessage(text));
+    }
+    @Override
+    public String chatText(String question) {
+        return this.openAiChatClient.prompt()
+                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemMessage().get()))
+                .user(question)
+                .call()
+                .content();
     }
 }
