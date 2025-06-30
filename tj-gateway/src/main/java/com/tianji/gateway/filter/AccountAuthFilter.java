@@ -21,8 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.tianji.auth.common.constants.JwtConstants.AUTHORIZATION_HEADER;
-import static com.tianji.auth.common.constants.JwtConstants.USER_HEADER;
+import static com.tianji.auth.common.constants.JwtConstants.*;
 
 @Component
 public class AccountAuthFilter implements GlobalFilter, Ordered {

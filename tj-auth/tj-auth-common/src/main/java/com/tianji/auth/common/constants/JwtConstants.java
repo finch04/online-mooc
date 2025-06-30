@@ -20,6 +20,9 @@ public class JwtConstants {
     public static final String ADMIN_REFRESH_HEADER = "admin-refresh";
 
     public static final String USER_HEADER = "user-info";
+    //为AI透传token
+    public static final String TOKEN_HEADER = "token-info";
+
 
     /* 权限缓存 KEY  begin */
     public static final String AUTH_PRIVILEGE_KEY = "auth:privileges";

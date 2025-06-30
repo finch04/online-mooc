@@ -1,6 +1,7 @@
 package com.tianji.authsdk.resource.interceptors;
 
 import com.tianji.auth.common.constants.JwtConstants;
+import com.tianji.common.utils.TokenContext;
 import com.tianji.common.utils.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
