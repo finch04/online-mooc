@@ -16,6 +16,7 @@ public class DashScopeProperties {
 
     private String key;
     private AppAgent appAgent;
+    private AppAgent textAppAgent;
 
     @Data
     @Builder

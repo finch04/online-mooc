@@ -31,6 +31,7 @@ tj:
     database: tj_aigc #指定使用的数据库名
   ai:
     chat-memory: MYSQL # Redis / MYSQL / MongoDB
+    chat-type: ROUTE # ROUTE / ENHANCE / APP
     prompt:
       system:
         chat:

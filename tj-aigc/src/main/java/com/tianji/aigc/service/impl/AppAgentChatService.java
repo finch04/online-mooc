@@ -128,11 +128,21 @@ public class AppAgentChatService implements ChatService {
 
     @Override
     public String chatText(String question) {
-        return this.openAiChatClient.prompt()
-                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemMessage().get()))
-                .user(question)
-                .call()
-                .content();
+        // 设置APP请求参数
+        ApplicationParam applicationParam = ApplicationParam.builder()
+                .apiKey(this.dashScopeProperties.getKey())
+                .appId(this.dashScopeProperties.getTextAppAgent().getId())
+                .prompt(question)
+                .build();
+
+        try {
+            // 创建APP对象并且开始执行
+            var application = new Application();
+            ApplicationResult result = application.call(applicationParam);
+            return result.getOutput().getText();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void saveStopHistoryRecord(String conversationId, String text) {

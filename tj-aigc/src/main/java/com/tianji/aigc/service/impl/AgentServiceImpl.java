@@ -1,7 +1,6 @@
 package com.tianji.aigc.service.impl;
 
 import cn.hutool.extra.spring.SpringUtil;
-
 import com.tianji.aigc.agent.AbstractAgent;
 import com.tianji.aigc.agent.Agent;
 import com.tianji.aigc.config.SystemPromptConfig;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.Objects;
 
 //@Service
 @RequiredArgsConstructor
@@ -58,10 +58,6 @@ public class AgentServiceImpl implements ChatService {
 
     @Override
     public String chatText(String question) {
-        return this.openAiChatClient.prompt()
-                .system(promptSystem -> promptSystem.text(this.systemPromptConfig.getTextSystemMessage().get()))
-                .user(question)
-                .call()
-                .content();
+        return Objects.requireNonNull(this.getAgentByType(AgentTypeEnum.TEXT)).process(question, null);
     }
 }
