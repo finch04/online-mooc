@@ -11,7 +11,7 @@
  Target Server Version : 80029 (8.0.29)
  File Encoding         : 65001
 
- Date: 26/06/2025 19:49:57
+ Date: 01/07/2025 18:58:13
 */
 
 SET NAMES utf8mb4;
@@ -28,6 +28,7 @@ CREATE TABLE `user`  (
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '密码',
   `type` tinyint NOT NULL DEFAULT 0 COMMENT '用户类型：1-员工, 2-普通学员，3-老师',
   `status` tinyint NOT NULL DEFAULT 1 COMMENT '账户状态：0-禁用 1-正常',
+  `wx_unionid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `creater` bigint NULL DEFAULT NULL COMMENT '创建者id',
