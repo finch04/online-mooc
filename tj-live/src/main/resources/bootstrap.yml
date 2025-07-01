@@ -31,7 +31,7 @@ tj:
     enable: true
     enableResponseWrap: true
     package-path: com.tianji.data.controller
-    title: 天机学堂 - 直播中心接口文档
+    title: 智慧MOOC - 直播中心接口文档
     description: 该服务包含课程直播的功能
     contact-name: 研究院
     contact-url: http://www.itcast.cn/

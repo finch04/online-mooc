@@ -35,7 +35,7 @@ tj:
     enable: true
     enableResponseWrap: true
     package-path: com.tianji.auth.controller
-    title: 天机学堂 - 权限微服务接口文档
+    title: 智慧MOOC - 权限微服务接口文档
     description: 该服务用于管理权限相关信息
     contact-name: 研究院
     contact-url: http://www.itcast.cn/

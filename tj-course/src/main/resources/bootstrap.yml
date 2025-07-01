@@ -26,7 +26,7 @@ tj:
   swagger:
     enable: true
     package-path: com.tianji.course.controller
-    title: 天机学堂 - 课程系统接口文档
+    title: 智慧MOOC - 课程系统接口文档
     description: 该服务包含课程管理相关功能
     contact-name: 研究院
     contact-url: http://www.itcast.cn/

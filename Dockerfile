@@ -1,5 +1,5 @@
 FROM openjdk:11.0-jre-buster
-LABEL maintainer="研究院研发组 <research-maint@itcast.cn>"
+LABEL maintainer="研发组 <1418875140@qq.com>"
 ENV JAVA_OPTS=""
 # 设定时区
 ENV TZ=Asia/Shanghai

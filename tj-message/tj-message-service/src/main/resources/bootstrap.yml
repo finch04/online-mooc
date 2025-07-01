@@ -33,7 +33,7 @@ tj:
     enable: true
     enableResponseWrap: true
     package-path: com.tianji.message.controller
-    title: 天机学堂 - 消息中心接口文档
+    title: 智慧MOOC - 消息中心接口文档
     description: 该服务用于站内信、通知管理、短信发送等功能
     contact-name: 研究院
     contact-url: http://www.itcast.cn/

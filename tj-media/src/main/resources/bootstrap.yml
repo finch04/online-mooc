@@ -31,7 +31,7 @@ tj:
   swagger:
     enable: true
     package-path: com.tianji.media.controller
-    title: 天机学堂 - 媒资中心接口文档
+    title: 智慧MOOC - 媒资中心接口文档
     description: 该服务包含图片管理、媒资管理等
     contact-name: 研究院
     contact-url: http://www.itcast.cn/

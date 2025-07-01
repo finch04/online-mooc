@@ -29,7 +29,7 @@ tj:
     enable: true
     enableResponseWrap: true
     package-path: com.tianji.remark.controller
-    title: 天机学堂 - 评价中心接口文档
+    title: 智慧MOOC - 评价中心接口文档
     description: 该服务包含评价、点赞等功能
     contact-name: 研究院
     contact-url: http://www.itcast.cn/

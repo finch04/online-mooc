@@ -28,7 +28,7 @@ tj:
   swagger:
     enable: true
     package-path: com.tianji.search.controller
-    title: 天机学堂 - 搜索系统接口文档
+    title: 智慧MOOC - 搜索系统接口文档
     description: 该服务包含课程搜索、兴趣推荐等相关功能
     contact-name: 研究院
     contact-url: http://www.itcast.cn/

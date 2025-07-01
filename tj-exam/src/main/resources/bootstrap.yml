@@ -27,7 +27,7 @@ tj:
     enable: true
     enableResponseWrap: true
     package-path: com.tianji.exam.controller
-    title: 天机学堂 - 考试中心接口文档
+    title: 智慧MOOC - 考试中心接口文档
     description: 该服务提供题目管理、考试管理、数据统计等功能
     contact-name: 研究院
     contact-url: http://www.itcast.cn/
