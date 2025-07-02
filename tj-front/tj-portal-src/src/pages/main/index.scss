@@ -1,0 +1,90 @@
+.mainWrapper {
+  .banner {
+    padding: 20px 0;
+    .categorys {
+      position: relative;
+      width: 236px;
+      height: 388px;
+      border-radius: 8px;
+      z-index: 9;
+    }
+  }
+  .globalTopBanner{
+      width: 100%;
+      min-width: 1152px;
+      max-width: 2560px;
+      height: 72px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      img{
+        height: 100%;
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+  }
+  .dialogHead{
+    border-bottom: solid 2px var(--color-background2);
+    padding-bottom: 20px;
+    .titleClass{
+      font-family: PingFangSC-Semibold;
+      font-weight: 600;
+      font-size: 28px;
+      color: var(--color-font1);
+    }
+    .butCont{
+      width: 250px;
+    }
+  }
+  .floatCont{
+    position: fixed;
+    right: 0;
+    top: 50%;
+    width: 50px;
+    height: 177px;
+    z-index: 1;
+    transform: translateY(-50%);
+    background: #FFFFFF;
+    padding: 10px 0;
+    box-shadow: 0 0 6px 2px #6c70762b;
+    border-radius: 8px;
+    .item{
+      &::after{
+        content: '';
+        display: block;
+        width: 22px;
+        height: 1px;
+        overflow: hidden;
+        // border-bottom: 1px solid #D9D9D9;
+        margin: 8px auto;
+        background: #D9D9D9;
+      }
+    }
+    .icon{
+      display: block;
+      width: 30px;
+      height: 30px;
+    }
+    .ticket{
+      img{
+        width: 50px;
+        height: 50px;
+      }
+    }
+    .question{
+      .icon{
+        background: url(@/assets/icon/btn_wentifankui.png) no-repeat;
+        background-size: contain;
+      }
+    }
+    .cont{
+      .icon{
+        background: url(@/assets/btn_backtop.png) no-repeat;
+        background-size: contain;
+      }
+    }
+  }
+}

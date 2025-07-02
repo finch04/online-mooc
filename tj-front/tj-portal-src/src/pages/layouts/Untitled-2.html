@@ -1,0 +1,525 @@
+<!-- 架构页面 -->
+<template>
+    <div class="layoutsWrapper fx-fd-col">
+      <Header></Header>
+      <router-view class="fx-1" />
+      <Footer></Footer>
+      <div class="aiSupernatant">
+        <!-- 大图 -->
+        <div v-if="isShow&&!dialogVisible" class="superCon" @click="handleBtn">
+          <el-tooltip class="box-item" effect="dark" content="" placement="top"><template #content>
+              <div>哈！天机不可泄露<br>除非你来问我</div>
+            </template>
+            <div class="bigIcon"></div>
+            <div class="text">天机AI助理</div>
+          </el-tooltip>
+  
+        </div>
+        <!-- end -->
+        <!-- 小图 -->
+        <div v-if="!isShow&&!dialogVisible" class="smallIcon" @click="handleClick"></div>
+        <!-- end -->
+        <!-- 对话弹层 -->
+        <el-dialog v-model="dialogVisible" modal-class="superDialog" title="" draggable @close="handleClose" :show-close="false">
+          <template #header>
+            <div class="dialogHeader">
+              <div :id="titleId" class="title">
+                <span class="font">天机AI助理</span>
+                <button>创建会话</button>
+                <button>历史记录</button>
+              </div>
+              <div class="text">
+                <button>全屏</button>
+                <button @click="handleClose">最小化</button>
+              </div>
+            </div>
+          </template>
+          <div class="chitchatBox">
+            
+            <!-- 聊天对话 -->
+            <div class="chatContainer" ref="scrollTarget" v-if="chatDataArr.length>0">
+              <div class="item" v-for="(item,index) in chatDataArr" :key="index">
+                <div class="questionContainer" v-if="item.type==='USER'">
+                  <div class="avatarWrap userAvatarWrap">
+                    <div class="questionAnswerCon">
+                      <div class="content">{{item.content}}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="answerContainer" v-if="item.type==='ASSISTANT'">
+                  <div class="avatarWrap aiAvatarWrap">
+                    <div class="answerCon">
+                      <div class="content">
+                        <!-- <div class="markdown-body">
+                          <div v-html="md.render(item.content)"></div>
+                        </div> -->
+                        <div v-if="isSend&&index===chatDataArr.length-1">
+                          <div v-if="markdownContent" class="markdown-body" :class="{ 'show-cursor': isTypingDone, 'hide-cursor': !isTypingDone }">
+                            <span ref="textElement" v-html="markdownContent" class="text"></span>
+                          </div>
+                          
+                        </div>
+                        <div v-else>
+                          <div class="markdown-body">
+                            <div v-html="md.render(item.content)"></div>
+                          </div>
+                        </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-if="isLoading" class="answerContainer">...给我点时间，我正在思考你的问题</div>
+              <!-- 回复的答案 -->
+              <!-- <div class="answerContainer" v-if="isLoading">...给我点时间，我正在思考你的问题</div>
+              <div class="answerContainer" v-else-if="compiledMarkdown!==''">
+                <div class="markdown-body" :class="{ 'show-cursor': isTypingDone, 'hide-cursor': !isTypingDone }">
+                  <span ref="textElement" v-html="compiledMarkdown" class="text"></span>
+                  <span class="cursor" v-if="isTypingDone"></span>
+                </div>
+              </div> -->
+              <!-- end -->
+            </div>
+            <!-- end -->
+            <!-- 初次进入对话弹层 -->
+            <div v-else-if="baseData" class="baseBox">
+              <div class="chatLogo"><img src="@/assets/icon03.gif" /></div>
+              <div class="head">
+                <div class="tit">{{baseData.title}}</div>
+                <div class="subTit">{{baseData.describe}}</div>
+              </div>
+              <div class="newQuestion">
+                <div class="tit">
+                  <div>试试这样问我：</div>
+                  <div class="barter"><span class="updateIcon"></span>换一换</div>
+                </div>
+              </div>
+              <div class="newList">
+                <div class="item" v-for="(item,index) in baseData.examples" :key="index">
+                  <div class="tit">{{item.title}}</div>
+                  <div class="tit">{{item.describe}}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- end -->
+            <div class="dialogForm">
+              <!-- 聊天表单 -->
+              <div class="textarea">
+                <el-input type='textarea' maxlength="10000" :show-word-limit="textVal.length>9500" v-model="textVal" @keydown.enter.prevent="onEnter" @keydown="handleKeyDown" @input="handleInput" placeholder="请将您的问题告诉我，Shift+Enter换行" :style="{ minHeight: '30px', maxHeight: '300px' }" autocomplete="off"></el-input>
+              </div>
+              <!-- end -->
+              <!-- 操作按钮 -->
+              <div class="dialogFooter">
+                <div class="leftInfo">
+                  <span class="uploadImgIcon">图片</span>
+                  <span class="uploadTextIcon">文本</span>
+                </div>
+                <div class="rightInfo">
+                  <span class="voiceIcon">语音</span>
+                  <el-button @click="handleStop" v-if="outputLoading">停止生成</el-button>
+                  <el-button v-else @click="handleSend" @keyup.enter.prevent="handleEnter" :disabled="!textVal">发送</el-button>
+  
+                </div>
+              </div>
+              <!-- end -->
+            </div>
+          </div>
+        </el-dialog>
+        <!-- end -->
+      </div>
+    </div>
+  </template>
+  <script setup>
+  import Footer from "@/components/Footer.vue";
+  import Header from "@/components/Header.vue";
+  import { onMounted, onUnmounted, ref, watch, computed } from "vue";
+  import { useUserStore } from "@/store";
+  import { fetchEventSource } from "@microsoft/fetch-event-source";
+  
+  
+  import MarkdownIt from 'markdown-it';
+  import hljs from 'highlight.js/lib/core';
+  // 导入语言模块和支持的表情符号
+  import javascript from 'highlight.js/lib/languages/javascript';
+  import 'highlight.js/styles/monokai-sublime.css'; // 选择你喜欢的主题
+  // import emojiPlugin from 'markdown-it-emoji';
+  import tocPlugin from 'markdown-it-table-of-contents';
+  import anchorPlugin from 'markdown-it-anchor';
+  
+  // import markdownContent from '@/assets/your-markdown-file.md';
+  // 获取接口
+  import { newSession, getChat, getChatHistory } from "@/api/intelligent.js";
+  const store = useUserStore(); //新建会话时把获取的信息存起来
+  const isShow = ref(false); // 默认小图显示
+  const dialogVisible = ref(true); //对话弹层
+  const outputLoading = ref(false); //ai内容生成中
+  const textVal = ref(""); //表单内容
+  const chatDataArr = ref([]); //聊天内容
+  const scrollTarget = ref(null); //对话框的ref
+  const baseData = ref(store.sessionInfo);
+  // const recognitionResult = ref("");
+  const isLoading = ref(false);
+  const currentIndex = ref(0);
+  const textData = ref("");
+  const typingSpeed = ref(80); //打字速度，单位毫秒
+  const typingDone = ref(false);
+  const typingInterval = ref(null); //定时器
+  const isSend = ref(false)
+  // 初始化 markdown-it 实例并添加插件
+  const textElement = ref(null);
+  // 注册语言
+  hljs.registerLanguage('javascript', javascript);
+  
+  // 初始化 markdown-it 实例并配置插件
+  const md = new MarkdownIt({
+    html: true,
+    linkify: true,
+    typographer: true,
+    highlight: function (str, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`;
+        } catch (__) {}
+      }
+  
+      return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
+    }
+  }).use(tocPlugin)
+    .use(anchorPlugin);
+  // 自定义渲染器：重写 h1, h2, h3 标签的渲染规则，并去除空格
+  ['h1', 'h2', 'h3'].forEach(tag => {
+    md.renderer.rules[`${tag}_open`] = function (tokens, idx, options, env, self) {
+      const token = tokens[idx];
+      
+      // 添加额外的属性、类名等
+      return `<${token.tag} class="custom-${tag}">`;
+    };
+  
+    md.renderer.rules[`${tag}_close`] = function (tokens, idx, options, env, self) {
+      const token = tokens[idx];
+      return `</${token.tag}>`;
+    };
+  
+    // 修改文本内容去除首尾空格
+    md.renderer.rules[`${tag}`] = function (tokens, idx, options, env, self) {
+      const token = tokens[idx];
+      if (token.type === `${tag}`) {
+        // 去除首尾空格
+        token.content = token.content.trim();
+      }
+      return self.renderToken(tokens, idx, options);
+    };
+  });
+  
+  const compiledMarkdown = ref('');
+  const markdownData =ref('')//md代码
+  
+  const isTypingDone = computed(
+    () => !typingDone.value && compiledMarkdown.value.length > 0
+  );
+  const markdownContent = ref('');
+  // 计算属性：将 Markdown 转换为 HTML
+  const renderedMarkdown = computed(() => md.render(markdownContent.value));
+  // 打字机效果函数
+  const typeWriter = () => {
+    if (markdownContent.value.length < textData.value.length) {
+      markdownContent.value = textData.value.slice(0, markdownContent.value.length + 1);
+      console.log(markdownContent.value,11111)
+    } else {
+      clearInterval(typingInterval.value); // 清除定时器
+    }
+  };
+  onMounted(() => {
+    window.addEventListener("keydown", handleEnter);
+    // 本地么有存储sessionId需要重新获取
+    if (baseData.value===undefined||!baseData.value) {
+      getSession();
+    }else{
+  
+      if(store.chatDataList){
+        chatDataArr.value =store.chatDataList
+      }
+      
+      console.log(chatDataArr.value)
+    }
+    console.log(textData.value)
+    
+  });
+  
+  // 新建窗口获取id
+  const getSession = async () => {
+    const res = await newSession();
+    baseData.value = res.data;
+    store.setSessionInfo(res.data);
+    // getList()
+  };
+  const getList = async () => {
+    const params = {
+      sessionId: baseData.value.sessionId,
+    };
+    const res = await getChatHistory(params);
+    if (res.code === 200) {
+      chatDataArr.value=res.data;
+    }
+  };
+  // 点击小图显示大图
+  const handleClick = () => {
+    isShow.value = true;
+  };
+  // 打开对话弹层
+  const handleBtn = () => {
+    dialogVisible.value = true;
+    isShow.value = false;
+  };
+  // 关闭弹层
+  const handleClose = () => {
+    isShow.value = true;
+    dialogVisible.value = false;
+  };
+  const eventSource = ref();
+  const ctrl = new AbortController();
+  // 发送信息
+  const handleSend = async () => {
+    isLoading.value = true;
+    outputLoading.value = true
+    console.log(isLoading.value)
+    const userObj = {
+      type:'USER',
+      content:textVal.value
+    }
+    
+    chatDataArr.value.push(userObj)
+    store.setChatDataList(chatDataArr.value)
+    const params = {
+      sessionId: baseData.value.sessionId,
+      q: textVal.value,
+    };
+    
+    eventSource.value = fetchEventSource(
+      `http://7f1097a1.r12.cpolar.top/ais/chat?sessionId=${baseData.value.sessionId}&q=${textVal.value}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: store.getToken,
+        },
+        signal: ctrl.signal,
+        openWhenHidden: true, // 切换标签页时连接不关闭
+        async onopen(response) {
+          // getList();
+          // handleInput()
+          // 处理登录失效
+          if (response.status === 401) {
+            message.warning("登录过期");
+            return;
+          }
+        },
+  
+        onmessage(msg) {
+          
+          isSend.value = true
+          if (msg.data !== "&complete&") {
+            // 获取的后台内容
+          textData.value = textData.value + msg.data;
+          // typeWriterEffect(); // 调整延迟时间
+          if(textData.value.length>0){
+            typingInterval.value = setInterval(typeWriter, 1000); // 设置打字速度 // 设置打字速度
+          }
+          
+          // const markdown = md.render(textData.value);
+            
+          // 获取md转好的html页面代码
+          // markdownData.value = textData.value;
+          // compiledMarkdown.value = ''
+          isLoading.value = false;
+          
+          // // console.log(markdownData.value)
+          
+          }else{
+            const assistantObj = {
+              type:'ASSISTANT',
+              content:textData.value
+            }
+          chatDataArr.value.push(assistantObj)
+          store.setChatDataList(chatDataArr.value)
+          }
+          
+        },
+        onclose() {
+          console.log(isLoading.value)
+          textData.value=''
+          markdownData.value = ''
+          // compiledMarkdown.value=''
+          ctrl.abort(); // 结束会话
+        },
+        onerror(err) {
+          isLoading.value = false;
+          ctrl.abort(); // 结束会话
+        },
+      }
+    );
+    //  发送后清空表单
+    textVal.value = "";
+  };
+  const messages = ref([]);
+  const typeWriterEffect=()=>{
+    let index = 0;
+    if (compiledMarkdown.value.length < textData.value.length) {
+      console.log(textData.value,1)
+      compiledMarkdown.value = textData.value.slice(0, compiledMarkdown.value.length + 1);
+      console.log(compiledMarkdown.value,2)
+    } else {
+      clearInterval(typingInterval.value); // 清除定时器
+    }
+    // typingInterval.value = setInterval(() => {
+    //   if (index < textData.value.length) {
+    //     compiledMarkdown.value += textData.value.charAt(index);
+    //     // const nextChar = textData.value.slice(0, compiledMarkdown.value.length + 1);
+    //     // compiledMarkdown.value = nextChar;
+    //     console.log(compiledMarkdown.value)
+    //     index++;
+    //   } else {
+    //     // isSend.value = false
+    //   clearInterval(typingInterval.value);
+    //   }
+    // }, 100);
+    // console.log(compiledMarkdown.value)
+    // let index = 0;
+    // const intervalId = setInterval(() => {
+    //   if (index < text.length) {
+    //     // 使用临时DOM节点逐步构建最终的HTML内容
+    //     const tempDiv = document.createElement('div');
+    //     tempDiv.innerHTML = text.slice(0, index + 1);
+    //     compiledMarkdown.value = tempDiv.innerHTML;
+    //     // 强制重新渲染
+    //     // element.scrollTop = element.scrollHeight;
+    //     index++;
+    //   } else {
+    //     clearInterval(intervalId);
+    //     // scrollToBottom();
+    //   }
+    // }, 50);
+  }
+  // 停止生成
+  const handleStop = () => {
+    console.log(compiledMarkdown.value)
+    console.log(isLoading.value)
+    // if (typingDone.value) {
+      outputLoading.value = false
+      // isSend.value = false
+      clearInterval(typingInterval.value);
+      chatDataArr.value[chatDataArr.value.length-1].content = compiledMarkdown.value
+      store.setChatDataList(chatDataArr.value)
+      typingDone.value = false;
+      ctrl.abort(); // 结束会话
+    // }
+  };
+  // Shift+Enter换行
+  const onEnter = (event) => {
+    // 阻止回车键默认行为
+    event.preventDefault();
+    // 检查shift是否被按下
+    if (event.shiftKey) {
+      // 换行逻辑
+      textVal.value += "\n";
+    }
+  };
+  // 输入文本时禁止触发回车
+  const handleKeyDown = (event) => {
+    if (event.keyCode === 13 && !event.shiftKey) {
+      // 当按下回车键但没有按下Shift键时，不允许换行
+      event.preventDefault();
+    }
+  };
+  // 触发发送信息按钮
+  const handleEnter = (e) => {
+    if (textVal.value !== "" && !e.shiftKey) {
+      if (e.keyCode === 13 || e.keyCode === 108) {
+        handleSend();
+      }
+    }
+  };
+  //触发输入文本框数据滚动到最后一条
+  const handleInput = (event) => {
+    const scrollTar = scrollTarget.value;
+    if (scrollTar) {
+      const scrollBehavior = scrollTar.scrollHeight - scrollTar.clientHeight;
+      scrollTar.scrollTo({
+        top: scrollBehavior,
+        behavior: "smooth", // 平滑滚动
+      });
+    }
+  };
+  onUnmounted(()=>{
+    ctrl.abort(); // 结束会话
+  })
+  </script>
+  <style lang="scss"  src="./index.scss" scoped></style>
+  <style scoped>
+  /* 引用 highlight.js 的样式 */
+  @import 'highlight.js/styles/monokai-sublime.css';
+  
+  /* 自定义样式 */
+  .markdown-body {
+    white-space: pre; /* 保留空白符 */
+      overflow: hidden; /* 隐藏溢出内容 */
+      display: inline-block;
+      white-space: pre-wrap; /* 保留换行符 */
+  }
+  
+  .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+  }
+  
+  .markdown-body p {
+    margin-bottom: 0.5em;
+  }
+  
+  .markdown-body a {
+    color: #0366d6;
+    text-decoration: none;
+  }
+  
+  .markdown-body a:hover {
+    text-decoration: underline;
+  }
+  
+  .markdown-body code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 4px;
+  }
+  
+  .markdown-body pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f7f7f7;
+    border-radius: 3px;
+  }
+  
+  .markdown-body table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+  }
+  
+  .markdown-body th {
+    font-weight: bold;
+  }
+  
+  .markdown-body td, .markdown-body th {
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+  }
+  
+  .markdown-body img {
+    max-width: 100%;
+    box-sizing: content-box;
+  }
+  </style>

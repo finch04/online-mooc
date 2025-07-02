@@ -1,0 +1,226 @@
+.askWrapper {
+  .askCont {
+    margin: 30px auto 40px auto;
+
+    font-size: 14px;
+    .formCont {
+      padding: 20px 30px;
+      border-radius: 8px;
+      .subCont {
+        width: 103px;
+        height: 32px;
+        span {
+          border-radius: 30px;
+          line-height: 30px;
+        }
+      }
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+      border-bottom: 1px solid #eeeeee;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+    .desc {
+      color: #80878c;
+      line-height: 50px;
+      font-size: 14px;
+    }
+  }
+}
+// 提问详情、回复相关样式
+.askDetailsWrapper {
+  .askCont {
+    padding: 20px 30px;
+    font-size: 14px;
+    border-radius: 8px;
+    margin-top: 30px;
+    .userInfo {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      color: var(--color-font3);
+      img {
+        width: 24px;
+        height: 24px;
+        border-radius: 24px;
+        margin-right: 10px;
+      }
+    }
+    .askInfo {
+      padding-left: 34px;
+      line-height: 32px;
+    }
+  }
+  .answerCont {
+    padding: 20px 30px;
+    font-size: 14px;
+    border-radius: 8px;
+    .subCont {
+      margin-top: 20px;
+      .bt {
+        width: 103px;
+        height: 32px;
+        line-height: 32px;
+        border-radius: 25px;
+      }
+    }
+    .answer {
+      img {
+        width: 24px;
+        height: 24px;
+        border-radius: 24px;
+        margin-right: 10px;
+      }
+    }
+    .answerItems {
+      .items {
+        .cont {
+          padding: 10px 10px 20px 34px;
+          line-height: 24px;
+        }
+      }
+      .replyCont {
+        padding-left: 34px;
+      }
+      .serverIcon{
+        margin-right: 5px;
+      }
+      .bt{
+        width: 80px;
+        margin-left: 6px;
+        border-radius: 3px;
+        height: 21px;
+        line-height: 21px;
+        font-size: 14px;
+      }
+    }
+    .answerCon {
+      position: relative;
+      .el-textarea__inner {
+        padding-bottom: 60px;
+      }
+      .aiCon {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        left: 1px;
+        bottom: 1px;
+        background: #fff;
+        right: 1px;
+        padding: 10px;
+        
+        .aiTip {
+          display: flex;
+          align-items: center;
+          .serverIcon {
+            margin-right: 8px;
+          }
+          .line {
+            margin: 0 2px 0 10px;
+            color: #bac0cd;
+          }
+        }
+        .aiTag {
+          display: flex;
+          span {
+            display: inline-block;
+            height: 22px;
+            line-height: 20px;
+            background: #ffffff;
+            border: 1px solid #bac0cd;
+            border-radius: 3px;
+            margin-left: 10px;
+            text-align: center;
+            color: #bac0cd;
+            font-size: 14px;
+            padding: 0 7px;
+            cursor: no-drop;
+          }
+          .iconfont {
+            margin-right: 3px;
+          }
+        }
+        .tagHover {
+          span {
+            color: #2080f7;
+            border-color: #2080f7;
+            cursor: pointer;
+          }
+        }
+      }
+      .answerCon{
+        z-index: 1;
+      }
+    }
+    .el-input__count{
+      z-index: 1;
+      bottom: 15px;
+    }
+  }
+  .serverIcon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: #ffdfb9;
+    border: 1px solid #ffc6a5;
+    overflow: hidden;
+    background: url(@/assets/icon/serverIcon.png) no-repeat;
+    background-size: contain;
+    & > span {
+      display: block;
+      position: absolute;
+      bottom: -1px;
+      left: 1px;
+      width: 25px;
+      height: 26px;
+      background: url(@/assets/icon/serverIcon.png) no-repeat;
+      background-size: contain;
+    }
+  }
+  .dialogReplyCont {
+    height: 80vh;
+    overflow: auto;
+    .items {
+      .cont {
+        padding: 10px 10px 20px 34px;
+        line-height: 24px;
+      }
+    }
+  }
+  .activeLiked {
+    color: var(--color-main);
+  }
+}
+.aiPopUp {
+  text-align: center;
+  border-radius: 12px;
+  padding-top: 8px;
+  padding-bottom: 22px;
+  .el-dialog__header {
+    display: none;
+  }
+  .aiLoad {
+    .iconLoad {
+      img {
+        height: 100px;
+      }
+    }
+    .text {
+      text-align: center;
+      padding: 0 0 22px;
+      margin-top: -10px;
+    }
+    .loadBtn {
+      .bt {
+        display: inline-block;
+        width: 80px;
+        height: 36px;
+        line-height: 36px;
+      }
+    }
+  }
+}
+
