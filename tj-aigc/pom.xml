@@ -156,6 +156,18 @@
             <artifactId>opencc4j</artifactId>
             <version>1.8.0</version>
         </dependency>
+
+        <!--阿里云OSS的SDK-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                    <groupId>org.bouncycastle</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 

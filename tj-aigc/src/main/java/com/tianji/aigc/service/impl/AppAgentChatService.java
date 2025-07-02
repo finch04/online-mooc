@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -31,8 +32,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-//@Service
+@Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "tj.ai", name = "chat-type", havingValue = "APP")
 public class AppAgentChatService implements ChatService {
 
     private final DashScopeProperties dashScopeProperties;

@@ -32,6 +32,7 @@ tj:
   ai:
     chat-memory: MYSQL # Redis / MYSQL / MongoDB
     chat-type: ROUTE # ROUTE / ENHANCE / APP
+    audio-type: DASHSCOPE
     prompt:
       system:
         chat:
@@ -66,3 +67,9 @@ tj:
           data-id: text-system-chat-message.txt
           group: DEFAULT_GROUP
           timeout-ms: 20000
+  ali:
+    oss:
+      endpoint: ${aliyun.oss.endpoint}
+      access-id: ${aliyun.oss.accessKeyId}
+      access-key: ${aliyun.oss.accessKeySecret}
+      bucket: ${aliyun.oss.bucket}
