@@ -6,7 +6,7 @@
 
 技术栈：SpringBoot、SpringCloud、Mybatis、MySQL、Redis、Redisson、Caffeine、RabbitMQ、XXL-JOB、腾讯云VOD（视频点播）、Nginx等
 
-拓展技术栈： Dubbo、Minio、Langchain4j、Qdrant、RocketMQ、SkyWalking、Sentinel、Seata等
+拓展技术栈： Dubbo、Minio、Langchain4j、Qdrant、RocketMQ、SkyWalking、Sentinel、Seata等（后续看情况筛选）
 
 
 ## 项目模块介绍
