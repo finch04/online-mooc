@@ -28,18 +28,18 @@
         </dependency>
 
         <!--rocketmq-->
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-client</artifactId>
-            <version>${rocketmq-client-version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-spring-boot-starter</artifactId>
-            <version>${rocketmq-starter-version}</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.rocketmq</groupId>-->
+<!--            <artifactId>rocketmq-client</artifactId>-->
+<!--            <version>${rocketmq-client-version}</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.rocketmq</groupId>-->
+<!--            <artifactId>rocketmq-spring-boot-starter</artifactId>-->
+<!--            <version>${rocketmq-starter-version}</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 <!--        sentinel-->
         <dependency>
             <groupId>com.alibaba.csp</groupId>

@@ -108,49 +108,49 @@ public class UserCouponController {
 
 
 
-//    测试接口-以下均为测试
-    @Autowired
-    private LearningClient learningClient;
-    private final ICouponService couponService;
-
-
-    /**
-     * 测试dubbo
-     */
-    @GetMapping("/hello")
-    public void sayhello() throws InterruptedException {
-        String ans = learningClient.sayHello("hello");
-        System.out.println("ans = " + ans);
-    }
-
-    /**
-     * 测试senta分布式事务
-     */
-    @PostMapping("/seata")
-    @GlobalTransactional(rollbackFor = Exception.class)
-    public void seata() {
-        CouponFormDTO dto = new CouponFormDTO();
-        dto.setId(1799677743084539999L);
-        dto.setName("测试优惠券");
-        dto.setDiscountType(DiscountType.PRICE_DISCOUNT);
-        dto.setSpecific(false);
-        dto.setDiscountValue(1000);
-        dto.setThresholdAmount(100000);
-        dto.setMaxDiscountAmount(0);
-        dto.setObtainWay(ObtainType.PUBLIC);
-        couponService.saveCoupon(dto);
-        learningClient.testSeata();
-    }
-
-    /**
-     * 测试sentinel限流
-     *
-     * @return
-     */
-    @GetMapping("/limit")
-    @SentinelResource(value = "QUEUE-DATA-FLOW")
-    public String limit() {
-        return "hello";
-    }
+////    测试接口-以下均为测试
+//    @Autowired
+//    private LearningClient learningClient;
+//    private final ICouponService couponService;
+//
+//
+//    /**
+//     * 测试dubbo
+//     */
+//    @GetMapping("/hello")
+//    public void sayhello() throws InterruptedException {
+//        String ans = learningClient.sayHello("hello");
+//        System.out.println("ans = " + ans);
+//    }
+//
+//    /**
+//     * 测试senta分布式事务
+//     */
+//    @PostMapping("/seata")
+//    @GlobalTransactional(rollbackFor = Exception.class)
+//    public void seata() {
+//        CouponFormDTO dto = new CouponFormDTO();
+//        dto.setId(1799677743084539999L);
+//        dto.setName("测试优惠券");
+//        dto.setDiscountType(DiscountType.PRICE_DISCOUNT);
+//        dto.setSpecific(false);
+//        dto.setDiscountValue(1000);
+//        dto.setThresholdAmount(100000);
+//        dto.setMaxDiscountAmount(0);
+//        dto.setObtainWay(ObtainType.PUBLIC);
+//        couponService.saveCoupon(dto);
+//        learningClient.testSeata();
+//    }
+//
+//    /**
+//     * 测试sentinel限流
+//     *
+//     * @return
+//     */
+//    @GetMapping("/limit")
+//    @SentinelResource(value = "QUEUE-DATA-FLOW")
+//    public String limit() {
+//        return "hello";
+//    }
 
 }

@@ -1,5 +1,6 @@
 server:
-  port: 9999  #端口
+#  port: 9999  #端口
+  port: 8094  #有时候端口被占用
   tomcat:
     uri-encoding: UTF-8   #服务编码
 spring:

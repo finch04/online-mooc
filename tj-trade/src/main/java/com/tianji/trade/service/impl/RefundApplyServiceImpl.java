@@ -534,6 +534,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         if (SUCCESS.equalsValue(refundApply.getStatus())) {
             throw new BadRequestException(TradeErrorInfo.REFUND_APPROVED);
         }
+        log.info("正在重新申请退款，申请单ID：{}", id);
         sendRefundRequestAsync(refundApply);
     }
 }

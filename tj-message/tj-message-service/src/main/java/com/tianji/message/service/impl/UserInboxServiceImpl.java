@@ -175,7 +175,7 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
                 .eq(UserInbox::getUserId, userId)          // 用户ID相等
                 .eq(UserInbox::getIsRead, false)// 未读消息
                 .eq(UserInbox::getType, type)
-                .ge(UserInbox::getExpireTime, LocalDateTime.now()) // 过期时间 >= 当前时间（未过期）
+//                .ge(UserInbox::getExpireTime, LocalDateTime.now()) // 过期时间 >= 当前时间（未过期）
                 .count();
 
         return userInboxUnReadCount;
@@ -190,7 +190,7 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
         Integer userInboxUnReadCount = this.lambdaQuery()
                 .eq(UserInbox::getUserId, userId)          // 用户ID相等
                 .eq(UserInbox::getIsRead, false)          // 未读消息
-                .ge(UserInbox::getExpireTime, LocalDateTime.now()) // 过期时间 >= 当前时间（未过期）
+//                .ge(UserInbox::getExpireTime, LocalDateTime.now()) // 过期时间 >= 当前时间（未过期）
                 .count();
         Integer userPrivateUnReadCount = userPrivateMessageService.getAllUnreadCountBySelf(userId);
         return userInboxUnReadCount+userPrivateUnReadCount;

@@ -27,10 +27,10 @@
             <artifactId>sentinel-datasource-nacos</artifactId>
         </dependency>
         <!--dubbo-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-dubbo</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba.cloud</groupId>-->
+<!--            <artifactId>spring-cloud-starter-dubbo</artifactId>-->
+<!--        </dependency>-->
         <!--seata-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -48,8 +48,6 @@
             <groupId>io.seata</groupId>
             <version>${seata-version}</version>
         </dependency>
-
-
         <!--auth-sdk-->
         <dependency>
             <groupId>com.tianji</groupId>

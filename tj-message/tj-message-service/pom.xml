@@ -106,16 +106,16 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
         <!--rocketmq-->
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-client</artifactId>
-            <version>${rocketmq-client-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-spring-boot-starter</artifactId>
-            <version>${rocketmq-starter-version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.rocketmq</groupId>-->
+<!--            <artifactId>rocketmq-client</artifactId>-->
+<!--            <version>${rocketmq-client-version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.rocketmq</groupId>-->
+<!--            <artifactId>rocketmq-spring-boot-starter</artifactId>-->
+<!--            <version>${rocketmq-starter-version}</version>-->
+<!--        </dependency>-->
         <!--caffeine-->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>

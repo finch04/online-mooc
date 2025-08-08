@@ -7,5 +7,9 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
  com.tianji.common.autoconfigure.redisson.RedissonConfig,\
  com.tianji.common.autoconfigure.swagger.Knife4jConfiguration, \
  com.tianji.common.autoconfigure.xxljob.XxlJobConfig,\
- com.tianji.common.autoconfigure.mq.RocketMqConfig, \
  com.tianji.common.autoconfigure.ratelimite.LimiterConfig
+
+
+
+
+# com.tianji.common.autoconfigure.mq.RocketMqConfig,

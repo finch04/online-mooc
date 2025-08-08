@@ -58,17 +58,17 @@ tj:
       retry:
         stateless: false # 无状态
 # dubbo相关配置
-dubbo:
-  application:
-    name: ${spring.application.name}
-  registry:
-    address: nacos://192.168.150.101:8848
-  protocol:
-    name: dubbo
-    # 协议端口（ -1 表示自增端口，从 20880 开始）
-    port: -1
-    id: dubbo
-  cloud:
-    subscribed-services: learning-service
-  consumer:
-    check: false  # 启动时不检查提供者是否存在
+#dubbo:
+#  application:
+#    name: ${spring.application.name}
+#  registry:
+#    address: nacos://192.168.150.101:8848
+#  protocol:
+#    name: dubbo
+#    # 协议端口（ -1 表示自增端口，从 20880 开始）
+#    port: -1
+#    id: dubbo
+#  cloud:
+#    subscribed-services: learning-service
+#  consumer:
+#    check: false  # 启动时不检查提供者是否存在

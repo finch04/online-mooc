@@ -61,8 +61,8 @@
         <tencent.sdk.vod.version>2.1.5</tencent.sdk.vod.version>
         <xxl-job-version>2.3.1</xxl-job-version>
         <seata-version>1.5.1</seata-version>
-        <rocketmq-client-version>4.9.6</rocketmq-client-version>
-        <rocketmq-starter-version>2.2.3</rocketmq-starter-version>
+<!--        <rocketmq-client-version>4.9.6</rocketmq-client-version>-->
+<!--        <rocketmq-starter-version>2.2.3</rocketmq-starter-version>-->
         <shardingsphere-jdbc-version>5.3.2</shardingsphere-jdbc-version>
         <protostuff.version>1.7.4</protostuff.version>
         <pinyin4j.version>2.5.0</pinyin4j.version>
