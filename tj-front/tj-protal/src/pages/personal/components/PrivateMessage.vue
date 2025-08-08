@@ -146,7 +146,6 @@ const hasMoreOlder = ref(true);
 const isSending = ref(false);
 const prevScrollHeight = ref(0);
 const messages = ref([]);
-const total = ref(0);
 const conversationMessages = ref([]);
 const messageHistoryTotal = ref(0);
 const currentPage = ref(props.messageHistoryCurrentPage);
@@ -213,6 +212,7 @@ const sendMessage = async () => {
             userId: selectedMessage.value.otherUserId,
             content: replyContent.value
         });
+        console.log('发送消息成功:', res);
         if (res.code === 200) {
             ElMessage.success('回复发送成功');
             // // 更新左侧会话列表的最后一条消息
@@ -237,7 +237,8 @@ const sendMessage = async () => {
             // 触发重新加载私信列表
             await loadPrivateMessages(true);
         }else{
-            ElMessage.error("发送消息失败：",res.msg);
+            console.log('发送消息失败:', res);
+            ElMessage.error(res.msg);
         }
     } catch (error) {
         console.error('发送消息失败:', error);
