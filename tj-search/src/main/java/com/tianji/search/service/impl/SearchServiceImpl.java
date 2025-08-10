@@ -98,20 +98,25 @@ public class SearchServiceImpl implements ISearchService {
         if(UserContext.getUser() == null){
             courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
         }else{
-            List<Long> courseIds = recommendClient.featureRecommend();
-            // 根据课程id返回课程VO
-            if (CollUtils.isNotEmpty(courseIds)) {
-                try {
-                    // 使用Elasticsearch查询课程
-                    courseVOS = queryCoursesByIds(courseIds);
-                } catch (IOException e) {
-                    log.error("查询推荐课程失败", e);
-                    // 查询失败时使用默认推荐
+            try {
+                List<Long> courseIds = recommendClient.featureRecommend();
+                // 根据课程id返回课程VO
+                if (CollUtils.isNotEmpty(courseIds)) {
+                    try {
+                        // 使用Elasticsearch查询课程
+                        courseVOS = queryCoursesByIds(courseIds);
+                    } catch (IOException e) {
+                        log.error("查询推荐课程失败", e);
+                        // 查询失败时使用默认推荐
+                        courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
+                    }
+                }
+                // 如果没有推荐结果，使用默认推荐
+                if (CollUtils.isEmpty(courseVOS)) {
                     courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
                 }
-            }
-            // 如果没有推荐结果，使用默认推荐
-            if (CollUtils.isEmpty(courseVOS)) {
+            } catch (Exception e) {
+                //如果出现报错 直接返回默认推荐即可
                 courseVOS = queryTopNCourseOnMarketByFree(false, CourseRepository.TYPE);
             }
         }

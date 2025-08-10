@@ -86,7 +86,7 @@ const getCouponData = async (item) => {
         });
       } else {
         ElMessage({
-          message:res.msg,
+          message:res.msg?res.msg:'优惠券领取失败',
           type: 'error'
         });
       }

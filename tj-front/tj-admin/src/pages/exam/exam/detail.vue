@@ -140,7 +140,7 @@
         <!-- 教师评语弹窗 -->
         <el-dialog v-model="commentDialogVisible" title="教师评语" width="50%" :close-on-click-modal="false">
             <div class="comment-dialog-content">
-                <div class="comment-item" v-for="(item, index) in myExamDetails" :key="index">
+                <div class="comment-item" v-for="(item, index) in tempComments" :key="index">
                     <div class="question-status">
                         <span class="question-number">题目{{ index + 1 }}:</span>
                         <span> {{ item.question.name }}</span>
@@ -175,7 +175,8 @@ import { useUserStore } from '@/store'
 const store = useUserStore()
 const route = useRoute();
 const router = useRouter();
-
+// 添加临时评语存储变量
+const tempComments = ref([]);
 // mounted生命周期
 onMounted(async () => {
     // 查询我的考试记录
@@ -269,8 +270,11 @@ const openCommentDialog = () => {
         return;
     }
 
-    // 保存原始评语用于取消时恢复
-    originalComments.value = myExamDetails.value.map(item => item.comment || '');
+    // 复制当前评语到临时变量，避免直接修改原数据
+    tempComments.value = myExamDetails.value.map(item => ({
+        ...item,
+        comment: item.comment || ''
+    }));
     commentDialogVisible.value = true;
 };
 
@@ -278,7 +282,7 @@ const openCommentDialog = () => {
 const submitComments = async () => {
     try {
         // 准备提交数据
-        const comments = myExamDetails.value.map(item => ({
+        const comments = tempComments.value.map(item => ({
             id: item.id, // 考试明细id
             comment: item.comment || '' // 评语内容
         }));
@@ -288,9 +292,12 @@ const submitComments = async () => {
 
         if (res.code === 200) {
             ElMessage.success('评语提交成功');
+            // 提交成功后才同步到原数据
+            myExamDetails.value = tempComments.value.map((temp, index) => ({
+                ...myExamDetails.value[index],
+                comment: temp.comment
+            }));
             commentDialogVisible.value = false;
-            // 重新加载数据以获取最新评语
-            getExamDetailsData();
         } else {
             ElMessage.error(res.message || '评语提交失败');
         }

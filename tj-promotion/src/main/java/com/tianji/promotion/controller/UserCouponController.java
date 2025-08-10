@@ -1,7 +1,6 @@
 package com.tianji.promotion.controller;
 
 
-import com.tianji.api.interfaces.learning.LearningDubboService;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.promotion.domain.dto.CouponDiscountDTO;
@@ -11,7 +10,6 @@ import com.tianji.promotion.domain.dto.OrderCourseDTO;
 import com.tianji.promotion.domain.query.UserCouponQuery;
 import com.tianji.promotion.domain.vo.CouponPageVO;
 import com.tianji.promotion.domain.vo.CouponVO;
-import com.tianji.promotion.dubbo.client.LearningClient;
 import com.tianji.promotion.enums.DiscountType;
 import com.tianji.promotion.enums.ObtainType;
 import com.tianji.promotion.service.ICouponService;
