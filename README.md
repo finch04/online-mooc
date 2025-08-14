@@ -8,6 +8,9 @@
 
 拓展技术栈： Dubbo、Minio、Langchain4j、Qdrant、RocketMQ、SkyWalking、Sentinel、Seata等（后续看情况筛选）
 
+项目展示视频：
+- 用户端：https://www.bilibili.com/video/BV1NEb5zBEko
+- 管理端：https://www.bilibili.com/video/BV1fdtRz6Efc
 
 ## 项目模块介绍
 
