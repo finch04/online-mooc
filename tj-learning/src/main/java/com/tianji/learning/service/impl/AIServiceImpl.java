@@ -40,7 +40,7 @@ public class AIServiceImpl implements AIService {
     public void autoReply(InteractionQuestion interactionQuestion) {
         // 构建包含完整问题信息的查询模板（标题+描述）
         var question = StrUtil.format("""
-                这是一个学生提出的问题，请以专业的角度进行回答，不要随意编造。
+                这是一个学生提出的问题，请以专业的角度进行回答，不要随意编造， 请控制在200字以内。
                 标题：{} 。
                 描述：{} 。""", interactionQuestion.getTitle(), interactionQuestion.getDescription());
 
