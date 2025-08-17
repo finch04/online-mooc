@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-//@Service
+@Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "tj.ai", name = "chat-type", havingValue = "ROUTE")
 public class AgentServiceImpl implements ChatService {

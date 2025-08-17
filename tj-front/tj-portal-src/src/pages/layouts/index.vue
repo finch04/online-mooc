@@ -998,6 +998,7 @@ const getListData = async (id) => {
     nextTick(async () => {
       let processedData = listDataArr.value.map(async (val) => {
         if (val.type === 'ASSISTANT') {
+        console.log('ASSISTANT',val.params&&val.params.prePlaceOrder);
           if (val.params&&val.params.prePlaceOrder !== undefined) {
             // 处理订单逻辑
             let idsArray = val.params.prePlaceOrder.courseIds;

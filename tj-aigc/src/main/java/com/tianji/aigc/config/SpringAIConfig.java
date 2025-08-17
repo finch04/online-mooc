@@ -71,13 +71,13 @@ public class SpringAIConfig {
     public ChatClient chatClient(@Qualifier("dashscopeChatModel") ChatModel dashScopeChatModel,
                                  Advisor loggerAdvisor, // 日志记录器
                                  Advisor messageChatMemoryAdvisor,
-                                 Advisor recordOptimizationAdvisor // 记录优化
-                                 // CourseTools courseTools, // 课程工具
-                                 // OrderTools orderTools // 预下单工具
+                                 Advisor recordOptimizationAdvisor, // 记录优化
+                                  CourseTools courseTools, // 课程工具
+                                  OrderTools orderTools // 预下单工具
     ) {
         return ChatClient.builder(dashScopeChatModel)
                 .defaultAdvisors(loggerAdvisor, messageChatMemoryAdvisor, recordOptimizationAdvisor) //添加 Advisor 功能增强
-                // .defaultTools(courseTools, orderTools)
+                 .defaultTools(courseTools, orderTools)
                 .build();
     }
 
