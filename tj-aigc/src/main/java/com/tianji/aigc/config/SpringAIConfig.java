@@ -90,6 +90,15 @@ public class SpringAIConfig {
                 .build();
     }
 
+//    @Bean
+//    public ChatClient openAiChatClient(ChatClient.Builder openAiChatClientBuilder,
+//                                       Advisor loggerAdvisor  // 日志记录器
+//    ) {
+//        return openAiChatClientBuilder
+//                .defaultAdvisors(loggerAdvisor)
+//                .build();
+//    }
+
     /**
      * 日志记录器
      */
