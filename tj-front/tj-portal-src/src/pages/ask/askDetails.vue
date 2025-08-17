@@ -549,10 +549,10 @@ const handleAi=async(num)=>{
     if(num===1){
       // 帮写
       data=textTypeData.value.helpedWrite.replace('$input', description.value)
-    }else if(num===1){
+    }else if(num===2){
       // 续写
       data=textTypeData.value.continuedWrite.replace('$input', description.value)
-    }else if(num===1){
+    }else if(num===3){
       // 润色
       data=textTypeData.value.polish.replace('$input', description.value)
     }else{
