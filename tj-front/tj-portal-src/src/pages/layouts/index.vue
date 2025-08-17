@@ -1164,6 +1164,11 @@ const objArr = ref([]);
 const prePlaceOrder = ref({});
 const isClickBtn = ref(false); //禁止连续发送信息
 const isScroll = ref(false);
+
+import proxy from '@/config/proxy';
+const env = import.meta.env.MODE || 'development';
+const host =  proxy[env].host;
+
 const handleSend = async () => {
   if (isClickBtn.value) return;
   questionList.value =[]
@@ -1212,7 +1217,7 @@ const handleSend = async () => {
 
   if (baseData.value === undefined) return;
   nextTick(() => {
-    eventSource.value = fetchEventSource(`http://api.tianji.com/ais/chat`, {
+    eventSource.value = fetchEventSource(`${host}/ais/chat`, {
       method: 'POST',
       headers: {
         Authorization: store.getToken,

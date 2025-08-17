@@ -1,7 +1,5 @@
 package com.tianji.aigc.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.tianji.aigc.entity.ChatSession;
 import com.tianji.aigc.vo.ChatSessionVO;
 import com.tianji.aigc.vo.MessageVO;
 import com.tianji.aigc.vo.SessionVO;
@@ -9,12 +7,12 @@ import com.tianji.aigc.vo.SessionVO;
 import java.util.List;
 import java.util.Map;
 
-public interface ChatSessionService extends IService<ChatSession> {
+public interface ChatSessionService {
 
     /**
-     * 创建会话
+     * 创建会话session
      *
-     * @param num 热门问题的数量，默认是3
+     * @param num 热门问题的数量
      * @return 会话信息
      */
     SessionVO createSession(Integer num);
@@ -26,6 +24,12 @@ public interface ChatSessionService extends IService<ChatSession> {
      */
     List<SessionVO.Example> hotExamples(Integer num);
 
+    /**
+     * 根据会话id查询消息列表
+     *
+     * @param sessionId 会话id
+     * @return 消息列表
+     */
     List<MessageVO> queryBySessionId(String sessionId);
 
     /**
@@ -35,20 +39,25 @@ public interface ChatSessionService extends IService<ChatSession> {
      * @param title     新的会话标题，如果为空则不进行更新
      * @param userId    用户ID
      */
-    void update(String sessionId,String title,Long userId);
-
-    public void autoUpdate(String sessionId, String title, Long userId);
+    void update(String sessionId, String title, Long userId);
 
     /**
      * 查询历史会话列表
      */
     Map<String, List<ChatSessionVO>> queryHistorySession();
 
+    /**
+     * 删除历史会话
+     *
+     * @param sessionId 会话id
+     */
     void deleteHistorySession(String sessionId);
 
+    /**
+     * 更新历史会话标题
+     *
+     * @param sessionId 会话id
+     * @param title     标题
+     */
     void updateTitle(String sessionId, String title);
-
-    void autoUpdateTitle(String sessionId,String question);
-
-    void autoUpdateTitle1(String sessionId);
 }

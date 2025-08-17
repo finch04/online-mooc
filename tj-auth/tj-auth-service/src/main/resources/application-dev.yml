@@ -10,8 +10,8 @@ spring:
         ip: 192.168.150.101
   config:
     import:
-      - nacos:shared-spring.yaml
       - nacos:shared-redis.yaml
+      - nacos:shared-spring.yaml
       - nacos:shared-mybatis.yaml
       - nacos:shared-logs.yaml
 logging:

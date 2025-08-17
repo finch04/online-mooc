@@ -35,8 +35,13 @@ public class SessionController {
         return this.chatSessionService.hotExamples(num);
     }
 
+    /**
+     * 查询单个历史对话详情
+     *
+     * @return 对话记录列表
+     */
     @GetMapping("/{sessionId}")
-    public List<MessageVO> queryBySessionId(@PathVariable String sessionId){
+    public List<MessageVO> queryBySessionId(@PathVariable("sessionId") String sessionId) {
         return this.chatSessionService.queryBySessionId(sessionId);
     }
 
@@ -49,10 +54,10 @@ public class SessionController {
     }
 
     /**
-     * 删除历史会话
+     * 删除历史会话列表
      */
     @DeleteMapping("/history")
-    public void deleteHistorySession(@RequestParam("sessionId")String sessionId){
+    public void deleteHistorySession(@RequestParam("sessionId") String sessionId) {
         this.chatSessionService.deleteHistorySession(sessionId);
     }
 
@@ -60,15 +65,8 @@ public class SessionController {
      * 更新历史会话标题
      */
     @PutMapping("/history")
-    public void updateTitle(@RequestParam("sessionId")String sessionId,@RequestParam("title")String title){
-        this.chatSessionService.updateTitle(sessionId,title);
-    }
-
-    /**
-     * 根据ai总结动态更改标题  测试
-     */
-    @PutMapping("/auto/history")
-    public void autoUpdateTitle(@RequestParam("sessionId")String sessionId){
-        this.chatSessionService.autoUpdateTitle1(sessionId);
+    public void updateTitle(@RequestParam("sessionId") String sessionId,
+                            @RequestParam("title") String title) {
+        this.chatSessionService.updateTitle(sessionId, title);
     }
 }

@@ -12,30 +12,21 @@ spring:
     import:
       - nacos:${spring.application.name}.yaml # 导入本服务的配置
       - nacos:shared-spring.yaml # 共享spring配置
-#      - nacos:shared-redis.yaml # 共享redis配置
+      - nacos:shared-redis.yaml # 共享redis配置
       - nacos:shared-logs.yaml # 共享日志配置
       - nacos:shared-feign.yaml # 共享feign配置
       - nacos:shared-mybatis.yaml # 共享mybatis配置
-  data:
-    mongodb:
-      host: 192.168.150.101
-      port: 27017
-      database: tianji
-      authentication-database: admin #认证数据库
-      username: tianji
-      password: "123321"
-      auto-index-creation: true #自动创建索引
 logging:
   level:
     com:
       #      alibaba: debug
       tianji: debug
-    org:
-      springframework:
-        ai:
-          chat:
-            client:
-              advisor: DEBUG
+#    org:
+#      springframework:
+#        ai:
+#          chat:
+#            client:
+#              advisor: DEBUG
 #      apache:
 #        hc:
 #          client5:

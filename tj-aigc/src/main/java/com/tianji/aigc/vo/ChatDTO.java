@@ -1,4 +1,4 @@
-package com.tianji.aigc.dto;
+package com.tianji.aigc.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

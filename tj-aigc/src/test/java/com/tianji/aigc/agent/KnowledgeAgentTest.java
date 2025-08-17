@@ -1,5 +1,5 @@
-import com.tianji.AIGCApplication;
-import com.tianji.aigc.agent.KnowledgeAgent;
+package com.tianji.aigc.agent;
+
 import com.tianji.aigc.vo.ChatEventVO;
 import com.tianji.common.utils.UserContext;
 import jakarta.annotation.Resource;
@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 
-@SpringBootTest(classes = AIGCApplication.class)
+@SpringBootTest
 class KnowledgeAgentTest {
 
     @Resource

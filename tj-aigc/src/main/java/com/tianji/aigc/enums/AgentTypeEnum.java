@@ -29,7 +29,7 @@ public enum AgentTypeEnum {
 
 
     /**
-     * 通过智能体的名称查找枚举,没找到返回null
+     * 通过智能体的名称查找枚举
      */
     public static AgentTypeEnum agentNameOf(String agentName) {
         return EnumUtil.getBy(AgentTypeEnum::getAgentName, agentName);

@@ -1,5 +1,7 @@
 package com.tianji.aigc.config;
 
+import cn.hutool.core.lang.Assert;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,13 +18,15 @@ public class ToolResultHolder {
     private static final Map<String, Map<String, Object>> HANDLER_MAP = new ConcurrentHashMap<>();
 
 
+    /**
+     * 工具类，禁止实例化
+     */
     private ToolResultHolder() {
     }
 
     public static void put(String key, String field, Object result) {
-        if (null == key || null == field) {
-            return;
-        }
+        Assert.notNull(key, "key is not null!");
+        Assert.notNull(field, "field is not null!");
         HANDLER_MAP.computeIfAbsent(key, k -> new HashMap<>()).put(field, result);
     }
 
@@ -31,18 +35,15 @@ public class ToolResultHolder {
     }
 
     public static Object get(String key, String field) {
-        if (null == key || null == field) {
-            return null;
-        }
+        Assert.notNull(key, "key is not null!");
+        Assert.notNull(field, "field is not null!");
         return Optional.ofNullable(HANDLER_MAP.get(key))
                 .map(map -> map.get(field))
                 .orElse(null);
     }
 
     public static void remove(String key) {
-        if (null == key) {
-            return;
-        }
+        Assert.notNull(key, "key is not null!");
         HANDLER_MAP.remove(key);
     }
 

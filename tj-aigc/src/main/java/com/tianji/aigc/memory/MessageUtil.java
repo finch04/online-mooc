@@ -1,8 +1,8 @@
 package com.tianji.aigc.memory;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.tianji.aigc.config.ToolResultHolder;
 import com.tianji.aigc.constants.Constant;
@@ -25,13 +25,13 @@ public class MessageUtil {
         myMessage.setTextContent(message.getText());
         if (message instanceof AssistantMessage assistantMessage) {
             myMessage.setToolCalls(assistantMessage.getToolCalls());
-            //问题，如何获取Tool执行过后的结果对象呢？
-            //思路：请求id是我们自己生成的，SpringAI框架是不会传递这个数据的，这里只能获取到消息id
-            //如果我们把消息id与请求id关联，可以通过消息id找到请求id,问题就解决了
-            var messageId = Convert.toStr(message.getMetadata().get(Constant.ID));
-            var requestId = Convert.toStr( ToolResultHolder.get(messageId, Constant.REQUEST_ID));
+
+            // 通过 messageId 获取 requestId，再通过 requestId 获取参数列表，如果有，就存储起来
+            // 最后，删除 messageId 对应的数据
+            var messageId = Convert.toStr(assistantMessage.getMetadata().get(Constant.ID));
+            var requestId = Convert.toStr(ToolResultHolder.get(messageId, Constant.REQUEST_ID));
             var params = ToolResultHolder.get(requestId);
-            if (CollUtil.isNotEmpty(params)){
+            if (ObjectUtil.isNotEmpty(params)) {
                 myMessage.setParams(params);
             }
             ToolResultHolder.remove(messageId);
@@ -59,11 +59,15 @@ public class MessageUtil {
                 return new SystemMessage(myMessage.getTextContent());
             }
             case USER -> {
-                return new UserMessage(myMessage.getTextContent(), myMessage.getMedia(), myMessage.getMetadata());
+                return UserMessage.builder()
+                        .text(myMessage.getTextContent())
+                        .metadata(myMessage.getMetadata())
+                        .media(myMessage.getMedia())
+                        .build();
             }
             case ASSISTANT -> {
-//                return new AssistantMessage(myMessage.getTextContent(), myMessage.getMetadata(), myMessage.getToolCalls());
                 return new MyAssistantMessage(myMessage.getTextContent(), myMessage.getMetadata(), myMessage.getToolCalls(), myMessage.getMedia(), myMessage.getParams());
+                // return new AssistantMessage(myMessage.getTextContent(), myMessage.getMetadata(), myMessage.getToolCalls());
             }
             case TOOL -> {
                 return new ToolResponseMessage(myMessage.getToolResponses(), myMessage.getMetadata());

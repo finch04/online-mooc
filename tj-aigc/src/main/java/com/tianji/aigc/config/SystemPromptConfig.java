@@ -22,33 +22,32 @@ public class SystemPromptConfig {
 
     // 使用原子引用，保证线程安全
     private final AtomicReference<String> chatSystemMessage = new AtomicReference<>();
-    private final AtomicReference<String> chatTitleMessage = new AtomicReference<>();
     private final AtomicReference<String> routeAgentSystemMessage = new AtomicReference<>();
     private final AtomicReference<String> recommendAgentSystemMessage = new AtomicReference<>();
     private final AtomicReference<String> buyAgentSystemMessage = new AtomicReference<>();
     private final AtomicReference<String> consultAgentSystemMessage = new AtomicReference<>();
     private final AtomicReference<String> knowledgeAgentSystemMessage = new AtomicReference<>();
+    private final AtomicReference<String> textSystemMessage = new AtomicReference<>();
 
     @PostConstruct // 初始化时加载配置
     public void init() {
         // 读取配置文件
         loadConfig(aiProperties.getSystem().getChat(), chatSystemMessage);
-        loadConfig(aiProperties.getSystem().getTitle(), chatTitleMessage);
         loadConfig(aiProperties.getSystem().getRouteAgent(), routeAgentSystemMessage);
         loadConfig(aiProperties.getSystem().getRecommendAgent(), recommendAgentSystemMessage);
         loadConfig(aiProperties.getSystem().getBuyAgent(), buyAgentSystemMessage);
         loadConfig(aiProperties.getSystem().getConsultAgent(), consultAgentSystemMessage);
         loadConfig(aiProperties.getSystem().getKnowledgeAgent(), knowledgeAgentSystemMessage);
-
+        loadConfig(aiProperties.getSystem().getText(), textSystemMessage);
     }
 
     private void loadConfig(AIProperties.System.Chat chatConfig, AtomicReference<String> target) {
         try {
-            String dataId = chatConfig.getDataId();
-            String group = chatConfig.getGroup();
-            long timeoutMs = chatConfig.getTimeoutMs();
+            var dataId = chatConfig.getDataId();
+            var group = chatConfig.getGroup();
+            var timeoutMs = chatConfig.getTimeoutMs();
 
-            String config = nacosConfigManager.getConfigService().getConfig(dataId, group, timeoutMs);
+            var config = nacosConfigManager.getConfigService().getConfig(dataId, group, timeoutMs);
             target.set(config);
             log.info("读取{}成功，内容为：{}", target, config);
 

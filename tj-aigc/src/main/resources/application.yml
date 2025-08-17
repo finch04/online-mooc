@@ -23,37 +23,39 @@ tj:
   auth:
     resource:
       enable: true
+      excludeLoginPaths:
+        - /chat/text
   jdbc:
     database: tj_aigc #指定使用的数据库名
   ai:
-    chat-memory: MYSQL # Redis / MYSQL / MongoDB
+    dashscope:
+      key: ${ALIYUN_API_KEY}
+      app-agent:
+        id: xxxxxxxxx
+        tools:
+          - "tool_xxxxx"
+          - "tool_xxxxx"
+    openai:
+      key: ${OPENAI_API_KEY}
     prompt:
       system:
         chat:
           data-id: system-chat-message.txt
           group: DEFAULT_GROUP
           timeout-ms: 20000
-        title:
-          data-id: system-chat-title-message.txt
-          group: DEFAULT_GROUP
-          timeout-ms: 20000
         route-agent:
           data-id: route-agent-system-message.txt
-          group: DEFAULT_GROUP
-          timeout-ms: 20000
         recommend-agent:
           data-id: recommend-agent-system-message.txt
-          group: DEFAULT_GROUP
-          timeout-ms: 20000
         buy-agent:
           data-id: buy-agent-system-message.txt
-          group: DEFAULT_GROUP
-          timeout-ms: 20000
         consult-agent:
           data-id: consult-agent-system-message.txt
-          group: DEFAULT_GROUP
-          timeout-ms: 20000
         knowledge-agent:
           data-id: knowledge-agent-system-message.txt
-          group: DEFAULT_GROUP
-          timeout-ms: 20000
+        text:
+          data-id: text-system-chat-message.txt
+    memory:
+      max: 100 #存储最大的聊天记录数
+      type: Redis # Redis / MYSQL / MongoDB
+    chat-type: ENHANCE # ROUTE / ENHANCE / APP
