@@ -57,5 +57,12 @@ tj:
           data-id: text-system-chat-message.txt
     memory:
       max: 100 #存储最大的聊天记录数
-      type: Redis # Redis / MYSQL / MongoDB
+      type: MongoDB # Redis / MYSQL / MongoDB
     chat-type: ENHANCE # ROUTE / ENHANCE / APP
+  ali:
+    oss:
+      endpoint: oss-cn-beijing.aliyuncs.com
+      access-id: ${OSS_ACCESSKEY_ID}
+      access-key: ${OSS_ACCESSKEY_SECRET}
+      bucket: web-shenqi
+

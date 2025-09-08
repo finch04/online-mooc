@@ -49,7 +49,7 @@ public class CourseController {
             @io.swagger.v3.oas.annotations.Parameter(description = "课程id集合") @RequestParam("courseIds") List<Long> courseIds) {
         for (Long courseId : courseIds) {
             // TODO 缺少方法，暂时不处理
-            // courseService.handleCourseDown(courseId);
+//             courseService.handleCourseDown(courseId);
         }
     }
 }

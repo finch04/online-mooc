@@ -3,6 +3,8 @@ package com.tianji.aigc.config;
 import com.tianji.aigc.advisor.RecordOptimizationAdvisor;
 import com.tianji.aigc.memory.MyChatMemoryRepository;
 import com.tianji.aigc.memory.RedisChatMemoryRepository;
+import com.tianji.aigc.memory.jdbc.JdbcChatMemoryRepository;
+import com.tianji.aigc.memory.mongodb.MongoDBChatMemoryRepository;
 import com.tianji.aigc.tools.CourseTools;
 import com.tianji.aigc.tools.OrderTools;
 import com.tianji.common.constants.Constant;
@@ -17,6 +19,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -77,7 +80,7 @@ public class SpringAIConfig {
     ) {
         return ChatClient.builder(dashScopeChatModel)
                 .defaultAdvisors(loggerAdvisor, messageChatMemoryAdvisor, recordOptimizationAdvisor) //添加 Advisor 功能增强
-                 .defaultTools(courseTools, orderTools)
+                .defaultTools(courseTools, orderTools)
                 .build();
     }
 
@@ -108,8 +111,21 @@ public class SpringAIConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "tj.ai.memory", value = "type", havingValue = "Redis")
     public ChatMemoryRepository redisChatMemoryRepository() {
         return new RedisChatMemoryRepository();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "tj.ai.memory", value = "type", havingValue = "MYSQL")
+    public ChatMemoryRepository jdbcChatMemoryRepository() {
+        return new JdbcChatMemoryRepository();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "tj.ai.memory", value = "type", havingValue = "MongoDB")
+    public ChatMemoryRepository mongoDBChatMemoryRepository() {
+        return new MongoDBChatMemoryRepository();
     }
 
     @Bean
