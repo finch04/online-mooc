@@ -57,8 +57,9 @@ tj:
           data-id: text-system-chat-message.txt
     memory:
       max: 100 #存储最大的聊天记录数
-      type: MongoDB # Redis / MYSQL / MongoDB
+      type: Redis # Redis / MYSQL / MongoDB
     chat-type: ENHANCE # ROUTE / ENHANCE / APP
+    audio-type: DASHSCOPE # OPENAI / DASHSCOPE
   ali:
     oss:
       endpoint: oss-cn-beijing.aliyuncs.com

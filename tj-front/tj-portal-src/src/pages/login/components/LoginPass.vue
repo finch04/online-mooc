@@ -49,7 +49,7 @@ const checked = ref(false)
 // 登录参数效验
 const fromData = reactive({
   username: "jack",
-  password: "123456",
+  password: "123",
   type: 1
 });
 // 效验规则

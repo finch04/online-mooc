@@ -9,6 +9,7 @@ import org.springframework.ai.openai.OpenAiAudioSpeechModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.audio.speech.SpeechPrompt;
 import org.springframework.ai.openai.audio.speech.SpeechResponse;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
@@ -19,6 +20,7 @@ import java.io.IOException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "tj.ai", name = "audio-type", havingValue = "OPENAI")
 public class OpenAIAudioServiceImpl implements AudioService {
 
     private final OpenAiAudioSpeechModel openAiAudioSpeechModel;
