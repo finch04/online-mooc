@@ -1,4 +1,4 @@
-package com.tianji.aigc.enums;
+package com.tianji.aigc.entity.dto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +10,7 @@ import java.util.Set;
 @Data
 @Builder
 public class AudioEventFilterParam {
+
     /**
      * 过滤模式：
      * INCLUDE - 只保留指定事件类型的内容
