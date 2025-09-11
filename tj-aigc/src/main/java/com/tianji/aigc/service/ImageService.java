@@ -1,8 +1,6 @@
 package com.tianji.aigc.service;
 
-import com.tianji.aigc.entity.dto.ImageGenerateDTO;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import com.tianji.aigc.domain.dto.ImageGenerateDTO;
 
 public interface ImageService {
 

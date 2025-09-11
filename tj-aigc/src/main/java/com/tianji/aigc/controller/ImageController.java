@@ -1,7 +1,6 @@
 package com.tianji.aigc.controller;
 
-import com.tianji.aigc.entity.dto.ImageGenerateDTO;
-import com.tianji.aigc.service.AudioService;
+import com.tianji.aigc.domain.dto.ImageGenerateDTO;
 import com.tianji.aigc.service.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

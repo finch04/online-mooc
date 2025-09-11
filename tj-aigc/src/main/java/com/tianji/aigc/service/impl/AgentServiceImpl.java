@@ -6,7 +6,7 @@ import com.tianji.aigc.agent.Agent;
 import com.tianji.aigc.enums.AgentTypeEnum;
 import com.tianji.aigc.enums.ChatEventTypeEnum;
 import com.tianji.aigc.service.ChatService;
-import com.tianji.aigc.vo.ChatEventVO;
+import com.tianji.aigc.domain.vo.ChatEventVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;

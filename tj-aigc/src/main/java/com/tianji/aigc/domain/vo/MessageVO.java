@@ -1,4 +1,4 @@
-package com.tianji.aigc.vo;
+package com.tianji.aigc.domain.vo;
 
 import com.tianji.aigc.enums.MessageTypeEnum;
 import lombok.AllArgsConstructor;

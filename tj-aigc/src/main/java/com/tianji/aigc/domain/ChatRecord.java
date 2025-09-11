@@ -1,4 +1,4 @@
-package com.tianji.aigc.entity;
+package com.tianji.aigc.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("chat_session")
-public class ChatSession implements Serializable {
+@TableName("chat_record")
+public class ChatRecord implements Serializable {
 
     /**
      * 数据id
@@ -25,19 +25,14 @@ public class ChatSession implements Serializable {
     private Long id;
 
     /**
-     * 会话id
+     * 对话id
      */
-    private String sessionId;
+    private String conversationId;
 
     /**
-     * 用户id
+     * 对话数据
      */
-    private Long userId;
-
-    /**
-     * 会话标题
-     */
-    private String title;
+    private String data;
 
     /**
      * 创建时间

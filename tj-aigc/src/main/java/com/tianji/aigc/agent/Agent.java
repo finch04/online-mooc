@@ -1,7 +1,7 @@
 package com.tianji.aigc.agent;
 
 import com.tianji.aigc.enums.AgentTypeEnum;
-import com.tianji.aigc.vo.ChatEventVO;
+import com.tianji.aigc.domain.vo.ChatEventVO;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import reactor.core.publisher.Flux;
 

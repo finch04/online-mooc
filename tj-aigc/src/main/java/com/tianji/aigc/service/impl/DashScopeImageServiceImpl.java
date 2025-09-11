@@ -2,7 +2,7 @@ package com.tianji.aigc.service.impl;
 
 import com.alibaba.cloud.ai.dashscope.image.DashScopeImageModel;
 import com.alibaba.cloud.ai.dashscope.image.DashScopeImageOptions;
-import com.tianji.aigc.entity.dto.ImageGenerateDTO;
+import com.tianji.aigc.domain.dto.ImageGenerateDTO;
 import com.tianji.aigc.enums.ImageStyleEnum;
 import com.tianji.aigc.service.ImageService;
 import lombok.RequiredArgsConstructor;

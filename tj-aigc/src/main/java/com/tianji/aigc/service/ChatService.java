@@ -1,6 +1,6 @@
 package com.tianji.aigc.service;
 
-import com.tianji.aigc.vo.ChatEventVO;
+import com.tianji.aigc.domain.vo.ChatEventVO;
 import com.tianji.common.utils.UserContext;
 import reactor.core.publisher.Flux;
 

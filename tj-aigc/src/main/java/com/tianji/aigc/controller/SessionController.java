@@ -1,9 +1,9 @@
 package com.tianji.aigc.controller;
 
 import com.tianji.aigc.service.ChatSessionService;
-import com.tianji.aigc.vo.ChatSessionVO;
-import com.tianji.aigc.vo.MessageVO;
-import com.tianji.aigc.vo.SessionVO;
+import com.tianji.aigc.domain.vo.ChatSessionVO;
+import com.tianji.aigc.domain.vo.MessageVO;
+import com.tianji.aigc.domain.vo.SessionVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

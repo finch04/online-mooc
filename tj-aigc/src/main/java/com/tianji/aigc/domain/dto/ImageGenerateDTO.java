@@ -1,10 +1,9 @@
-package com.tianji.aigc.entity.dto;
+package com.tianji.aigc.domain.dto;
 
 import com.tianji.aigc.enums.ImageStyleEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
-import lombok.Builder;
 import lombok.Data;
 
 

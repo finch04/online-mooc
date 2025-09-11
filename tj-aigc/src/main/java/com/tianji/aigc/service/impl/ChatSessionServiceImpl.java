@@ -11,15 +11,15 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.aigc.config.SessionProperties;
-import com.tianji.aigc.entity.ChatSession;
+import com.tianji.aigc.domain.ChatSession;
 import com.tianji.aigc.enums.MessageTypeEnum;
 import com.tianji.aigc.mapper.ChatSessionMapper;
 import com.tianji.aigc.memory.MyAssistantMessage;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
-import com.tianji.aigc.vo.ChatSessionVO;
-import com.tianji.aigc.vo.MessageVO;
-import com.tianji.aigc.vo.SessionVO;
+import com.tianji.aigc.domain.vo.ChatSessionVO;
+import com.tianji.aigc.domain.vo.MessageVO;
+import com.tianji.aigc.domain.vo.SessionVO;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,22 +43,34 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
 
     @Override
     public SessionVO createSession(Integer num) {
-        var sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
-        // 随机获取examples
-        sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(), num));
+        // 检查是否存在空会话
+        String emptySessionId = findEmptySession();
+        if (StrUtil.isNotBlank(emptySessionId)) {
+            // 查询空会话并返回
+            ChatSession session = getOne(Wrappers.<ChatSession>lambdaQuery()
+                    .eq(ChatSession::getSessionId, emptySessionId));
+            SessionVO sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
+            sessionVO.setSessionId(emptySessionId);
+            sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(), num));
+            return sessionVO;
+        }
 
-        // 随机生成sessionId
+        // 没有空会话则创建新会话
+        var sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
+        sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(), num));
         sessionVO.setSessionId(IdUtil.fastSimpleUUID());
 
-        // 构建持久化对象，并持久化
         var chatSession = ChatSession.builder()
                 .sessionId(sessionVO.getSessionId())
                 .userId(UserContext.getUser())
+                .createTime(LocalDateTimeUtil.now())
+                .updateTime(LocalDateTimeUtil.now())
                 .build();
         super.save(chatSession);
 
         return sessionVO;
     }
+
 
     /**
      * 获取热门会话
@@ -69,6 +81,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     public List<SessionVO.Example> hotExamples(Integer num) {
         return RandomUtil.randomEleList(sessionProperties.getExamples(), num);
     }
+
+
 
     private final ChatMemory chatMemory;
 
@@ -204,4 +218,21 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                 .eq(ChatSession::getUserId, UserContext.getUser())
                 .update();
     }
+
+    /**
+     * 检查是否存在未使用的空会话
+     */
+    private String findEmptySession() {
+        Long userId = UserContext.getUser();
+        // 查询未设置标题且创建时间较近的会话（视为空会话）
+        List<ChatSession> emptySessions = lambdaQuery()
+                .eq(ChatSession::getUserId, userId)
+                .isNull(ChatSession::getTitle)
+                .orderByAsc(ChatSession::getCreateTime)
+                .last("LIMIT 1")
+                .list();
+
+        return CollUtil.isNotEmpty(emptySessions) ? emptySessions.get(0).getSessionId() : null;
+    }
+
 }

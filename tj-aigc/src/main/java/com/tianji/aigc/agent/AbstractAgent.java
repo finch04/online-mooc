@@ -8,7 +8,7 @@ import com.tianji.aigc.constants.Constant;
 import com.tianji.aigc.enums.ChatEventTypeEnum;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
-import com.tianji.aigc.vo.ChatEventVO;
+import com.tianji.aigc.domain.vo.ChatEventVO;
 import com.tianji.common.utils.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

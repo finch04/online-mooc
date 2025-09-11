@@ -1,4 +1,4 @@
-package com.tianji.aigc.vo;
+package com.tianji.aigc.domain.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,6 @@
 package com.tianji.aigc.agent;
 
-import com.tianji.aigc.vo.ChatEventVO;
+import com.tianji.aigc.domain.vo.ChatEventVO;
 import com.tianji.common.utils.UserContext;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
