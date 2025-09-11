@@ -1,9 +1,12 @@
-package com.tianji.aigc.memory;
+package com.tianji.aigc.memory.redis;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONUtil;
+import com.tianji.aigc.memory.MessageUtil;
+import com.tianji.aigc.memory.MyChatMemoryRepository;
+import com.tianji.aigc.memory.clean.DataSourceType;
 import com.tianji.aigc.utils.MessageDelayPersistHandler;
 import com.tianji.common.utils.UserContext;
 import jakarta.annotation.Resource;
@@ -68,7 +71,7 @@ public class RedisChatMemoryRepository implements ChatMemoryRepository, MyChatMe
         // 将消息序列化并添加到Redis列表的右侧
         messages.forEach(message -> listOps.rightPush(MessageUtil.toJson(message)));
 
-        messageDelayPersistHandler.addDelayedTask(conversationId);
+        messageDelayPersistHandler.addDelayedTask(conversationId, DataSourceType.REDIS);
     }
 
     @Override

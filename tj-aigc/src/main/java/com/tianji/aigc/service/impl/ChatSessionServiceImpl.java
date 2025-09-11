@@ -22,6 +22,7 @@ import com.tianji.aigc.enums.MessageTypeEnum;
 import com.tianji.aigc.mapper.ChatRecordMapper;
 import com.tianji.aigc.mapper.ChatSessionMapper;
 import com.tianji.aigc.memory.MyAssistantMessage;
+import com.tianji.aigc.memory.clean.DataSourceType;
 import com.tianji.aigc.service.AgentConfigService;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
@@ -150,7 +151,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         Long userId = UserContext.getUser();
 
         // 立即将Redis中的数据落库
-        messageDelayPersistHandler.forcePersist(conversationId, userId);
+        messageDelayPersistHandler.forcePersist(conversationId);
 
         // 从MySQL查询历史记录
         List<ChatRecord> records = chatRecordMapper.selectList(Wrappers.<ChatRecord>lambdaQuery()

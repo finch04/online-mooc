@@ -40,7 +40,7 @@ tj:
   ai:
     memory:
       max: 100
-      type: Redis
+      type: Redis # MYSQL | MongoDB | Redis
     chat-type: ENHANCE
     audio-type: DASHSCOPE
     # AI提示词配置
@@ -62,50 +62,6 @@ tj:
           data-id: knowledge-agent-system-message.txt
         text:
           data-id: text-system-chat-message.txt
-    session:
-      title: Hello，我是智慧MOOC学习助理
-      describe: 我是由智慧MOOC倾力打造的智能助理，我不仅能推荐课程、答疑解惑，还能为您激发创意、畅聊心事。
-      examples:
-        - title: "课程推荐"
-          describe: "能帮我推荐一个合适的课吗？"
-        - title: "课程推荐"
-          describe: "最近有什么新课吗？"
-        - title: "课程推荐"
-          describe: "如何选择适合我的课程？"
-        - title: "课程推荐"
-          describe: "有哪些热门课程推荐？"
-        - title: "课程购买"
-          describe: "我想要购买《Java进阶编程实战》"
-        - title: "课程购买"
-          describe: "我想要报名《Java高级架构与微服务》"
-        - title: "课程购买"
-          describe: "《Java进阶编程实战》的课程价格是多少？"
-        - title: "课程购买"
-          describe: "《Java高级架构与微服务》的课程价格是多少？"
-        - title: "课程介绍"
-          describe: "请帮我介绍一下《互联网产品运营实战》"
-        - title: "课程介绍"
-          describe: "《Java大数据处理与分析》这门课一共有多少节？"
-        - title: "课程介绍"
-          describe: "《Java高级架构与微服务》能学到什么内容？"
-        - title: "课程介绍"
-          describe: "《互联网产品运营实战》适合我学习吗？"
-        - title: "知识讲解"
-          describe: "面向对象的三大特征是什么？"
-        - title: "知识讲解"
-          describe: "ArrayList和LinkedList有何区别？"
-        - title: "知识讲解"
-          describe: "Java多线程怎么实现？"
-        - title: "知识讲解"
-          describe: "Spring Boot和SSM有什么区别？"
-        - title: "知识讲解"
-          describe: "列表和元组有什么区别？"
-        - title: "知识讲解"
-          describe: " Python如何管理内存？"
-        - title: "知识讲解"
-          describe: " 装饰器的作用是什么？"
-        - title: "知识讲解"
-          describe: "多线程为什么有GIL限制？"
 
   # 阿里云OSS配置
   ali:

@@ -57,7 +57,7 @@
       <template #header>
         <div class="dialogHeader" @mousedown="startDrag">
           <div :id="titleId" class="title">
-            <span class="font">天机AI助理</span>
+            <span class="font">AI助理</span>
             <button
               :class="
                 chatDataArr.length === 0 || outputLoading ? 'disabled' : ''

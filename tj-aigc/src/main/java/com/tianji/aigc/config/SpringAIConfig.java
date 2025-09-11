@@ -2,7 +2,7 @@ package com.tianji.aigc.config;
 
 import com.tianji.aigc.advisor.RecordOptimizationAdvisor;
 import com.tianji.aigc.memory.MyChatMemoryRepository;
-import com.tianji.aigc.memory.RedisChatMemoryRepository;
+import com.tianji.aigc.memory.redis.RedisChatMemoryRepository;
 import com.tianji.aigc.memory.jdbc.JdbcChatMemoryRepository;
 import com.tianji.aigc.memory.mongodb.MongoDBChatMemoryRepository;
 import com.tianji.aigc.tools.CourseTools;
@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;

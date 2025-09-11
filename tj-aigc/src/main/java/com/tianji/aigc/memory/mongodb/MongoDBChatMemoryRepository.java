@@ -3,6 +3,7 @@ package com.tianji.aigc.memory.mongodb;
 import cn.hutool.core.collection.CollStreamUtil;
 import com.tianji.aigc.memory.MessageUtil;
 import com.tianji.aigc.memory.MyChatMemoryRepository;
+import com.tianji.aigc.memory.clean.DataSourceType;
 import com.tianji.aigc.utils.MessageDelayPersistHandler;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
@@ -52,6 +53,7 @@ public class MongoDBChatMemoryRepository implements ChatMemoryRepository, MyChat
 
         // 保存到MongoDB中
         this.mongoTemplate.save(chatRecord);
+        messageDelayPersistHandler.addDelayedTask(conversationId, DataSourceType.MONGODB);
     }
 
     @Override
