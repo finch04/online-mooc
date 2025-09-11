@@ -63,7 +63,7 @@
       <!-- <template #header> -->
         <div class="dialogHeader">
           <div :id="titleId" class="title">
-            <span class="font">天机AI助理</span>
+            <span class="font">AI助理</span>
             <button
               :class="
                 chatDataArr.length === 0 || outputLoading ? 'disabled' : ''
@@ -92,7 +92,6 @@
       <div class="chitchatBox">
         <!-- 聊天对话 -->
         <div v-if="chatDataArr.length > 0"
-          
           ref="scrollContainer"
           class="chitchatCon">
           <div style="flex: 1;overflow: auto;width: 100%;">
@@ -944,12 +943,6 @@ const hadlechatStop = async () => {
     sessionId: baseData.value.sessionId,
   };
   const res = await chatStop(params);
-  // if (res.code === 200) {
-  //   ElMessage({
-  //     message: "此功能暂未开发！",
-  //     type: 'error'
-  //   });
-  // }
 };
 // Shift+Enter换行
 const onEnter = (event) => {

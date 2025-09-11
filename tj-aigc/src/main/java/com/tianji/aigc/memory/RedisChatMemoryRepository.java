@@ -4,12 +4,15 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONUtil;
+import com.tianji.aigc.utils.MessageDelayPersistHandler;
+import com.tianji.common.utils.UserContext;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 基于Redis实现的ChatMemoryRepository
@@ -24,6 +27,8 @@ public class RedisChatMemoryRepository implements ChatMemoryRepository, MyChatMe
     // 注入spring redis模板，进行redis的操作
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private MessageDelayPersistHandler messageDelayPersistHandler;
 
     public RedisChatMemoryRepository() {
         this.prefix = DEFAULT_PREFIX;
@@ -62,6 +67,8 @@ public class RedisChatMemoryRepository implements ChatMemoryRepository, MyChatMe
         this.deleteByConversationId(conversationId);
         // 将消息序列化并添加到Redis列表的右侧
         messages.forEach(message -> listOps.rightPush(MessageUtil.toJson(message)));
+
+        messageDelayPersistHandler.addDelayedTask(conversationId);
     }
 
     @Override

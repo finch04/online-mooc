@@ -3,6 +3,7 @@ package com.tianji.aigc.memory.mongodb;
 import cn.hutool.core.collection.CollStreamUtil;
 import com.tianji.aigc.memory.MessageUtil;
 import com.tianji.aigc.memory.MyChatMemoryRepository;
+import com.tianji.aigc.utils.MessageDelayPersistHandler;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.Message;
@@ -19,6 +20,8 @@ public class MongoDBChatMemoryRepository implements ChatMemoryRepository, MyChat
 
     @Resource
     private MongoTemplate mongoTemplate;
+    @Resource
+    private MessageDelayPersistHandler messageDelayPersistHandler;
 
     @Override
     public List<String> findConversationIds() {

@@ -8,20 +8,24 @@ import cn.hutool.core.stream.StreamUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.tianji.aigc.domain.ChatRecord;
 import com.tianji.aigc.domain.ChatSession;
 import com.tianji.aigc.domain.vo.AgentConfigVO;
 import com.tianji.aigc.domain.vo.ChatSessionVO;
 import com.tianji.aigc.domain.vo.MessageVO;
 import com.tianji.aigc.domain.vo.SessionVO;
 import com.tianji.aigc.enums.MessageTypeEnum;
+import com.tianji.aigc.mapper.ChatRecordMapper;
 import com.tianji.aigc.mapper.ChatSessionMapper;
 import com.tianji.aigc.memory.MyAssistantMessage;
 import com.tianji.aigc.service.AgentConfigService;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
+import com.tianji.aigc.utils.MessageDelayPersistHandler;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +47,8 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
 
     private final AgentConfigService agentConfigService;
     private final ChatMemory chatMemory;
+    private final ChatRecordMapper chatRecordMapper;
+    private final MessageDelayPersistHandler messageDelayPersistHandler;
 
     @Override
     public SessionVO createSession(Integer num) {
@@ -110,29 +116,52 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         return List.of();
     }
 
+//    @Override
+//    public List<MessageVO> queryBySessionId(String sessionId) {
+//        // 根据会话ID获取对话ID
+//        String conversationId = ChatService.getConversationId(sessionId);
+//        // 从Redis中获取历史消息
+//        List<Message> messageList = this.chatMemory.get(conversationId);
+//        // 过滤并转换消息列表
+//        return StreamUtil.of(messageList)
+//                // 过滤掉非用户消息和助手消息
+//                .filter(message -> message.getMessageType() == MessageType.ASSISTANT || message.getMessageType() == MessageType.USER)
+//                // 转换为MessageVO对象
+//                .map(message -> {
+//                    if (message instanceof MyAssistantMessage) {
+//                        return MessageVO.builder()
+//                                .content(message.getText())
+//                                .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
+//                                .params(((MyAssistantMessage) message).getParams())
+//                                .build();
+//                    }
+//                    return MessageVO.builder()
+//                            .content(message.getText())
+//                            .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
+//                            .build();
+//                })
+//                .toList();
+//    }
+
     @Override
     public List<MessageVO> queryBySessionId(String sessionId) {
         // 根据会话ID获取对话ID
         String conversationId = ChatService.getConversationId(sessionId);
-        // 从Redis中获取历史消息
-        List<Message> messageList = this.chatMemory.get(conversationId);
-        // 过滤并转换消息列表
-        return StreamUtil.of(messageList)
-                // 过滤掉非用户消息和助手消息
-                .filter(message -> message.getMessageType() == MessageType.ASSISTANT || message.getMessageType() == MessageType.USER)
-                // 转换为MessageVO对象
-                .map(message -> {
-                    if (message instanceof MyAssistantMessage) {
-                        return MessageVO.builder()
-                                .content(message.getText())
-                                .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
-                                .params(((MyAssistantMessage) message).getParams())
-                                .build();
-                    }
-                    return MessageVO.builder()
-                            .content(message.getText())
-                            .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
-                            .build();
+        Long userId = UserContext.getUser();
+
+        // 立即将Redis中的数据落库
+        messageDelayPersistHandler.forcePersist(conversationId, userId);
+
+        // 从MySQL查询历史记录
+        List<ChatRecord> records = chatRecordMapper.selectList(Wrappers.<ChatRecord>lambdaQuery()
+                .eq(ChatRecord::getConversationId, conversationId)
+                .orderByAsc(ChatRecord::getCreateTime));
+
+        // 转换为MessageVO列表
+        return StreamUtil.of(records)
+                .map(record -> {
+                    MessageVO messageVO = JSONUtil.toBean(record.getData(), MessageVO.class);
+                    return messageVO;
                 })
                 .toList();
     }
