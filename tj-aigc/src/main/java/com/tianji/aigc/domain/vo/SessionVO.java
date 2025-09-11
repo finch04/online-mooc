@@ -31,26 +31,7 @@ public class SessionVO {
     /**
      * 示例列表，包含一些使用助手的示例。
      */
-    private List<Example> examples;
+    private List<AgentConfigVO.Example> examples;
 
-    /**
-     * Example类表示每个示例的标题和描述。
-     */
-    @Data
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Example {
-
-        /**
-         * 示例的标题，描述了示例的类型或内容。
-         */
-        private String title;
-
-        /**
-         * 示例的描述，具体说明了示例的内容或问题。
-         */
-        private String describe;
-    }
 
 }

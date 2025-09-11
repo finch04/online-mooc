@@ -17,11 +17,11 @@ tj:
   swagger:
     enable: true
     package-path: com.tianji.aigc.controller
-    title: 天机学堂 - AIGC接口文档
+    title: 智慧MOOC - AIGC接口文档
     description: 该服务包含AI相关功能
-    contact-name: 传智教育·研究院
+    contact-name: 研究院
     contact-url: http://www.itcast.cn/
-    contact-email: zhangzhijun@itcast.cn
+    contact-email: 1418875140@qq.com
     version: v1.0
     enableResponseWrap: true
 
@@ -63,8 +63,8 @@ tj:
         text:
           data-id: text-system-chat-message.txt
     session:
-      title: Hello，我是天机AI助理
-      describe: 我是由天机学堂倾力打造的智能助理，我不仅能推荐课程、答疑解惑，还能为您激发创意、畅聊心事。
+      title: Hello，我是智慧MOOC学习助理
+      describe: 我是由智慧MOOC倾力打造的智能助理，我不仅能推荐课程、答疑解惑，还能为您激发创意、畅聊心事。
       examples:
         - title: "课程推荐"
           describe: "能帮我推荐一个合适的课吗？"

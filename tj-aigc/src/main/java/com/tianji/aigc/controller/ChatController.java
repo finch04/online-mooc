@@ -1,7 +1,7 @@
 package com.tianji.aigc.controller;
 
 import com.tianji.aigc.service.ChatService;
-import com.tianji.aigc.domain.vo.ChatDTO;
+import com.tianji.aigc.domain.dto.ChatDTO;
 import com.tianji.aigc.domain.vo.ChatEventVO;
 import com.tianji.aigc.domain.vo.TemplateVO;
 import com.tianji.common.annotations.NoWrapper;

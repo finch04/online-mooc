@@ -7,7 +7,7 @@ import com.alibaba.cloud.ai.dashscope.audio.DashScopeAudioTranscriptionOptions;
 import com.alibaba.cloud.ai.dashscope.audio.synthesis.SpeechSynthesisModel;
 import com.alibaba.cloud.ai.dashscope.audio.synthesis.SpeechSynthesisPrompt;
 import com.alibaba.cloud.ai.dashscope.audio.transcription.AudioTranscriptionModel;
-import com.tianji.aigc.domain.dto.AudioEventFilterParam;
+import com.tianji.aigc.domain.param.AudioEventFilterParam;
 import com.tianji.aigc.service.AudioService;
 import com.tianji.aigc.service.FileStorage;
 import com.tianji.aigc.utils.AudioEventFilterUtil;

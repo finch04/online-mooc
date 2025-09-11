@@ -1,4 +1,4 @@
-package com.tianji.aigc.domain.dto;
+package com.tianji.aigc.domain.param;
 
 import lombok.Builder;
 import lombok.Data;

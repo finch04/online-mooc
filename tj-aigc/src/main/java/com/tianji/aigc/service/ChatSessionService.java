@@ -1,5 +1,6 @@
 package com.tianji.aigc.service;
 
+import com.tianji.aigc.domain.vo.AgentConfigVO;
 import com.tianji.aigc.domain.vo.ChatSessionVO;
 import com.tianji.aigc.domain.vo.MessageVO;
 import com.tianji.aigc.domain.vo.SessionVO;
@@ -22,7 +23,7 @@ public interface ChatSessionService {
      *
      * @return 热门会话列表
      */
-    List<SessionVO.Example> hotExamples(Integer num);
+    List<AgentConfigVO.Example> hotExamples(Integer num);
 
     /**
      * 根据会话id查询消息列表

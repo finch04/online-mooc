@@ -10,16 +10,18 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tianji.aigc.config.SessionProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tianji.aigc.domain.ChatSession;
-import com.tianji.aigc.enums.MessageTypeEnum;
-import com.tianji.aigc.mapper.ChatSessionMapper;
-import com.tianji.aigc.memory.MyAssistantMessage;
-import com.tianji.aigc.service.ChatService;
-import com.tianji.aigc.service.ChatSessionService;
+import com.tianji.aigc.domain.vo.AgentConfigVO;
 import com.tianji.aigc.domain.vo.ChatSessionVO;
 import com.tianji.aigc.domain.vo.MessageVO;
 import com.tianji.aigc.domain.vo.SessionVO;
+import com.tianji.aigc.enums.MessageTypeEnum;
+import com.tianji.aigc.mapper.ChatSessionMapper;
+import com.tianji.aigc.memory.MyAssistantMessage;
+import com.tianji.aigc.service.AgentConfigService;
+import com.tianji.aigc.service.ChatService;
+import com.tianji.aigc.service.ChatSessionService;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,38 +41,56 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatSession> implements ChatSessionService {
 
-    private final SessionProperties sessionProperties;
+    private final AgentConfigService agentConfigService;
+    private final ChatMemory chatMemory;
 
     @Override
     public SessionVO createSession(Integer num) {
-        // 检查是否存在空会话
-        String emptySessionId = findEmptySession();
-        if (StrUtil.isNotBlank(emptySessionId)) {
-            // 查询空会话并返回
-            ChatSession session = getOne(Wrappers.<ChatSession>lambdaQuery()
-                    .eq(ChatSession::getSessionId, emptySessionId));
-            SessionVO sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
-            sessionVO.setSessionId(emptySessionId);
-            sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(), num));
+        try {
+            // 获取智能体配置
+            AgentConfigVO agentConfig = agentConfigService.getAgentConfig();
+            if (agentConfig == null) {
+                log.warn("未获取到智能体配置，使用默认值创建会话");
+                return createDefaultSession(num);
+            }
+
+            // 检查是否存在空会话
+            String emptySessionId = findEmptySession();
+            if (StrUtil.isNotBlank(emptySessionId)) {
+                // 查询空会话并返回
+                ChatSession session = getOne(Wrappers.<ChatSession>lambdaQuery()
+                        .eq(ChatSession::getSessionId, emptySessionId));
+                SessionVO sessionVO = SessionVO.builder()
+                        .sessionId(emptySessionId)
+                        .title(agentConfig.getTitle())
+                        .describe(agentConfig.getDescribe())
+                        .examples(RandomUtil.randomEleList(agentConfig.getHotQuestions(), num))
+                        .build();
+                return sessionVO;
+            }
+
+            // 没有空会话则创建新会话
+            SessionVO sessionVO = SessionVO.builder()
+                    .sessionId(IdUtil.fastSimpleUUID())
+                    .title(agentConfig.getTitle())
+                    .describe(agentConfig.getDescribe())
+                    .examples(RandomUtil.randomEleList(agentConfig.getHotQuestions(), num))
+                    .build();
+
+            var chatSession = ChatSession.builder()
+                    .sessionId(sessionVO.getSessionId())
+                    .userId(UserContext.getUser())
+                    .createTime(LocalDateTimeUtil.now())
+                    .updateTime(LocalDateTimeUtil.now())
+                    .build();
+            super.save(chatSession);
+
             return sessionVO;
+        } catch (JsonProcessingException e) {
+            log.error("创建会话时获取智能体配置失败", e);
+            return createDefaultSession(num);
         }
-
-        // 没有空会话则创建新会话
-        var sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
-        sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(), num));
-        sessionVO.setSessionId(IdUtil.fastSimpleUUID());
-
-        var chatSession = ChatSession.builder()
-                .sessionId(sessionVO.getSessionId())
-                .userId(UserContext.getUser())
-                .createTime(LocalDateTimeUtil.now())
-                .updateTime(LocalDateTimeUtil.now())
-                .build();
-        super.save(chatSession);
-
-        return sessionVO;
     }
-
 
     /**
      * 获取热门会话
@@ -78,13 +98,17 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
      * @return 热门会话列表
      */
     @Override
-    public List<SessionVO.Example> hotExamples(Integer num) {
-        return RandomUtil.randomEleList(sessionProperties.getExamples(), num);
+    public List<AgentConfigVO.Example> hotExamples(Integer num) {
+        try {
+            AgentConfigVO agentConfig = agentConfigService.getAgentConfig();
+            if (agentConfig != null && CollUtil.isNotEmpty(agentConfig.getHotQuestions())) {
+                return RandomUtil.randomEleList(agentConfig.getHotQuestions(), num);
+            }
+        } catch (JsonProcessingException e) {
+            log.error("获取热门问题失败", e);
+        }
+        return List.of();
     }
-
-
-
-    private final ChatMemory chatMemory;
 
     @Override
     public List<MessageVO> queryBySessionId(String sessionId) {
@@ -235,4 +259,35 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         return CollUtil.isNotEmpty(emptySessions) ? emptySessions.get(0).getSessionId() : null;
     }
 
+    /**
+     * 创建默认会话（当获取不到智能体配置时使用）
+     */
+    private SessionVO createDefaultSession(Integer num) {
+        // 使用预设的默认智能体配置
+        SessionVO sessionVO = SessionVO.builder()
+                .sessionId(IdUtil.fastSimpleUUID())
+                .title("Hello，我是智慧MOOC学习助理")
+                .describe("我是由智慧MOOC倾力打造的智能助理，我不仅能推荐课程、答疑解惑，还能为您激发创意、畅聊心事。")
+                .examples(List.of(
+                        new AgentConfigVO.Example("课程推荐", "能帮我推荐一个合适的课吗？"),
+                        new AgentConfigVO.Example("课程购买", "我想要报名《天津中德职业规划课》"),
+                        new AgentConfigVO.Example("知识讲解", "ArrayList和LinkedList有何区别？")
+                ))
+                .examples(RandomUtil.randomEleList(List.of(
+                        new AgentConfigVO.Example("课程推荐", "能帮我推荐一个合适的课吗？"),
+                        new AgentConfigVO.Example("课程购买", "我想要报名《天津中德职业规划课》"),
+                        new AgentConfigVO.Example("知识讲解", "ArrayList和LinkedList有何区别？")
+                ), num))
+                .build();
+
+        var chatSession = ChatSession.builder()
+                .sessionId(sessionVO.getSessionId())
+                .userId(UserContext.getUser())
+                .createTime(LocalDateTimeUtil.now())
+                .updateTime(LocalDateTimeUtil.now())
+                .build();
+        super.save(chatSession);
+
+        return sessionVO;
+    }
 }

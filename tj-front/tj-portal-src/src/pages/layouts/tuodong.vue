@@ -18,7 +18,7 @@
         >
           <template #content>
             <div v-if="token">哈！天机不可泄露<br />除非你来问我</div>
-            <div v-else>哇！我是天机AI助理<br />你没有登录可不能和我聊哦～</div>
+            <div v-else>哇！我是AI助理<br />你没有登录可不能和我聊哦～</div>
           </template>
           <div>
             <span @click="handleBigClose" class="close"

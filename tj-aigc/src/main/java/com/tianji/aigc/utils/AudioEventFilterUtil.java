@@ -1,7 +1,7 @@
 package com.tianji.aigc.utils;
 
 import cn.hutool.core.util.StrUtil;
-import com.tianji.aigc.domain.dto.AudioEventFilterParam;
+import com.tianji.aigc.domain.param.AudioEventFilterParam;
 
 import java.util.ArrayList;
 import java.util.List;

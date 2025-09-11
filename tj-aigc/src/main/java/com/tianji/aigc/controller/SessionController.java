@@ -1,5 +1,6 @@
 package com.tianji.aigc.controller;
 
+import com.tianji.aigc.domain.vo.AgentConfigVO;
 import com.tianji.aigc.service.ChatSessionService;
 import com.tianji.aigc.domain.vo.ChatSessionVO;
 import com.tianji.aigc.domain.vo.MessageVO;
@@ -31,7 +32,7 @@ public class SessionController {
      * @return 热门会话列表
      */
     @GetMapping("/hot")
-    public List<SessionVO.Example> hotExamples(@RequestParam(value = "n", defaultValue = "3") Integer num) {
+    public List<AgentConfigVO.Example> hotExamples(@RequestParam(value = "n", defaultValue = "3") Integer num) {
         return this.chatSessionService.hotExamples(num);
     }
 
