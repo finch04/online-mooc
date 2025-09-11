@@ -64,6 +64,24 @@ public class MongoDBChatMemoryRepository implements ChatMemoryRepository, MyChat
 
     @Override
     public void optimization(String conversationId) {
-        //TODO 待完成
+        // 1. 查询当前对话的消息记录
+        Query query = Query.query(Criteria.where("conversationId").is(conversationId));
+        ChatRecord chatRecord = this.mongoTemplate.findOne(query, ChatRecord.class);
+        if (chatRecord == null || chatRecord.getMessages() == null) {
+            return; // 无记录则无需处理
+        }
+
+        // 2. 移除最后2条消息（如果消息数量不足2条则清空）
+        List<String> messages = chatRecord.getMessages();
+        int newSize = messages.size() - 2;
+        if (newSize <= 0) {
+            messages.clear();
+        } else {
+            messages = messages.subList(0, newSize);
+        }
+
+        // 3. 更新保存优化后的消息
+        chatRecord.setMessages(messages);
+        this.mongoTemplate.save(chatRecord);
     }
 }

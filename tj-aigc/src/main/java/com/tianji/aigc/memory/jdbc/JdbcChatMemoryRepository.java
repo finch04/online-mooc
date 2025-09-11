@@ -66,6 +66,19 @@ public class JdbcChatMemoryRepository implements ChatMemoryRepository, MyChatMem
 
     @Override
     public void optimization(String conversationId) {
-        // TODO 待完成
+        // 1. 查询当前对话的最新2条消息（按创建时间倒序取前2条）
+        List<ChatRecord> latestRecords = this.chatRecordService.lambdaQuery()
+                .eq(ChatRecord::getConversationId, conversationId)
+                .orderByDesc(ChatRecord::getCreateTime)
+                .last("LIMIT 2") // 取最新的2条
+                .list();
+
+        if (latestRecords.isEmpty()) {
+            return; // 无记录则无需处理
+        }
+
+        // 2. 删除这2条消息
+        List<Long> ids = CollStreamUtil.toList(latestRecords, ChatRecord::getId);
+        this.chatRecordService.removeByIds(ids);
     }
 }
