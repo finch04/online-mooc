@@ -101,3 +101,20 @@ export const audioStt = (params) =>
     data: params,
     responseType: 'blob'
   });
+
+// 根据提示语进行文生图
+export const generateSimpleImage = (params) =>
+  request({
+    url: `/ais/img/generate/simple`,
+    method: 'post',
+    data: params,
+  });
+
+// 高级生图
+export const generateImage = (params) =>
+  request({
+    url: `/ais/img/generate`,
+    method: 'post',
+    data: params,
+  });
+    
