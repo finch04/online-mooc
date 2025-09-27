@@ -1,12 +1,28 @@
 package com.tianji.search.service.impl;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.ShardFailure;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.core.search.Highlight;
+import co.elastic.clients.elasticsearch.core.search.HighlightField;
+import co.elastic.clients.elasticsearch.core.search.SourceConfig;
+import co.elastic.clients.json.JsonData;
 import com.tianji.api.cache.CategoryCache;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.constants.ErrorInfo;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.CommonException;
-import com.tianji.common.utils.*;
+import com.tianji.common.utils.AssertUtils;
+import com.tianji.common.utils.BeanUtils;
+import com.tianji.common.utils.CollUtils;
+import com.tianji.common.utils.StringUtils;
+import com.tianji.common.utils.UserContext;
 import com.tianji.search.config.InterestsProperties;
 import com.tianji.search.constants.SearchErrorInfo;
 import com.tianji.search.domain.po.Course;
@@ -15,20 +31,8 @@ import com.tianji.search.domain.vo.CourseVO;
 import com.tianji.search.repository.CourseRepository;
 import com.tianji.search.service.IInterestsService;
 import com.tianji.search.service.ISearchService;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -39,38 +43,30 @@ import java.util.stream.Collectors;
 import static com.tianji.search.repository.CourseRepository.PUBLISH_TIME;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class SearchServiceImpl implements ISearchService {
 
-    @Autowired
-    private RestHighLevelClient restClient;
-
-    @Autowired
-    private IInterestsService interestsService;
-
-    @Autowired
-    private UserClient userClient;
-
-    @Autowired
-    private CategoryCache categoryCache;
-
-    @Autowired
-    private InterestsProperties interestsProperties;
+    private final ElasticsearchClient esClient;
+    private final IInterestsService interestsService;
+    private final UserClient userClient;
+    private final CategoryCache categoryCache;
+    private final InterestsProperties interestsProperties;
 
     @Override
     public List<CourseVO> queryCourseByCateId(Long cateLv2Id) {
         return queryTopNByCategoryIdLv2sAndFree(
-                CollUtils.singletonList(cateLv2Id), null, PUBLISH_TIME, false, 10);
+                CollUtils.singletonList(cateLv2Id), null, PUBLISH_TIME+".keyword", false, 10);
     }
 
     @Override
     public List<CourseVO> queryBestTopN() {
-        // 1.获取当前用户
         return queryTopNCourseOnMarketByFree(false, CourseRepository.SOLD);
     }
 
     @Override
     public List<CourseVO> queryNewTopN() {
-        return queryTopNCourseOnMarketByFree(false, PUBLISH_TIME);
+        return queryTopNCourseOnMarketByFree(false, PUBLISH_TIME+".keyword");
     }
 
     @Override
@@ -79,23 +75,20 @@ public class SearchServiceImpl implements ISearchService {
     }
 
     private List<CourseVO> queryTopNCourseOnMarketByFree(boolean isFree, String sortBy) {
-        // 1.获取当前用户
-        Long id = UserContext.getUser();
-        // 2.查询课程
-        List<CourseVO> courses = null;
-        if (id == null) {
-            // 3.未登录，直接查询报名人数最多的
+        Long userId = UserContext.getUser();
+        List<CourseVO> courses;
+
+        if (userId == null) {
+            // 未登录用户查询
             courses = queryTopNByCategoryIdLv2sAndFree(
                     null, isFree, sortBy, false, interestsProperties.getTopNumber());
         } else {
-            // 4.已登录，根据兴趣爱好查询
+            // 已登录用户查询
             List<Long> categoryIds = interestsService.queryMyInterestsIds();
             if (CollUtils.isEmpty(categoryIds)) {
-                // 4.1.没有兴趣爱好，直接查询报名人数最多的
                 courses = queryTopNByCategoryIdLv2sAndFree(
                         null, isFree, sortBy, false, interestsProperties.getTopNumber());
             } else {
-                // 4.2.有爱好.查询爱好课程中报名人数最多的
                 courses = queryTopNByCategoryIdLv2sAndFree(
                         categoryIds, isFree, sortBy, false, interestsProperties.getTopNumber());
             }
@@ -105,220 +98,310 @@ public class SearchServiceImpl implements ISearchService {
 
     private List<CourseVO> queryTopNByCategoryIdLv2sAndFree(
             List<Long> categoryIds, Boolean isFree, String sortBy, boolean isASC, int n) {
-        // 1.准备Request
-        SearchRequest request = new SearchRequest(CourseRepository.INDEX_NAME);
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        // 1.1.是否免费
-        if(isFree != null) {
-            queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.FREE, isFree));
-        }
-        // 1.2.分类id
-        if (categoryIds != null) {
-            if (categoryIds.size() == 1) {
-                queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.CATEGORY_ID_LV2, categoryIds.get(0)));
-            } else {
-                queryBuilder.filter(QueryBuilders.termsQuery(CourseRepository.CATEGORY_ID_LV2, categoryIds));
-            }
-        }
-        if(isFree != null || categoryIds != null) {
-            request.source().query(queryBuilder);
-        }
-        // 1.3.TopN
-        request.source().size(n).sort(sortBy, isASC ? SortOrder.ASC : SortOrder.DESC);
-        // 2.发送请求
-        SearchResponse response = null;
         try {
-            response = restClient.search(request, RequestOptions.DEFAULT);
+            // 构建查询条件
+            BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+
+            // 过滤条件：是否免费
+            if (isFree != null) {
+                boolQuery.filter(f -> f.term(t -> t
+                        .field(CourseRepository.FREE)
+                        .value(isFree)));
+            }
+
+            // 过滤条件：分类ID
+            if (CollUtils.isNotEmpty(categoryIds)) {
+                boolQuery.filter(f -> f.terms(t -> t
+                        .field(CourseRepository.CATEGORY_ID_LV2)
+                        .terms(ts -> ts.value(categoryIds.stream()
+                                .map(id -> FieldValue.of(id))
+                                .collect(Collectors.toList())))));
+            }
+
+            // 构建搜索请求
+            SearchRequest.Builder requestBuilder = new SearchRequest.Builder()
+                    .index(CourseRepository.INDEX_NAME)
+                    .query(boolQuery.build()._toQuery())
+                    .size(Math.min(n, 1000)); // 限制最大返回数量，避免过大查询
+
+            // 添加排序条件（如果sortBy不为空且是有效的排序字段）
+            if (StringUtils.isNotBlank(sortBy)) {
+                // 验证排序字段是否存在于映射中（可选，但推荐）
+                // 这里可以添加对sortBy字段的验证逻辑
+                requestBuilder.sort(s -> s.field(f -> f
+                        .field(sortBy)
+                        .order(isASC ? SortOrder.Asc : SortOrder.Desc)
+                ));
+            } else {
+                // 如果没有指定排序，添加默认排序（比如按_id排序）以避免潜在问题
+                requestBuilder.sort(s -> s.score(sb -> sb.order(SortOrder.Desc)));
+            }
+
+            // 执行查询
+            SearchResponse<Course> response = esClient.search(requestBuilder.build(), Course.class);
+
+            // 检查查询是否成功
+            if (response.shards() != null && response.shards().failures() != null) {
+                for (ShardFailure failure : response.shards().failures()) {
+                    log.error("Shard failure: {}", failure.reason());
+                }
+            }
+
+            // 解析结果
+            List<Hit<Course>> hits = response.hits().hits();
+            if (CollUtils.isEmpty(hits)) {
+                return CollUtils.emptyList();
+            }
+
+            List<CourseVO> courses = new ArrayList<>(hits.size());
+            Set<Long> teacherIds = new HashSet<>(hits.size());
+
+            for (Hit<Course> hit : hits) {
+                Course course = hit.source();
+                if (course == null) {
+                    continue;
+                }
+
+                CourseVO vo = BeanUtils.toBean(course, CourseVO.class);
+                teacherIds.add(course.getTeacher());
+                courses.add(vo);
+            }
+
+            // 补充教师信息
+            teacherIds.remove(0L);
+            if (CollUtils.isNotEmpty(teacherIds)) {
+                List<UserDTO> teachers = userClient.queryUserByIds(teacherIds);
+                AssertUtils.isNotEmpty(teachers, SearchErrorInfo.TEACHER_NOT_EXISTS);
+
+                Map<Long, String> teacherMap = teachers.stream()
+                        .collect(Collectors.toMap(UserDTO::getId, UserDTO::getName));
+
+                courses.forEach(vo -> vo.setTeacher(teacherMap.getOrDefault(
+                        Long.valueOf(vo.getTeacher()), "匿名")));
+            }
+
+            return courses;
         } catch (IOException e) {
+            log.error("Elasticsearch query failed: {}", e.getMessage(), e);
+            throw new CommonException(SearchErrorInfo.QUERY_COURSE_ERROR, e);
+        } catch (Exception e) {
+            log.error("Unexpected error during Elasticsearch query: {}", e.getMessage(), e);
             throw new CommonException(SearchErrorInfo.QUERY_COURSE_ERROR, e);
         }
-        // 3.解析
-        SearchHits searchHits = response.getHits();
-        SearchHit[] hits = searchHits.getHits();
-        if (hits == null || hits.length == 0) {
-            return CollUtils.emptyList();
-        }
-        List<CourseVO> courses = new ArrayList<>(hits.length);
-        Set<Long> teacherIds = new HashSet<>(hits.length);
-        for (SearchHit hit : hits) {
-            // 3.1.数据转换
-            CourseVO vo = JsonUtils.toBean(hit.getSourceAsString(), CourseVO.class);
-            // 3.2.获取分类id
-            teacherIds.add(Long.valueOf(vo.getTeacher()));
-            // 3.3.保存
-            courses.add(vo);
-        }
-        teacherIds.remove(0L);
-        if (teacherIds.size() == 0) {
-            return courses;
-        }
-        // 4.查询教师
-        List<UserDTO> teachers = userClient.queryUserByIds(teacherIds);
-        AssertUtils.isNotEmpty(teachers, SearchErrorInfo.TEACHER_NOT_EXISTS);
-        Map<String, String> tMap = teachers.stream()
-                .collect(Collectors.toMap(t -> t.getId().toString(), UserDTO::getName));
-        for (CourseVO c : courses) {
-            c.setTeacher(tMap.getOrDefault(c.getTeacher(), "匿名"));
-        }
-        return courses;
     }
 
     @Override
     public PageDTO<CourseVO> queryCoursesForPortal(CoursePageQuery query) {
-        // 1.搜索数据
-        SearchResponse response = searchForResponse(query, CourseVO.EXCLUDE_FIELDS);
-        // 2.解析响应
-        PageDTO<Course> result = handleSearchResponse(response, query.getPageSize());
-        // 3.处理VO
-        List<Course> list = result.getList();
-        if (CollUtils.isEmpty(list)) {
-            return PageDTO.empty(result.getTotal(), result.getPages());
+        try {
+            // 1.执行搜索
+            SearchResponse<Course> response = searchForResponse(query, CourseVO.EXCLUDE_FIELDS);
+
+            // 2.处理响应结果
+            PageDTO<Course> result = handleSearchResponse(response, query.getPageSize());
+
+            // 3.转换为VO
+            List<Course> courses = result.getList();
+            if (CollUtils.isEmpty(courses)) {
+                return PageDTO.empty(result.getTotal(), result.getPages());
+            }
+
+            // 补充教师信息
+            List<Long> teacherIds = courses.stream()
+                    .map(Course::getTeacher)
+                    .collect(Collectors.toList());
+
+            List<UserDTO> teachers = userClient.queryUserByIds(teacherIds);
+            AssertUtils.isNotEmpty(teachers, SearchErrorInfo.TEACHER_NOT_EXISTS);
+
+            Map<Long, String> teacherMap = teachers.stream()
+                    .collect(Collectors.toMap(UserDTO::getId, UserDTO::getName));
+
+            List<CourseVO> vos = courses.stream()
+                    .map(course -> {
+                        CourseVO vo = BeanUtils.toBean(course, CourseVO.class);
+                        vo.setTeacher(teacherMap.getOrDefault(course.getTeacher(), "未知"));
+                        return vo;
+                    })
+                    .collect(Collectors.toList());
+
+            return new PageDTO<>(result.getTotal(), result.getPages(), vos);
+        } catch (Exception e) {
+            throw new CommonException(ErrorInfo.Msg.SERVER_INTER_ERROR, e);
         }
-        // 3.1.查询教师信息
-        List<Long> teacherIds = list.stream().map(Course::getTeacher).collect(Collectors.toList());
-        List<UserDTO> teachers = userClient.queryUserByIds(teacherIds);
-        AssertUtils.isNotEmpty(teachers, SearchErrorInfo.TEACHER_NOT_EXISTS);
-        Map<Long, String> teacherMap = teachers.stream()
-                .collect(Collectors.toMap(UserDTO::getId, UserDTO::getName));
-        // 3.2.转换VO
-        List<CourseVO> vos = new ArrayList<>(list.size());
-        for (Course c : list) {
-            CourseVO vo = BeanUtils.toBean(c, CourseVO.class);
-            vo.setTeacher(teacherMap.getOrDefault(c.getTeacher(), "未知"));
-            vos.add(vo);
-        }
-        return new PageDTO<>(result.getTotal(), result.getPages(), vos);
     }
 
     @Override
     public List<Long> queryCoursesIdByName(String keyword) {
-        // 1.创建Request
-        SearchRequest request = new SearchRequest(CourseRepository.INDEX_NAME);
-        // 2.构建DSL
-        request.source()
-                .query(QueryBuilders.matchPhraseQuery(CourseRepository.DEFAULT_QUERY_NAME, keyword))
-                .fetchSource(new String[]{"id"}, null);
-        // 3.查询
-        SearchResponse response;
         try {
-            response = restClient.search(request, RequestOptions.DEFAULT);
+            // 构建查询
+            SearchRequest request = SearchRequest.of(s -> s
+                    .index(CourseRepository.INDEX_NAME)
+                    .query(q -> q
+                            .matchPhrase(mp -> mp
+                                    .field(CourseRepository.DEFAULT_QUERY_NAME)
+                                    .query(keyword)
+                            )
+                    )
+                    .source(sc -> sc
+                            .filter(f -> f.includes("id"))
+                    )
+            );
+
+            // 执行查询
+            SearchResponse<Course> response = esClient.search(request, Course.class);
+
+            // 解析结果
+            return response.hits().hits().stream()
+                    .map(hit -> hit.source().getId())
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new CommonException(SearchErrorInfo.QUERY_COURSE_ERROR, e);
         }
-        // 4.解析
-        SearchHits searchHits = response.getHits();
-        // 4.1.获取hits
-        SearchHit[] hits = searchHits.getHits();
-        if (hits.length == 0) {
-            return CollUtils.emptyList();
-        }
-        // 4.2.获取id
-        return Arrays.stream(hits)
-                .map(SearchHit::getId)
-                .map(Long::valueOf)
-                .collect(Collectors.toList());
     }
 
+    private SearchResponse<Course> searchForResponse(CoursePageQuery query, String[] excludeFields) throws IOException {
+        // 构建基础查询
+        BoolQuery.Builder boolQuery = buildBasicQuery(query);
 
-    private SearchResponse searchForResponse(CoursePageQuery query, String[] excludeFields) {
-        // 1.创建Request
-        SearchRequest request = new SearchRequest(CourseRepository.INDEX_NAME);
-        // 2.构建DSL
-        // 2.1.构建query
-        buildBasicQuery(request, query);
-        // 2.2.排序
-        String sortBy = query.getSortBy();
-        if (StringUtils.isNotBlank(sortBy)) {
-            request.source().sort(sortBy, query.getIsAsc() ? SortOrder.ASC : SortOrder.DESC);
+
+        // 构建搜索请求（使用 8.x 版本的 Builder 模式）
+        SearchRequest.Builder requestBuilder = new SearchRequest.Builder()
+                .index(CourseRepository.INDEX_NAME)
+                .query(boolQuery.build()._toQuery())
+                .from(query.from())
+                .size(query.getPageSize());
+
+        // 排序（8.x 版本需通过 sort 方法的函数式接口配置）
+        if (StringUtils.isNotBlank(query.getSortBy())) {
+            if("publishTime".equals(query.getSortBy())){
+                query.setSortBy("publishTime.keyword");
+            }
+            requestBuilder.sort(sort -> sort
+                    .field(field -> field
+                            .field(query.getSortBy())
+                            .order(query.getIsAsc() ? SortOrder.Asc : SortOrder.Desc)
+                    )
+            );
         }
-        // 2.3.分页
-        request.source().from(query.from()).size(query.getPageSize());
-        // 2.4.高亮
-        request.source().highlighter(new HighlightBuilder().field(CourseRepository.DEFAULT_QUERY_NAME));
-        // 2.5.source处理
-        request.source().fetchSource(null, excludeFields);
-        // 3.发送请求
-        SearchResponse response = null;
-        try {
-            response = restClient.search(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new CommonException(ErrorInfo.Msg.SERVER_INTER_ERROR, e);
+
+        // 高亮设置（8.x 版本通过 fields 方法配置字段高亮）
+        requestBuilder.highlight(highlight -> highlight
+                .fields(CourseRepository.DEFAULT_QUERY_NAME, field -> field
+                        .preTags("<em>")
+                        .postTags("</em>")
+                )
+        );
+
+        // 过滤返回字段（8.x 版本 source 配置语法）
+        if (excludeFields != null && excludeFields.length > 0) {
+            requestBuilder.source(source -> source
+                    .filter(f -> f.excludes(Arrays.asList(excludeFields)))
+            );
         }
-        return response;
+
+        // 执行查询时构建请求
+        SearchRequest request = requestBuilder.build();
+
+        // 使用 ElasticsearchClient 执行查询并返回结果
+        return esClient.search(request, Course.class);
     }
 
-    private void buildBasicQuery(SearchRequest request, CoursePageQuery query) {
-        // 1.准备bool查询
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        // 2.关键字搜索
+    private BoolQuery.Builder buildBasicQuery(CoursePageQuery query) {
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+
+        // 关键字搜索
         String keyword = query.getKeyword();
         if (StringUtils.isBlank(keyword)) {
-            queryBuilder.must(QueryBuilders.matchAllQuery());
+            boolQuery.must(must -> must.matchAll(m -> m));
         } else {
-            queryBuilder.must(QueryBuilders.matchPhraseQuery(CourseRepository.DEFAULT_QUERY_NAME, keyword));
+            boolQuery.must(must -> must.matchPhrase(mp -> mp
+                    .field(CourseRepository.DEFAULT_QUERY_NAME)
+                    .query(keyword)
+            ));
         }
-        // 3.其它条件
+
+        // 分类过滤
         if (query.getCategoryIdLv1() != null) {
-            queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.CATEGORY_ID_LV1, query.getCategoryIdLv1()));
+            boolQuery.filter(filter -> filter.term(t -> t
+                    .field(CourseRepository.CATEGORY_ID_LV1)
+                    .value(query.getCategoryIdLv1())
+            ));
         }
         if (query.getCategoryIdLv2() != null) {
-            queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.CATEGORY_ID_LV2, query.getCategoryIdLv2()));
+            boolQuery.filter(filter -> filter.term(t -> t
+                    .field(CourseRepository.CATEGORY_ID_LV2)
+                    .value(query.getCategoryIdLv2())
+            ));
         }
         if (query.getCategoryIdLv3() != null) {
-            queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.CATEGORY_ID_LV3, query.getCategoryIdLv3()));
+            boolQuery.filter(filter -> filter.term(t -> t
+                    .field(CourseRepository.CATEGORY_ID_LV3)
+                    .value(query.getCategoryIdLv3())
+            ));
         }
+
+        // 其他过滤条件
         if (query.getFree() != null) {
-            queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.FREE, query.getFree()));
+            boolQuery.filter(filter -> filter.term(t -> t
+                    .field(CourseRepository.FREE)
+                    .value(query.getFree())
+            ));
         }
         if (query.getType() != null) {
-            queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.TYPE, query.getType()));
+            boolQuery.filter(filter -> filter.term(t -> t
+                    .field(CourseRepository.TYPE)
+                    .value(query.getType())
+            ));
         }
+
+        // 时间范围过滤
         LocalDateTime beginTime = query.getBeginTime();
         LocalDateTime endTime = query.getEndTime();
-        if(beginTime != null || endTime != null) {
-            RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(CourseRepository.UPDATE_TIME);
-            if (beginTime != null) {
-                rangeQuery.gte(beginTime);
-            }
-            if (endTime != null) {
-                rangeQuery.lte(endTime);
-            }
-            queryBuilder.filter(rangeQuery);
+        if (beginTime != null || endTime != null) {
+            boolQuery.filter(filter -> filter.range(r -> {
+                RangeQuery.Builder range = new RangeQuery.Builder().field(CourseRepository.UPDATE_TIME);
+                if (beginTime != null) {
+                    range.gte(JsonData.of(beginTime));
+                }
+                if (endTime != null) {
+                    range.lte(JsonData.of(endTime));
+                }
+                return range;
+            }));
         }
-        // 4.写入request
-        request.source().query(queryBuilder);
-    }
 
-    private PageDTO<Course> handleSearchResponse(SearchResponse response, int pageSize) {
-        SearchHits searchHits = response.getHits();
-        // 1.总条数
-        long total = searchHits.getTotalHits().value;
-        // 2.总页数
+        return boolQuery;
+    }
+    private PageDTO<Course> handleSearchResponse(SearchResponse<Course> response, int pageSize) {
+        // 总条数
+        long total = response.hits().total().value();
+        // 总页数
         long totalPages = (total + pageSize - 1) / pageSize;
-        // 3.获取命中的数据
-        SearchHit[] hits = searchHits.getHits();
-        if (hits.length <= 0) {
+
+        // 处理命中数据
+        List<Hit<Course>> hits = response.hits().hits();
+        if (CollUtils.isEmpty(hits)) {
             return new PageDTO<>(total, totalPages, CollUtils.emptyList());
         }
-        // 4.遍历
-        List<Course> list = new ArrayList<>(hits.length);
-        for (SearchHit hit : hits) {
-            // 5.获取某一条source
-            String jsonSource = hit.getSourceAsString();
-            // 6.反序列化
-            Course course = JsonUtils.toBean(jsonSource, Course.class);
-            // 7.处理高亮
-            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            if (CollUtils.isNotEmpty(highlightFields)) {
-                // 7.1.获取高亮结果
-                HighlightField field = highlightFields.get(CourseRepository.DEFAULT_QUERY_NAME);
-                Object[] fragments = field.getFragments();
-                String value = StringUtils.join(fragments);
-                // 7.2.覆盖非高亮结果
-                course.setName(value);
+
+        List<Course> courses = new ArrayList<>(hits.size());
+        for (Hit<Course> hit : hits) {
+            Course course = hit.source();
+            if (course == null) {
+                continue;
             }
-            list.add(course);
+
+            // 处理高亮
+            if (hit.highlight() != null && hit.highlight().containsKey(CourseRepository.DEFAULT_QUERY_NAME)) {
+                List<String> highlights = hit.highlight().get(CourseRepository.DEFAULT_QUERY_NAME);
+                if (CollUtils.isNotEmpty(highlights)) {
+                    course.setName(highlights.get(0));
+                }
+            }
+
+            courses.add(course);
         }
-        return new PageDTO<>(total, totalPages, list);
+
+        return new PageDTO<>(total, totalPages, courses);
     }
 }

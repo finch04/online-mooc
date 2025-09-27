@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 /**
  * <p>
- * 草稿课程 服务实现类
+ * 课程 服务实现类
  * </p>
  *
  * @author wusongsong
@@ -126,6 +126,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
         // 3.课程数据封装
         CourseDTO courseDTO = BeanUtils.toBean(course, CourseDTO.class);
+        courseDTO.setEnable(course.getDeleted()==0?1:0);
         //3.1.一级课程分类
         courseDTO.setCategoryIdLv1(course.getFirstCateId());
         //3.2.二级课程分类
@@ -152,7 +153,6 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         }
         //5.返回数据
         return courseDTO;
-
     }
 
     @Override
@@ -304,7 +304,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         for (ChapterVO chapter : vo.getChapters()) {
             for (SectionVO section : chapter.getSections()) {
                 LearningRecordDTO r = rMap.get(section.getId());
-                if (r == null) continue;
+                if (r == null) {
+                    continue;
+                }
                 section.setFinished(r.getFinished());
                 section.setMoment(r.getMoment());
             }

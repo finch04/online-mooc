@@ -1,6 +1,7 @@
 package com.tianji.search.impl;
 
 import com.tianji.api.client.course.CourseClient;
+import com.tianji.api.dto.course.CourseDTO;
 import com.tianji.api.dto.course.CourseSearchDTO;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.RandomUtils;
@@ -66,13 +67,13 @@ class CourseServiceImplTest {
     void testLoadCourse() {
         for (long i = 1549025085494521857L; i <= 1549025085494521857L; i++) {
             // 1.根据id查询课程信息
-            CourseSearchDTO courseSearchDTO = courseClient.getSearchInfo(i);
-            if (courseSearchDTO == null) {
+            CourseDTO courseDTO = courseClient.getSearchInfo(i);
+            if (courseDTO == null) {
                 return;
             }
             // 2.数据转换
-            Course course = BeanUtils.toBean(courseSearchDTO, Course.class);
-            course.setType(courseSearchDTO.getCourseType());
+            Course course = BeanUtils.toBean(courseDTO, Course.class);
+            course.setType(courseDTO.getCourseType());
             course.setScore(41 + RandomUtils.randomInt(10));
             course.setSold(0);
             // 3.写入索引库

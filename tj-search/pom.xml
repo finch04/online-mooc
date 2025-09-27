@@ -57,13 +57,6 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
-        <!--es-->
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>${elasticsearch.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
@@ -81,17 +74,75 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
-        <!--spring boot与es整合依赖-->
-        <!--<dependency>-->
-        <!--    <groupId>org.springframework.boot</groupId>-->
-        <!--    <artifactId>spring-boot-starter-data-elasticsearch</artifactId>-->
-        <!--</dependency>-->
-        <!--es的java客户端需要的jakarta.json依赖-->
-        <!--<dependency>-->
-        <!--    <groupId>jakarta.json</groupId>-->
-        <!--    <artifactId>jakarta.json-api</artifactId>-->
-        <!--    <version>2.0.1</version>-->
-        <!--</dependency>-->
+
+
+        <!-- Spring Boot 与 Elasticsearch 整合依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+<!--            &lt;!&ndash; 排除 Spring Boot 自带的 Elasticsearch 客户端依赖，避免版本冲突 &ndash;&gt;-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.elasticsearch.client</groupId>-->
+<!--                    <artifactId>elasticsearch-rest-high-level-client</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.elasticsearch</groupId>-->
+<!--                    <artifactId>elasticsearch</artifactId>-->
+<!--                </exclusion>-->
+<!--                &lt;!&ndash; 排除可能冲突的依赖 &ndash;&gt;-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.elasticsearch.plugin</groupId>-->
+<!--                    <artifactId>x-content</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+        </dependency>
+
+
+
+        <!-- Jakarta JSON 依赖（Elasticsearch 8.x 必需） -->
+        <dependency>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- 添加 JSON 处理实现（重要！） -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.json</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+<!--        &lt;!&ndash; 添加 Elasticsearch 核心依赖（确保版本一致） &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>co.elastic.clients</groupId>-->
+<!--            <artifactId>elasticsearch-java</artifactId>-->
+<!--            <version>8.1.3</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.elasticsearch.client</groupId>-->
+<!--            <artifactId>elasticsearch-rest-client</artifactId>-->
+<!--            <version>8.1.3</version>-->
+<!--        </dependency>-->
+
+
+        <!--es-->
+<!--        <dependency>-->
+<!--            <groupId>org.elasticsearch.client</groupId>-->
+<!--            <artifactId>elasticsearch-rest-high-level-client</artifactId>-->
+<!--            <version>7.12.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>co.elastic.clients</groupId>-->
+<!--            <artifactId>elasticsearch-java</artifactId>-->
+<!--            <version>8.13.4</version>-->
+<!--        </dependency>-->
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>

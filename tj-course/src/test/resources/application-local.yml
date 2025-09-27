@@ -16,9 +16,9 @@ spring:
       - nacos:shared-mybatis.yaml # 共享mybatis配置
       - nacos:shared-logs.yaml # 共享日志配置
       - nacos:shared-feign.yaml # 共享feign配置
-      - nacos:shared-mq.yaml # 共享mq配置
-  elasticsearch:
-    uris: http://192.168.150.101:19200
+      - nacos:shared-mq.yaml # 共享MQ配置
+      - nacos:shared-seata.yaml # 共享seata配置
+      - nacos:shared-xxljob.yaml # 共享seata配置
 logging:
   level:
     com.tianji: debug

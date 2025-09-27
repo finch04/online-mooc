@@ -55,8 +55,8 @@
         <ali.sdk.pay.version>4.33.12.ALL</ali.sdk.pay.version>
         <tencent.cloud.version>3.1.515</tencent.cloud.version>
         <redisson.version>3.13.6</redisson.version>
-        <elasticsearch.version>7.12.1</elasticsearch.version>
-        <!--<elasticsearch.version>8.13.4</elasticsearch.version>-->
+<!--        <elasticsearch.version>7.12.1</elasticsearch.version>-->
+        <elasticsearch.version>8.13.4</elasticsearch.version>
         <tencent.sdk.cos.version>5.6.89</tencent.sdk.cos.version>
         <tencent.sdk.vod.version>2.1.5</tencent.sdk.vod.version>
         <xxl-job-version>2.3.1</xxl-job-version>

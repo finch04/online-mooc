@@ -57,7 +57,8 @@ const searchParams = ref({  // 搜索参数定义
   categoryIdLv2: '',
   categoryIdLv3: '',
   pageNo: 1,
-  pageSize: 12
+  pageSize: 12,
+  isAsc:false
 })
 // 结果 - 课程列表
 const searchResultData = ref([])

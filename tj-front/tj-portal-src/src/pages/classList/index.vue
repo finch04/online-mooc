@@ -17,10 +17,10 @@
         :data="freeClassData"
       ></OpenClass>
     </div>
-    <!-- 新课推荐 -->
+    <!-- 免费课推荐 -->
     <div class="pd-tp-30">
       <OpenClass
-        title="新课推荐"
+        title="免费课推荐"
         class="container"
         :data="freeClassData"
       ></OpenClass>
@@ -56,7 +56,7 @@ import banner3 from "@/assets/banner3.jpg";
 const classCategorys = ref([]);
 // banner幻灯片图片
 const imags = [banner1, banner2, banner3];
-// 直播公开课的数据
+// 免费课推荐的数据
 const freeClassData = ref([]);
 
 // mounted生命周期

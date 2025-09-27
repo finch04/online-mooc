@@ -1,15 +1,22 @@
 package com.tianji.search.repository;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.indices.GetMappingResponse;
+import co.elastic.clients.elasticsearch.indices.PutMappingResponse;
 import com.tianji.common.utils.RandomUtils;
 import com.tianji.search.domain.po.Course;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @SpringBootTest
+@Slf4j
 class CourseRepositoryTest {
 
     @Autowired
@@ -53,6 +60,35 @@ class CourseRepositoryTest {
     @Test
     void increment() {
         repository.increment(1204101L, "sold", -1);
+    }
+
+    @Test
+    void test() throws IOException {
+        checkAndFixMapping();
+    }
+
+    @Resource
+    private ElasticsearchClient esClient;
+    // 检查当前映射
+    public void checkAndFixMapping() throws IOException {
+        GetMappingResponse mapping = esClient.indices().getMapping(g -> g
+                .index(CourseRepository.INDEX_NAME));
+
+        log.info("当前映射: {}", mapping);
+
+        // 如果publishTime是text类型，需要重建索引或更新映射
+        updateMappingToDateType();
+    }
+
+    // 更新映射为日期类型
+    private void updateMappingToDateType() throws IOException {
+        PutMappingResponse response = esClient.indices().putMapping(p -> p
+                .index(CourseRepository.INDEX_NAME)
+                .properties("publishTime", prop -> prop
+                        .date(d -> d.format("yyyy-MM-dd HH:mm:ss||epoch_millis"))
+                ));
+
+        log.info("映射更新结果: {}", response);
     }
 
 }

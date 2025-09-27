@@ -82,7 +82,7 @@ public class RabbitMqHelper {
             try {
                 MDC.put(REQUEST_ID_HEADER, requestId);
                 if(time != null && time > 0){
-                    Thread.sleep( time);
+                    Thread.sleep(time);
                 }
                 send(exchange, routingKey, t);
             }catch (Exception e){

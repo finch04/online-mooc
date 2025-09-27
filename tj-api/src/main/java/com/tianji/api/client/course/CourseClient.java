@@ -45,7 +45,7 @@ public interface CourseClient {
      * @return 索引库需要的数据
      */
     @GetMapping("/course/{id}/searchInfo")
-    CourseSearchDTO getSearchInfo(@PathVariable("id") Long id);
+    CourseDTO getSearchInfo(@PathVariable("id") Long id);
 
     /**
      * 根据课程id集合查询课程简单信息
