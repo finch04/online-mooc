@@ -25,6 +25,7 @@
         <module>tj-data</module>
         <module>tj-remark</module>
         <module>tj-aigc</module>
+        <module>tj-live</module>
     </modules>
     <packaging>pom</packaging>
 
