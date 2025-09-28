@@ -1,12 +1,22 @@
 # 智慧MOOC教育平台
 
+![logo](项目升级日志.assets/logo.png)
+
+
+
+**项目展示视频：**
+- 用户端：https://www.bilibili.com/video/BV1NEb5zBEko
+- 管理端：https://www.bilibili.com/video/BV1fdtRz6Efc
+
+JDK17版本展示视频等功能基本完善再发布，敬请期待~
+
 ## 项目介绍
 
 智慧MOOC教育平台是一个在线的非学历职业技能培训平台，核心业务是以售卖各种技能培训的在线课程，并提供丰富的学习辅助功能、交互功能，以提升用户学习时的氛围感和学习的积极性。
 
 技术栈：SpringBoot、SpringCloud、SpringAI、Mybatis、MySQL、Redis、Redisson、Caffeine、RabbitMQ、XXL-JOB、腾讯云VOD（视频点播）、Nginx、MongoDB等
 
-JDK17分支介绍：本分支将项目由JDK11版本升级为JDK17，并添加**AIGC模块**
+JDK17分支介绍：本分支将项目由JDK11版本升级为JDK17，并添加**AIGC模块、直播模块**
 
 ## 项目模块介绍
 
@@ -22,6 +32,7 @@ JDK17分支介绍：本分支将项目由JDK11版本升级为JDK17，并添加**
 | tj-front     | 前端展示模块 | 负责平台前端页面的展示、交互等功能，包含管理端和前台                     |
 | tj-gateway   | 网关控制中心 | 作为网关，处理请求的路由、过滤、鉴权等，保障系统的安全和流量管理               |
 | tj-learning  | 学习中心   | 专注于学习相关业务，也包含用户学习的各种辅助功能                       |
+| tj-live      | 直播中心   | 支持直播功能，如直播课程的创建、直播流管理、观众互动等 |
 | tj-media     | 媒资管理中心 | 用于管理媒体资源，如媒资、文件的管理存储                           |
 | tj-message   | 消息中心   | 负责平台系统消息/通知推送、以及用户私聊、在线群聊的功能                   |
 | tj-pay       | 支付中台   | 集成了多种支付方式，处理支付相关业务，如第三方支付或退款、支付方式管理、支付状态查询、对账等 |
@@ -88,6 +99,7 @@ JDK17分支介绍：本分支将项目由JDK11版本升级为JDK17，并添加**
 > 集成MongoDB、Redis、MySQL等多异构数据源的数据存储方案
 > 
 > 基于Redis的Queue将数据定时持久化到MySQL的解决方案
+>
 > 
 
 
