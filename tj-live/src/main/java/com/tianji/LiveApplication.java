@@ -1,4 +1,4 @@
-package com.tianji.live;
+package com.tianji;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;

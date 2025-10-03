@@ -17,11 +17,11 @@
     </properties>
     <dependencies>
         <!-- Javacv 依赖 -->
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv</artifactId>
-            <version>1.5.4</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.bytedeco</groupId>-->
+<!--            <artifactId>javacv</artifactId>-->
+<!--            <version>1.5.4</version>-->
+<!--        </dependency>-->
 
 <!--        &lt;!&ndash; Ffmpeg 依赖 &ndash;&gt;-->
 <!--        <dependency>-->
@@ -29,7 +29,6 @@
 <!--            <artifactId>ffmpeg</artifactId>-->
 <!--            <version>4.4-1.5.7</version>-->
 <!--        </dependency>-->
-
         <!--auth-sdk-->
         <dependency>
             <groupId>com.tianji</groupId>
@@ -54,7 +53,7 @@
         <!--mybatis-->
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -84,11 +83,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-        <!--xxl-job-->
-        <dependency>
-            <groupId>com.xuxueli</groupId>
-            <artifactId>xxl-job-core</artifactId>
         </dependency>
         <!--loadbalancer-->
         <dependency>

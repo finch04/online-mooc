@@ -18,6 +18,10 @@ import './permission';
 import { store } from './store';
 import router from './router';
 
+
+import { closeWebSocket } from './utils/websocket'
+
+import 'video.js/dist/video-js.min.css'
 const app = createApp(App);
 //创建v-highlight全局指令
 app.directive('highlight',function (el) {
@@ -26,6 +30,9 @@ app.directive('highlight',function (el) {
       hljs.highlightBlock(block)
     })
   })
+  
+//浏览器关闭时，触发一次关闭链接动作
+window.addEventListener('beforeunload',closeWebSocket)
 app.use(ElementPlus);
 app.use(store);
 app.use(router);

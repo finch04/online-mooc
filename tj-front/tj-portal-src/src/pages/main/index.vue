@@ -15,17 +15,17 @@
     </div>
     <!-- 兴趣模块 -->
     <!-- 直播公开课 -->
-    <!-- <div class="bg-wt pd-tp-30">
-      <OpenClass
-        title="直播公开课"
-        class="container bg-wt"
-        :data="freeClassData"
-      ></OpenClass>
-    </div> -->
-    <!-- 免费课推荐 -->
+    <div class="bg-wt pd-tp-30">
+      <OpenLive
+        title="直播课"
+        class="container"
+        :data="liveRoomList"
+      ></OpenLive>
+    </div>
+    <!-- 精品公开课 -->
     <div class="pd-tp-30 bg-wt">
       <OpenClass
-        title="免费课推荐"
+        title="精品公开课"
         class="container"
         :data="freeClassData"
       ></OpenClass>
@@ -92,6 +92,8 @@ import { onMounted, ref } from "vue";
 import { isLogin, dataCacheStore } from "@/store";
 import { ElMessage } from "element-plus";
 import { getClassCategorys, getRecommendClassList, setInterests, getInterests } from "@/api/class.js";
+import { getLiveRoomList } from "@/api/live.js";
+import OpenLive from "./components/OpenLive.vue";
 import ClassCategory from "@/components/ClassCategory.vue";
 import CheckInterest from "./components/CheckInterest.vue";
 import Interest from "./components/Interest.vue";
@@ -113,10 +115,15 @@ const interestDialog = ref(false);
 const goodClassData = ref([]);
 // 精品新课数据
 const newClassData = ref([]);
+// 直播间列表
+const liveRoomList = ref([]);
+
 // mounted生命周期
 onMounted(async () => {
   // 获取三级分类信息
   getClassCategoryData();
+  // 获取直播间列表
+  getLiveRoomListData();
   // 获取精品公开课
   getFreeClassListData();
   getGoodClassListData();
@@ -125,10 +132,25 @@ onMounted(async () => {
   if (await isLogin()) {
     getInterestData();
   }
+  
 });
 
 /** 方法定义 **/
 
+//获取直播间列表
+const getLiveRoomListData = async () => {
+  await getLiveRoomList()
+    .then((res) => {
+      if (res.code == 200) {
+        liveRoomList.value = res.data;
+      } else {
+        ElMessage(res.data.msg);
+      }
+    })
+    .catch(() => {
+      ElMessage("直播间请求出错！");
+    });
+};
 // 获取一、二、三级分类信息
 const getClassCategoryData = async () => {
   await getClassCategorys()

@@ -11,16 +11,11 @@
     </div>
     <!-- 直播公开课 -->
     <div class="bg-wt pd-tp-30">
-      <OpenClass
-        title="直播公开课"
-        class="container bg-wt"
-        :data="freeClassData"
-      ></OpenClass>
     </div>
-    <!-- 免费课推荐 -->
+    <!-- 精品公开课 -->
     <div class="pd-tp-30">
       <OpenClass
-        title="免费课推荐"
+        title="精品公开课"
         class="container"
         :data="freeClassData"
       ></OpenClass>
@@ -56,9 +51,8 @@ import banner3 from "@/assets/banner3.jpg";
 const classCategorys = ref([]);
 // banner幻灯片图片
 const imags = [banner1, banner2, banner3];
-// 免费课推荐的数据
+// 精品公开课的数据
 const freeClassData = ref([]);
-
 // mounted生命周期
 onMounted(() => {
   // 获取三级分类信息

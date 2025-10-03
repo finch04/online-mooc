@@ -44,6 +44,10 @@ spring:
           uri: lb://search-service
           predicates:
             - Path=/ss/**
+        - id: lvs
+          uri: lb://live-service
+          predicates:
+            - Path=/lvs/**
         - id: ls
           uri: lb://learning-service
           predicates:
@@ -72,10 +76,6 @@ spring:
           uri: lb://aigc-service
           predicates:
             - Path=/ais/**
-        - id: lvs
-          uri: lb://live-service
-          predicates:
-            - Path=/lvs/**
       default-filters:
         - StripPrefix=1
       globalcors: # 全局的跨域处理

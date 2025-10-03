@@ -33,6 +33,7 @@
     "marked": "^15.0.7",
     "marked-highlight": "^2.2.1",
     "microsoft-cognitiveservices-speech-sdk": "^1.42.0",
+    "mitt": "^3.0.1",
     "moment": "^2.29.4",
     "npm": "^11.1.0",
     "nprogress": "^0.2.0",
@@ -43,6 +44,7 @@
     "sass": "^1.53.0",
     "swiper": "^8.3.1",
     "tcadapter": "^0.0.8",
+    "video.js": "^8.10.0",
     "vite-svg-loader": "^3.4.0",
     "vue": "^3.2.25",
     "vue-router": "^4.1.2"

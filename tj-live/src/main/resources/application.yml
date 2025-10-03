@@ -22,4 +22,4 @@ tj:
     database: tj_live
   auth:
     resource:
-      enable: false
+      enable: true

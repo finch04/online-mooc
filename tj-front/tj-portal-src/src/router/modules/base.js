@@ -38,6 +38,21 @@ export default [
     ],
   },
   {
+    path: '/live',
+    component: Layout,
+    name: 'live',
+    redirect: '/live/index',
+    meta: { title: '直播课' },
+    children: [
+      {
+        path: 'index',
+        name: 'liveIndex',
+        component: () => import('@/pages/live/index.vue'),
+        meta: { title: '直播课' },
+      },
+    ],
+  },
+  {
     path: '/askDetails',
     component: Layout,
     name: 'askDetails',
@@ -57,13 +72,13 @@ export default [
     component: Layout,
     name: 'details',
     redirect: '/details/index',
-    meta: { title: '问题详情' },
+    meta: { title: '课程详情' },
     children: [
       {
         path: 'index',
         name: 'detailsIndex',
         component: () => import('@/pages/classDetails/index.vue'),
-        meta: { title: '问题详情' },
+        meta: { title: '课程详情' },
       }
     ],
   },

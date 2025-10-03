@@ -17,7 +17,6 @@ spring:
       - nacos:shared-logs.yaml # 共享日志配置
       - nacos:shared-feign.yaml # 共享feign配置
       - nacos:shared-mq.yaml # 共享mq配置
-      - nacos:shared-xxljob.yaml # 共享mq配置
 logging:
   level:
     com.tianji: debug

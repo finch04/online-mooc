@@ -2,8 +2,7 @@
 <template>
   <div class="classCards" @click="goDetails(data.id)">
     <div class="image">
-       <!-- 由于暂时不做直播 所以录播先去掉 -->
-        <!-- <span class="label">录播</span> -->
+        <span class="label">录播</span>
         <img :src="data.coverUrl" alt="" />
     </div>
     <div class="pd-10">
