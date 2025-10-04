@@ -1,0 +1,25 @@
+server:
+  port: 8098  #端口
+  tomcat:
+    uri-encoding: UTF-8   #服务编码
+spring:
+  profiles:
+    active: local
+  application:
+    name: unqid-service
+tj:
+  swagger:
+    enable: true
+    enableResponseWrap: true
+    package-path: com.tianji.unqid.controller
+    title: 智慧MOOC - 独立ID生成服务接口文档
+    description: 该服务包含独立ID生成服务，供其他服务调用
+    contact-name: 研究院
+    contact-url: http://www.itcast.cn/
+    contact-email: 1418875140@qq.com
+    version: v1.0
+  jdbc:
+    database: tj_unqid
+  auth:
+    resource:
+      enable: false

@@ -1,5 +1,6 @@
 package com.tianji.live.service;
 
+import com.tianji.api.client.unqid.UnqidClient;
 import com.tianji.live.constants.IMConstants;
 import com.tianji.live.protocol.GenericMessage;
 import com.tianji.live.protocol.MessageBody;
@@ -11,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,7 +30,7 @@ public class ChatBusiService {
     @Resource
     private IIMRPCService imRPCService;
     @Resource
-    private IGenerateIDRPCService generateIDRPCService;
+    private UnqidClient unqidClient;
     @Resource
     private IMCacheKeyBuilder imCacheKeyBuilder;
 
@@ -54,7 +53,7 @@ public class ChatBusiService {
         }else{
             for (MessageBody messageBody : message.getBody()) {
                 //需要给每个消息生成一个ID，防止用户多次发送相同内容时，被认为是一条重复的消息
-                messageBody.setMsgId(generateIDRPCService.getUnSeqId());
+                messageBody.setMsgId(unqidClient.getUnSeqId());
                 //消息是以房间为单位聚合，一批消息中包含多人发送的消息，所以要将消息发送者放到MessageBody中。
                 messageBody.setUserId(message.getFromUserId());
                 messageBody.setUserName(message.getFromUserName());

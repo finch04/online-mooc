@@ -9,26 +9,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tj-live</artifactId>
+    <artifactId>tj-unqid</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
-        <!-- Javacv 依赖 -->
-<!--        <dependency>-->
-<!--            <groupId>org.bytedeco</groupId>-->
-<!--            <artifactId>javacv</artifactId>-->
-<!--            <version>1.5.4</version>-->
-<!--        </dependency>-->
-
-<!--        &lt;!&ndash; Ffmpeg 依赖 &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.bytedeco</groupId>-->
-<!--            <artifactId>ffmpeg</artifactId>-->
-<!--            <version>4.4-1.5.7</version>-->
-<!--        </dependency>-->
         <!--auth-sdk-->
         <dependency>
             <groupId>com.tianji</groupId>
@@ -47,10 +34,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
         </dependency>
@@ -63,16 +46,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
-        <!--Redis-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <!--redisson-->
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-        </dependency>
         <!--discovery-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -83,16 +56,24 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
-        <!--mq-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
         <!--loadbalancer-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>me.ahoo.cosid</groupId>
+            <artifactId>cosid-spring-boot-starter</artifactId>
+            <version>${cosid.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.ahoo.cosid</groupId>
+            <artifactId>cosid-jdbc</artifactId>
+            <version>${cosid.version}</version>
+        </dependency>
+
+
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -108,7 +89,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.tianji.live.LiveApplication</mainClass>
+                    <mainClass>com.tianji.UnqidApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

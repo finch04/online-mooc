@@ -26,6 +26,7 @@
         <module>tj-remark</module>
         <module>tj-aigc</module>
         <module>tj-live</module>
+        <module>tj-unqid</module>
     </modules>
     <packaging>pom</packaging>
 

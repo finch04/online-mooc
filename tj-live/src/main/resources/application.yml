@@ -33,4 +33,4 @@ tj:
         keepAliveTime: 600
     heartbeat:
       timeout:
-        seconds: 30
+        seconds: 3000 #测试用，先久一些

@@ -19,8 +19,4 @@ public class IMConstants {
 
     public static final int MESSAGE_TYPE_GIFT=5;
 
-    public static final String ID_SNOWFLAKE="snowflakeId";
-
-    public static final String ID_SEQUENCE="sequence";
-
 }

@@ -1,6 +1,6 @@
-package com.tianji.live.service;
+package com.tianji.unqid.service;
 
-public interface IGenerateIDRPCService {
+public interface IGenerateIDService {
     /**
      * 获取有序id
      *
