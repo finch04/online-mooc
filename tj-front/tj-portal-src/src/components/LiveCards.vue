@@ -72,7 +72,7 @@
   });
   
   const goDetails = (id) => {
-    router.push({ path: '/live', query: { id } });
+    router.push({ path: '/liveDetails', query: {id} });
   };
   </script>
   <style lang="scss" scoped>

@@ -1,8 +1,8 @@
 import {getEmitter} from './messageEmitter'
 import { getIMServerUrl } from "@/api/live.js";
   
+import qs from 'qs'
 let socket;
-   
 // const getWebSocket = async (url,userId) => {  
 
 const getWebSocket = async (userId) => {  
@@ -19,8 +19,10 @@ console.info("getWebSocket",userId,socket)
   // }
   if(!userId){
     userId = generateRandomString(8)
+    console.info("getWebSocket-生成随机id",userId,socket)
   }
   let res = await getIMServerUrl(userId)
+  res=res.data;
   console.info("res ",res)
   if(res){
     socket = new WebSocket(res.url,res.imToken);

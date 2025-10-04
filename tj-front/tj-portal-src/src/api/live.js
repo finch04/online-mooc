@@ -1,4 +1,5 @@
 import request from "@/utils/request.js"
+import qs from 'qs'
 const LIVE_API_PREFIX = "/lvs"
 
 // 获取直播间详情
@@ -19,8 +20,6 @@ export const getLiveRoomList = () =>
 // 获取IM服务器
 export const getIMServerUrl = (params) =>
     request({
-        url: `${LIVE_API_PREFIX}/im/getIMServer`,		
-        method: 'post',
-		data:params,
-		params
+        url: `${LIVE_API_PREFIX}/im/getIMServer/${params}`,		
+        method: 'get',
     })

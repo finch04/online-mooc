@@ -62,6 +62,7 @@
         <tencent.sdk.vod.version>2.1.5</tencent.sdk.vod.version>
         <xxl-job-version>2.3.1</xxl-job-version>
         <seata-version>1.5.1</seata-version>
+        <cosid.version>2.6.8</cosid.version>
     </properties>
     <!-- 对依赖包进行管理 -->
     <dependencyManagement>

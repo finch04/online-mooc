@@ -28,6 +28,9 @@ public interface MqConstants {
 
         /*优惠促销有关的交换机*/
         String PROMOTION_EXCHANGE = "promotion.topic";
+
+        /*直播有关的交换机*/
+        String LIVE_EXCHANGE = "live.topic";
     }
     interface Queue {
         String ERROR_QUEUE_TEMPLATE = "error.{}.queue";
@@ -78,5 +81,8 @@ public interface MqConstants {
 
         /*领取优惠券的key*/
         String COUPON_RECEIVE = "coupon.receive";
+
+        /* 直播 IM*/
+        String LIVE_IM_MESSAGE = "live.im.message";
     }
 }

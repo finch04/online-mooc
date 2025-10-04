@@ -49,11 +49,6 @@ public class LiveRoomVO {
     private String roomCover;
 
     /**
-     * 直播间描述
-     */
-    private String roomDesc;
-
-    /**
      * 直播间分类id
      */
     private Long categoryId;

@@ -20,9 +20,21 @@
           <!-- 视频和聊天区域左右布局 -->
           <div class="videoChatWrapper">
             <!-- 视频区域 -->
-            <div class="videoContainer">
-              <video class="video-js" ref="videoplayer" width="100%"
-                style="background-color: rgb(18, 9, 37);width:100%;height:550px"></video>
+            <div class="videoSide">
+              <div class="videoContainer">
+                <video class="video-js" ref="videoplayer" width="100%"
+                  style="background-color: rgb(18, 9, 37);width:100%;height:610px"></video>
+              </div>
+              <!-- 礼物面板 - 底部罗列 -->
+              <div class="giftArea">
+                <div class="giftList">
+                  <div class="giftItem" v-for="item in giftList" :key="item.giftId">
+                    <img @click="sendGift(item)" :src="item.coverImgUrl" class="giftImg" alt="">
+                    <div class="giftItemName">{{ item.giftName }}</div>
+                    <div class="giftItemPrice">{{ item.price }}金币</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- 聊天区域 -->
@@ -42,32 +54,11 @@
                 </div>
               </div>
               <div class="commentBox">
-                <el-form v-if="userId">
-                  <el-form-item>
-                    <el-input v-model="comment" placeholder="发送直播评论"></el-input>
-                  </el-form-item>
-                  <el-form-item style="text-align:right;">
-                    <el-button class="sendBtn" @click="sendComment()">发送消息</el-button>
-                  </el-form-item>
-                </el-form>
+                <div v-if="userId">
+                    <el-input  v-model="comment" placeholder="发送直播评论" max="40" ></el-input>
+                </div>
+                 <span  v-if="userId" class="bt sendBtn" style="margin-top: 10px;" @click="sendComment()">发送消息</span>
                 <button class="loginPrompt" v-if="!userId">请先登录，才能开始聊天</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 礼物面板 - 底部罗列 -->
-          <div class="giftArea">
-            <div class="giftContentTitle">礼物面板</div>
-            <div class="bankTab">
-              <span @click="toShowCarTab()">查看购物车</span>
-              <span @click="showBankInfoTab()">钱包余额:</span>
-              <span>{{ currentBalance }}</span>
-            </div>
-            <div class="giftList">
-              <div class="giftItem" v-for="item in giftList" :key="item.giftId">
-                <img @click="sendGift(item)" :src="item.coverImgUrl" class="giftImg" alt="">
-                <div class="giftItemName">{{ item.giftName }}</div>
-                <div class="giftItemPrice">{{ item.price }}金币</div>
               </div>
             </div>
           </div>
@@ -91,7 +82,7 @@ import Breadcrumb from "@/components/Breadcrumb.vue";
 
 // 路由与房间信息
 const route = useRoute()
-const roomId = route.params.id
+const roomId = route.query.id
 const url = 'http://192.168.150.101/hls/test.m3u8'
 
 // 视频播放器
@@ -113,7 +104,6 @@ const userName = ref(userStore.value?.name || '')
 // 聊天相关
 const comment = ref('')
 const chatList = ref([])
-let socket = null
 let heartbeatInterval = null
 
 // 礼物相关
@@ -132,12 +122,6 @@ const giftList = ref([
 const currentBalance = ref(0)
 const showBankInfo = ref(false)
 
-// 初始化播放器
-onMounted(() => {
-  initPlayer()
-  initWebsocket()
-})
-
 // 清理资源
 onUnmounted(() => {
   if (myPlayer.value) {
@@ -151,7 +135,7 @@ const initPlayer = () => {
   if (!myPlayer.value) {
     myPlayer.value = videojs(videoplayer.value, {
       autoplay: false,
-      poster: "/img/2.jpeg",
+      poster: "/img/loading.gif",
       controls: true,
       controlBar: true,
       bigPlayButton: true,
@@ -167,78 +151,52 @@ const initPlayer = () => {
   }
 }
 
-// 初始化WebSocket
-const initWebsocket = () => {
-  socket = getWebSocket(userId.value)
+// 1. 将 socket 声明为 ref 响应式变量，方便跟踪状态
+const socket = ref(null);
 
-  const emitter = getEmitter()
-  emitter.on("messageReceived", (genericMessage) => {
-    if (!genericMessage || !genericMessage.type) return
+// 2. 修正初始化逻辑，移除外部重复调用
+const initWebsocket = async () => {
+  // 等待 getWebSocket 执行完成，并将结果赋值给 socket
+  socket.value = await getWebSocket(userId.value?userId.value:''); // 注意：userId 是 ref，需用 .value 访问
 
-    // 聊天消息
-    if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
-      genericMessage.body.forEach(msg => {
-        chatList.value.push({
-          msgType: 2,
-          senderName: msg.userName,
-          content: msg.content
-        })
-      })
-      scrollToBottom()
-    }
-    // 进入房间消息
-    else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
-      chatList.value.push({
-        msgType: 0,
-        content: `${genericMessage.fromUserName} 进入房间`
-      })
-      scrollToBottom()
-    }
-    // 礼物消息
-    else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
-      genericMessage.body.forEach(giftMsg => {
-        chatList.value.push({
-          msgType: 5,
-          content: giftMsg.content
-        })
-      })
-      scrollToBottom()
-    }
-  })
-}
+};
 
-// 滚动到最新消息
-const scrollToBottom = () => {
-  nextTick(() => {
-    const chatBox = document.getElementById("chatContentBox")
-    chatBox.scrollTop = chatBox.scrollHeight
-  })
-}
+onMounted(async () => { // onMounted 支持异步函数
+  initPlayer();
+  await initWebsocket(); // 等待 websocket 初始化完成
+});
 
-// 发送评论
+// 3. 发送评论时检查 socket 状态
 const sendComment = () => {
-  if (!comment.value) return
-
+  if (!comment.value) return;
+  // 检查 socket 是否存在且处于打开状态
+  if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
+    ElMessage.error('连接未就绪，请稍后再试');
+    return;
+  }
   const commentMsg = {
     type: 2,
     roomId: roomId,
     fromUserId: userId.value,
     fromUserName: userName.value,
     body: [{ content: comment.value }]
-  }
-  socket.send(JSON.stringify(commentMsg))
-  comment.value = ''
-}
+  };
+  
+  console.log('发送评论：', commentMsg);
+  socket.value.send(JSON.stringify(commentMsg)); // 使用 .value 访问 ref 变量
+  comment.value = '';
+};
 
-// 发送礼物
+// 4. 发送礼物时同样检查 socket 状态
 const sendGift = (gift) => {
   if (!userId.value) {
-    ElMessage({
-      showClose: true,
-      message: '未登录用户不能送礼',
-      type: 'error',
-    })
-    return
+    ElMessage.error('未登录用户不能送礼');
+    return;
+  }
+  // 检查 socket 是否存在且处于打开状态
+  if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
+    ElMessage.error('连接未就绪，请稍后再试');
+    return;
   }
 
   const giftMsg = {
@@ -247,22 +205,10 @@ const sendGift = (gift) => {
     fromUserId: userId.value,
     fromUserName: userName.value,
     body: [{ content: `${userName.value}送给主播一个 ${gift.giftName}` }]
-  }
-  socket.send(JSON.stringify(giftMsg))
-}
+  };
+  socket.value.send(JSON.stringify(giftMsg)); // 使用 .value 访问 ref 变量
+};
 
-// 显示钱包信息
-const showBankInfoTab = () => {
-  showBankInfo.value = true
-}
-
-// 查看购物车
-const toShowCarTab = () => {
-  ElMessage({
-    message: '购物车功能暂未实现',
-    type: 'info'
-  })
-}
 </script>
 
 <style lang="scss">
@@ -288,7 +234,6 @@ const toShowCarTab = () => {
         display: flex;
         align-items: center;
         padding: 15px;
-        // background-color: grey;
         border: 1px solid black;
         border-radius: 8px;
         margin-bottom: 20px;
@@ -304,12 +249,6 @@ const toShowCarTab = () => {
         .anchorName {
           color: #ffad2c;
           font-size: 13px;
-          margin-right: 10px;
-        }
-
-        .anchorLabel {
-          width: 23px;
-          height: 23px;
           margin-right: 10px;
         }
 
@@ -330,17 +269,21 @@ const toShowCarTab = () => {
         display: flex;
         gap: 20px;
         margin-bottom: 20px;
-        height: 550px;
-        /* 增加视频区域高度 */
+        height: 800px /* 可根据实际情况调整 */
+      }
+
+      .videoSide {
+        flex: 3; /* 视频和礼物区域占比 */
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
       }
 
       .videoContainer {
-        flex: 3;
-        /* 视频区域占比更大 */
         background-color: #120925;
         border-radius: 8px;
         overflow: hidden;
-        height: 100%;
+        flex: 1; /* 视频区域占视频侧的大部分高度 */
 
         video {
           width: 100%;
@@ -349,106 +292,12 @@ const toShowCarTab = () => {
         }
       }
 
-      .chatArea {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        height: 100%;
-
-        .talkContentBox {
-          flex: 1;
-          background-color: #fff;
-          border: 1px solid #e5e5e5;
-          border-radius: 8px;
-          overflow-y: auto;
-          padding: 15px;
-
-          .chatContent {
-            margin-bottom: 10px;
-
-            &.giftMsg {
-              text-align: center;
-              font-size: 13px;
-              color: #868686;
-            }
-
-            &.systemMsg {
-              color: #666;
-              font-size: 13px;
-            }
-
-            .userName {
-              color: #8694ff;
-              font-size: 13px;
-              margin-right: 5px;
-            }
-          }
-        }
-
-        .commentBox {
-          background-color: #fff;
-          border: 1px solid #e5e5e5;
-          border-radius: 8px;
-          padding: 15px;
-
-          .el-form {
-            display: flex;
-            gap: 10px;
-
-            .el-form-item {
-              flex: 1;
-
-              .el-input {
-                width: 100%;
-              }
-            }
-
-            .sendBtn {
-              background-color: #1890ff;
-              color: #fff;
-              border: none;
-              padding: 0 20px;
-              border-radius: 4px;
-              cursor: pointer;
-            }
-          }
-
-          .loginPrompt {
-            width: 100%;
-            text-align: center;
-            padding: 10px 0;
-            color: #666;
-          }
-        }
-      }
-
       .giftArea {
         width: 100%;
-        // background-color: grey;
         border: #120925 3px solid;
         border-radius: 8px;
         padding: 15px;
-
-        .giftContentTitle {
-          color: #ffa735;
-          font-size: 16px;
-          text-align: center;
-          margin-bottom: 15px;
-        }
-
-        .bankTab {
-          color: #ffbc2e;
-          text-align: right;
-          font-size: 14px;
-          margin-bottom: 15px;
-          padding-right: 10px;
-
-          span {
-            margin-left: 10px;
-            cursor: pointer;
-          }
-        }
+        box-sizing: border-box;
 
         .giftList {
           display: flex;
@@ -484,6 +333,87 @@ const toShowCarTab = () => {
               color: #ffa84c;
               font-size: 12px;
             }
+          }
+        }
+      }
+
+      .chatArea {
+        flex: 1; /* 聊天区域占比，可根据需要调整 */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: 100%;
+
+        .talkContentBox {
+          flex: 1;
+          background-color: #fff;
+          border: 1px solid #e5e5e5;
+          border-radius: 8px;
+          overflow-y: auto;
+
+          .chatContent {
+            margin-bottom: 10px;
+
+            &.giftMsg {
+              text-align: center;
+              font-size: 13px;
+              color: #868686;
+            }
+
+            &.systemMsg {
+              color: #666;
+              font-size: 13px;
+            }
+
+            .userName {
+              color: #8694ff;
+              font-size: 13px;
+              margin-right: 5px;
+            }
+          }
+        }
+
+        .commentBox {
+          background-color: #fff;
+          border: 1px solid #e5e5e5;
+          border-radius: 8px;
+          padding: 15px;
+
+          .el-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+
+            .el-form-item {
+              flex: 1;
+              margin-bottom: 10px;
+
+              .el-input {
+                width: 100%;
+                height: 100%;
+                textarea {
+                  min-height: 80px !important;
+                }
+              }
+            }
+
+            .sendBtn {
+              background-color: #1890ff;
+              color: #fff;
+              border: none;
+              padding: 8px 20px;
+              border-radius: 4px;
+              cursor: pointer;
+              align-self: flex-end;
+            }
+          }
+
+          .loginPrompt {
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            color: #666;
           }
         }
       }

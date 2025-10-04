@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,13 +41,13 @@ public class IMController {
      * 获取IM服务器地址
      * @return
      */
-    @PostMapping("/getIMServer")
-    public Map<String,Object> getIMServer(String userId){
+    @GetMapping("/getIMServer/{id}")
+    public Map<String,Object> getIMServer(@PathVariable("id") String userId){
+        System.out.println("userId = " + userId);
         List<ServiceInstance> instances = discoveryClient.getInstances(imInstance);
         if(instances.size()  == 0){
             throw new CommonException("IM服务未启动");
         }else{
-            //TODO IM-SERVER增加Dubbo服务后，Dubbo服务也会往Nacos上注册一个dubbo服务的实例。这些实例要过滤掉。
             List<ServiceInstance> livinginstances = new ArrayList<>();
             instances.forEach(instance -> {
                 if(instance.getPort()<9000){

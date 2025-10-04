@@ -45,8 +45,8 @@ export default [
     meta: { title: '直播课' },
     children: [
       {
-        path: 'index',
-        name: 'liveIndex',
+        path: '/liveDetails',
+        name: 'liveDetails',
         component: () => import('@/pages/live/index.vue'),
         meta: { title: '直播课' },
       },

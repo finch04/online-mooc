@@ -22,4 +22,15 @@ tj:
     database: tj_live
   auth:
     resource:
-      enable: true
+      enable: false
+  im:
+    instance: live-service
+    thread:
+      pool:
+        corePoolSize: 2
+        maxPoolSize: 10
+        queueCapacity: 10000
+        keepAliveTime: 600
+    heartbeat:
+      timeout:
+        seconds: 30
