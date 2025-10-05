@@ -1,12 +1,12 @@
 package com.tianji.live.domain.vo;
 
-import java.time.LocalDateTime;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * 直播间实体类
@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "直播间简要信息")
-public class LiveRoomVO {
+@Schema(description = "直播间详细信息")
+public class LiveRoomDetailVO {
     /**
      * 直播间id
      */
@@ -54,6 +54,12 @@ public class LiveRoomVO {
     private Integer status;
 
     /**
+     * 主播是否已关注
+     */
+    private Boolean followed;
+
+
+    /**
      * 当前在线人数
      */
     private Integer onlineCount;
@@ -68,6 +74,11 @@ public class LiveRoomVO {
      */
     private Long likeCount;
 
+    /**
+     * 分享次数
+     */
+    private Integer shareCount;
+
 
     /**
      * 是否私有直播间(0-公开,1-私有)
@@ -78,4 +89,9 @@ public class LiveRoomVO {
      * 创建时间
      */
     private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 }

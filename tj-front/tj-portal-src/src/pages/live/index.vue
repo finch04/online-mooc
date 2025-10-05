@@ -1,19 +1,41 @@
 <template>
   <div class="mainWrapper">
-    <!-- 面包屑导航 - 左上角 -->
+    <!-- 面包屑导航与直播间信息 -->
     <div class="container">
-      <Breadcrumb data="直播间" class="breadcrumb" />
+      <div class="header-info">
+        <!-- <Breadcrumb data="直播间" class="breadcrumb" /> -->
+        <div class="room-header">
+          <img :src="liveRoomDetail.roomCover" class="room-cover" alt="直播间封面">
+          <div class="room-title-container">
+            <h2 class="room-title">{{ liveRoomDetail.roomTitle }}</h2>
+            <div class="room-status">
+              <span v-if="liveRoomDetail.status === 1" class="status-live">直播中</span>
+              <span v-if="liveRoomDetail.status === 0" class="status-offline">未开播</span>
+              <span v-if="liveRoomDetail.status === 2" class="status-closed">已关闭</span>
+              <span v-if="liveRoomDetail.status === 3" class="status-banned">禁播</span>
+              <span v-if="liveRoomDetail.isPrivate" class="private-tag">私有直播间</span>
+            </div>
+          </div>
+          <div class="butCont fx-ct">
+            <span class="bt bt-round" style="padding:4px"  @click="goHome()">返回首页</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="liveroomContainer">
       <el-container class="mainContent">
         <el-main>
-          <!-- 主播信息 - 消息框上方 -->
+          <!-- 主播信息 -->
           <div class="anchorInfo">
-            <img :src="anchorInfo.avatar" class="anchorAvatar" alt="">
-            <div class="anchorName">{{ anchorInfo.nickName }}</div>
+            <img :src="liveRoomDetail.anchorIcon" class="anchorAvatar" alt="主播头像">
+            <div class="anchorName">{{ liveRoomDetail.anchorName }}</div>
+            <div class="room-stats">
+              <span>在线: {{ liveRoomDetail.onlineCount || 0 }}</span>
+              <span>点赞: {{ liveRoomDetail.likeCount || 0 }}</span>
+            </div>
             <div class="butCont fx-ct">
-              <span class="bt-red Btn">关注</span>
-              <span class="bt-blue Btn">分享</span>
+              <span class="bt-red Btn" @click="handleFollow">{{ liveRoomDetail.followed ? '已关注' : '关注' }}</span>
+              <span class="bt-blue Btn" @click="handleShare">分享({{ liveRoomDetail.shareCount || 0 }})</span>
             </div>
           </div>
 
@@ -92,6 +114,7 @@ import videojs from 'video.js'
 import { useUserStore } from '@/store'
 import { getWebSocket } from "@/utils/websocket"
 import { getEmitter } from '@/utils/messageEmitter'
+import { getLiveRoomById, getRoomMessages } from '@/api/live'
 
 // 组件导入
 import Breadcrumb from "@/components/Breadcrumb.vue";
@@ -106,10 +129,18 @@ const url = 'http://192.168.150.101/hls/test.m3u8'
 const videoplayer = ref(null)
 const myPlayer = ref(null)
 
-// 主播信息
-const anchorInfo = ref({
-  nickName: '主播信息加载中······',
-  avatar: '/img/avatar.png'
+// 直播间详情信息
+const liveRoomDetail = ref({
+  anchorName: '加载中...',
+  anchorIcon: '/img/avatar.png',
+  roomTitle: '直播间标题加载中...',
+  roomCover: '/img/default-cover.png',
+  status: 0,
+  onlineCount: 0,
+  likeCount: 0,
+  shareCount: 0,
+  isPrivate: false,
+  followed: false
 })
 
 // 用户信息
@@ -142,6 +173,22 @@ const giftList = ref([
 const login = () => {
   router.push('/login')
 }
+const goHome = () => {
+  router.push('/')
+}
+
+// 关注主播
+const handleFollow = () => {
+  // 实际项目中需要调用关注接口
+  liveRoomDetail.value.followed = !liveRoomDetail.value.followed
+  ElMessage.success(liveRoomDetail.value.followed ? '关注成功' : '取消关注成功')
+}
+
+// 分享直播间
+const handleShare = () => {
+  // 实际项目中需要实现分享逻辑
+  ElMessage.info('分享功能开发中...')
+}
 
 // 清理资源
 onUnmounted(() => {
@@ -169,6 +216,19 @@ const initPlayer = () => {
     myPlayer.value.on('error', (error) => {
       console.info('播放器加载错误', error)
     })
+  }
+}
+
+// 获取直播间详情
+const getLiveRoomDetail = async () => {
+  try {
+    const res = await getLiveRoomById(roomId)
+    if (res.data) {
+      liveRoomDetail.value = res.data
+    }
+  } catch (error) {
+    ElMessage.error('获取直播间信息失败')
+    console.error('获取直播间详情错误:', error)
   }
 }
 
@@ -279,6 +339,7 @@ const initWebsocket = async () => {
 };
 
 onMounted(async () => {
+  await getLiveRoomDetail() // 先获取直播间详情
   initPlayer();
   await initWebsocket();
 });
@@ -341,6 +402,82 @@ const sendGift = (gift) => {
     display: inline-block;
   }
 
+  .header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .room-header {
+    display: flex;
+    float: right;
+    align-items: right;
+    gap: 15px;
+  }
+
+  .room-cover {
+    width: 180px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .room-title-container {
+    flex: 1;
+  }
+
+  .room-title {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 18px;
+  }
+
+  .room-status {
+    display: flex;
+    gap: 10px;
+  }
+
+  .status-live {
+    background-color: #ff4d4f;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .status-offline {
+    background-color: #8c8c8c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .status-closed {
+    background-color: #1890ff;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .status-banned {
+    background-color: #ff7d00;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .private-tag {
+    background-color: #722ed1;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
   .liveroomContainer {
     width: 100%;
 
@@ -372,6 +509,14 @@ const sendGift = (gift) => {
           margin-right: 10px;
         }
 
+        .room-stats {
+          display: flex;
+          gap: 15px;
+          margin-right: 20px;
+          color: #666;
+          font-size: 14px;
+        }
+
         .butCont {
           margin-left: auto;
           padding: 0 20px;
@@ -390,6 +535,24 @@ const sendGift = (gift) => {
 
             &:hover {
               background-color: #e0e0e0;
+            }
+          }
+
+          .bt-red {
+            background-color: #ff4d4f;
+            color: white;
+
+            &:hover {
+              background-color: #f5222d;
+            }
+          }
+
+          .bt-blue {
+            background-color: #1890ff;
+            color: white;
+
+            &:hover {
+              background-color: #096dd9;
             }
           }
         }

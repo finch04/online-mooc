@@ -6,8 +6,7 @@ const LIVE_API_PREFIX = "/lvs"
 export const getLiveRoomById = (params) =>
     request({
         url: `${LIVE_API_PREFIX}/live/${params}`,		
-        method: 'get',
-		params
+        method: 'get'
     })
 
 export const getLiveRoomList = () =>
@@ -23,3 +22,10 @@ export const getIMServerUrl = (params) =>
         url: `${LIVE_API_PREFIX}/im/getIMServer/${params}`,		
         method: 'get',
     })
+
+// 根据直播间id获取直播间信息
+export const getRoomMessages = (roomId) =>
+    request({
+        url: `${LIVE_API_PREFIX}/im/${roomId}`,		
+        method: 'get',
+}) 

@@ -1,5 +1,6 @@
 package com.tianji.live.controller;
 import com.tianji.live.domain.po.LiveRoom;
+import com.tianji.live.domain.vo.LiveRoomDetailVO;
 import com.tianji.live.domain.vo.LiveRoomVO;
 import com.tianji.live.service.ILiveRoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +29,7 @@ public class LiveController {
     private ILiveRoomService liveRoomService;
 
     @GetMapping("/{id}")
-    public LiveRoomVO getLiveRoomById(@PathVariable Long id) throws IOException {
+    public LiveRoomDetailVO getLiveRoomById(@PathVariable Long id) throws IOException {
         return liveRoomService.getRoomById(id);
     }
 

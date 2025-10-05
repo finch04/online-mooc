@@ -24,7 +24,7 @@ public class ConnectionManager {
     private static final Map<String, Session> CHANNEL_CONTAINER = new ConcurrentHashMap<>();
 
     //存放房间与用户关系 key为RoomId, value为Set<UserId>
-//    private static final Map<String, Set<String>> ROOM_CONTAINER = new ConcurrentHashMap<>();
+    private static final Map<String, Set<String>> ROOM_CONTAINER = new ConcurrentHashMap<>();
 
 
     public static boolean register(String sessionId,Session session){

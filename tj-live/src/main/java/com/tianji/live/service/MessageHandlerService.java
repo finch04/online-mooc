@@ -70,8 +70,8 @@ public class MessageHandlerService {
             sendRoomBroadCast(Long.valueOf(roomId), broadcastMsg);
         }
 
-        // 查询房间最新20条消息，推送给用户，没有存储消息就不实现了
-        // socketSession.sendMessage();
+//         查询房间最新20条消息，推送给用户，没有存储消息就不实现了
+
 //        logger.info("异步推送首页消息成功！！！！！！！！！！");
     }
 

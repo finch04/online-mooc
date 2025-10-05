@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.utils.BeanUtils;
+import com.tianji.live.domain.vo.LiveRoomDetailVO;
 import com.tianji.live.mapper.LiveRoomMapper;
 import com.tianji.live.domain.po.LiveRoom;
 import com.tianji.live.domain.vo.LiveRoomVO;
@@ -26,9 +27,15 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
     private final UserClient userClient;
 
     @Override
-    public LiveRoomVO getRoomById(Long roomId) {
+    public LiveRoomDetailVO getRoomById(Long roomId) {
         LiveRoom liveRoom = liveRoomMapper.selectById(roomId);
-        return BeanUtils.copyBean(liveRoom, LiveRoomVO.class);
+        LiveRoomDetailVO vo = BeanUtils.copyBean(liveRoom, LiveRoomDetailVO.class);
+        UserDTO dto = userClient.queryUserById(liveRoom.getAnchorId());
+        vo.setAnchorName(dto.getName());
+        vo.setAnchorIcon(dto.getIcon());
+        vo.setFollowed(false); //TODO : 判断用户是否已关注
+        return vo;
+
     }
 
     @Override
