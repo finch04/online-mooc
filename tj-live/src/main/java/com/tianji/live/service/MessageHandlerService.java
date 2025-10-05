@@ -63,14 +63,14 @@ public class MessageHandlerService {
      */
     public void sendRoomChatMessage(String userId, String roomId, GenericMessage message) {
 
-        List<Session> allUserConnect = ConnectionManager.getRoomAllUserConnect(roomId, userId);
-        if (allUserConnect.isEmpty()) {
-            return;
-        }
-        // 消息发送需要根据房间中用户，进行消息分裂。
-        allUserConnect.forEach(c -> executor.execute(() -> sendMessage(c, message)));
-
-        message.setFromUserId(Long.parseLong(userId));
+//        List<Session> allUserConnect = ConnectionManager.getRoomAllUserConnect(roomId, userId);
+//        if (allUserConnect.isEmpty()) {
+//            return;
+//        }
+//        // 消息发送需要根据房间中用户，进行消息分裂。
+//        allUserConnect.forEach(c -> executor.execute(() -> sendMessage(c, message)));
+//
+//        message.setFromUserId(Long.parseLong(userId));
         logger.info("消息准备发送");
 //        //通过MQ往后端转发消息
         rabbitMqHelper.send(LIVE_EXCHANGE, MqConstants.Key.LIVE_IM_MESSAGE, message);
@@ -92,8 +92,8 @@ public class MessageHandlerService {
     public void sendMessage(Session session, GenericMessage message) {
         if (session.isOpen()) {
             try {
-                Object userId = session.getUserProperties().get(IMConstants.PROP_USER_ID);
-                message.setFromUserId(Long.parseLong(userId.toString()));
+//                Object userId = session.getUserProperties().get(IMConstants.PROP_USER_ID);
+//                message.setFromUserId(Long.parseLong(userId.toString()));
                 session.getBasicRemote().sendText(JSON.toJSONString(message));
             } catch (IOException e) {
                 logger.error("发送消息失败,用户信息=>{},message=>{}", session.getUserProperties().get("UserId"), message);

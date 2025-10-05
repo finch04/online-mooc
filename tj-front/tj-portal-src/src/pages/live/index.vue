@@ -58,7 +58,7 @@
                     <el-input  v-model="comment" placeholder="发送直播评论" max="40" ></el-input>
                 </div>
                  <span  v-if="userId" class="bt sendBtn" style="margin-top: 10px;" @click="sendComment()">发送消息</span>
-                <button class="loginPrompt" v-if="!userId">请先登录，才能开始聊天</button>
+                <button class="loginPrompt" v-if="!userId" @click="login()">请先登录，才能开始聊天</button>
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@
 <script setup>
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { nextTick, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import videojs from 'video.js'
 import { useUserStore } from '@/store'
 import { getWebSocket } from "@/utils/websocket"
@@ -82,6 +82,7 @@ import Breadcrumb from "@/components/Breadcrumb.vue";
 
 // 路由与房间信息
 const route = useRoute()
+const router = useRouter()
 const roomId = route.query.id
 const url = 'http://192.168.150.101/hls/test.m3u8'
 
@@ -105,6 +106,7 @@ const userName = ref(userStore.value?.name || '')
 const comment = ref('')
 const chatList = ref([])
 let heartbeatInterval = null
+let isConfirming = ref(false)
 
 // 礼物相关
 const giftList = ref([
@@ -122,6 +124,10 @@ const giftList = ref([
 const currentBalance = ref(0)
 const showBankInfo = ref(false)
 
+// 登录跳转方法
+const login = () => {
+  router.push('/login')
+}
 // 清理资源
 onUnmounted(() => {
   if (myPlayer.value) {
@@ -154,11 +160,105 @@ const initPlayer = () => {
 // 1. 将 socket 声明为 ref 响应式变量，方便跟踪状态
 const socket = ref(null);
 
+// 处理收到的聊天消息
+const emitter = getEmitter()
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    document.getElementById("chatContentBox").scrollTop = document.getElementById("chatContentBox").scrollHeight
+  })
+}
+
 // 2. 修正初始化逻辑，移除外部重复调用
 const initWebsocket = async () => {
   // 等待 getWebSocket 执行完成，并将结果赋值给 socket
-  socket.value = await getWebSocket(userId.value?userId.value:''); // 注意：userId 是 ref，需用 .value 访问
+  socket.value = await getWebSocket(userId.value ? userId.value : ''); // 注意：userId 是 ref，需用 .value 访问
+  
+  if (!socket.value) {
+    ElMessage({
+      showClose: true,
+      message: 'IM服务暂未启动，请联系管理员',
+      type: 'error',
+    })
+    return
+  }
 
+  // 发送进入房间消息
+  const joinRoomMsg = {
+    type: 0,
+    roomId: roomId
+  }
+  
+  if (socket.value && socket.value.readyState === WebSocket.OPEN) {
+    socket.value.send(JSON.stringify(joinRoomMsg))
+  } else {
+    setTimeout(() => {
+      if (socket.value && socket.value.readyState === WebSocket.OPEN) {
+        socket.value.send(JSON.stringify(joinRoomMsg))
+      }
+    }, 1000)
+  }
+
+  // 处理消息接收
+  emitter.on("messageReceived", (genericMessage) => {
+    console.info("收到消息", genericMessage)
+    if (!genericMessage || !genericMessage.type) {
+      return
+      //聊天消息
+    } else if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
+      for (var bodyIndex in genericMessage.body) {
+        var messagebody = genericMessage.body[bodyIndex]
+        var chatmsg = {}
+        chatmsg.msgType = 2
+        chatmsg.senderName = messagebody.userName
+        chatmsg.content = messagebody.content
+        chatList.value.push(chatmsg)
+        scrollToBottom();
+      }
+      //进入房间消息
+    } else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
+      var vipInRoomMsg = {}
+      vipInRoomMsg.msgType = 0
+      vipInRoomMsg.content = genericMessage.fromUserName + " 进入房间"
+      chatList.value.push(vipInRoomMsg)
+      scrollToBottom();
+      //送礼物消息
+    } else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
+      for (var index2 in genericMessage.body) {
+        var giftMessages = genericMessage.body[index2]
+        var giftMsg = {}
+        giftMsg.msgType = 5
+        giftMsg.content = giftMessages.content
+        chatList.value.push(giftMsg)
+        scrollToBottom();
+      }
+    }
+  })
+
+  // 启动心跳检测
+  heartbeatInterval = setInterval(() => {
+    try {
+      if (socket.value && socket.value.readyState === WebSocket.OPEN) {
+        socket.value.send("Heartbeat")
+      }
+    } catch (e) {
+      if (!isConfirming.value) {
+        isConfirming.value = true
+        ElMessageBox.confirm(
+          '长时间无操作，已退出IM聊天',
+          '提示',
+          {
+            confirmButtonText: '重新恢复',
+            showCancelButton: false,
+            type: 'warning'
+          }
+        ).then(async () => {
+          socket.value = await getWebSocket(userId.value ? userId.value : '')
+          isConfirming.value = false
+        })
+      }
+    }
+  }, 20000)
 };
 
 onMounted(async () => { // onMounted 支持异步函数
@@ -168,49 +268,49 @@ onMounted(async () => { // onMounted 支持异步函数
 
 // 3. 发送评论时检查 socket 状态
 const sendComment = () => {
-  if (!comment.value) return;
-  // 检查 socket 是否存在且处于打开状态
-  if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
-    ElMessage.error('连接未就绪，请稍后再试');
-    return;
+  if (comment.value) {
+    var commentMsg = {}
+    commentMsg.type = 2 // 聊天消息
+    commentMsg.roomId = roomId //房间ID
+    commentMsg.fromUserId = userId.value//发送者
+    commentMsg.fromUserName = userName.value //发送者名字
+    commentMsg.body = []
+    commentMsg.body.push({ 'content': comment.value })
+    if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
+      ElMessage.error('连接未就绪，请稍后再试');
+      return;
+    }
+    socket.value.send(JSON.stringify(commentMsg));
+    comment.value = '';
   }
-  const commentMsg = {
-    type: 2,
-    roomId: roomId,
-    fromUserId: userId.value,
-    fromUserName: userName.value,
-    body: [{ content: comment.value }]
-  };
-  
-  console.log('发送评论：', commentMsg);
-  socket.value.send(JSON.stringify(commentMsg)); // 使用 .value 访问 ref 变量
-  comment.value = '';
 };
 
 // 4. 发送礼物时同样检查 socket 状态
 const sendGift = (gift) => {
   if (!userId.value) {
-    ElMessage.error('未登录用户不能送礼');
+    ElMessage({
+      showClose: true,
+      message: '未登录用户不能送礼。',
+      type: 'error',
+    })
     return;
+  } else {
+    var giftMsg = {}
+    giftMsg.type = 5
+    giftMsg.roomId = roomId
+    giftMsg.fromUserId = userId.value
+    giftMsg.fromUserName = userName.value
+    giftMsg.body = []
+    giftMsg.body.push({ 'content': userName.value + '送给主播一个 ' + gift.giftName })
+    if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
+      ElMessage.error('连接未就绪，请稍后再试');
+      return;
+    }
+    socket.value.send(JSON.stringify(giftMsg));
   }
-  // 检查 socket 是否存在且处于打开状态
-  if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
-    ElMessage.error('连接未就绪，请稍后再试');
-    return;
-  }
-
-  const giftMsg = {
-    type: 5,
-    roomId: roomId,
-    fromUserId: userId.value,
-    fromUserName: userName.value,
-    body: [{ content: `${userName.value}送给主播一个 ${gift.giftName}` }]
-  };
-  socket.value.send(JSON.stringify(giftMsg)); // 使用 .value 访问 ref 变量
 };
 
 </script>
-
 <style lang="scss">
 .mainWrapper {
   padding: 20px;

@@ -6,12 +6,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @SpringBootApplication
 @MapperScan("com.tianji.live.mapper")
+@EnableScheduling // 启用定时任务
 @Slf4j
 public class LiveApplication {
     public static void main(String[] args) throws UnknownHostException {
