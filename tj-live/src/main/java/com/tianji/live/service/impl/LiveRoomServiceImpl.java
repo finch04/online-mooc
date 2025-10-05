@@ -26,8 +26,9 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
     private final UserClient userClient;
 
     @Override
-    public LiveRoom getRoomById(Long roomId) {
-        return liveRoomMapper.selectById(roomId);
+    public LiveRoomVO getRoomById(Long roomId) {
+        LiveRoom liveRoom = liveRoomMapper.selectById(roomId);
+        return BeanUtils.copyBean(liveRoom, LiveRoomVO.class);
     }
 
     @Override

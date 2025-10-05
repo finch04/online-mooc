@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ILiveRoomService {
 
-    LiveRoom getRoomById(Long roomId);
+    LiveRoomVO getRoomById(Long roomId);
 
     List<LiveRoomVO> getLiveRoomList();
 }

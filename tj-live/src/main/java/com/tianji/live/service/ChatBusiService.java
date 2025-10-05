@@ -1,42 +1,53 @@
 package com.tianji.live.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tianji.api.client.unqid.UnqidClient;
 import com.tianji.live.constants.IMConstants;
 import com.tianji.live.protocol.GenericMessage;
 import com.tianji.live.protocol.MessageBody;
 import com.tianji.live.utils.IMCacheKeyBuilder;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Author： roy
- * Description：对消息做处理--简单实现
+ * Description：对消息做处理--使用List存储历史消息，List实现削峰批量发送（基于插入顺序自然排序）
  **/
 @Service
+@RequiredArgsConstructor
 public class ChatBusiService {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private Logger logger = LoggerFactory.getLogger(ChatBusiService.class);
 
-    @Value("${tl-live.message.cachesize:5}")
+    // 历史消息缓存数量
+    @Value("${tj.im.message.cachesize:5}")
     private int roomMessageCacheSize;
 
-    @Resource(name = "messageBodyRedisTemplate")
-    private RedisTemplate<String, MessageBody> redisTemplate;
+    // 削峰批次最小数量
+    @Value("${tj.im.message.batchsize:5}")
+    private int batchSendSize = 5;
+
+    private final StringRedisTemplate redisTemplate;
     @Resource
-    private IIMRPCService imRPCService;
+    private final IIMRPCService imRPCService;
     @Resource
-    private UnqidClient unqidClient;
+    private final UnqidClient unqidClient;
     @Resource
-    private IMCacheKeyBuilder imCacheKeyBuilder;
+    private final IMCacheKeyBuilder imCacheKeyBuilder;
 
 
     /**
@@ -45,84 +56,141 @@ public class ChatBusiService {
     public void handleMessage(GenericMessage message){
         logger.info("处理消息："+message);
         Long roomId = message.getRoomId();
-        String cacheKey = imCacheKeyBuilder.buildRoomMessageCacheKey(roomId);
+        String historyListKey = imCacheKeyBuilder.buildRoomMessageCacheKey(roomId);
+        String batchListKey = imCacheKeyBuilder.buildRoomBatchMessageKey(roomId); // 修改为List结构的键
 
         // 礼物消息不缓存，直接推送
         if(message.getType().equals(IMConstants.MESSAGE_TYPE_GIFT)){
             imRPCService.pushChatMessage(roomId,message);
-            // 聊天消息，缓存Redis，满足条件时推送
-        }else{
+        }
+        // 聊天消息和进入广播需要处理
+        else if(message.getType().equals(IMConstants.MESSAGE_TYPE_CHAT) ||
+                message.getType().equals(IMConstants.MESSAGE_TYPE_JOIN_ROOM)){
+
             for (MessageBody messageBody : message.getBody()) {
-                messageBody.setMsgId(unqidClient.getUnSeqId());
-                messageBody.setUserId(message.getFromUserId());
-                messageBody.setUserName(message.getFromUserName());
-                redisTemplate.opsForSet().add(cacheKey, messageBody);
+                try {
+                    messageBody.setMsgId(unqidClient.getUnSeqId());
+                    messageBody.setUserId(message.getFromUserId());
+                    messageBody.setUserName(message.getFromUserName());
+                    // 移除时间戳字段，依赖Redis List的插入顺序维护时间序
 
-                // 设置缓存过期时间，避免长期未推送的消息占用空间
-                redisTemplate.expire(cacheKey, 30, TimeUnit.MINUTES);
-            }
+                    // 1. 维护历史消息List（最新20条）
+                    // 使用右插左截的方式，保证List头部是最新消息
+                    String messageJson = objectMapper.writeValueAsString(messageBody);
+                    redisTemplate.opsForList().rightPush(historyListKey, messageJson);
+                    redisTemplate.opsForList().trim(historyListKey, -roomMessageCacheSize, -1); // 只保留最后N条
+                    redisTemplate.expire(historyListKey, 24, TimeUnit.HOURS);
 
-            // 检查是否达到推送阈值
-            checkAndPushMessages(roomId, cacheKey);
-        }
-    }
+                    // 2. 加入削峰List（使用List的自然插入顺序维护时间序）
+                    redisTemplate.opsForList().rightPush(batchListKey, messageJson);
+                    redisTemplate.expire(batchListKey, 24, TimeUnit.HOURS);
 
-    /**
-     * 检查消息数量并推送
-     */
-    private void checkAndPushMessages(Long roomId, String cacheKey) {
-        Set<MessageBody> roomMessages = redisTemplate.opsForSet().members(cacheKey);
-        if (roomMessages != null && roomMessages.size() >= roomMessageCacheSize) {
-            pushAndClearMessages(roomId, cacheKey, roomMessages);
-        }
-    }
-
-    /**
-     * 定时任务：每30秒检查并推送所有房间的缓存消息
-     * 确保即使消息数量不足，也能定时推送
-     */
-    @Scheduled(fixedRate = 5000) // 5秒执行一次
-    public void scheduledPushMessages() {
-        logger.info("开始执行定时消息推送任务");
-
-        // 获取所有房间的消息缓存键（实际实现需要根据你的key命名规则来获取）
-        Set<String> roomCacheKeys = redisTemplate.keys(imCacheKeyBuilder.buildRoomMessageCachePattern());
-
-        if (roomCacheKeys != null && !roomCacheKeys.isEmpty()) {
-            for (String cacheKey : roomCacheKeys) {
-                // 提取房间ID（需要根据你的key格式来解析）
-                Long roomId = imCacheKeyBuilder.parseRoomIdFromCacheKey(cacheKey);
-
-                Set<MessageBody> roomMessages = redisTemplate.opsForSet().members(cacheKey);
-                if (roomMessages != null && !roomMessages.isEmpty()) {
-                    logger.info("定时任务推送房间 {} 的消息，共 {} 条", roomId, roomMessages.size());
-                    pushAndClearMessages(roomId, cacheKey, roomMessages);
+                } catch (JsonProcessingException e) {
+                    logger.error("消息序列化失败", e);
+                    continue;
                 }
             }
+
+            // 3. 检查List中消息数量，达到批次阈值则立即发送
+            Long messageCount = redisTemplate.opsForList().size(batchListKey);
+            if (messageCount != null && messageCount >= batchSendSize) {
+                sendBatchMessages(roomId, batchListKey);
+            }
         }
-        logger.info("定时消息推送任务执行完毕");
     }
 
     /**
-     * 推送消息并清理缓存
+     * 获取房间历史消息（默认5条）
      */
-    private void pushAndClearMessages(Long roomId, String cacheKey, Set<MessageBody> messages) {
-        try {
-            GenericMessage downMessage = new GenericMessage();
-            downMessage.setRoomId(roomId);
-            downMessage.setBody(messages.stream().toList());
-            downMessage.setType(IMConstants.MESSAGE_TYPE_CHAT);
+    public List<MessageBody> getRoomHistoryMessages(Long roomId) {
+        String historyListKey = imCacheKeyBuilder.buildRoomMessageCacheKey(roomId);
+        // 由于采用右插左截，range(0, -1)会按时间正序返回（最早的在前，最新的在后）
+        List<String> messageJsonList = redisTemplate.opsForList().range(historyListKey, 0, -1);
 
-            imRPCService.pushChatMessage(roomId, downMessage);
-            logger.info("房间 {} 推送消息 {} 条成功", roomId, messages.size());
-
-            // 清理缓存
-            redisTemplate.delete(cacheKey);
-        } catch (Exception e) {
-            logger.error("房间 {} 消息推送失败，失败原因：{}", roomId, e.getMessage());
-            // 可以考虑将消息移到失败队列，进行重试
+        if (messageJsonList == null || messageJsonList.isEmpty()) {
+            return new ArrayList<>();
         }
+
+        // 反序列化为MessageBody列表（已按插入顺序排序）
+        return messageJsonList.stream()
+                .map(json -> {
+                    try {
+                        return objectMapper.readValue(json, MessageBody.class);
+                    } catch (JsonProcessingException e) {
+                        logger.error("消息反序列化失败", e);
+                        return null;
+                    }
+                })
+                .filter(msg -> msg != null)
+                .collect(Collectors.toList());
     }
 
+    /**
+     * 定时任务：每5秒检查并发送所有房间的批量消息（处理不足批次的情况）
+     */
+    @Scheduled(fixedRate = 5000)
+    public void scheduledBatchPush() {
+        logger.info("开始执行定时批量推送任务");
 
+        // 获取所有房间的批量消息List键
+        Set<String> batchListKeys = redisTemplate.keys(imCacheKeyBuilder.buildRoomBatchMessagePattern());
+
+        if (batchListKeys != null && !batchListKeys.isEmpty()) {
+            for (String batchListKey : batchListKeys) {
+                // 提取房间ID
+                Long roomId = imCacheKeyBuilder.parseRoomIdFromBatchKey(batchListKey);
+                // 无论数量多少，强制发送当前List中的所有消息
+                sendBatchMessages(roomId, batchListKey);
+            }
+        }
+        logger.info("定时批量推送任务执行完毕");
+    }
+
+    /**
+     * 批量发送消息并清理List
+     */
+    private void sendBatchMessages(Long roomId, String batchListKey) {
+        // 获取List中所有消息（按插入顺序返回）
+        Long messageCount = redisTemplate.opsForList().size(batchListKey);
+        if (messageCount == null || messageCount == 0) {
+            return;
+        }
+
+        // 从List左侧开始获取所有元素（保持插入顺序）
+        List<String> messageJsonList = redisTemplate.opsForList().range(batchListKey, 0, -1);
+        if (messageJsonList == null || messageJsonList.isEmpty()) {
+            return;
+        }
+
+        // 反序列化（已按插入顺序排序，无需额外排序）
+        List<MessageBody> messageList = messageJsonList.stream()
+                .map(json -> {
+                    try {
+                        return objectMapper.readValue(json, MessageBody.class);
+                    } catch (JsonProcessingException e) {
+                        logger.error("消息反序列化失败", e);
+                        return null;
+                    }
+                })
+                .filter(msg -> msg != null)
+                .collect(Collectors.toList());
+
+        logger.info("批量推送房间 {} 的消息，共 {} 条", roomId, messageList.size());
+
+        try {
+            // 推送消息
+            GenericMessage downMessage = new GenericMessage();
+            downMessage.setRoomId(roomId);
+            downMessage.setBody(messageList);
+            downMessage.setType(IMConstants.MESSAGE_TYPE_CHAT);
+            imRPCService.pushChatMessage(roomId, downMessage);
+            logger.info("房间 {} 批量消息推送成功", roomId);
+
+            // 发送成功后清空List
+            redisTemplate.delete(batchListKey);
+        } catch (Exception e) {
+            logger.error("房间 {} 批量消息推送失败，失败原因：{}", roomId, e.getMessage());
+            // 推送失败保留List中的消息，等待下次重试
+        }
+    }
 }

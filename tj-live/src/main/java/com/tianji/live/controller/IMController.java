@@ -2,7 +2,10 @@ package com.tianji.live.controller;
 
 import com.tianji.common.domain.R;
 import com.tianji.common.exceptions.CommonException;
+import com.tianji.live.protocol.MessageBody;
+import com.tianji.live.service.ChatBusiService;
 import com.tianji.live.service.IMTokenService;
+import com.tianji.live.service.MessageHandlerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,9 @@ public class IMController {
     @Resource
     private IMTokenService imTokenService;
 
+    @Resource
+    private ChatBusiService chatBusiService;
+
     /**
      * 获取IM服务器地址
      * @return
@@ -65,5 +71,17 @@ public class IMController {
             res.put("url",instanceUrl);
             return res;
         }
+    }
+
+    /**
+     * 获取房间历史消息
+     */
+    @GetMapping("/messages/{roomId}")
+    public List<MessageBody> getRoomMessages(@PathVariable Long roomId) {
+        if (roomId == null || roomId <= 0) {
+            throw new CommonException("房间ID不能为空");
+        }
+        List<MessageBody> messages = chatBusiService.getRoomHistoryMessages(roomId);
+        return messages == null ? new ArrayList<>() : messages;
     }
 }

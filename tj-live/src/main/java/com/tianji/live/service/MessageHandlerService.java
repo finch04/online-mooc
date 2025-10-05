@@ -3,9 +3,11 @@ package com.tianji.live.service;
 import com.alibaba.fastjson.JSON;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
 import com.tianji.common.constants.MqConstants;
+import com.tianji.common.utils.StringUtils;
 import com.tianji.live.constants.IMConstants;
 import com.tianji.live.manager.ConnectionManager;
 import com.tianji.live.protocol.GenericMessage;
+import com.tianji.live.protocol.MessageBody;
 import com.tianji.live.utils.IMCacheKeyBuilder;
 import jakarta.annotation.Resource;
 import jakarta.websocket.Session;
@@ -15,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,9 +41,12 @@ public class MessageHandlerService {
 
     @Resource
     private IMCacheKeyBuilder imCacheKeyBuilder;
+
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-    public void sendIndexMessage(String userId, String roomId) {
+
+
+    public void sendIndexMessage(String userId, String roomId,String userName) {
         Optional<Session> connOpt = ConnectionManager.getSession(userId);
         if (!connOpt.isPresent()) {
             logger.info("用户路由不存在,首页消息推送失败,userId=>{}", userId);
@@ -50,6 +56,20 @@ public class MessageHandlerService {
         if (!socketSession.isOpen()) {
             logger.info("用户已经断开连接,首页消息推送失败,userId=>{}", userId);
         }
+        if(StringUtils.isNotEmpty(userName)){
+            GenericMessage broadcastMsg = new GenericMessage();
+            broadcastMsg.setType(IMConstants.MESSAGE_TYPE_JOIN_ROOM);
+            broadcastMsg.setRoomId(Long.valueOf(roomId));
+
+            MessageBody body = new MessageBody();
+            body.setContent( userName + " 进入了直播间");
+
+            List<MessageBody> bodies = new ArrayList<>();
+            bodies.add(body);
+            broadcastMsg.setBody(bodies);
+            sendRoomBroadCast(Long.valueOf(roomId), broadcastMsg);
+        }
+
         // 查询房间最新20条消息，推送给用户，没有存储消息就不实现了
         // socketSession.sendMessage();
 //        logger.info("异步推送首页消息成功！！！！！！！！！！");
@@ -70,7 +90,7 @@ public class MessageHandlerService {
 //        // 消息发送需要根据房间中用户，进行消息分裂。
 //        allUserConnect.forEach(c -> executor.execute(() -> sendMessage(c, message)));
 //
-//        message.setFromUserId(Long.parseLong(userId));
+        message.setFromUserId(Long.parseLong(userId));
         logger.info("消息准备发送");
 //        //通过MQ往后端转发消息
         rabbitMqHelper.send(LIVE_EXCHANGE, MqConstants.Key.LIVE_IM_MESSAGE, message);

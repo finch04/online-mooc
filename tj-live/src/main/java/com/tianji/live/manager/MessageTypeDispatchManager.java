@@ -1,13 +1,17 @@
 package com.tianji.live.manager;
 
+import com.tianji.common.utils.StringUtils;
 import com.tianji.live.constants.IMConstants;
 import com.tianji.live.protocol.GenericMessage;
+import com.tianji.live.protocol.MessageBody;
 import com.tianji.live.service.MessageHandlerService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -40,7 +44,8 @@ public class MessageTypeDispatchManager {
             case IMConstants.MESSAGE_TYPE_JOIN_ROOM://加入房间
                 ConnectionManager.joinRoom(roomId, userId);
                 logger.info("用户=>{},加入房间=>{}", userId, roomId);
-                executor.execute(() -> messageHandlerService.sendIndexMessage(userId, roomId));
+                // 发送用户进入广播
+                executor.execute(() -> messageHandlerService.sendIndexMessage(userId, roomId,message.getFromUserName()));
                 break;
             case IMConstants.MESSAGE_TYPE_EXIT_ROOM://退出房间
                 ConnectionManager.exitRoom(roomId, userId);

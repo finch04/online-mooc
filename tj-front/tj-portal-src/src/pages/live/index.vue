@@ -12,8 +12,8 @@
             <img :src="anchorInfo.avatar" class="anchorAvatar" alt="">
             <div class="anchorName">{{ anchorInfo.nickName }}</div>
             <div class="butCont fx-ct">
-              <span class="bt Btn">关注</span>
-              <span class="bt Btn">分享</span>
+              <span class="bt-red Btn">关注</span>
+              <span class="bt-blue Btn">分享</span>
             </div>
           </div>
 
@@ -40,24 +40,40 @@
             <!-- 聊天区域 -->
             <div class="chatArea">
               <div class="talkContentBox" id="chatContentBox">
-                <div class="chatContent giftMsg" v-for='chatItem in chatList' :key="chatItem"
-                  v-show="chatItem.msgType == 5">
-                  {{ chatItem.content }}
-                </div>
-                <div class="chatContent" v-for='chatItem in chatList' :key="chatItem" v-show="chatItem.msgType == 2">
-                  <span class="userName">{{ chatItem.senderName }} :</span>
-                  <span>{{ chatItem.content }}</span>
-                </div>
-                <div class="chatContent systemMsg" v-for='chatItem in chatList' :key="chatItem"
-                  v-show="chatItem.msgType == 0">
-                  {{ chatItem.content }}
+                <!-- 统一的消息容器，通过类型区分样式 -->
+                <div 
+                  v-for="(chatItem, index) in chatList" 
+                  :key="index" 
+                  class="message-item"
+                  :class="{
+                    'message-user': chatItem.msgType === 2,
+                    'message-system': chatItem.msgType === 0,
+                    'message-gift': chatItem.msgType === 5
+                  }"
+                >
+                  <!-- 用户聊天消息 -->
+                  <template v-if="chatItem.msgType === 2">
+                    <span class="message-sender">{{ chatItem.senderName }}:</span>
+                    <span class="message-content">{{ chatItem.content }}</span>
+                  </template>
+                  
+                  <!-- 系统消息（进入房间） -->
+                  <template v-if="chatItem.msgType === 0">
+                    <span class="message-content">{{ chatItem.content }}</span>
+                  </template>
+                  
+                  <!-- 礼物消息 -->
+                  <template v-if="chatItem.msgType === 5">
+                    <span class="gift-icon">🎁</span>
+                    <span class="message-content">{{ chatItem.content }}</span>
+                  </template>
                 </div>
               </div>
               <div class="commentBox">
                 <div v-if="userId">
-                    <el-input  v-model="comment" placeholder="发送直播评论" max="40" ></el-input>
+                  <el-input v-model="comment" placeholder="发送直播评论" max="40"></el-input>
                 </div>
-                 <span  v-if="userId" class="bt sendBtn" style="margin-top: 10px;" @click="sendComment()">发送消息</span>
+                <span v-if="userId" class="bt sendBtn" style="margin-top: 10px;" @click="sendComment()">发送消息</span>
                 <button class="loginPrompt" v-if="!userId" @click="login()">请先登录，才能开始聊天</button>
               </div>
             </div>
@@ -121,13 +137,12 @@ const giftList = ref([
   { giftId: '9', coverImgUrl: '/img/gift9.png', giftName: '小灰兔', price: '40' },
   { giftId: '10', coverImgUrl: '/img/gift10.png', giftName: '飞机', price: '50' }
 ])
-const currentBalance = ref(0)
-const showBankInfo = ref(false)
 
 // 登录跳转方法
 const login = () => {
   router.push('/login')
 }
+
 // 清理资源
 onUnmounted(() => {
   if (myPlayer.value) {
@@ -157,23 +172,20 @@ const initPlayer = () => {
   }
 }
 
-// 1. 将 socket 声明为 ref 响应式变量，方便跟踪状态
+// WebSocket相关
 const socket = ref(null);
-
-// 处理收到的聊天消息
 const emitter = getEmitter()
 
 const scrollToBottom = () => {
   nextTick(() => {
-    document.getElementById("chatContentBox").scrollTop = document.getElementById("chatContentBox").scrollHeight
+    const chatBox = document.getElementById("chatContentBox")
+    chatBox.scrollTop = chatBox.scrollHeight
   })
 }
 
-// 2. 修正初始化逻辑，移除外部重复调用
 const initWebsocket = async () => {
-  // 等待 getWebSocket 执行完成，并将结果赋值给 socket
-  socket.value = await getWebSocket(userId.value ? userId.value : ''); // 注意：userId 是 ref，需用 .value 访问
-  
+  socket.value = await getWebSocket(userId.value ? userId.value : '');
+
   if (!socket.value) {
     ElMessage({
       showClose: true,
@@ -186,7 +198,9 @@ const initWebsocket = async () => {
   // 发送进入房间消息
   const joinRoomMsg = {
     type: 0,
-    roomId: roomId
+    roomId: roomId,
+    fromUserId: userId.value ? userId.value : '',
+    fromUserName: userName.value ? userName.value : '',
   }
   
   if (socket.value && socket.value.readyState === WebSocket.OPEN) {
@@ -202,40 +216,43 @@ const initWebsocket = async () => {
   // 处理消息接收
   emitter.on("messageReceived", (genericMessage) => {
     console.info("收到消息", genericMessage)
-    if (!genericMessage || !genericMessage.type) {
-      return
-      //聊天消息
-    } else if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
-      for (var bodyIndex in genericMessage.body) {
-        var messagebody = genericMessage.body[bodyIndex]
-        var chatmsg = {}
-        chatmsg.msgType = 2
-        chatmsg.senderName = messagebody.userName
-        chatmsg.content = messagebody.content
-        chatList.value.push(chatmsg)
-        scrollToBottom();
+
+    if (!genericMessage) return
+
+    // 聊天消息
+    if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
+      genericMessage.body.forEach(messagebody => {
+        chatList.value.push({
+          msgType: 2,
+          senderName: messagebody.userName,
+          content: messagebody.content
+        })
+        scrollToBottom()
+      })
+    }
+    // 进入房间消息
+    else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
+      if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
+        chatList.value.push({
+          msgType: 0,
+          content: genericMessage.body[0].content
+        })
+        scrollToBottom()
       }
-      //进入房间消息
-    } else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
-      var vipInRoomMsg = {}
-      vipInRoomMsg.msgType = 0
-      vipInRoomMsg.content = genericMessage.fromUserName + " 进入房间"
-      chatList.value.push(vipInRoomMsg)
-      scrollToBottom();
-      //送礼物消息
-    } else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
-      for (var index2 in genericMessage.body) {
-        var giftMessages = genericMessage.body[index2]
-        var giftMsg = {}
-        giftMsg.msgType = 5
-        giftMsg.content = giftMessages.content
-        chatList.value.push(giftMsg)
-        scrollToBottom();
-      }
+    }
+    // 礼物消息
+    else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
+      genericMessage.body.forEach(giftMessages => {
+        chatList.value.push({
+          msgType: 5,
+          content: giftMessages.content
+        })
+        scrollToBottom()
+      })
     }
   })
 
-  // 启动心跳检测
+  // 心跳检测
   heartbeatInterval = setInterval(() => {
     try {
       if (socket.value && socket.value.readyState === WebSocket.OPEN) {
@@ -261,21 +278,21 @@ const initWebsocket = async () => {
   }, 20000)
 };
 
-onMounted(async () => { // onMounted 支持异步函数
+onMounted(async () => {
   initPlayer();
-  await initWebsocket(); // 等待 websocket 初始化完成
+  await initWebsocket();
 });
 
-// 3. 发送评论时检查 socket 状态
+// 发送评论
 const sendComment = () => {
   if (comment.value) {
-    var commentMsg = {}
-    commentMsg.type = 2 // 聊天消息
-    commentMsg.roomId = roomId //房间ID
-    commentMsg.fromUserId = userId.value//发送者
-    commentMsg.fromUserName = userName.value //发送者名字
-    commentMsg.body = []
-    commentMsg.body.push({ 'content': comment.value })
+    const commentMsg = {
+      type: 2,
+      roomId: roomId,
+      fromUserId: userId.value,
+      fromUserName: userName.value,
+      body: [{ 'content': comment.value }]
+    }
     if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
       ElMessage.error('连接未就绪，请稍后再试');
       return;
@@ -285,7 +302,7 @@ const sendComment = () => {
   }
 };
 
-// 4. 发送礼物时同样检查 socket 状态
+// 发送礼物
 const sendGift = (gift) => {
   if (!userId.value) {
     ElMessage({
@@ -294,23 +311,24 @@ const sendGift = (gift) => {
       type: 'error',
     })
     return;
-  } else {
-    var giftMsg = {}
-    giftMsg.type = 5
-    giftMsg.roomId = roomId
-    giftMsg.fromUserId = userId.value
-    giftMsg.fromUserName = userName.value
-    giftMsg.body = []
-    giftMsg.body.push({ 'content': userName.value + '送给主播一个 ' + gift.giftName })
-    if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
-      ElMessage.error('连接未就绪，请稍后再试');
-      return;
-    }
-    socket.value.send(JSON.stringify(giftMsg));
   }
+  
+  const giftMsg = {
+    type: 5,
+    roomId: roomId,
+    fromUserId: userId.value,
+    fromUserName: userName.value,
+    body: [{ 'content': `${userName.value}送给主播一个 ${gift.giftName}` }]
+  }
+  
+  if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
+    ElMessage.error('连接未就绪，请稍后再试');
+    return;
+  }
+  socket.value.send(JSON.stringify(giftMsg));
 };
-
 </script>
+
 <style lang="scss">
 .mainWrapper {
   padding: 20px;
@@ -334,9 +352,10 @@ const sendGift = (gift) => {
         display: flex;
         align-items: center;
         padding: 15px;
-        border: 1px solid black;
+        border: 1px solid #e0e0e0;
         border-radius: 8px;
         margin-bottom: 20px;
+        background-color: #fff;
 
         .anchorAvatar {
           width: 50px;
@@ -347,20 +366,31 @@ const sendGift = (gift) => {
         }
 
         .anchorName {
-          color: #ffad2c;
-          font-size: 13px;
+          color: #333;
+          font-size: 16px;
+          font-weight: 500;
           margin-right: 10px;
         }
 
         .butCont {
-          padding: 20px;
+          margin-left: auto;
+          padding: 0 20px;
+
           span {
             display: inline-block;
             width: 85px;
             text-align: center;
             height: 35px;
+            line-height: 35px;
             border-radius: 20px;
             margin-left: 10px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: all 0.3s;
+
+            &:hover {
+              background-color: #e0e0e0;
+            }
           }
         }
       }
@@ -369,11 +399,11 @@ const sendGift = (gift) => {
         display: flex;
         gap: 20px;
         margin-bottom: 20px;
-        height: 800px /* 可根据实际情况调整 */
+        height: 800px;
       }
 
       .videoSide {
-        flex: 3; /* 视频和礼物区域占比 */
+        flex: 3;
         display: flex;
         flex-direction: column;
         gap: 20px;
@@ -383,7 +413,7 @@ const sendGift = (gift) => {
         background-color: #120925;
         border-radius: 8px;
         overflow: hidden;
-        flex: 1; /* 视频区域占视频侧的大部分高度 */
+        flex: 1;
 
         video {
           width: 100%;
@@ -403,6 +433,7 @@ const sendGift = (gift) => {
           display: flex;
           gap: 10px;
           overflow-x: auto;
+          padding-top: 10px;
           padding-bottom: 10px;
 
           .giftItem {
@@ -417,9 +448,11 @@ const sendGift = (gift) => {
               border: 2px solid transparent;
               border-radius: 5px;
               cursor: pointer;
+              transition: all 0.3s;
 
               &:hover {
                 border-color: #ffa925;
+                transform: scale(1.05);
               }
             }
 
@@ -438,7 +471,7 @@ const sendGift = (gift) => {
       }
 
       .chatArea {
-        flex: 1; /* 聊天区域占比，可根据需要调整 */
+        flex: 1;
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -450,25 +483,51 @@ const sendGift = (gift) => {
           border: 1px solid #e5e5e5;
           border-radius: 8px;
           overflow-y: auto;
+          padding: 15px;
+          box-sizing: border-box;
 
-          .chatContent {
-            margin-bottom: 10px;
+          // 统一消息容器样式
+          .message-item {
+            margin-bottom: 12px;
+            line-height: 1.5;
+            font-size: 14px;
+            padding: 5px 0;
+          }
 
-            &.giftMsg {
-              text-align: center;
-              font-size: 13px;
-              color: #868686;
+          // 用户聊天消息样式
+          .message-user {
+            .message-sender {
+              color: #409eff;
+              font-weight: 500;
+              margin-right: 8px;
             }
-
-            &.systemMsg {
-              color: #666;
-              font-size: 13px;
+            .message-content {
+              color: #333;
             }
+          }
 
-            .userName {
-              color: #8694ff;
+          // 系统消息样式
+          .message-system {
+            text-align: center;
+            .message-content {
+              color: #8c8c8c;
               font-size: 13px;
+              background-color: #f5f5f5;
+              padding: 3px 10px;
+              border-radius: 12px;
+            }
+          }
+
+          // 礼物消息样式
+          .message-gift {
+            text-align: center;
+            .gift-icon {
+              color: #ff4d4f;
               margin-right: 5px;
+            }
+            .message-content {
+              color: #e6a23c;
+              font-weight: 500;
             }
           }
         }
@@ -478,42 +537,41 @@ const sendGift = (gift) => {
           border: 1px solid #e5e5e5;
           border-radius: 8px;
           padding: 15px;
+          box-sizing: border-box;
 
-          .el-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            height: 100%;
+          .el-input {
+            margin-bottom: 10px;
+          }
 
-            .el-form-item {
-              flex: 1;
-              margin-bottom: 10px;
+          .sendBtn {
+            background-color: #1890ff;
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            transition: background-color 0.3s;
 
-              .el-input {
-                width: 100%;
-                height: 100%;
-                textarea {
-                  min-height: 80px !important;
-                }
-              }
-            }
-
-            .sendBtn {
-              background-color: #1890ff;
-              color: #fff;
-              border: none;
-              padding: 8px 20px;
-              border-radius: 4px;
-              cursor: pointer;
-              align-self: flex-end;
+            &:hover {
+              background-color: #096dd9;
             }
           }
 
           .loginPrompt {
             width: 100%;
             text-align: center;
-            padding: 20px 0;
+            padding: 15px 0;
             color: #666;
+            background-color: #f5f5f5;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+
+            &:hover {
+              background-color: #e9e9e9;
+            }
           }
         }
       }

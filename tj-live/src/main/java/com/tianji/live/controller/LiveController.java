@@ -28,7 +28,7 @@ public class LiveController {
     private ILiveRoomService liveRoomService;
 
     @GetMapping("/{id}")
-    public LiveRoom getLiveRoomById(@PathVariable Long id) throws IOException {
+    public LiveRoomVO getLiveRoomById(@PathVariable Long id) throws IOException {
         return liveRoomService.getRoomById(id);
     }
 

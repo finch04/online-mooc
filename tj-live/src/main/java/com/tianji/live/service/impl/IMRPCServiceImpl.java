@@ -15,10 +15,12 @@ import java.util.List;
 
 @Service
 public class IMRPCServiceImpl implements IIMRPCService {
+
     private Logger logger = LoggerFactory.getLogger(IMRPCServiceImpl.class);
 
     @Resource
     private MessageHandlerService messageHandlerService;
+
     @Override
     public boolean sendMesasgeToRoom(Long roomId, String message) {
         GenericMessage genericMessage = new GenericMessage();

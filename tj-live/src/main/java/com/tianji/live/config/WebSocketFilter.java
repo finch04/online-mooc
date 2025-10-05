@@ -5,9 +5,11 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -20,14 +22,15 @@ import java.util.Map;
  * @Version: 1.0
  */
 @Component
+@RequiredArgsConstructor
 public class WebSocketFilter implements Filter {
+
     private Logger logger = LoggerFactory.getLogger(WebSocketFilter.class);
 
-    @Resource
-    private IMCacheKeyBuilder imCacheKeyBuilder;
+    private final IMCacheKeyBuilder imCacheKeyBuilder;
 
-    @Resource
-    private RedisTemplate<String,Object> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;

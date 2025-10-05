@@ -38,7 +38,8 @@ public class ChatWebSocketController {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("userId") String userId) {
-        logger.info("收到新链接请求，userId={},sessionId={}", userId, session.getId());
+        logger.info("收到新链接请求，userId={},  sessionId={}",
+                userId, session.getId());
         try {//登录用户
             Long lUserId = Long.parseLong(userId);
             session.getUserProperties().put(IMConstants.PROP_USER_ID, lUserId);
@@ -93,22 +94,18 @@ public class ChatWebSocketController {
         if(message.equals(IMConstants.MESSAGE_HEARTBEAT)){
             return;
         }
-
         GenericMessage chatMessage = null;
         //消息格式不是JSON格式，更新心跳后直接退出。
         try{
             chatMessage = JSON.parseObject(message, GenericMessage.class);
         }catch(JSONException e){
             logger.error("消息格式解析错误，message={}，error={}", message, e.getMessage());
-//            Optional<Session> optionalSession = ConnectionManager.getSession(this.userId);
-//            if (!optionalSession.isEmpty()) {
-//                optionalSession.get().getBasicRemote().sendText("消息格式发送错误，请重新发送");
-//            }
             return;
         }
 
         if(chatMessage.getType() == IMConstants.MESSAGE_TYPE_JOIN_ROOM
                 || chatMessage.getType() == IMConstants.MESSAGE_TYPE_EXIT_ROOM){
+            chatMessage.setFromUserName(chatMessage.getFromUserName());
             messageDispatchManager.messageTypeDispatch(userId,chatMessage);
         }else{
             //只有登录用户的消息进行转发
