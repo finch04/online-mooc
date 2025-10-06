@@ -56,6 +56,10 @@ public class MessageHandlerService {
         if (!socketSession.isOpen()) {
             logger.info("用户已经断开连接,首页消息推送失败,userId=>{}", userId);
         }
+        //发送直播间公告
+
+
+        //发送用户进入直播间的消息
         if(StringUtils.isNotEmpty(userName)){
             GenericMessage broadcastMsg = new GenericMessage();
             broadcastMsg.setType(IMConstants.MESSAGE_TYPE_JOIN_ROOM);
@@ -140,5 +144,49 @@ public class MessageHandlerService {
             //如果没有，表示用户对应的Session不在当前服务上，而是在集群中的其他服务上。
         });
         return true;
+    }
+
+    /**
+     * 推送房间公告给指定用户
+     */
+    public void sendRoomNoticeToUser(String userId, Long roomId, String notice) {
+        Optional<Session> connOpt = ConnectionManager.getSession(userId);
+        if (!connOpt.isPresent()) {
+            logger.info("用户路由不存在,公告推送失败,userId=>{}", userId);
+            return;
+        }
+        Session session = connOpt.get();
+        if (!session.isOpen()) {
+            logger.info("用户已经断开连接,公告推送失败,userId=>{}", userId);
+            return;
+        }
+
+        GenericMessage noticeMsg = new GenericMessage();
+        noticeMsg.setType(IMConstants.MESSAGE_TYPE_NOTICE);
+        noticeMsg.setRoomId(roomId);
+
+        MessageBody body = new MessageBody();
+        body.setContent("直播间公告：" + notice);
+        noticeMsg.setBody(List.of(body));
+
+        sendMessage(session, noticeMsg);
+    }
+
+    /**
+     * 推送历史消息给指定用户
+     */
+    public void sendHistoryMessagesToUser(String userId, Long roomId, List<MessageBody> historyMessages) {
+        Optional<Session> connOpt = ConnectionManager.getSession(userId);
+        if (!connOpt.isPresent() || !connOpt.get().isOpen()) {
+            logger.info("用户连接不存在或已关闭,历史消息推送失败,userId=>{}", userId);
+            return;
+        }
+
+        GenericMessage historyMsg = new GenericMessage();
+        historyMsg.setType(IMConstants.MESSAGE_TYPE_CHAT);
+        historyMsg.setRoomId(roomId);
+        historyMsg.setBody(historyMessages);
+
+        sendMessage(connOpt.get(), historyMsg);
     }
 }

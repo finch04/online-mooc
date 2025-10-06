@@ -44,6 +44,11 @@ public class LiveRoom {
     private String roomDesc;
 
     /**
+     * 直播间公告
+     */
+    private String roomNotice;
+
+    /**
      * 直播间分类id
      */
     private Long categoryId;

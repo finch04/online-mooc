@@ -74,7 +74,7 @@ public class IMController {
     }
 
     /**
-     * 获取房间历史消息
+     * 获取房间历史消息(未启用)
      */
     @GetMapping("/messages/{roomId}")
     public List<MessageBody> getRoomMessages(@PathVariable Long roomId) {

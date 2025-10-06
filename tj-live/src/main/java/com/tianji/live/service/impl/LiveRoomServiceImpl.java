@@ -34,6 +34,8 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
         vo.setAnchorName(dto.getName());
         vo.setAnchorIcon(dto.getIcon());
         vo.setFollowed(false); //TODO : 判断用户是否已关注
+
+
         return vo;
 
     }

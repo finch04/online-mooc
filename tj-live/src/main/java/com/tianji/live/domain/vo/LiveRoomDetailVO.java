@@ -44,6 +44,18 @@ public class LiveRoomDetailVO {
     private String roomTitle;
 
     /**
+     * 直播间描述
+     */
+    private String roomDesc;
+
+
+    /**
+     * 直播间公告
+     */
+    private String roomNotice;
+
+
+    /**
      * 直播间封面图URL
      */
     private String roomCover;

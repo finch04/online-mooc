@@ -23,9 +23,9 @@ export const getIMServerUrl = (params) =>
         method: 'get',
     })
 
-// 根据直播间id获取直播间信息
-export const getRoomMessages = (roomId) =>
-    request({
-        url: `${LIVE_API_PREFIX}/im/${roomId}`,		
-        method: 'get',
-}) 
+// // 根据直播间id获取直播间历史消息
+// export const getRoomMessages = (roomId) =>
+//     request({
+//         url: `${LIVE_API_PREFIX}/im/${roomId}`,		
+//         method: 'get',
+// }) 

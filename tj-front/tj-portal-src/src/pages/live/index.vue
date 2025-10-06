@@ -3,7 +3,6 @@
     <!-- 面包屑导航与直播间信息 -->
     <div class="container">
       <div class="header-info">
-        <!-- <Breadcrumb data="直播间" class="breadcrumb" /> -->
         <div class="room-header">
           <img :src="liveRoomDetail.roomCover" class="room-cover" alt="直播间封面">
           <div class="room-title-container">
@@ -15,9 +14,11 @@
               <span v-if="liveRoomDetail.status === 3" class="status-banned">禁播</span>
               <span v-if="liveRoomDetail.isPrivate" class="private-tag">私有直播间</span>
             </div>
+            <p class="room-desc">{{ liveRoomDetail.roomDesc }}</p>
+            <!-- <p class="room-notice"><span class="notice-label">公告：</span>{{ liveRoomDetail.roomNotice || '暂无公告' }}</p> -->
           </div>
           <div class="butCont fx-ct">
-            <span class="bt bt-round" style="padding:4px"  @click="goHome()">返回首页</span>
+            <span class="bt bt-round" style="padding:4px;width: 100px;"  @click="goHome()">返回首页</span>
           </div>
         </div>
       </div>
@@ -25,17 +26,41 @@
     <div class="liveroomContainer">
       <el-container class="mainContent">
         <el-main>
-          <!-- 主播信息 -->
-          <div class="anchorInfo">
-            <img :src="liveRoomDetail.anchorIcon" class="anchorAvatar" alt="主播头像">
-            <div class="anchorName">{{ liveRoomDetail.anchorName }}</div>
-            <div class="room-stats">
-              <span>在线: {{ liveRoomDetail.onlineCount || 0 }}</span>
-              <span>点赞: {{ liveRoomDetail.likeCount || 0 }}</span>
+          <!-- 主播信息与直播间信息合并区域 -->
+          <div class="info-bar">
+            <div class="anchor-info">
+              <img :src="liveRoomDetail.anchorIcon" class="anchor-avatar" alt="主播头像">
+              <div class="anchor-detail">
+                <h3 class="anchor-name">{{ liveRoomDetail.anchorName }}</h3>
+                <p class="room-meta">
+                  <span class="meta-item">开播时间：{{ formatTime(liveRoomDetail.createTime) }}</span>
+                  <span class="meta-item">最后更新：{{ formatTime(liveRoomDetail.updateTime) }}</span>
+                </p>
+              </div>
             </div>
-            <div class="butCont fx-ct">
+            
+            <div class="room-stats">
+              <div class="stat-item">
+                <span class="stat-value">{{ liveRoomDetail.onlineCount || 0 }}</span>
+                <span class="stat-label">当前在线</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ liveRoomDetail.maxOnlineCount || 0 }}</span>
+                <span class="stat-label">最高在线</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ liveRoomDetail.likeCount || 0 }}</span>
+                <span class="stat-label">总点赞</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ liveRoomDetail.shareCount || 0 }}</span>
+                <span class="stat-label">分享次数</span>
+              </div>
+            </div>
+            
+            <div class="action-buttons">
               <span class="bt-red Btn" @click="handleFollow">{{ liveRoomDetail.followed ? '已关注' : '关注' }}</span>
-              <span class="bt-blue Btn" @click="handleShare">分享({{ liveRoomDetail.shareCount || 0 }})</span>
+              <span class="bt-blue Btn" @click="handleShare">分享</span>
             </div>
           </div>
 
@@ -70,7 +95,8 @@
                   :class="{
                     'message-user': chatItem.msgType === 2,
                     'message-system': chatItem.msgType === 0,
-                    'message-gift': chatItem.msgType === 5
+                    'message-gift': chatItem.msgType === 5,
+                    'message-notice': chatItem.msgType === 6
                   }"
                 >
                   <!-- 用户聊天消息 -->
@@ -87,6 +113,12 @@
                   <!-- 礼物消息 -->
                   <template v-if="chatItem.msgType === 5">
                     <span class="gift-icon">🎁</span>
+                    <span class="message-content">{{ chatItem.content }}</span>
+                  </template>
+                  
+                  <!-- 直播间公告 -->
+                  <template v-if="chatItem.msgType === 6">
+                    <span class="notice-icon">📢</span>
                     <span class="message-content">{{ chatItem.content }}</span>
                   </template>
                 </div>
@@ -114,8 +146,13 @@ import videojs from 'video.js'
 import { useUserStore } from '@/store'
 import { getWebSocket } from "@/utils/websocket"
 import { getEmitter } from '@/utils/messageEmitter'
-import { getLiveRoomById, getRoomMessages } from '@/api/live'
+import { getLiveRoomById } from '@/api/live'
 
+import { closeWebSocket } from '@/utils/websocket'
+//浏览器关闭时，触发一次关闭链接动作
+window.addEventListener('beforeunload',closeWebSocket)
+
+import 'video.js/dist/video-js.min.css'
 // 组件导入
 import Breadcrumb from "@/components/Breadcrumb.vue";
 
@@ -131,16 +168,22 @@ const myPlayer = ref(null)
 
 // 直播间详情信息
 const liveRoomDetail = ref({
+  anchorId: '',
   anchorName: '加载中...',
   anchorIcon: '/img/avatar.png',
   roomTitle: '直播间标题加载中...',
+  roomDesc: '',
+  roomNotice: '',
   roomCover: '/img/default-cover.png',
   status: 0,
   onlineCount: 0,
+  maxOnlineCount: 0,
   likeCount: 0,
   shareCount: 0,
   isPrivate: false,
-  followed: false
+  followed: false,
+  createTime: '',
+  updateTime: ''
 })
 
 // 用户信息
@@ -168,6 +211,13 @@ const giftList = ref([
   { giftId: '9', coverImgUrl: '/img/gift9.png', giftName: '小灰兔', price: '40' },
   { giftId: '10', coverImgUrl: '/img/gift10.png', giftName: '飞机', price: '50' }
 ])
+
+// 格式化时间
+const formatTime = (timeStr) => {
+  if (!timeStr) return '未知'
+  const date = new Date(timeStr)
+  return date.toLocaleString()
+}
 
 // 登录跳转方法
 const login = () => {
@@ -310,6 +360,18 @@ const initWebsocket = async () => {
         scrollToBottom()
       })
     }
+    // 直播间公告消息
+    else if (genericMessage.type == 6 && genericMessage.roomId == roomId) {
+      if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
+        genericMessage.body.forEach(notice => {
+          chatList.value.push({
+            msgType: 6,
+            content: notice.content
+          })
+          scrollToBottom()
+        })
+      }
+    }
   })
 
   // 心跳检测
@@ -390,432 +452,5 @@ const sendGift = (gift) => {
 };
 </script>
 
-<style lang="scss">
-.mainWrapper {
-  padding: 20px;
-  box-sizing: border-box;
-  background-color: #f5f5f5;
-  min-height: 100vh;
-
-  .breadcrumb {
-    margin-bottom: 20px;
-    display: inline-block;
-  }
-
-  .header-info {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-
-  .room-header {
-    display: flex;
-    float: right;
-    align-items: right;
-    gap: 15px;
-  }
-
-  .room-cover {
-    width: 180px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-
-  .room-title-container {
-    flex: 1;
-  }
-
-  .room-title {
-    margin: 0 0 10px 0;
-    color: #333;
-    font-size: 18px;
-  }
-
-  .room-status {
-    display: flex;
-    gap: 10px;
-  }
-
-  .status-live {
-    background-color: #ff4d4f;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-  }
-
-  .status-offline {
-    background-color: #8c8c8c;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-  }
-
-  .status-closed {
-    background-color: #1890ff;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-  }
-
-  .status-banned {
-    background-color: #ff7d00;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-  }
-
-  .private-tag {
-    background-color: #722ed1;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-  }
-
-  .liveroomContainer {
-    width: 100%;
-
-    .mainContent {
-      width: 100%;
-      padding: 0;
-
-      .anchorInfo {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        background-color: #fff;
-
-        .anchorAvatar {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          border: 2px solid #ff8f19;
-          margin-right: 15px;
-        }
-
-        .anchorName {
-          color: #333;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 10px;
-        }
-
-        .room-stats {
-          display: flex;
-          gap: 15px;
-          margin-right: 20px;
-          color: #666;
-          font-size: 14px;
-        }
-
-        .butCont {
-          margin-left: auto;
-          padding: 0 20px;
-
-          span {
-            display: inline-block;
-            width: 85px;
-            text-align: center;
-            height: 35px;
-            line-height: 35px;
-            border-radius: 20px;
-            margin-left: 10px;
-            cursor: pointer;
-            background-color: #f0f0f0;
-            transition: all 0.3s;
-
-            &:hover {
-              background-color: #e0e0e0;
-            }
-          }
-
-          .bt-red {
-            background-color: #ff4d4f;
-            color: white;
-
-            &:hover {
-              background-color: #f5222d;
-            }
-          }
-
-          .bt-blue {
-            background-color: #1890ff;
-            color: white;
-
-            &:hover {
-              background-color: #096dd9;
-            }
-          }
-        }
-      }
-
-      .videoChatWrapper {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
-        height: 800px;
-      }
-
-      .videoSide {
-        flex: 3;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .videoContainer {
-        background-color: #120925;
-        border-radius: 8px;
-        overflow: hidden;
-        flex: 1;
-
-        video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-      }
-
-      .giftArea {
-        width: 100%;
-        border: #120925 3px solid;
-        border-radius: 8px;
-        padding: 15px;
-        box-sizing: border-box;
-
-        .giftList {
-          display: flex;
-          gap: 10px;
-          overflow-x: auto;
-          padding-top: 10px;
-          padding-bottom: 10px;
-
-          .giftItem {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 80px;
-
-            .giftImg {
-              width: 80px;
-              height: 80px;
-              border: 2px solid transparent;
-              border-radius: 5px;
-              cursor: pointer;
-              transition: all 0.3s;
-
-              &:hover {
-                border-color: #ffa925;
-                transform: scale(1.05);
-              }
-            }
-
-            .giftItemName {
-              color: #fff;
-              font-size: 15px;
-              margin-top: 5px;
-            }
-
-            .giftItemPrice {
-              color: #ffa84c;
-              font-size: 12px;
-            }
-          }
-        }
-      }
-
-      .chatArea {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        height: 100%;
-
-        .talkContentBox {
-          flex: 1;
-          background-color: #fff;
-          border: 1px solid #e5e5e5;
-          border-radius: 8px;
-          overflow-y: auto;
-          padding: 15px;
-          box-sizing: border-box;
-
-          // 统一消息容器样式
-          .message-item {
-            margin-bottom: 12px;
-            line-height: 1.5;
-            font-size: 14px;
-            padding: 5px 0;
-          }
-
-          // 用户聊天消息样式
-          .message-user {
-            .message-sender {
-              color: #409eff;
-              font-weight: 500;
-              margin-right: 8px;
-            }
-            .message-content {
-              color: #333;
-            }
-          }
-
-          // 系统消息样式
-          .message-system {
-            text-align: center;
-            .message-content {
-              color: #8c8c8c;
-              font-size: 13px;
-              background-color: #f5f5f5;
-              padding: 3px 10px;
-              border-radius: 12px;
-            }
-          }
-
-          // 礼物消息样式
-          .message-gift {
-            text-align: center;
-            .gift-icon {
-              color: #ff4d4f;
-              margin-right: 5px;
-            }
-            .message-content {
-              color: #e6a23c;
-              font-weight: 500;
-            }
-          }
-        }
-
-        .commentBox {
-          background-color: #fff;
-          border: 1px solid #e5e5e5;
-          border-radius: 8px;
-          padding: 15px;
-          box-sizing: border-box;
-
-          .el-input {
-            margin-bottom: 10px;
-          }
-
-          .sendBtn {
-            background-color: #1890ff;
-            color: #fff;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: inline-block;
-            transition: background-color 0.3s;
-
-            &:hover {
-              background-color: #096dd9;
-            }
-          }
-
-          .loginPrompt {
-            width: 100%;
-            text-align: center;
-            padding: 15px 0;
-            color: #666;
-            background-color: #f5f5f5;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-
-            &:hover {
-              background-color: #e9e9e9;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // 红包相关样式
-  .redPacketWrap {
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-    height: 100%;
-    width: 100%;
-    z-index: 9999;
-
-    #wrapper {
-      img {
-        position: absolute;
-        transform: translateY(-120%);
-        animation: dropDowm 2s forwards;
-        z-index: 9999;
-        top: -100px;
-      }
-    }
-
-    @keyframes dropDowm {
-      0% {
-        top: 0px;
-        transform: translateY(-100%) rotate(0deg);
-      }
-
-      100% {
-        top: 60%;
-        transform: translateY(0%) rotate(360deg);
-      }
-    }
-
-    #modol {
-      display: none;
-
-      &::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-      }
-    }
-
-    #hb {
-      width: 350px;
-      height: 450px;
-      border-radius: 20px;
-      background-color: #e7223e;
-      color: #fad755;
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      margin-top: -225px;
-      margin-left: -175px;
-      font-size: 30px;
-      font-weight: 900;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-
-      #btn {
-        background-color: #fad755;
-        color: #e7223e;
-        font-size: 18px;
-        margin-top: 10px;
-        padding: 10px;
-        border: none;
-        outline: none;
-        cursor: pointer;
-      }
-    }
-  }
-}
+<style lang="scss" src="./index.scss">
 </style>

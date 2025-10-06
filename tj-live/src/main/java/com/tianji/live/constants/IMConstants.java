@@ -18,7 +18,7 @@ public class IMConstants {
     public static final int MESSAGE_TYPE_EXIT_ROOM=1;      // 退出房间
     public static final int MESSAGE_TYPE_CHAT=2;           // 聊天消息
     public static final int MESSAGE_TYPE_GIFT=5;           // 礼物消息
-    public static final int MESSAGE_TYPE_BROADCAST=6;
+    public static final int MESSAGE_TYPE_NOTICE=6;
 
     // 消息缓存数量
     public static final int MESSAGE_CACHE_SIZE=20;
