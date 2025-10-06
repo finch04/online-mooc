@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Author： roy
+ * Author： fsq
  * Description： 链接心跳管理器，自动关闭空闲链接
  **/
 @Component

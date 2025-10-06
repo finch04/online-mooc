@@ -1,11 +1,10 @@
 package com.tianji.live.controller;
 
-import com.tianji.common.domain.R;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.live.protocol.MessageBody;
 import com.tianji.live.service.ChatBusiService;
+import com.tianji.live.service.IIMService;
 import com.tianji.live.service.IMTokenService;
-import com.tianji.live.service.MessageHandlerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +41,9 @@ public class IMController {
 
     @Resource
     private ChatBusiService chatBusiService;
+
+    @Resource
+    private IIMService iMService;
 
     /**
      * 获取IM服务器地址
@@ -83,5 +85,12 @@ public class IMController {
         }
         List<MessageBody> messages = chatBusiService.getRoomHistoryMessages(roomId);
         return messages == null ? new ArrayList<>() : messages;
+    }
+
+    //TODO 往直播间发送广播消息。--只用作单机测试。
+    // IMServer后端只做了单机测试，没做集群化处理。
+    @PostMapping("/sendRoomBroadCast")
+    public void sendRoomBroadCast(Long roomId,String message){
+        iMService.sendMesasgeToRoom(roomId,message);
     }
 }

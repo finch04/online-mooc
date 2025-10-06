@@ -1,7 +1,7 @@
 package com.tianji.unqid.constants;
 
 /**
- * Author： roy
+ * Author： fsq
  * Description：
  **/
 public class IDConstants {

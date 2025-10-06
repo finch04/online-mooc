@@ -33,7 +33,7 @@ tj:
         keepAliveTime: 600
     heartbeat:
       timeout:
-        seconds: 6 #测试用，先久一些
+        seconds: 3000 #测试用，先久一些
     message:
       cachesize: 5
       batchsize: 5

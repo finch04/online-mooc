@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Author： roy
+ * Author： fsq
  * Description：对消息做处理--使用List存储历史消息，List实现削峰批量发送（基于插入顺序自然排序）
  **/
 @Service
@@ -43,7 +43,7 @@ public class ChatBusiService {
 
     private final StringRedisTemplate redisTemplate;
     @Resource
-    private final IIMRPCService imRPCService;
+    private final IIMService imRPCService;
     @Resource
     private final UnqidClient unqidClient;
     @Resource

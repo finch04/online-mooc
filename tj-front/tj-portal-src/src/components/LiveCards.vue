@@ -13,14 +13,18 @@
       >
         {{ statusLabel }}
       </span>
-      <img :src="data.roomCover" alt="" />
+      <!-- 私有直播间标签 - 右上角倾斜效果 -->
+      <div v-if="data.isPrivate" class="private-tag-container">
+        <span class="private-tag">私有直播间</span>
+      </div>
+      <img :src="data.roomCover" alt="直播间封面" />
     </div>
     <div class="pd-10">
       <div class="title marg-bt-10 ft-14" v-html="data.roomTitle"></div>
       <!-- 主播信息 -->
       <div class="anchor-info ft-cl-des">
         <!-- 主播头像 -->
-        <img class="avatar" :src="data.anchorIcon || '/img/default-avatar.png'" alt="" />
+        <img class="avatar" :src="data.anchorIcon || '/img/default-avatar.png'" alt="主播头像" />
         <span>主播：</span>
         {{ data.anchorName || '未知主播' }}
       </div>
@@ -34,10 +38,6 @@
           🔥最高{{ data.maxOnlineCount || 0 }}人在线
           👍点赞{{ data.likeCount }}次
         </span>
-      </div>
-      <!-- 私有标识 -->
-      <div class="ft-cl-des" v-if="data.isPrivate">
-        <span class="private-tag">私有直播间</span>
       </div>
     </div>
   </div>
@@ -110,6 +110,32 @@ const goDetails = (id) => {
       padding: 2px 5px;
       color: #fff;
       border-radius: 3px;
+      z-index: 2;
+    }
+
+    // 私有直播间标签容器 - 实现右上角倾斜效果
+    .private-tag-container {
+      position: absolute;
+      top: 15px;
+      right: -40px;
+      width: 160px;
+      height: 40px;
+      transform: rotate(45deg);
+      z-index: 2;
+      overflow: hidden;
+    }
+    
+    // 私有直播间标签样式
+    .private-tag {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-color: #ff4d4f;
+      color: #fff;
+      text-align: center;
+      line-height: 40px;
+      font-size: 12px;
+      font-weight: 500;
     }
 
     // 状态标签样式
@@ -128,6 +154,8 @@ const goDetails = (id) => {
 
     img {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
       border-radius: 8px 8px 0 0;
       transition: transform 0.3s ease;
     }
@@ -160,15 +188,6 @@ const goDetails = (id) => {
     padding: 1px;
     background-color: #fff;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-  }
-
-  // 私有直播间标签
-  .private-tag {
-    background-color: #ff4d4f;
-    color: #fff;
-    padding: 2px 5px;
-    border-radius: 3px;
-    font-size: 12px;
   }
 }
 </style>

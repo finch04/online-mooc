@@ -4,10 +4,10 @@ package com.tianji.live.service;
 import com.tianji.live.protocol.GenericMessage;
 
 /**
- * Author： roy
+ * Author： fsq
  * Description：
  **/
-public interface IIMRPCService {
+public interface IIMService {
 
     /**
      * 向直播间发送公告

@@ -251,13 +251,13 @@
   background-color: #f5222d;
 }
 
-.mainWrapper .liveroomContainer .mainContent .butCont .bt-blue {
-  background-color: #1890ff;
+.mainWrapper .liveroomContainer .mainContent .butCont .bt-pink {
+  background-color: pink;
   color: white;
 }
 
-.mainWrapper .liveroomContainer .mainContent .butCont .bt-blue:hover {
-  background-color: #096dd9;
+.mainWrapper .liveroomContainer .mainContent .butCont .bt-pink:hover {
+  background-color: #ff6666;
 }
 
 .mainWrapper .liveroomContainer .mainContent .Btn {

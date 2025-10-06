@@ -59,8 +59,8 @@
             </div>
 
             <div class="action-buttons">
+              <span class="bt-pink Btn" @click="handleLike">👍点赞</span>
               <span class="bt-red Btn" @click="handleFollow">{{ liveRoomDetail.followed ? '已关注' : '关注' }}</span>
-              <span class="bt-blue Btn" @click="handleShare">分享</span>
             </div>
           </div>
 
@@ -70,7 +70,7 @@
             <div class="videoSide">
               <div class="videoContainer">
                 <video class="video-js" ref="videoplayer" width="100%"
-                  style="background-color: rgb(18, 9, 37);width:100%;height:610px"></video>
+                  style="background-color: rgb(18, 9, 37);width:100%;height:600px"></video>
               </div>
               <!-- 礼物面板 - 底部罗列 -->
               <div class="giftArea">
@@ -159,6 +159,7 @@ window.addEventListener('beforeunload', () => {
 
 // 组件卸载时也关闭连接（作为双重保障）
 onUnmounted(() => {
+  emitter.off("closeWebsocket", handleCloseWebsocket); // 精准移除当前监听器
   closeWebSocket()
   if (myPlayer.value) {
     myPlayer.value.dispose()
@@ -248,19 +249,13 @@ const handleFollow = () => {
   ElMessage.success(liveRoomDetail.value.followed ? '关注成功' : '取消关注成功')
 }
 
-// 分享直播间
-const handleShare = () => {
-  // 实际项目中需要实现分享逻辑
-  ElMessage.info('分享功能开发中...')
+// 点赞直播间
+const handleLike = () => {
+  // 实际项目中需要实现点赞逻辑
+  ElMessage.info('点赞功能开发中...')
 }
 
-// 清理资源
-onUnmounted(() => {
-  if (myPlayer.value) {
-    myPlayer.value.dispose()
-  }
-  clearInterval(heartbeatInterval)
-})
+
 
 // 初始化播放器
 const initPlayer = () => {
@@ -337,99 +332,120 @@ const initWebsocket = async () => {
     }, 1000)
   }
 
-//心跳处理
-emitter.on("closeWebsocket", () => {
-   ElMessageBox.confirm(
-      '长时间无操作，已退出IM聊天',
-      '提示',
-      {
-        confirmButtonText: '重新恢复',
-        showCancelButton: false,
-        type: 'warning'
-      })
-  }
-  )
-}
-// 处理消息接收
-emitter.on("messageReceived", (genericMessage) => {
-  console.info("收到消息", genericMessage)
+  // 处理消息接收
+  emitter.on("messageReceived", (genericMessage) => {
+    console.info("收到消息", genericMessage)
 
-  if (!genericMessage) return
+    if (!genericMessage) return
 
-  // 聊天消息
-  if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
-    genericMessage.body.forEach(messagebody => {
-      chatList.value.push({
-        msgType: 2,
-        senderName: messagebody.userName,
-        content: messagebody.content
-      })
-      scrollToBottom()
-    })
-  }
-  // 进入房间消息
-  else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
-    if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
-      chatList.value.push({
-        msgType: 0,
-        content: genericMessage.body[0].content
-      })
-      scrollToBottom()
-    }
-  }
-  // 礼物消息
-  else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
-    genericMessage.body.forEach(giftMessages => {
-      chatList.value.push({
-        msgType: 5,
-        content: giftMessages.content
-      })
-      scrollToBottom()
-    })
-  }
-  // 直播间公告消息
-  else if (genericMessage.type == 6 && genericMessage.roomId == roomId) {
-    if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
-      genericMessage.body.forEach(notice => {
+    // 聊天消息
+    if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
+      genericMessage.body.forEach(messagebody => {
         chatList.value.push({
-          msgType: 6,
-          content: notice.content
+          msgType: 2,
+          senderName: messagebody.userName,
+          content: messagebody.content
         })
         scrollToBottom()
       })
     }
-  }
-})
-
-// 心跳检测
-heartbeatInterval = setInterval(() => {
-  try {
-    if (socket.value && socket.value.readyState === WebSocket.OPEN) {
-      socket.value.send("Heartbeat")
+    // 进入房间消息
+    else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
+      if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
+        chatList.value.push({
+          msgType: 0,
+          content: genericMessage.body[0].content
+        })
+        scrollToBottom()
+      }
     }
-  } catch (e) {
-    if (!isConfirming.value) {
-      isConfirming.value = true
-      ElMessageBox.confirm(
-        '长时间无操作，已退出IM聊天',
-        '提示',
-        {
-          confirmButtonText: '重新恢复',
-          showCancelButton: false,
-          type: 'warning'
-        }
-      ).then(async () => {
-        socket.value = await getWebSocket(userId.value ? userId.value : '')
-        isConfirming.value = false
+    // 礼物消息
+    else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
+      genericMessage.body.forEach(giftMessages => {
+        chatList.value.push({
+          msgType: 5,
+          content: giftMessages.content
+        })
+        scrollToBottom()
       })
     }
+    // 直播间公告消息
+    else if (genericMessage.type == 6 && genericMessage.roomId == roomId) {
+      if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
+        genericMessage.body.forEach(notice => {
+          chatList.value.push({
+            msgType: 6,
+            content: notice.content
+          })
+          scrollToBottom()
+        })
+      }
+    }
+  })
+
+  heartbeatInterval = setInterval(() => {
+    try {
+      console.log("心跳检测将发起")
+      if (socket.value && socket.value.readyState === WebSocket.OPEN) {
+        socket.value.send("Heartbeat")
+      } else {
+        handleDisconnect()
+      }
+    } catch (e) {
+      console.error("心跳检测出错:", e)
+      handleDisconnect()
+    }
+  }, 20000) // 发送心跳包的间隔必须大于后端设置最长心跳时间的间隔 先设置20秒
+}
+// 处理断开连接的统一方法
+const handleDisconnect = () => {
+  if (!isConfirming.value) {
+    isConfirming.value = true
+
+    // 显示提示对话框
+    const messageBox = ElMessageBox({
+      message: '长时间无操作，已退出IM聊天，将在3秒后返回首页',
+      title: '提示',
+      confirmButtonText: '立即刷新',
+      showCancelButton: false,
+      type: 'warning',
+      closeOnClickModal: false,
+      closeOnPressEscape: false
+    })
+
+    // 3秒后自动返回首页
+    const timer = setTimeout(() => {
+      // 返回首页的逻辑，这里假设首页路由是'/'
+      window.location.href = '/'
+      clearTimeout(timer)
+    }, 3000)
+
+    // 处理立即刷新按钮
+    messageBox.then(async () => {
+      clearTimeout(timer) // 清除自动返回的计时器
+      // 刷新当前页面
+      window.location.reload()
+    }).finally(() => {
+      isConfirming.value = false
+    })
   }
-}, 20000)
+}
+
+// 心跳监听
+const handleCloseWebsocket = () => {
+  ElMessage({
+    message: 'WebSocket连接已关闭',
+    type: 'info',
+    showClose: true
+  });
+};
 
 onMounted(async () => {
   await getLiveRoomDetail() // 先获取直播间详情
   initPlayer();
-  await initWebsocket();
+  await initWebsocket();// 绑定事件并记录监听器
+  // 绑定事件并记录监听器
+  emitter.on("closeWebsocket", handleCloseWebsocket);
 });
 
 // 发送评论
@@ -456,7 +472,7 @@ const sendGift = (gift) => {
   if (!userId.value) {
     ElMessage({
       showClose: true,
-      message: '未登录用户不能送礼。',
+      message: '未登录用户不能送礼',
       type: 'error',
     })
     return;

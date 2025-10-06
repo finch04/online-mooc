@@ -3,7 +3,7 @@ package com.tianji.live.service.impl;
 import com.tianji.live.constants.IMConstants;
 import com.tianji.live.protocol.GenericMessage;
 import com.tianji.live.protocol.MessageBody;
-import com.tianji.live.service.IIMRPCService;
+import com.tianji.live.service.IIMService;
 import com.tianji.live.service.MessageHandlerService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class IMRPCServiceImpl implements IIMRPCService {
+public class IMServiceImpl implements IIMService {
 
-    private Logger logger = LoggerFactory.getLogger(IMRPCServiceImpl.class);
+    private Logger logger = LoggerFactory.getLogger(IMServiceImpl.class);
 
     @Resource
     private MessageHandlerService messageHandlerService;

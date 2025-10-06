@@ -26,7 +26,7 @@ import java.util.concurrent.Executor;
 import static com.tianji.common.constants.MqConstants.Exchange.LIVE_EXCHANGE;
 
 /**
- * Author： roy
+ * Author： fsq
  * Description：消息推送服务
  **/
 @Component
@@ -73,10 +73,6 @@ public class MessageHandlerService {
             broadcastMsg.setBody(bodies);
             sendRoomBroadCast(Long.valueOf(roomId), broadcastMsg);
         }
-
-//         查询房间最新20条消息，推送给用户，没有存储消息就不实现了
-
-//        logger.info("异步推送首页消息成功！！！！！！！！！！");
     }
 
     /**

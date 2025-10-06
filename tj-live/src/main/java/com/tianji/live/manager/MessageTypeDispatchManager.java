@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * Author： roy
+ * Author： fsq
  * Description：消息分发服务
  **/
 @Component

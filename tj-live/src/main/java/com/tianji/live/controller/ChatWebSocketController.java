@@ -123,6 +123,5 @@ public class ChatWebSocketController {
                 }
             }
         }
-
     }
 }

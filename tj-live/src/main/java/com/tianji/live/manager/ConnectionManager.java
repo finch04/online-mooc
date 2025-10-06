@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Author： roy
+ * Author： fsq
  * Description： 连接管理器 --基于Redis保存房间信息，基于MQ进行消息处理
  **/
 public class ConnectionManager {
@@ -145,7 +145,7 @@ public class ConnectionManager {
     }
 
     /**
-     * 获取房间内所有用户连接 对接Dubbo接口
+     * 获取房间内所有用户连接
      *
      * @param roomId 房间
      * @return List<Session>
