@@ -35,7 +35,7 @@ console.info("getWebSocket",userId,socket)
     console.info("收到websocket消息：",event.data)
       try{
         const genericMessage = JSON.parse(event.data);
-    console.info("推送websocket消息：",genericMessage)    
+        console.info("推送websocket消息：",genericMessage)    
         // 触发一个事件
         getEmitter().emit('messageReceived', genericMessage);  
       }catch(e){
@@ -44,6 +44,7 @@ console.info("getWebSocket",userId,socket)
     };  
     socket.onclose=() =>{
       console.info('关闭Websocket链接')
+      getEmitter().emit('closeWebsocket');  
     }
     return socket;
   }else{

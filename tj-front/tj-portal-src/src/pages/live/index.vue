@@ -18,7 +18,7 @@
             <!-- <p class="room-notice"><span class="notice-label">公告：</span>{{ liveRoomDetail.roomNotice || '暂无公告' }}</p> -->
           </div>
           <div class="butCont fx-ct">
-            <span class="bt bt-round" style="padding:4px;width: 100px;"  @click="goHome()">返回首页</span>
+            <span class="bt bt-round" style="padding:4px;width: 100px;" @click="goHome()">返回首页</span>
           </div>
         </div>
       </div>
@@ -38,7 +38,7 @@
                 </p>
               </div>
             </div>
-            
+
             <div class="room-stats">
               <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.onlineCount || 0 }}</span>
@@ -57,7 +57,7 @@
                 <span class="stat-label">分享次数</span>
               </div>
             </div>
-            
+
             <div class="action-buttons">
               <span class="bt-red Btn" @click="handleFollow">{{ liveRoomDetail.followed ? '已关注' : '关注' }}</span>
               <span class="bt-blue Btn" @click="handleShare">分享</span>
@@ -88,34 +88,29 @@
             <div class="chatArea">
               <div class="talkContentBox" id="chatContentBox">
                 <!-- 统一的消息容器，通过类型区分样式 -->
-                <div 
-                  v-for="(chatItem, index) in chatList" 
-                  :key="index" 
-                  class="message-item"
-                  :class="{
-                    'message-user': chatItem.msgType === 2,
-                    'message-system': chatItem.msgType === 0,
-                    'message-gift': chatItem.msgType === 5,
-                    'message-notice': chatItem.msgType === 6
-                  }"
-                >
+                <div v-for="(chatItem, index) in chatList" :key="index" class="message-item" :class="{
+                  'message-user': chatItem.msgType === 2,
+                  'message-system': chatItem.msgType === 0,
+                  'message-gift': chatItem.msgType === 5,
+                  'message-notice': chatItem.msgType === 6
+                }">
                   <!-- 用户聊天消息 -->
                   <template v-if="chatItem.msgType === 2">
                     <span class="message-sender">{{ chatItem.senderName }}:</span>
                     <span class="message-content">{{ chatItem.content }}</span>
                   </template>
-                  
+
                   <!-- 系统消息（进入房间） -->
                   <template v-if="chatItem.msgType === 0">
                     <span class="message-content">{{ chatItem.content }}</span>
                   </template>
-                  
+
                   <!-- 礼物消息 -->
                   <template v-if="chatItem.msgType === 5">
                     <span class="gift-icon">🎁</span>
                     <span class="message-content">{{ chatItem.content }}</span>
                   </template>
-                  
+
                   <!-- 直播间公告 -->
                   <template v-if="chatItem.msgType === 6">
                     <span class="notice-icon">📢</span>
@@ -149,8 +144,27 @@ import { getEmitter } from '@/utils/messageEmitter'
 import { getLiveRoomById } from '@/api/live'
 
 import { closeWebSocket } from '@/utils/websocket'
-//浏览器关闭时，触发一次关闭链接动作
-window.addEventListener('beforeunload',closeWebSocket)
+import { onBeforeRouteLeave } from 'vue-router'
+
+// 路由离开当前页面时关闭连接
+onBeforeRouteLeave((to, from, next) => {
+  closeWebSocket()
+  next()
+})
+
+// 浏览器关闭时关闭连接
+window.addEventListener('beforeunload', () => {
+  closeWebSocket()
+})
+
+// 组件卸载时也关闭连接（作为双重保障）
+onUnmounted(() => {
+  closeWebSocket()
+  if (myPlayer.value) {
+    myPlayer.value.dispose()
+  }
+  clearInterval(heartbeatInterval)
+})
 
 import 'video.js/dist/video-js.min.css'
 // 组件导入
@@ -312,7 +326,7 @@ const initWebsocket = async () => {
     fromUserId: userId.value ? userId.value : '',
     fromUserName: userName.value ? userName.value : '',
   }
-  
+
   if (socket.value && socket.value.readyState === WebSocket.OPEN) {
     socket.value.send(JSON.stringify(joinRoomMsg))
   } else {
@@ -323,82 +337,94 @@ const initWebsocket = async () => {
     }, 1000)
   }
 
-  // 处理消息接收
-  emitter.on("messageReceived", (genericMessage) => {
-    console.info("收到消息", genericMessage)
+//心跳处理
+emitter.on("closeWebsocket", () => {
+   ElMessageBox.confirm(
+      '长时间无操作，已退出IM聊天',
+      '提示',
+      {
+        confirmButtonText: '重新恢复',
+        showCancelButton: false,
+        type: 'warning'
+      })
+  }
+  )
+}
+// 处理消息接收
+emitter.on("messageReceived", (genericMessage) => {
+  console.info("收到消息", genericMessage)
 
-    if (!genericMessage) return
+  if (!genericMessage) return
 
-    // 聊天消息
-    if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
-      genericMessage.body.forEach(messagebody => {
+  // 聊天消息
+  if (genericMessage.type == 2 && genericMessage.roomId == roomId && genericMessage.body) {
+    genericMessage.body.forEach(messagebody => {
+      chatList.value.push({
+        msgType: 2,
+        senderName: messagebody.userName,
+        content: messagebody.content
+      })
+      scrollToBottom()
+    })
+  }
+  // 进入房间消息
+  else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
+    if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
+      chatList.value.push({
+        msgType: 0,
+        content: genericMessage.body[0].content
+      })
+      scrollToBottom()
+    }
+  }
+  // 礼物消息
+  else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
+    genericMessage.body.forEach(giftMessages => {
+      chatList.value.push({
+        msgType: 5,
+        content: giftMessages.content
+      })
+      scrollToBottom()
+    })
+  }
+  // 直播间公告消息
+  else if (genericMessage.type == 6 && genericMessage.roomId == roomId) {
+    if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
+      genericMessage.body.forEach(notice => {
         chatList.value.push({
-          msgType: 2,
-          senderName: messagebody.userName,
-          content: messagebody.content
+          msgType: 6,
+          content: notice.content
         })
         scrollToBottom()
       })
     }
-    // 进入房间消息
-    else if (genericMessage.type == 0 && genericMessage.roomId == roomId) {
-      if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
-        chatList.value.push({
-          msgType: 0,
-          content: genericMessage.body[0].content
-        })
-        scrollToBottom()
-      }
+  }
+})
+
+// 心跳检测
+heartbeatInterval = setInterval(() => {
+  try {
+    if (socket.value && socket.value.readyState === WebSocket.OPEN) {
+      socket.value.send("Heartbeat")
     }
-    // 礼物消息
-    else if (genericMessage.type == 5 && genericMessage.roomId == roomId) {
-      genericMessage.body.forEach(giftMessages => {
-        chatList.value.push({
-          msgType: 5,
-          content: giftMessages.content
-        })
-        scrollToBottom()
+  } catch (e) {
+    if (!isConfirming.value) {
+      isConfirming.value = true
+      ElMessageBox.confirm(
+        '长时间无操作，已退出IM聊天',
+        '提示',
+        {
+          confirmButtonText: '重新恢复',
+          showCancelButton: false,
+          type: 'warning'
+        }
+      ).then(async () => {
+        socket.value = await getWebSocket(userId.value ? userId.value : '')
+        isConfirming.value = false
       })
     }
-    // 直播间公告消息
-    else if (genericMessage.type == 6 && genericMessage.roomId == roomId) {
-      if (Array.isArray(genericMessage.body) && genericMessage.body.length > 0) {
-        genericMessage.body.forEach(notice => {
-          chatList.value.push({
-            msgType: 6,
-            content: notice.content
-          })
-          scrollToBottom()
-        })
-      }
-    }
-  })
-
-  // 心跳检测
-  heartbeatInterval = setInterval(() => {
-    try {
-      if (socket.value && socket.value.readyState === WebSocket.OPEN) {
-        socket.value.send("Heartbeat")
-      }
-    } catch (e) {
-      if (!isConfirming.value) {
-        isConfirming.value = true
-        ElMessageBox.confirm(
-          '长时间无操作，已退出IM聊天',
-          '提示',
-          {
-            confirmButtonText: '重新恢复',
-            showCancelButton: false,
-            type: 'warning'
-          }
-        ).then(async () => {
-          socket.value = await getWebSocket(userId.value ? userId.value : '')
-          isConfirming.value = false
-        })
-      }
-    }
-  }, 20000)
-};
+  }
+}, 20000)
 
 onMounted(async () => {
   await getLiveRoomDetail() // 先获取直播间详情
@@ -435,7 +461,7 @@ const sendGift = (gift) => {
     })
     return;
   }
-  
+
   const giftMsg = {
     type: 5,
     roomId: roomId,
@@ -443,7 +469,7 @@ const sendGift = (gift) => {
     fromUserName: userName.value,
     body: [{ 'content': `${userName.value}送给主播一个 ${gift.giftName}` }]
   }
-  
+
   if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
     ElMessage.error('连接未就绪，请稍后再试');
     return;
@@ -452,5 +478,4 @@ const sendGift = (gift) => {
 };
 </script>
 
-<style lang="scss" src="./index.scss">
-</style>
+<style lang="scss" src="./index.scss"></style>
