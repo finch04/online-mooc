@@ -141,7 +141,7 @@ import videojs from 'video.js'
 import { useUserStore } from '@/store'
 import { getWebSocket } from "@/utils/websocket"
 import { getEmitter } from '@/utils/messageEmitter'
-import { getLiveRoomById } from '@/api/live'
+import { getLiveRoomById,getLiveRoomOnlineCount } from '@/api/live'
 
 import { closeWebSocket } from '@/utils/websocket'
 import { onBeforeRouteLeave } from 'vue-router'
@@ -290,6 +290,20 @@ const getLiveRoomDetail = async () => {
     console.error('获取直播间详情错误:', error)
   }
 }
+//3秒轮询 获取实时在线人数
+const getLiveRoomOnlineCountInterval = () => { 
+  setInterval(async () => {
+    try {
+      const res = await getLiveRoomOnlineCount(roomId)
+      if (res.data) {
+        liveRoomDetail.value.onlineCount = res.data
+      }
+    } catch (error) {
+      console.error('获取实时在线人数错误:', error)
+    }
+  }, 3000)
+}
+
 
 // WebSocket相关
 const socket = ref(null);
@@ -303,7 +317,7 @@ const scrollToBottom = () => {
 }
 
 const initWebsocket = async () => {
-  socket.value = await getWebSocket(userId.value ? userId.value : '');
+  socket.value = await getWebSocket(roomId,userId.value ? userId.value : '');
 
   if (!socket.value) {
     ElMessage({
@@ -442,6 +456,7 @@ const handleCloseWebsocket = () => {
 
 onMounted(async () => {
   await getLiveRoomDetail() // 先获取直播间详情
+  getLiveRoomOnlineCountInterval()
   initPlayer();
   await initWebsocket();// 绑定事件并记录监听器
   // 绑定事件并记录监听器

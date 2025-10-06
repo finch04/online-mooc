@@ -9,6 +9,7 @@ package com.tianji.live.constants;
 public class IMConstants {
 
     public static final String PROP_USER_ID="UserId";
+    public static final String PROP_ROOM_ID="RoomId";
     public static final String PROP_USER_NAME="UserName";
 
     public static final String MESSAGE_HEARTBEAT="Heartbeat";

@@ -1,7 +1,7 @@
 package com.tianji.live.mq;
 
 import com.tianji.live.protocol.GenericMessage;
-import com.tianji.live.service.ChatBusiService;
+import com.tianji.live.service.IChatBusiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -11,9 +11,6 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.tianji.common.constants.MqConstants.Exchange.LIVE_EXCHANGE;
 import static com.tianji.common.constants.MqConstants.Key.LIVE_IM_MESSAGE;
 
@@ -22,7 +19,7 @@ import static com.tianji.common.constants.MqConstants.Key.LIVE_IM_MESSAGE;
 @RequiredArgsConstructor
 public class ChatMessageListener {
 
-    private final ChatBusiService chatBusiService;
+    private final IChatBusiService IChatBusiService;
 
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = "live.im.queue", durable = "true"),
@@ -31,6 +28,6 @@ public class ChatMessageListener {
     ))
     public void listenChatMessage(GenericMessage genericMessage){
         log.info("接收到消息：{}",genericMessage);
-        chatBusiService.handleMessage(genericMessage);
+        IChatBusiService.handleMessage(genericMessage);
     }
 }

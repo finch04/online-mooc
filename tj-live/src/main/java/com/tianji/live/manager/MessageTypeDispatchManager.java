@@ -5,15 +5,14 @@ import com.tianji.live.constants.IMConstants;
 import com.tianji.live.domain.vo.LiveRoomDetailVO;
 import com.tianji.live.protocol.GenericMessage;
 import com.tianji.live.protocol.MessageBody;
-import com.tianji.live.service.ChatBusiService;
+import com.tianji.live.service.IChatBusiService;
 import com.tianji.live.service.ILiveRoomService;
-import com.tianji.live.service.MessageHandlerService;
+import com.tianji.live.handler.MessageHandlerService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -33,7 +32,7 @@ public class MessageTypeDispatchManager {
     private ILiveRoomService liveRoomService;
 
     @Resource
-    private ChatBusiService chatBusiService;
+    private IChatBusiService IChatBusiService;
 
     @Resource(name = "asyncExecutor")
     private Executor executor;
@@ -63,7 +62,7 @@ public class MessageTypeDispatchManager {
                         }
 
                         // 获取并推送历史消息
-                        List<MessageBody> historyMessages = chatBusiService.getRoomHistoryMessages(Long.valueOf(roomId));
+                        List<MessageBody> historyMessages = IChatBusiService.getRoomHistoryMessages(Long.valueOf(roomId));
                         if (!historyMessages.isEmpty()) {
                             messageHandlerService.sendHistoryMessagesToUser(userId, Long.valueOf(roomId), historyMessages);
                         }

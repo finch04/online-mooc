@@ -1,4 +1,4 @@
-package com.tianji.live.service;
+package com.tianji.live.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,6 +6,8 @@ import com.tianji.api.client.unqid.UnqidClient;
 import com.tianji.live.constants.IMConstants;
 import com.tianji.live.protocol.GenericMessage;
 import com.tianji.live.protocol.MessageBody;
+import com.tianji.live.service.IChatBusiService;
+import com.tianji.live.service.IIMService;
 import com.tianji.live.utils.IMCacheKeyBuilder;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -28,19 +30,16 @@ import java.util.stream.Collectors;
  **/
 @Service
 @RequiredArgsConstructor
-public class ChatBusiService {
+public class ChatBusiServiceImpl implements IChatBusiService {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private Logger logger = LoggerFactory.getLogger(ChatBusiService.class);
-
+    private Logger logger = LoggerFactory.getLogger(ChatBusiServiceImpl.class);
     // 历史消息缓存数量
     @Value("${tj.im.message.cachesize:5}")
     private int roomMessageCacheSize;
-
     // 削峰批次最小数量
     @Value("${tj.im.message.batchsize:5}")
     private int batchSendSize = 5;
-
     private final StringRedisTemplate redisTemplate;
     @Resource
     private final IIMService imRPCService;
@@ -53,6 +52,7 @@ public class ChatBusiService {
     /**
      * 对消息做处理，包含缓存和聚合逻辑
      */
+    @Override
     public void handleMessage(GenericMessage message){
         logger.info("处理消息："+message);
         Long roomId = message.getRoomId();
@@ -102,6 +102,7 @@ public class ChatBusiService {
     /**
      * 获取房间历史消息（默认5条）
      */
+    @Override
     public List<MessageBody> getRoomHistoryMessages(Long roomId) {
         String historyListKey = imCacheKeyBuilder.buildRoomMessageCacheKey(roomId);
         // 由于采用右插左截，range(0, -1)会按时间正序返回（最早的在前，最新的在后）
@@ -125,31 +126,12 @@ public class ChatBusiService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 定时任务：每5秒检查并发送所有房间的批量消息（处理不足批次的情况）
-     */
-    @Scheduled(fixedRate = 5000)
-    public void scheduledBatchPush() {
-        logger.info("开始执行定时批量推送任务");
-
-        // 获取所有房间的批量消息List键
-        Set<String> batchListKeys = redisTemplate.keys(imCacheKeyBuilder.buildRoomBatchMessagePattern());
-
-        if (batchListKeys != null && !batchListKeys.isEmpty()) {
-            for (String batchListKey : batchListKeys) {
-                // 提取房间ID
-                Long roomId = imCacheKeyBuilder.parseRoomIdFromBatchKey(batchListKey);
-                // 无论数量多少，强制发送当前List中的所有消息
-                sendBatchMessages(roomId, batchListKey);
-            }
-        }
-        logger.info("定时批量推送任务执行完毕");
-    }
 
     /**
      * 批量发送消息并清理List
      */
-    private void sendBatchMessages(Long roomId, String batchListKey) {
+    @Override
+    public void sendBatchMessages(Long roomId, String batchListKey) {
         // 获取List中所有消息（按插入顺序返回）
         Long messageCount = redisTemplate.opsForList().size(batchListKey);
         if (messageCount == null || messageCount == 0) {

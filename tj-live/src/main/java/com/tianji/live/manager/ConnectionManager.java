@@ -20,12 +20,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
+
     //存放Session缓存
     private static final Map<String, Session> CHANNEL_CONTAINER = new ConcurrentHashMap<>();
 
-    //存放房间与用户关系 key为RoomId, value为Set<UserId>
-    private static final Map<String, Set<String>> ROOM_CONTAINER = new ConcurrentHashMap<>();
+//    //存放房间与用户关系 key为RoomId, value为Set<UserId>
+//    private static final Map<String, Set<String>> ROOM_CONTAINER = new ConcurrentHashMap<>();
 
+
+    //根据房间id得到当前在线人数
+    public static int getRoomUserCount(String roomId) {
+        StringRedisTemplate stringRedisTemplate = SpringContextUtil.getBean(StringRedisTemplate.class);
+        IMCacheKeyBuilder imCacheKeyBuilder = SpringContextUtil.getBean(IMCacheKeyBuilder.class);
+        String roomUserCacheKey = imCacheKeyBuilder.buildRoomUserCacheKey(roomId);
+        return stringRedisTemplate.opsForSet().size(roomUserCacheKey).intValue();
+    }
 
     public static boolean register(String sessionId,Session session){
         Session addedSession = CHANNEL_CONTAINER.putIfAbsent(sessionId, session);
@@ -44,34 +53,27 @@ public class ConnectionManager {
     }
 
     public static void cancel(String userId, Session session) {
+        // 清除本地会话缓存
         Optional<Session> optConn = getSession(userId);
-        if (optConn.isPresent()) {
-            if (optConn.get().getId().equals(session.getId())) {
-                CHANNEL_CONTAINER.remove(userId);
-                logger.debug("清理用户路由成功,userId=>{}", userId);
-            }
+        if (optConn.isPresent() && optConn.get().getId().equals(session.getId())) {
+            CHANNEL_CONTAINER.remove(userId);
+            logger.debug("清理用户本地路由成功,userId=>{}", userId);
         }
     }
 
-    public static boolean cancel(Session session){
-        for (Map.Entry<String, Session> entry : CHANNEL_CONTAINER.entrySet()) {
-            if (entry.getValue().getId().equals(session.getId())) {
-                CHANNEL_CONTAINER.remove(entry.getKey());
-                logger.debug("清理路由成功,sessionId=>{}", entry.getKey());
-                return true;
-            }
-        }
-        return false;
-    }
 
-    public static boolean cancel(String sessionId){
-        if(CHANNEL_CONTAINER.containsKey(sessionId)){
+    public static boolean cancel(String roomId,String userId){
+        if(CHANNEL_CONTAINER.containsKey(userId)){
             try {
-                CHANNEL_CONTAINER.get(sessionId).close();
+                CHANNEL_CONTAINER.get(userId).close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            CHANNEL_CONTAINER.remove(sessionId);
+            CHANNEL_CONTAINER.remove(userId);
+            // 清除Redis中该用户所在的所有房间信息
+            StringRedisTemplate stringRedisTemplate = SpringContextUtil.getBean(StringRedisTemplate.class);
+            IMCacheKeyBuilder imCacheKeyBuilder = SpringContextUtil.getBean(IMCacheKeyBuilder.class);
+            stringRedisTemplate.opsForSet().remove(imCacheKeyBuilder.buildRoomUserCacheKey(roomId), userId);
             return true;
         }
         return false;

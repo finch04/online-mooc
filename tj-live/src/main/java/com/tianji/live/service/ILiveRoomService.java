@@ -11,4 +11,6 @@ public interface ILiveRoomService {
     LiveRoomDetailVO getRoomById(Long roomId);
 
     List<LiveRoomVO> getLiveRoomList();
+
+    int getOnlineCount(String roomId);
 }

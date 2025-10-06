@@ -1,4 +1,4 @@
-package com.tianji.live.service;
+package com.tianji.live.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;

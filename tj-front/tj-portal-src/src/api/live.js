@@ -17,15 +17,15 @@ export const getLiveRoomList = () =>
     
 
 // 获取IM服务器
-export const getIMServerUrl = (params) =>
+export const getIMServerUrl = (roomId,userId) =>
     request({
-        url: `${LIVE_API_PREFIX}/im/getIMServer/${params}`,		
+        url: `${LIVE_API_PREFIX}/im/getIMServer/${roomId}/${userId}`,		
         method: 'get',
     })
 
-// // 根据直播间id获取直播间历史消息
-// export const getRoomMessages = (roomId) =>
-//     request({
-//         url: `${LIVE_API_PREFIX}/im/${roomId}`,		
-//         method: 'get',
-// }) 
+//获取直播间实时在线人数
+export const getLiveRoomOnlineCount = (params) =>
+    request({
+        url: `${LIVE_API_PREFIX}/live/onlineCount/${params}`,		
+        method: 'get',
+    })

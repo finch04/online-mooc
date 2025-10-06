@@ -5,6 +5,7 @@ import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.live.domain.vo.LiveRoomDetailVO;
+import com.tianji.live.manager.ConnectionManager;
 import com.tianji.live.mapper.LiveRoomMapper;
 import com.tianji.live.domain.po.LiveRoom;
 import com.tianji.live.domain.vo.LiveRoomVO;
@@ -34,6 +35,7 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
         vo.setAnchorName(dto.getName());
         vo.setAnchorIcon(dto.getIcon());
         vo.setFollowed(false); //TODO : 判断用户是否已关注
+        vo.setOnlineCount(ConnectionManager.getRoomUserCount(roomId.toString()));
 
 
         return vo;
@@ -53,4 +55,12 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
                 })
                 .toList();
     }
+
+    @Override
+    public int getOnlineCount(String roomId) {
+       return ConnectionManager.getRoomUserCount(roomId);
+    }
+
+
+
 }

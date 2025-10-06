@@ -3,10 +3,9 @@ import { getIMServerUrl } from "@/api/live.js";
   
 import qs from 'qs'
 let socket;
-// const getWebSocket = async (url,userId) => {  
 
-const getWebSocket = async (userId) => {  
-console.info("getWebSocket",userId,socket)
+const getWebSocket = async (roomId,userId) => {  
+console.info("getWebSocket",roomId,userId,socket)
   if (socket && socket.isOpen()) {
     // 如果已经存在连接，则不重新创建  
     return;  
@@ -21,7 +20,7 @@ console.info("getWebSocket",userId,socket)
     userId = generateRandomString(8)
     console.info("getWebSocket-生成随机id",userId,socket)
   }
-  let res = await getIMServerUrl(userId)
+  let res = await getIMServerUrl(roomId,userId)
   res=res.data;
   console.info("res ",res)
   if(res){

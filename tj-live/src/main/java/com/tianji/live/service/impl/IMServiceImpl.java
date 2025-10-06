@@ -4,7 +4,7 @@ import com.tianji.live.constants.IMConstants;
 import com.tianji.live.protocol.GenericMessage;
 import com.tianji.live.protocol.MessageBody;
 import com.tianji.live.service.IIMService;
-import com.tianji.live.service.MessageHandlerService;
+import com.tianji.live.handler.MessageHandlerService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class IMServiceImpl implements IIMService {
     public boolean sendMesasgeToRoom(Long roomId, String message) {
         GenericMessage genericMessage = new GenericMessage();
         genericMessage.setRoomId(roomId);
-        genericMessage.setType(IMConstants.MESSAGE_TYPE_CHAT);
+        genericMessage.setType(IMConstants.MESSAGE_TYPE_NOTICE);
 
         List<MessageBody> messageBodies = new ArrayList<>();
 

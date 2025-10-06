@@ -24,12 +24,13 @@ import java.util.*;
  * @Version: 1.0
  */
 @Component
-@ServerEndpoint("/chat/{userId}")
+@ServerEndpoint("/chat/{roomId}/{userId}")
 public class ChatWebSocketController {
     Logger logger = LoggerFactory.getLogger(ChatWebSocketController.class);
-
     //缓存当前请求的UserId
     private String userId;
+    //缓存当前请求的RoomId
+    private String roomId;
 
     //websocket里是无法直接依赖注入的。
     private MessageTypeDispatchManager messageDispatchManager;
@@ -37,22 +38,20 @@ public class ChatWebSocketController {
     private ChannelIdleStateManager channelIdleStateManager;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("userId") String userId) {
-        logger.info("收到新链接请求，userId={},  sessionId={}",
-                userId, session.getId());
+    public void onOpen(Session session,
+                       @PathParam("userId") String userId,
+                       @PathParam("roomId") String roomId) {
+        logger.info("收到新链接请求，userId={}, roomId = {} ,sessionId={}",
+                userId, roomId,session.getId());
         try {//登录用户
             Long lUserId = Long.parseLong(userId);
             session.getUserProperties().put(IMConstants.PROP_USER_ID, lUserId);
-            logger.info("缓存Session成功,userId={}", userId);
+            session.getUserProperties().put(IMConstants.PROP_ROOM_ID, roomId);
+            logger.info("缓存Session成功,userId={} roomId={}", userId, roomId);
         } catch (NumberFormatException e) {
             //非登录用户
             logger.info("非登录用户,userId={}", userId);
         }
-
-        //没有做去重判断，所以同一个客户端，可以重复创建连接。
-//        sessionList.add(session);
-//        ConnectionManager.register(session.getId(), session);
-        //以UserId为key注册Session。
         if (ConnectionManager.register(userId, session)) {
             channelIdleStateManager = SpringContextUtil.getBean(ChannelIdleStateManager.class);
             channelIdleStateManager.connect(userId, session);
@@ -60,6 +59,7 @@ public class ChatWebSocketController {
         } else {
             logger.warn("用户已经登录，禁止重复登录！URL= {}", session.getRequestURI());
         }
+        this.roomId = roomId;
         this.userId = userId;
     }
 
@@ -69,7 +69,7 @@ public class ChatWebSocketController {
             return;
         }
         //以用户ID为Key缓存Session，自然就需要根据用户ID移除Session
-        ConnectionManager.cancel(userId);
+        ConnectionManager.cancel(roomId,userId);
         logger.info("关闭链接");
     }
 

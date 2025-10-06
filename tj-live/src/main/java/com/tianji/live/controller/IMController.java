@@ -2,9 +2,9 @@ package com.tianji.live.controller;
 
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.live.protocol.MessageBody;
-import com.tianji.live.service.ChatBusiService;
+import com.tianji.live.service.IChatBusiService;
 import com.tianji.live.service.IIMService;
-import com.tianji.live.service.IMTokenService;
+import com.tianji.live.service.IIMTokenService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +37,10 @@ public class IMController {
     private DiscoveryClient discoveryClient;
 
     @Resource
-    private IMTokenService imTokenService;
+    private IIMTokenService IIMTokenService;
 
     @Resource
-    private ChatBusiService chatBusiService;
+    private IChatBusiService IChatBusiService;
 
     @Resource
     private IIMService iMService;
@@ -49,8 +49,9 @@ public class IMController {
      * 获取IM服务器地址
      * @return
      */
-    @GetMapping("/getIMServer/{id}")
-    public Map<String,Object> getIMServer(@PathVariable("id") String userId){
+    @GetMapping("/getIMServer/{roomId}/{userId}")
+    public Map<String,Object> getIMServer(@PathVariable("roomId") String roomId,
+                                          @PathVariable("userId") String userId){
         System.out.println("userId = " + userId);
         List<ServiceInstance> instances = discoveryClient.getInstances(imInstance);
         if(instances.size()  == 0){
@@ -65,9 +66,9 @@ public class IMController {
             int index = ThreadLocalRandom.current().nextInt(0, livinginstances.size());
 //            items.get(ThreadLocalRandom.current().nextInt(items.size()))
             ServiceInstance instanceToChoose = livinginstances.get(ThreadLocalRandom.current().nextInt(instances.size()));
-            //ws://localhost:8989/chat/1
-            var instanceUrl = "ws://"+instanceToChoose.getHost()+":"+instanceToChoose.getPort()+"/chat/"+userId;
-            var imToken = imTokenService.generateIMToken(userId);
+            //ws://localhost:8989/chat/1/2
+            var instanceUrl = "ws://"+instanceToChoose.getHost()+":"+instanceToChoose.getPort()+"/chat/"+roomId+"/"+userId;
+            var imToken = IIMTokenService.generateIMToken(userId);
             Map<String ,Object > res = new HashMap<>();
             res.put("imToken",imToken);
             res.put("url",instanceUrl);
@@ -83,9 +84,10 @@ public class IMController {
         if (roomId == null || roomId <= 0) {
             throw new CommonException("房间ID不能为空");
         }
-        List<MessageBody> messages = chatBusiService.getRoomHistoryMessages(roomId);
+        List<MessageBody> messages = IChatBusiService.getRoomHistoryMessages(roomId);
         return messages == null ? new ArrayList<>() : messages;
     }
+
 
     //TODO 往直播间发送广播消息。--只用作单机测试。
     // IMServer后端只做了单机测试，没做集群化处理。
@@ -93,4 +95,6 @@ public class IMController {
     public void sendRoomBroadCast(Long roomId,String message){
         iMService.sendMesasgeToRoom(roomId,message);
     }
+
+
 }
