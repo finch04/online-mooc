@@ -164,7 +164,7 @@ export const restartMyLesson = (courseId) =>
 export const signUp = (courseId) =>
 request({
 	url: `/ts/orders/freeCourse/${courseId}`,
-	method: 'psot',
+	method: 'post',
 })
 
 // 将指定课程从课程表移除

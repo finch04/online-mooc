@@ -32,6 +32,7 @@
               <img :src="liveRoomDetail.anchorIcon" class="anchor-avatar" alt="主播头像">
               <div class="anchor-detail">
                 <h3 class="anchor-name">{{ liveRoomDetail.anchorName }}</h3>
+                
                 <p class="room-meta">
                   <span class="meta-item">开播时间：{{ formatTime(liveRoomDetail.createTime) }}</span>
                   <span class="meta-item">最后更新：{{ formatTime(liveRoomDetail.updateTime) }}</span>
@@ -41,16 +42,20 @@
 
             <div class="room-stats">
               <div class="stat-item">
+                <span class="stat-value">{{ liveRoomDetail.fansCount || 0 }}</span>
+                <span class="stat-label">主播粉丝数</span>
+              </div>
+              <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.onlineCount || 0 }}</span>
-                <span class="stat-label">当前在线</span>
+                <span class="stat-label">直播间当前在线人数</span>
               </div>
               <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.maxOnlineCount || 0 }}</span>
-                <span class="stat-label">最高在线人数</span>
+                <span class="stat-label">直播间最高在线人数</span>
               </div>
               <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.likeCount || 0 }}</span>
-                <span class="stat-label">总点赞</span>
+                <span class="stat-label">直播间总点赞数</span>
               </div>
               <!-- <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.shareCount || 0 }}</span>
@@ -141,7 +146,7 @@ import videojs from 'video.js'
 import { useUserStore } from '@/store'
 import { getWebSocket } from "@/utils/websocket"
 import { getEmitter } from '@/utils/messageEmitter'
-import { getLiveRoomById,getLiveRoomOnlineCount } from '@/api/live'
+import { getLiveRoomById,getLiveRoomOnlineCount,follow } from '@/api/live'
 
 import { closeWebSocket } from '@/utils/websocket'
 import { onBeforeRouteLeave } from 'vue-router'
@@ -197,6 +202,7 @@ const liveRoomDetail = ref({
   shareCount: 0,
   isPrivate: false,
   followed: false,
+  fansCount: 0,
   createTime: '',
   updateTime: ''
 })
@@ -242,11 +248,25 @@ const goHome = () => {
   router.push('/')
 }
 
-// 关注主播
+// 关注/取消关注主播
 const handleFollow = () => {
-  // 实际项目中需要调用关注接口
-  liveRoomDetail.value.followed = !liveRoomDetail.value.followed
-  ElMessage.success(liveRoomDetail.value.followed ? '关注成功' : '取消关注成功')
+  const params = {
+    follow: !liveRoomDetail.value.followed?1:0,
+    anchorId: liveRoomDetail.value.anchorId
+  }
+  follow(params).then(res => {
+    if (res.code === 200) {
+      liveRoomDetail.value.followed = !liveRoomDetail.value.followed
+      if (liveRoomDetail.value.followed) {
+        liveRoomDetail.value.fansCount++
+      } else {
+        liveRoomDetail.value.fansCount--
+      }
+      ElMessage.success(liveRoomDetail.value.followed ? '关注成功' : '取消关注成功')
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
 }
 
 // 点赞直播间

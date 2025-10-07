@@ -8,7 +8,7 @@ export const getLiveRoomById = (params) =>
         url: `${LIVE_API_PREFIX}/live/${params}`,		
         method: 'get'
     })
-
+// 获取直播间列表
 export const getLiveRoomList = () =>
     request({
         url: `${LIVE_API_PREFIX}/live/list`,		
@@ -28,4 +28,12 @@ export const getLiveRoomOnlineCount = (params) =>
     request({
         url: `${LIVE_API_PREFIX}/live/onlineCount/${params}`,		
         method: 'get',
+    })
+
+// 关注用户/取消关注用户
+export const follow = (params) =>
+    request({
+        url: `${LIVE_API_PREFIX}/follow`,		
+        method: 'post',
+        data: params
     })

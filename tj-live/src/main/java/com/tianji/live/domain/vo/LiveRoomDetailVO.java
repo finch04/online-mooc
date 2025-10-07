@@ -70,6 +70,11 @@ public class LiveRoomDetailVO {
      */
     private Boolean followed;
 
+    /**
+     * 主播粉丝数
+     */
+    private Long fansCount;
+
 
     /**
      * 当前在线人数

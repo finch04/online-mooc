@@ -23,4 +23,9 @@ public class IMConstants {
 
     // 消息缓存数量
     public static final int MESSAGE_CACHE_SIZE=20;
+
+    //用户关注
+    public static final String FOLLOW_PREFIX = "user:follow:";  // 关注的人
+    public static final String FANS_PREFIX = "user:fans:";      // 粉丝
+
 }

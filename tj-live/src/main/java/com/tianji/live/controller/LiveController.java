@@ -28,12 +28,13 @@ public class LiveController {
     @Resource
     private ILiveRoomService liveRoomService;
 
+    @Operation(summary = "直播间查询接口")
     @GetMapping("/{id}")
     public LiveRoomDetailVO getLiveRoomById(@PathVariable Long id) throws IOException {
         return liveRoomService.getRoomById(id);
     }
 
-    @Operation(summary = "直播间查询接口")
+    @Operation(summary = "直播间列表查询接口")
     @GetMapping("/list")
     public List<LiveRoomVO> getLiveRoomList()  {
         return liveRoomService.getLiveRoomList();
