@@ -1,5 +1,6 @@
 package com.tianji.live.manager;
 
+import com.tianji.live.constants.IMConstants;
 import com.tianji.live.utils.IMCacheKeyBuilder;
 import com.tianji.live.utils.SpringContextUtil;
 import io.micrometer.common.util.StringUtils;
@@ -33,7 +34,9 @@ public class ConnectionManager {
         StringRedisTemplate stringRedisTemplate = SpringContextUtil.getBean(StringRedisTemplate.class);
         IMCacheKeyBuilder imCacheKeyBuilder = SpringContextUtil.getBean(IMCacheKeyBuilder.class);
         String roomUserCacheKey = imCacheKeyBuilder.buildRoomUserCacheKey(roomId);
-        return stringRedisTemplate.opsForSet().size(roomUserCacheKey).intValue();
+        // 获取集合大小，若为null则返回0
+        Long size = stringRedisTemplate.opsForSet().size(roomUserCacheKey);
+        return size != null ? size.intValue() : 0;
     }
 
     public static boolean register(String sessionId,Session session){
@@ -52,12 +55,16 @@ public class ConnectionManager {
         return Optional.ofNullable(CHANNEL_CONTAINER.get(sessionId));
     }
 
-    public static void cancel(String userId, Session session) {
+    public static void cancel(String userId,String roomId, Session session) {
         // 清除本地会话缓存
         Optional<Session> optConn = getSession(userId);
         if (optConn.isPresent() && optConn.get().getId().equals(session.getId())) {
+            // 清除Redis中该用户所在的所有房间信息
+            StringRedisTemplate stringRedisTemplate = SpringContextUtil.getBean(StringRedisTemplate.class);
+            IMCacheKeyBuilder imCacheKeyBuilder = SpringContextUtil.getBean(IMCacheKeyBuilder.class);
+            stringRedisTemplate.opsForSet().remove(imCacheKeyBuilder.buildRoomUserCacheKey(roomId), userId);
             CHANNEL_CONTAINER.remove(userId);
-            logger.debug("清理用户本地路由成功,userId=>{}", userId);
+            logger.debug("根据session清理用户本地路由成功,userId=>{},roomId=>{}", userId,roomId);
         }
     }
 
@@ -74,6 +81,7 @@ public class ConnectionManager {
             StringRedisTemplate stringRedisTemplate = SpringContextUtil.getBean(StringRedisTemplate.class);
             IMCacheKeyBuilder imCacheKeyBuilder = SpringContextUtil.getBean(IMCacheKeyBuilder.class);
             stringRedisTemplate.opsForSet().remove(imCacheKeyBuilder.buildRoomUserCacheKey(roomId), userId);
+            logger.debug("根据roomId和userId清理用户本地路由成功,userId=>{},roomId=>{}", userId,roomId);
             return true;
         }
         return false;

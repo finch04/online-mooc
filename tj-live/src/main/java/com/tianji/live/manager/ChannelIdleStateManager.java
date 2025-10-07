@@ -26,6 +26,7 @@ public class ChannelIdleStateManager {
 
     @Value("${tj.im.heartbeat.timeout.seconds:30}")
     private long READ_TIMEOUT_SECONDS;
+
     private final ScheduledThreadPoolExecutor scheduledExecutor;
 
     public ChannelIdleStateManager() {
@@ -33,8 +34,8 @@ public class ChannelIdleStateManager {
         scheduledExecutor = new ScheduledThreadPoolExecutor(coreCount, new ThreadPoolExecutor.AbortPolicy());
     }
 
-    public void connect(String userId, Session socketSession) {
-        scheduledExecutor.schedule(new ReadTimeOutTask(userId, socketSession), READ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    public void connect(String userId, String roomId,Session socketSession) {
+        scheduledExecutor.schedule(new ReadTimeOutTask(userId,roomId,socketSession), READ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         USER_LAST_READ_TIMESTAMP.put(socketSession.getId(), System.nanoTime());
     }
 
@@ -58,10 +59,12 @@ public class ChannelIdleStateManager {
     private final class ReadTimeOutTask implements Runnable {
 
         private final String userId;
+        private final String roomId;
         private final Session socketSession;
 
-        public ReadTimeOutTask(String id, Session socketSession) {
-            this.userId = id;
+        public ReadTimeOutTask(String userId,String roomId,Session socketSession) {
+            this.userId = userId;
+            this.roomId = roomId;
             this.socketSession = socketSession;
         }
 
@@ -69,7 +72,7 @@ public class ChannelIdleStateManager {
         public void run() {
             if (!socketSession.isOpen()) {
                 USER_LAST_READ_TIMESTAMP.remove(socketSession.getId());
-                ConnectionManager.cancel(userId, socketSession);
+                ConnectionManager.cancel(userId, roomId,socketSession);
                 return;
             }
             Long lastReadTime = USER_LAST_READ_TIMESTAMP.get(socketSession.getId());
@@ -83,7 +86,7 @@ public class ChannelIdleStateManager {
                 try {
                     // 空闲超时关闭channel
                     if (socketSession.isOpen()) {
-                        logger.info("WebSocket通道空闲超时关闭,id:{},socket:{}", userId, socketSession.getId());
+                        logger.info("WebSocket通道空闲超时关闭,userId:{},roomId:{},socket:{}", userId,roomId,socketSession.getId());
                         socketSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE,"心跳超时，正常关闭链接"));
                     }
                 } catch (Throwable throwable) {
@@ -91,10 +94,10 @@ public class ChannelIdleStateManager {
                 } finally {
                     // 确保map中对应的信息一定要被删除，避免内存泄露
                     USER_LAST_READ_TIMESTAMP.remove(socketSession.getId());
-                    ConnectionManager.cancel(userId, socketSession);
+                    ConnectionManager.cancel(userId,roomId,socketSession);
                 }
             } else {
-                scheduledExecutor.schedule(new ReadTimeOutTask(userId, socketSession), nextDelay, TimeUnit.NANOSECONDS);
+                scheduledExecutor.schedule(new ReadTimeOutTask(userId,roomId,socketSession), nextDelay, TimeUnit.NANOSECONDS);
             }
         }
     }

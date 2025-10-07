@@ -54,7 +54,7 @@ public class ChatWebSocketController {
         }
         if (ConnectionManager.register(userId, session)) {
             channelIdleStateManager = SpringContextUtil.getBean(ChannelIdleStateManager.class);
-            channelIdleStateManager.connect(userId, session);
+            channelIdleStateManager.connect(userId,roomId, session);
             logger.info("用户连接成功 userId = {}", userId);
         } else {
             logger.warn("用户已经登录，禁止重复登录！URL= {}", session.getRequestURI());
@@ -68,7 +68,8 @@ public class ChatWebSocketController {
         if (null == this.userId) {
             return;
         }
-        //以用户ID为Key缓存Session，自然就需要根据用户ID移除Session
+        // 以用户ID为Key缓存Session，自然就需要根据用户ID移除Session
+        // 一般心跳超时会在这里就执行方法，ConnectionManager的cancel方法是双保险
         ConnectionManager.cancel(roomId,userId);
         logger.info("关闭链接");
     }

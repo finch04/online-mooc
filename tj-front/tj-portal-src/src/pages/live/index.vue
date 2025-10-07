@@ -46,20 +46,20 @@
               </div>
               <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.maxOnlineCount || 0 }}</span>
-                <span class="stat-label">最高在线</span>
+                <span class="stat-label">最高在线人数</span>
               </div>
               <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.likeCount || 0 }}</span>
                 <span class="stat-label">总点赞</span>
               </div>
-              <div class="stat-item">
+              <!-- <div class="stat-item">
                 <span class="stat-value">{{ liveRoomDetail.shareCount || 0 }}</span>
                 <span class="stat-label">分享次数</span>
-              </div>
+              </div> -->
             </div>
 
             <div class="action-buttons">
-              <span class="bt-pink Btn" @click="handleLike">👍点赞</span>
+              <span class="bt Btn" @click="handleLike">👍点赞</span>
               <span class="bt-red Btn" @click="handleFollow">{{ liveRoomDetail.followed ? '已关注' : '关注' }}</span>
             </div>
           </div>
