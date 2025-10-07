@@ -37,6 +37,13 @@ public class IMCacheKeyBuilder {
     }
 
     /**
+     * 构建房间用户缓存键的匹配模式
+     */
+    public String buildRoomUserCachePattern() {
+        return ROOM_USER_PREFIX + "*";
+    }
+
+    /**
      * 构建房间批量消息缓存键的匹配模式（用于定时任务批量查询）
      */
     public String buildRoomBatchMessagePattern() {

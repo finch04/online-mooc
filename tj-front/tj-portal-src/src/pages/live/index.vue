@@ -317,7 +317,7 @@ const getLiveRoomStatInterval = () => {
     try {
       const res = await getStat(roomId)
       if (res.data) {
-        liveRoomDetail.value.fansCount = res.data.fansCount
+        // liveRoomDetail.value.fansCount = res.data.fansCount
         liveRoomDetail.value.onlineCount = res.data.onlineCount
         liveRoomDetail.value.maxOnlineCount = res.data.maxOnlineCount
         liveRoomDetail.value.likeCount = res.data.likeCount

@@ -4,6 +4,7 @@ import com.tianji.live.constants.IMConstants;
 import com.tianji.live.utils.IMCacheKeyBuilder;
 import com.tianji.live.utils.SpringContextUtil;
 import io.micrometer.common.util.StringUtils;
+import jakarta.annotation.PreDestroy;
 import jakarta.websocket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,8 @@ public class ConnectionManager {
         }
         return false;
     }
+
+
 
     public static List<Session> getAllSession(){
         return CHANNEL_CONTAINER.values().stream().toList();

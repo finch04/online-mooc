@@ -33,6 +33,7 @@ import static com.tianji.common.constants.MqConstants.Exchange.LIVE_EXCHANGE;
 public class MessageHandlerService {
 
     private Logger logger = LoggerFactory.getLogger(MessageHandlerService.class);
+
     @Resource(name = "asyncExecutor")
     private Executor executor;
 

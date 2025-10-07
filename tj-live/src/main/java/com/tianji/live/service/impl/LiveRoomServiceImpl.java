@@ -51,6 +51,8 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
                     UserDTO dto = userClient.queryUserById(liveRoomVO.getAnchorId());
                     liveRoomVO.setAnchorName(dto.getName());
                     liveRoomVO.setAnchorIcon(dto.getIcon());
+                    // 补充：列表查询时返回实时在线人数（可选，根据需求决定是否添加）
+                    liveRoomVO.setMaxOnlineCount(getMaxOnlineCount(liveRoom.getId().toString()));
                     // 补充：列表查询时返回实时点赞数（可选，根据需求决定是否添加）
                     liveRoomVO.setLikeCount(getLikeCount(liveRoom.getId().toString()));
                     return liveRoomVO;
@@ -75,19 +77,25 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
 
         vo.setFansCount(userFollowService.getFansCount(liveRoom.getAnchorId()));
         vo.setOnlineCount(ConnectionManager.getRoomUserCount(roomId.toString()));
-        // 关键：查询实时点赞数（替换原数据库查询，改为Redis优先）
+        // 获取直播间历史最高在线人数
+        vo.setMaxOnlineCount(getMaxOnlineCount(roomId.toString()));
+        // 查询实时点赞数（替换原数据库查询，改为Redis优先）
         vo.setLikeCount(getLikeCount(roomId.toString()));
         return vo;
     }
 
+    /**
+     * 获取直播间实时在线人数（注意，这是高频调用的方法，尽量不要查库）
+     * @param roomId 直播间ID
+     * @return 直播间实时在线人数
+     */
     @Override
     public LiveRoomStatVO getStat(String roomId) {
-        LiveRoom liveRoom = liveRoomMapper.selectById(roomId);
         LiveRoomStatVO vo = new LiveRoomStatVO();
         vo.setOnlineCount(ConnectionManager.getRoomUserCount(roomId));
-        vo.setFansCount(userFollowService.getFansCount(liveRoom.getAnchorId()));
         vo.setMaxOnlineCount(getMaxOnlineCount(roomId));
         vo.setLikeCount(getLikeCount(roomId));
+        //这里就不更新主播粉丝数据，否则需要根据roomId查库得到主播id，导致性能下降
         return vo;
     }
 
