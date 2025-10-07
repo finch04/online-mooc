@@ -1,16 +1,15 @@
 package com.tianji.live.controller;
 import com.tianji.live.domain.po.LiveRoom;
 import com.tianji.live.domain.vo.LiveRoomDetailVO;
+import com.tianji.live.domain.vo.LiveRoomStatVO;
 import com.tianji.live.domain.vo.LiveRoomVO;
 import com.tianji.live.service.ILiveRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -41,13 +40,24 @@ public class LiveController {
     }
 
     /**
-     * 根据roomId获取直播间在线人数
+     * [轮询接口]获取直播间相关统计信息 (实时)
      * @param roomId
      */
-    @Operation(summary ="获取直播间在线人数")
-    @GetMapping("/onlineCount/{roomId}")
-    public int getOnlineCount(@PathVariable String roomId) {
-        return liveRoomService.getOnlineCount(roomId);
+    @Operation(summary ="获取直播间相关统计信息")
+    @GetMapping("/stat/{roomId}")
+    public LiveRoomStatVO getStat(@PathVariable String roomId) {
+        return liveRoomService.getStat(roomId);
+    }
+
+
+    /**
+     * 给直播间点赞
+     * @param roomId
+     */
+    @Operation(summary ="直播间点赞")
+    @PostMapping ("/like/{roomId}")
+    public Long like(@PathVariable String roomId) {
+        return liveRoomService.like(roomId);
     }
 
 }

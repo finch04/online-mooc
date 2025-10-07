@@ -24,7 +24,7 @@ import static com.tianji.live.constants.IMConstants.FOLLOW_PREFIX;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ScheduledBatchFollowHandler {
+public class ScheduledSyncFollowHandler {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final UserFollowMapper userFollowMapper;

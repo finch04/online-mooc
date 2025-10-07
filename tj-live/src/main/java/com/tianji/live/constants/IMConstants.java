@@ -28,4 +28,9 @@ public class IMConstants {
     public static final String FOLLOW_PREFIX = "user:follow:";  // 关注的人
     public static final String FANS_PREFIX = "user:fans:";      // 粉丝
 
+    // 直播间点赞数Key前缀（String类型，存总点赞数）
+    public static final String LIKE_COUNT_PREFIX = "ROOM:LIKE:COUNT:";
+    // 点赞数据缓存过期时间（30天，避免Redis数据无限堆积）
+    public static final long LIKE_CACHE_EXPIRE_DAYS = 30;
+
 }

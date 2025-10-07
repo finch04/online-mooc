@@ -57,10 +57,6 @@
                 <span class="stat-value">{{ liveRoomDetail.likeCount || 0 }}</span>
                 <span class="stat-label">直播间总点赞数</span>
               </div>
-              <!-- <div class="stat-item">
-                <span class="stat-value">{{ liveRoomDetail.shareCount || 0 }}</span>
-                <span class="stat-label">分享次数</span>
-              </div> -->
             </div>
 
             <div class="action-buttons">
@@ -146,7 +142,7 @@ import videojs from 'video.js'
 import { useUserStore } from '@/store'
 import { getWebSocket } from "@/utils/websocket"
 import { getEmitter } from '@/utils/messageEmitter'
-import { getLiveRoomById,getLiveRoomOnlineCount,follow } from '@/api/live'
+import { getLiveRoomById,getStat,follow,like } from '@/api/live'
 
 import { closeWebSocket } from '@/utils/websocket'
 import { onBeforeRouteLeave } from 'vue-router'
@@ -199,7 +195,6 @@ const liveRoomDetail = ref({
   onlineCount: 0,
   maxOnlineCount: 0,
   likeCount: 0,
-  shareCount: 0,
   isPrivate: false,
   followed: false,
   fansCount: 0,
@@ -271,8 +266,14 @@ const handleFollow = () => {
 
 // 点赞直播间
 const handleLike = () => {
-  // 实际项目中需要实现点赞逻辑
-  ElMessage.info('点赞功能开发中...')
+  like(roomId).then(res => {
+    if (res.code === 200) {
+      liveRoomDetail.value.likeCount++
+      ElMessage.success('点赞成功')
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
 }
 
 
@@ -311,12 +312,15 @@ const getLiveRoomDetail = async () => {
   }
 }
 //3秒轮询 获取实时在线人数
-const getLiveRoomOnlineCountInterval = () => { 
+const getLiveRoomStatInterval = () => { 
   setInterval(async () => {
     try {
-      const res = await getLiveRoomOnlineCount(roomId)
+      const res = await getStat(roomId)
       if (res.data) {
-        liveRoomDetail.value.onlineCount = res.data
+        liveRoomDetail.value.fansCount = res.data.fansCount
+        liveRoomDetail.value.onlineCount = res.data.onlineCount
+        liveRoomDetail.value.maxOnlineCount = res.data.maxOnlineCount
+        liveRoomDetail.value.likeCount = res.data.likeCount
       }
     } catch (error) {
       console.error('获取实时在线人数错误:', error)
@@ -476,7 +480,7 @@ const handleCloseWebsocket = () => {
 
 onMounted(async () => {
   await getLiveRoomDetail() // 先获取直播间详情
-  getLiveRoomOnlineCountInterval()
+  getLiveRoomStatInterval()
   initPlayer();
   await initWebsocket();// 绑定事件并记录监听器
   // 绑定事件并记录监听器

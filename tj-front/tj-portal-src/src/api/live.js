@@ -23,10 +23,10 @@ export const getIMServerUrl = (roomId,userId) =>
         method: 'get',
     })
 
-//获取直播间实时在线人数
-export const getLiveRoomOnlineCount = (params) =>
+//获取直播间实时统计数据
+export const getStat = (params) =>
     request({
-        url: `${LIVE_API_PREFIX}/live/onlineCount/${params}`,		
+        url: `${LIVE_API_PREFIX}/live/stat/${params}`,		
         method: 'get',
     })
 
@@ -36,4 +36,10 @@ export const follow = (params) =>
         url: `${LIVE_API_PREFIX}/follow`,		
         method: 'post',
         data: params
+    })
+// 直播间点赞
+export const like = (params) =>
+    request({
+        url: `${LIVE_API_PREFIX}/live/like/${params}`,		
+        method: 'post',
     })

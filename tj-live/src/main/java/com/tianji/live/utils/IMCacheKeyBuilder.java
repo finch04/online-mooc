@@ -8,13 +8,15 @@ public class IMCacheKeyBuilder {
     private static final String IM_TOKEN_PREFIX = "IM_TOKEN_";
     private static final String ROOM_MESSAGE_PREFIX = "ROOM_MESSAGE_";
     private static final String ROOM_BATCH_MESSAGE_PREFIX = "ROOM_BATCH_MESSAGE_";
+    private static final String ROOM_USER_PREFIX = "ROOM_USER_";
+    private static final String ROOM_MAX_ONLINE_PREFIX = "ROOM_MAX_ONLINE_";
 
     public String buildIMTokenCacheKey(String token) {
         return IM_TOKEN_PREFIX + token;
     }
 
     public String buildRoomUserCacheKey(String roomId) {
-        return "ROOM_USER_" + roomId;
+        return ROOM_USER_PREFIX + roomId;
     }
 
     // 构建房间历史消息List的缓存键（用于存储最新20条消息）
@@ -61,6 +63,12 @@ public class IMCacheKeyBuilder {
         }
         String roomIdStr = batchKey.substring(ROOM_BATCH_MESSAGE_PREFIX.length());
         return Long.parseLong(roomIdStr);
+    }
+
+
+    // 最高在线人数缓存键
+    public String buildRoomMaxOnlineKey(String roomId) {
+        return ROOM_MAX_ONLINE_PREFIX + roomId;
     }
 
 }

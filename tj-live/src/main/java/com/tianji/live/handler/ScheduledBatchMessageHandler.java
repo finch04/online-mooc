@@ -19,7 +19,7 @@ import java.util.Set;
  */
 @Component
 @RequiredArgsConstructor
-public class ScheduledBatchPushHandler {
+public class ScheduledBatchMessageHandler {
 
     private Logger logger = LoggerFactory.getLogger(ChatBusiServiceImpl.class);
     private final StringRedisTemplate redisTemplate;

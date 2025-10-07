@@ -75,7 +75,6 @@ public class LiveRoomDetailVO {
      */
     private Long fansCount;
 
-
     /**
      * 当前在线人数
      */
