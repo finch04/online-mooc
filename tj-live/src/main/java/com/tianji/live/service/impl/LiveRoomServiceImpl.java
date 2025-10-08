@@ -3,6 +3,7 @@ package com.tianji.live.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
+import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.live.constants.IMConstants;
@@ -108,11 +109,11 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
     public Long like(String roomId) {
         // 1. 校验用户登录（可选，根据需求决定是否允许匿名点赞）
         if (UserContext.getUser() == null) {
-            throw new RuntimeException("请先登录再点赞"); // 或返回特定错误码，根据全局异常处理调整
+            throw new CommonException("请先登录再操作"); // 或返回特定错误码，根据全局异常处理调整
         }
 
         // 2. 构建Redis Key（直播间点赞数Key）
-        String likeCountKey = IMConstants.LIKE_COUNT_PREFIX + roomId;
+        String likeCountKey = imCacheKeyBuilder.buildRoomLikeCountKey(roomId);
 
         // 3. 原子自增点赞数（Redis INCR命令，性能极高，支持高频调用）
         Long newLikeCount = stringRedisTemplate.opsForValue().increment(likeCountKey);
@@ -134,7 +135,7 @@ public class LiveRoomServiceImpl implements ILiveRoomService {
      */
     public Long getLikeCount(String roomId) {
         // 1. 先查Redis
-        String likeCountKey = IMConstants.LIKE_COUNT_PREFIX + roomId;
+        String likeCountKey = imCacheKeyBuilder.buildRoomLikeCountKey(roomId);
         String likeCountStr = stringRedisTemplate.opsForValue().get(likeCountKey);
 
         // 2. Redis有数据：直接返回

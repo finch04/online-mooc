@@ -32,7 +32,7 @@
               <img :src="liveRoomDetail.anchorIcon" class="anchor-avatar" alt="主播头像">
               <div class="anchor-detail">
                 <h3 class="anchor-name">{{ liveRoomDetail.anchorName }}</h3>
-                
+
                 <p class="room-meta">
                   <span class="meta-item">开播时间：{{ formatTime(liveRoomDetail.createTime) }}</span>
                   <span class="meta-item">最后更新：{{ formatTime(liveRoomDetail.updateTime) }}</span>
@@ -70,6 +70,12 @@
             <!-- 视频区域 -->
             <div class="videoSide">
               <div class="videoContainer">
+                <!-- 加载动画：默认显示，直播中且流加载成功后隐藏 -->
+                <div class="video-loading" v-show="showLoading"
+                  :class="{ 'loading-low-zindex': liveRoomDetail.status === 1 }">
+                  <img src="/img/loading.gif" alt="加载中" class="loading-img">
+                  <p class="loading-text">{{ loadingText }}</p>
+                </div>
                 <video class="video-js" ref="videoplayer" width="100%"
                   style="background-color: rgb(18, 9, 37);width:100%;height:600px"></video>
               </div>
@@ -136,13 +142,13 @@
 
 <script setup>
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import videojs from 'video.js'
 import { useUserStore } from '@/store'
 import { getWebSocket } from "@/utils/websocket"
 import { getEmitter } from '@/utils/messageEmitter'
-import { getLiveRoomById,getStat,follow,like } from '@/api/live'
+import { getLiveRoomById, getStat, follow, like } from '@/api/live'
 
 import { closeWebSocket } from '@/utils/websocket'
 import { onBeforeRouteLeave } from 'vue-router'
@@ -176,7 +182,14 @@ import Breadcrumb from "@/components/Breadcrumb.vue";
 const route = useRoute()
 const router = useRouter()
 const roomId = route.query.id
-const url = 'http://192.168.150.101/hls/test.m3u8'
+
+// 动态生成直播URL：依赖liveRoomDetail中的streamKey
+const liveUrl = computed(() => {
+  // 若streamKey为空，返回空字符串（避免无效URL）
+  if (!liveRoomDetail.value?.streamKey) return ''
+  // 拼接HLS格式的直播URL（根据后端实际协议调整，如RTMP则改为rtmp://xxx）
+  return `http://192.168.150.101/hls/${liveRoomDetail.value.streamKey}.m3u8`
+})
 
 // 视频播放器
 const videoplayer = ref(null)
@@ -184,6 +197,7 @@ const myPlayer = ref(null)
 
 // 直播间详情信息
 const liveRoomDetail = ref({
+  streamKey: '',
   anchorId: '',
   anchorName: '加载中...',
   anchorIcon: '/img/avatar.png',
@@ -214,6 +228,17 @@ const chatList = ref([])
 let heartbeatInterval = null
 let isConfirming = ref(false)
 
+// 加载动画&直播间提示相关
+const showLoading = ref(true)
+const loadingText = computed(() => {
+  const status = liveRoomDetail.value.status
+  // 根据直播间状态返回不同提示
+  if (status === 0) return '直播间未开播，正在等待主播上线...'
+  if (status === 2) return '直播间已关闭，无法观看'
+  if (status === 3) return '直播间已被禁播，无法观看'
+  // 直播中但流未加载成功：显示“直播加载中”
+  return '直播加载中，请稍候...'
+})
 // 礼物相关
 const giftList = ref([
   { giftId: '1', coverImgUrl: '/img/gift1.png', giftName: '大天使', price: '5' },
@@ -246,7 +271,7 @@ const goHome = () => {
 // 关注/取消关注主播
 const handleFollow = () => {
   const params = {
-    follow: !liveRoomDetail.value.followed?1:0,
+    follow: !liveRoomDetail.value.followed ? 1 : 0,
     anchorId: liveRoomDetail.value.anchorId
   }
   follow(params).then(res => {
@@ -276,28 +301,142 @@ const handleLike = () => {
   })
 }
 
-
-
-// 初始化播放器
 const initPlayer = () => {
-  if (!myPlayer.value) {
-    myPlayer.value = videojs(videoplayer.value, {
-      autoplay: false,
-      poster: "/img/loading.gif",
-      controls: true,
-      controlBar: true,
-      bigPlayButton: true,
-      sources: [{
-        src: url
-      }]
-    }, () => {
-      console.info("播放器加载完成")
-    })
-    myPlayer.value.on('error', (error) => {
-      console.info('播放器加载错误', error)
-    })
+  // 1. 非直播状态处理
+  if ([0, 2, 3].includes(liveRoomDetail.value.status)) {
+    showLoading.value = true;
+    console.warn('非直播状态，不初始化播放器', liveRoomDetail.value.status);
+    return;
   }
-}
+
+  // 2. 直播地址无效处理
+  if (!liveUrl.value) {
+    showLoading.value = true;
+    ElMessage.warning('直播流地址无效，请联系管理员');
+    return;
+  }
+
+  // 清理旧播放器实例
+  if (myPlayer.value) {
+    myPlayer.value.dispose();
+    myPlayer.value = null;
+  }
+
+  // 3. 创建新播放器实例
+  myPlayer.value = videojs(videoplayer.value, {
+    autoplay: false,
+    // poster: "transparent",
+    controls: true,
+    controlBar: true,
+    bigPlayButton: true,
+    sources: [{ 
+      src: liveUrl.value, 
+      type: 'application/x-mpegURL' 
+    }],
+    html5: {
+      hls: {
+        maxBufferLength: 30,
+        maxMaxBufferLength: 600
+      }
+    }
+  }, function onPlayerReady() {
+    videojs.log('播放器初始化完成!');
+    // 初始化时显示加载动画
+    showLoading.value = true;
+  });
+
+  // 4. 资源请求相关事件 - 控制加载动画显示
+  myPlayer.value.on("loadstart", function() {
+    console.log("开始请求数据");
+    showLoading.value = false; // 开始请求时显示加载动画
+  });
+
+  myPlayer.value.on("progress", function() {
+    console.log("正在请求数据中");
+    showLoading.value = false; // 数据请求过程中保持显示
+  });
+
+  myPlayer.value.on("waiting", function() {
+    console.log("等待数据加载");
+    showLoading.value = false; // 等待数据时显示加载动画
+  });
+
+  myPlayer.value.on("stalled", function() {
+    console.log("网速异常，数据加载中断");
+    showLoading.value = true; // 网络异常时显示加载动画
+  });
+
+  // 5. 资源加载完成相关事件 - 控制加载动画隐藏
+  myPlayer.value.on("loadedmetadata", function() {
+    console.log("获取资源长度完成");
+    showLoading.value = false; // 元数据加载完成，隐藏动画
+  });
+
+  myPlayer.value.on("canplaythrough", function() {
+    console.log("视频源数据加载完成，可流畅播放");
+    showLoading.value = false; // 资源完全加载，隐藏动画
+  });
+
+  myPlayer.value.on("play", function() {
+    console.log("视频开始播放");
+    showLoading.value = false; // 开始播放时隐藏动画
+  });
+
+  myPlayer.value.on("playing", function() {
+    console.log("视频播放中");
+    showLoading.value = false; // 播放中保持隐藏
+  });
+
+  // 6. 错误处理
+  myPlayer.value.on("error", function() {
+    console.log("加载错误");
+    showLoading.value = true; // 错误时显示动画
+    const error = myPlayer.value.error();
+    let errorMessage = '直播加载失败，请重试';
+    if (error) {
+      switch(error.code) {
+        case 2: errorMessage = '无法加载视频源'; break;
+        case 4: errorMessage = '无法解析视频源'; break;
+        case 10: errorMessage = '视频加载超时'; break;
+        default: errorMessage = `错误代码: ${error.code}`;
+      }
+    }
+    ElMessage.error(errorMessage);
+  });
+
+  // 7. 播放控制相关事件
+  myPlayer.value.on("pause", function() {
+    console.log("视频暂停播放");
+    // 暂停时不改变加载动画状态
+  });
+
+  myPlayer.value.on("ended", function() {
+    console.log("视频播放结束");
+    showLoading.value = true; // 播放结束重新显示动画
+  });
+
+  myPlayer.value.on("seeking", function() {
+    console.log("视频跳转中");
+    showLoading.value = true; // 跳转时显示动画
+  });
+
+  myPlayer.value.on("seeked", function() {
+    console.log("视频跳转结束");
+    showLoading.value = false; // 跳转完成隐藏动画
+  });
+
+  // 8. 播放按钮点击事件（最终保障）
+  const bigPlayButton = myPlayer.value.getChild('bigPlayButton');
+  if (bigPlayButton) {
+    bigPlayButton.on('click', () => {
+      console.log('播放按钮被点击');
+      showLoading.value = false;
+    });
+  }
+};
+
+
+
 
 // 获取直播间详情
 const getLiveRoomDetail = async () => {
@@ -312,7 +451,7 @@ const getLiveRoomDetail = async () => {
   }
 }
 //3秒轮询 获取实时在线人数
-const getLiveRoomStatInterval = () => { 
+const getLiveRoomStatInterval = () => {
   setInterval(async () => {
     try {
       const res = await getStat(roomId)
@@ -341,7 +480,7 @@ const scrollToBottom = () => {
 }
 
 const initWebsocket = async () => {
-  socket.value = await getWebSocket(roomId,userId.value ? userId.value : '');
+  socket.value = await getWebSocket(roomId, userId.value ? userId.value : '');
 
   if (!socket.value) {
     ElMessage({
@@ -480,8 +619,8 @@ const handleCloseWebsocket = () => {
 
 onMounted(async () => {
   await getLiveRoomDetail() // 先获取直播间详情
-  getLiveRoomStatInterval()
   initPlayer();
+  getLiveRoomStatInterval()
   await initWebsocket();// 绑定事件并记录监听器
   // 绑定事件并记录监听器
   emitter.on("closeWebsocket", handleCloseWebsocket);

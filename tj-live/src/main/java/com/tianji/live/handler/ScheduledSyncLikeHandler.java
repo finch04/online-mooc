@@ -4,6 +4,7 @@ import com.tianji.live.constants.IMConstants;
 import com.tianji.live.domain.po.LiveRoom;
 import com.tianji.live.mapper.LiveRoomMapper;
 import com.tianji.live.service.impl.ChatBusiServiceImpl;
+import com.tianji.live.utils.IMCacheKeyBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class ScheduledSyncLikeHandler {
     private Logger logger = LoggerFactory.getLogger(ChatBusiServiceImpl.class);
     private final StringRedisTemplate stringRedisTemplate;
     private final LiveRoomMapper liveRoomMapper;
+    private final IMCacheKeyBuilder imCacheKeyBuilder;
 
     /**
      * 定时同步Redis中的点赞数到MySQL（每天凌晨3点执行，避开业务高峰）
@@ -49,7 +51,7 @@ public class ScheduledSyncLikeHandler {
             for (LiveRoom room : allRooms) {
                 Long roomId = room.getId();
                 String roomIdStr = roomId.toString();
-                String likeCountKey = IMConstants.LIKE_COUNT_PREFIX + roomIdStr;
+                String likeCountKey =  imCacheKeyBuilder.buildRoomLikeCountKey(roomIdStr);
 
                 // 2.1 获取Redis中的最新点赞数
                 String redisLikeCountStr = stringRedisTemplate.opsForValue().get(likeCountKey);

@@ -2,6 +2,7 @@ package com.tianji.live.handler;
 
 import com.tianji.live.domain.po.UserFollow;
 import com.tianji.live.mapper.UserFollowMapper;
+import com.tianji.live.utils.IMCacheKeyBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.tianji.live.constants.IMConstants.FOLLOW_PREFIX;
 
 /**
  * @Author: fsq
@@ -28,6 +28,7 @@ public class ScheduledSyncFollowHandler {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final UserFollowMapper userFollowMapper;
+    private final IMCacheKeyBuilder imCacheKeyBuilder;
 
 
     // ======================== 定期同步Redis到MySQL（定时任务） ========================
@@ -39,7 +40,7 @@ public class ScheduledSyncFollowHandler {
     public void syncRedisToMysql() {
         try {
             // 1. 扫描Redis中所有用户的关注Key（匹配前缀：user:follow:*）
-            Set<String> followKeys = stringRedisTemplate.keys(FOLLOW_PREFIX + "*");
+            Set<String> followKeys = stringRedisTemplate.keys(imCacheKeyBuilder.buildUserFollowCachePattern());
             if (CollectionUtils.isEmpty(followKeys)) {
                 return; // 无数据直接返回
             }
@@ -48,7 +49,7 @@ public class ScheduledSyncFollowHandler {
             List<UserFollow> followList = new ArrayList<>();
             for (String followKey : followKeys) {
                 // 2.1 提取用户ID（从Key中截取：user:follow:123 → 123）
-                Long userId = Long.valueOf(followKey.replace(FOLLOW_PREFIX, ""));
+                Long userId =imCacheKeyBuilder.parseUserIdFromCacheKey(followKey);
                 // 2.2 获取该用户的所有关注ID（Redis Set全部元素）
                 Set<String> followedUserIdStrs = stringRedisTemplate.opsForSet().members(followKey);
                 if (CollectionUtils.isEmpty(followedUserIdStrs)) {

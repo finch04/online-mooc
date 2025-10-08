@@ -4,6 +4,7 @@ import com.tianji.live.constants.IMConstants;
 import com.tianji.live.domain.po.UserFollow;
 import com.tianji.live.mapper.UserFollowMapper;
 import com.tianji.live.service.IUserFollowService;
+import com.tianji.live.utils.IMCacheKeyBuilder;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -15,8 +16,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.tianji.live.constants.IMConstants.FANS_PREFIX;
-import static com.tianji.live.constants.IMConstants.FOLLOW_PREFIX;
 
 /**
  * 用户关注服务实现类（优化版：简化Redis操作 + 定期同步MySQL）
@@ -29,13 +28,11 @@ public class UserFollowServiceImpl implements IUserFollowService {
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private UserFollowMapper userFollowMapper;
+    @Resource
+    private IMCacheKeyBuilder cacheKeyBuilder;
 
     // 缓存过期时间（7天，常量定义）
     private static final long EXPIRE_DAYS = 7;
-    // Redis Key前缀（复用常量，减少硬编码）
-    private static final String FOLLOW_KEY_TPL = FOLLOW_PREFIX + "%s";
-    private static final String FANS_KEY_TPL = FANS_PREFIX + "%s";
-
 
     // ======================== 核心业务方法（简化Redis操作） ========================
     @Override
@@ -45,8 +42,8 @@ public class UserFollowServiceImpl implements IUserFollowService {
             return false;
         }
 
-        String followKey = getFollowKey(userId);
-        String fansKey = getFansKey(followedUserId);
+        String followKey = cacheKeyBuilder.buildUserFollowCacheKey(userId);
+        String fansKey = cacheKeyBuilder.buildUserFansCacheKey(followedUserId);
         String followedUserIdStr = toString(followedUserId);
         String userIdStr = toString(userId);
 
@@ -69,8 +66,8 @@ public class UserFollowServiceImpl implements IUserFollowService {
             return false;
         }
 
-        String followKey = getFollowKey(userId);
-        String fansKey = getFansKey(followedUserId);
+        String followKey = cacheKeyBuilder.buildUserFollowCacheKey(userId);
+        String fansKey = cacheKeyBuilder.buildUserFansCacheKey(followedUserId);
         String followedUserIdStr = toString(followedUserId);
         String userIdStr = toString(userId);
 
@@ -90,7 +87,7 @@ public class UserFollowServiceImpl implements IUserFollowService {
             return false;
         }
         return Boolean.TRUE.equals(stringRedisTemplate.opsForSet().isMember(
-                getFollowKey(userId), toString(followedUserId)
+                cacheKeyBuilder.buildUserFollowCacheKey(userId), toString(followedUserId)
         ));
     }
 
@@ -98,43 +95,29 @@ public class UserFollowServiceImpl implements IUserFollowService {
     public Set<String> getFollowList(Long userId, long limit) {
         // 简化空值判断 + 返回默认空集合
         return userId == null || limit <= 0 ? Collections.emptySet() :
-                stringRedisTemplate.opsForSet().distinctRandomMembers(getFollowKey(userId), limit);
+                stringRedisTemplate.opsForSet().distinctRandomMembers(cacheKeyBuilder.buildUserFollowCacheKey(userId), limit);
     }
 
     @Override
     public Set<String> getFansList(Long userId, long limit) {
         return userId == null || limit <= 0 ? Collections.emptySet() :
-                stringRedisTemplate.opsForSet().distinctRandomMembers(getFansKey(userId), limit);
+                stringRedisTemplate.opsForSet().distinctRandomMembers(cacheKeyBuilder.buildUserFollowCacheKey(userId), limit);
     }
 
     @Override
     public Long getFollowCount(Long userId) {
         // 简化空值处理（一行返回）
         return userId == null ? 0L :
-                Optional.ofNullable(stringRedisTemplate.opsForSet().size(getFollowKey(userId))).orElse(0L);
+                Optional.ofNullable(stringRedisTemplate.opsForSet().size(cacheKeyBuilder.buildUserFollowCacheKey(userId))).orElse(0L);
     }
 
     @Override
     public Long getFansCount(Long userId) {
         return userId == null ? 0L :
-                Optional.ofNullable(stringRedisTemplate.opsForSet().size(getFansKey(userId))).orElse(0L);
+                Optional.ofNullable(stringRedisTemplate.opsForSet().size(cacheKeyBuilder.buildUserFollowCacheKey(userId))).orElse(0L);
     }
 
 
-    // ======================== 私有工具方法（减少冗余代码） ========================
-    /**
-     * 生成用户关注列表的Redis Key
-     */
-    private String getFollowKey(Long userId) {
-        return String.format(FOLLOW_KEY_TPL, userId);
-    }
-
-    /**
-     * 生成用户粉丝列表的Redis Key
-     */
-    private String getFansKey(Long userId) {
-        return String.format(FANS_KEY_TPL, userId);
-    }
 
     /**
      * Long转String（避免空指针）

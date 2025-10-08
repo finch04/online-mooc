@@ -24,6 +24,11 @@ public class LiveRoom {
     private Long id;
 
     /**
+     * 直播间串流密钥
+     */
+    private String streamKey;
+
+    /**
      * 主播用户id
      */
     private Long anchorId;

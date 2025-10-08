@@ -89,7 +89,6 @@ public class ConnectionManager {
     }
 
 
-
     public static List<Session> getAllSession(){
         return CHANNEL_CONTAINER.values().stream().toList();
     }

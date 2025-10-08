@@ -10,6 +10,17 @@ public class IMCacheKeyBuilder {
     private static final String ROOM_BATCH_MESSAGE_PREFIX = "ROOM_BATCH_MESSAGE_";
     private static final String ROOM_USER_PREFIX = "ROOM_USER_";
     private static final String ROOM_MAX_ONLINE_PREFIX = "ROOM_MAX_ONLINE_";
+    //用户关注
+    public static final String FOLLOW_PREFIX = "user:follow:";  // 关注的人
+    public static final String FANS_PREFIX = "user:fans:";      // 粉丝
+
+    // 直播间点赞数Key前缀（String类型，存总点赞数）
+    public static final String ROOM_LIKE_COUNT_PREFIX = "ROOM_LIKE_COUNT_";
+
+    //用户关注
+    public static final String IM_FOLLOW_PREFIX = "user:follow:";  // 关注的人
+    public static final String IM_FANS_PREFIX = "user:fans:";      // 粉丝
+
 
     public String buildIMTokenCacheKey(String token) {
         return IM_TOKEN_PREFIX + token;
@@ -76,6 +87,40 @@ public class IMCacheKeyBuilder {
     // 最高在线人数缓存键
     public String buildRoomMaxOnlineKey(String roomId) {
         return ROOM_MAX_ONLINE_PREFIX + roomId;
+    }
+
+    // 房间点赞数缓存键
+    public String buildRoomLikeCountKey(String roomId) {
+        return ROOM_LIKE_COUNT_PREFIX + roomId;
+    }
+
+    //用户关注
+    public String buildUserFollowCacheKey(Long userId) {
+        return FOLLOW_PREFIX + userId;
+    }
+
+    //用户粉丝
+    public String buildUserFansCacheKey(Long userId) {
+        return FANS_PREFIX + userId;
+    }
+
+    //用户关注
+    public String buildUserFollowCachePattern() {
+        return FOLLOW_PREFIX + "*";
+    }
+
+    //用户粉丝
+    public String buildUserFansCachePattern() {
+        return FANS_PREFIX + "*";
+    }
+
+    //（从Key中截取：user:follow:123 → 123）
+    public Long parseUserIdFromCacheKey(String cacheKey) {
+        if (cacheKey == null || !cacheKey.startsWith(FOLLOW_PREFIX)) {
+            throw new IllegalArgumentException("无效的用户关注缓存键：" + cacheKey);
+        }
+        String userIdStr = cacheKey.substring(FOLLOW_PREFIX.length());
+        return Long.parseLong(userIdStr);
     }
 
 }

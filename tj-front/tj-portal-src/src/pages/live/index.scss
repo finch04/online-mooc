@@ -284,16 +284,60 @@
       }
 
       .videoContainer {
-        background-color: #120925;
-        border-radius: 8px;
-        overflow: hidden;
-        flex: 1;
+        position: relative; // 父容器相对定位，让子元素绝对定位生效
+        width: 100%;
+        height: 600px; // 与视频高度一致
+      }
 
-        video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+      .video-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(18, 9, 37);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10; /* 非直播状态：高层级覆盖播放器 */
+      }
+      
+      /* 直播中状态：低层级，让播放器按钮可点击 */
+      .loading-low-zindex {
+        z-index: 1; 
+        /* 可选：半透明背景，既显示加载动画又能看到播放器按钮 */
+        background-color: rgba(18, 9, 37, 0.7);
+      }
+      
+      .loading-img {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 16px;
+      }
+      
+      .loading-text {
+        color: #fff;
+        font-size: 16px;
+        opacity: 0.8;
+      }
+
+      // 可选：加载图片旋转动画（若loading.gif本身无动画可加）
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
         }
+
+        to {
+          transform: rotate(360deg);
+        }
+
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .giftArea {
@@ -375,6 +419,7 @@
               font-weight: 500;
               margin-right: 8px;
             }
+
             .message-content {
               color: #333;
             }
@@ -383,6 +428,7 @@
           // 系统消息样式
           .message-system {
             text-align: center;
+
             .message-content {
               color: #8c8c8c;
               font-size: 13px;
@@ -395,10 +441,12 @@
           // 礼物消息样式
           .message-gift {
             text-align: center;
+
             .gift-icon {
               color: #ff4d4f;
               margin-right: 5px;
             }
+
             .message-content {
               color: #e6a23c;
               font-weight: 500;
@@ -409,10 +457,12 @@
           .message-notice {
             text-align: center;
             animation: noticeFlash 2s ease-in-out;
+
             .notice-icon {
               color: #ff7d00;
               margin-right: 5px;
             }
+
             .message-content {
               color: #d4380d;
               font-weight: bold;
@@ -551,6 +601,13 @@
 
 // 公告闪烁动画
 @keyframes noticeFlash {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
