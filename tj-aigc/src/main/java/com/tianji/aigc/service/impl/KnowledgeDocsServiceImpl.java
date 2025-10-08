@@ -37,8 +37,10 @@ public class KnowledgeDocsServiceImpl  implements KnowledgeDocsService {
 
         // 判断是否为md文件
         String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".md")) {
-            throw new BadRequestException("只支持上传 .md 格式的文件") ;
+        //得到文件后缀名
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")+1);
+        if (originalFilename == null || !extension.equals("md")) {
+            throw new BadRequestException("目前只支持上传 md 格式的文件") ;
         }
         //文件如果大于2MB拒绝上传
         if (file.getSize() > 2 * 1024 * 1024) {
@@ -61,12 +63,16 @@ public class KnowledgeDocsServiceImpl  implements KnowledgeDocsService {
             BeanUtils.copyProperties(dto, doc);
             doc.setUserId(userId);
             doc.setStatus(1); // 默认为正常状态
-            doc.setSegmentCount(0); // 初始片段数为0
-            doc.setCreateTime(LocalDateTime.now());
-            doc.setUpdateTime(LocalDateTime.now());
+            doc.setContent(contentBuilder.toString());
+            doc.setFileName(originalFilename);
+            doc.setFileSize(file.getSize());
+            doc.setFileExtension(extension);
+
+            Integer segmentCount =segmentService.saveSegments(doc);
+            doc.setSegmentCount(segmentCount);
 
             knowledgeDocsMapper.insert(doc);
-            segmentService.saveSegments(doc);
+
         }catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("文件解析失败：" + e.getMessage());

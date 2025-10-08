@@ -43,6 +43,10 @@ tj:
       type: Redis # MYSQL | MongoDB | Redis
     chat-type: ENHANCE
     audio-type: DASHSCOPE
+    splitter:
+      max-chunk-size: 2000
+      overlap-size: 100
+      min-chunk-size: 100
     # AI提示词配置
     prompt:
       system:

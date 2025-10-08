@@ -1,5 +1,6 @@
 package com.tianji.aigc.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.tianji.aigc.domain.po.KnowledgeDocs;
 import com.tianji.aigc.domain.po.MarkdownChunk;
 import com.tianji.aigc.service.SegmentService;
@@ -28,56 +29,90 @@ public class SegmentServiceImpl implements SegmentService {
     private final QdrantVectorStore qdrantVectorStore;
     // Spring AI 标准向量存储接口（通用增删查操作）
     private final VectorStore vectorStore;
+    private final MarkdownSplitter markdownSplitter;
 
     /**
      * 增加：保存文件分片到向量库（含Markdown分片、向量生成、元数据关联）
      * @param doc 原始文件（KnowledgeDocs，含ID、内容、用户ID等）
      */
     @Override
-    public void saveSegments(KnowledgeDocs doc) {
-        // 校验入参
-        if (doc == null || doc.getId() == null || doc.getContent() == null) {
-            log.error("保存文件分片失败：入参无效（doc={}）", doc);
-            throw new IllegalArgumentException("文件信息或内容不能为空");
+    public Integer saveSegments(KnowledgeDocs doc) {
+        // 1. 入参校验
+        if (doc == null ||StrUtil.isEmpty(doc.getContent())) {
+            log.error("保存文件分片失败：入参无效（docId={}, contentLength={}",
+                    doc.getId(), doc.getContent() == null ? 0 : doc.getContent().length());
+            throw new IllegalArgumentException("文件ID和内容不能为空");
         }
 
         String markdownContent = doc.getContent();
-        Integer splitLevel = doc.getLevel(); // Markdown分片层级（如1=按H1，2=按H2）
+        Integer splitLevel = doc.getLevel();
+        Long docId = doc.getId();
+        Long userId = doc.getUserId();
 
-        // 2. Markdown分片处理：优先按指定层级分片，无则默认按标题智能分片
-        List<MarkdownChunk> markdownChunks = new ArrayList<>();
+        // 2. Markdown 分片（使用改造后的分片器，自动限制单个分片大小）
+        List<MarkdownChunk> markdownChunks;
         if (splitLevel != null && splitLevel >= 1 && splitLevel <= 6) {
-            markdownChunks = MarkdownSplitter.getMarkdownChunksByH(markdownContent, splitLevel);
-            log.info("文档[{}]按H{}层级分片，得到{}个片段", doc.getId(), splitLevel, markdownChunks.size());
-        }
-        // 若指定层级无结果，使用默认智能分片（按所有标题拆分）
-        if (CollectionUtils.isEmpty(markdownChunks)) {
-            markdownChunks = MarkdownSplitter.smartSplitByHeading(markdownContent);
-            log.info("文档[{}]使用默认智能分片，得到{}个片段", doc.getId(), markdownChunks.size());
-        }
-        // 若仍无分片（如纯文本），直接作为1个片段处理
-        if (CollectionUtils.isEmpty(markdownChunks)) {
-            markdownChunks.add(new MarkdownChunk("全文", markdownContent));
-            log.info("文档[{}]无标题，作为1个全文片段处理", doc.getId());
+            // 按指定级别分片（如 H2）
+            markdownChunks = markdownSplitter.getMarkdownChunksByH(markdownContent, splitLevel);
+            log.info("文档[{}]按指定级别 H{} 分片，初始分片数：{}",
+                    doc.getFileName(), splitLevel, markdownChunks.size());
+        } else {
+            // 智能分片（自动找最大标题级别 + 长度限制）
+            markdownChunks = markdownSplitter.smartSplitByHeading(markdownContent);
+            log.info("文档[{}]智能分片，初始分片数：{}",  doc.getFileName(), markdownChunks.size());
         }
 
-        // 3. 转换为Spring AI Document（含元数据，便于后续查询过滤）
+        // 3. 兜底：若分片为空（极端情况，如纯空白内容）
+        if (CollectionUtils.isEmpty(markdownChunks)) {
+            markdownChunks = new ArrayList<>();
+            markdownChunks.add(new MarkdownChunk("全文", markdownContent.trim()));
+            log.warn("文档[{}]分片为空，兜底为1个全文分片", docId);
+        }
+
+        // 4. 转换为 Spring AI Document（含元数据）
         List<Document> documents = markdownChunks.stream()
                 .map(chunk -> new Document(
-                        chunk.getContent(), // 分片文本内容
+                        chunk.getContent(), // 分片内容（已确保 ≤ maxChunkSize）
                         Map.of(
-                                "doc_id", doc.getId().toString(), // 关联原始文件ID（关键：用于按文件查询）
-                                "user_id", doc.getUserId().toString(), // 关联上传用户ID
-                                "title", chunk.getTitle(), // 分片标题（如H1标题）
-                                "create_time", new Date().toString()// 创建时间
+                                "user_id", userId.toString(), // 关联上传用户
+                                "chunk_title", chunk.getTitle(), // 分片标题
+                                "create_time", new Date().toString(), // 创建时间
+                                "chunk_size", chunk.getContent().length() // 分片大小（用于日志和监控）
                         )
                 ))
                 .collect(Collectors.toList());
 
-        // 4. 保存到Qdrant向量库（Spring AI自动生成向量并写入）
-        vectorStore.add(documents);
-        log.info("文档[{}]分片保存完成：向量库新增{}个片段",
-                doc.getId(), documents.size());
+        // 5. 校验分片大小（兜底检查，确保无超大分片）
+        int maxChunkSize = markdownSplitter.getSplitterProperties().getMaxChunkSize();
+        List<Document> validDocs = documents.stream()
+                .filter(document -> {
+                    int contentLength = document.getText().length();
+                    boolean valid = contentLength <= maxChunkSize;
+                    if (!valid) {
+                        log.error("文档[{}]存在超大分片，已过滤（chunkTitle={}, contentLength={}, maxSize={}",
+                                docId, document.getMetadata().get("chunk_title"), contentLength, maxChunkSize);
+                    }
+                    return valid;
+                })
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(validDocs)) {
+            log.error("文档[{}]所有分片均超限制，无法保存", docId);
+            throw new RuntimeException("分片大小超过限制，无法保存");
+        }
+
+        // 6. 分批保存到向量库（避免批量过大触发 Embedding 400 错误，之前实现的分批逻辑）
+        int batchSize = 10; // 对应 Embedding 模型的批量限制
+        for (int i = 0; i < validDocs.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, validDocs.size());
+            List<Document> batchDocs = validDocs.subList(i, end);
+            vectorStore.add(batchDocs);
+            log.info("文档[{}]分批保存向量库：第{}批，大小{}", docId, (i / batchSize) + 1, batchDocs.size());
+        }
+
+        log.info("文档[{}]分片保存完成：最终有效分片数{}，总大小{}字符",
+                docId, validDocs.size(), validDocs.stream().mapToInt(d -> d.getText().length()).sum());
+        return validDocs.size();
     }
 
     /**
@@ -174,7 +209,6 @@ public class SegmentServiceImpl implements SegmentService {
             log.error("生成向量失败：文本为空");
             throw new IllegalArgumentException("待生成向量的文本不能为空");
         }
-
         log.info("生成文本向量：长度={}字符", message.length());
         return embeddingModel.embedForResponse(List.of(message));
     }

@@ -22,16 +22,6 @@ import java.time.LocalDateTime;
 public class KnowledgeDocsDTO {
 
     /**
-     * 上传时的原始文件名
-     */
-    private String fileName;
-
-    /**
-     * 文档文本内容
-     */
-    private String content;
-
-    /**
      * 文档描述
      */
     private String description;

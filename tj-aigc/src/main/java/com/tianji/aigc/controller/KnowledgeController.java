@@ -23,8 +23,12 @@ public class KnowledgeController {
     /**
      * 新增知识文件
      */
+    //注意：@RequestBody 与 MultipartFile 无法共存
+    // @RequestBody 要求请求体是 JSON/XML 等 “纯数据格式”，而 multipart/form-data 是 “表单 + 文件” 格式
+    // Spring 无法同时解析这两种格式，导致抛出 Content-Type 不支持 异常。
     @PostMapping("/upload")
-    public void uploadKnowledgeDoc(@RequestParam MultipartFile file, @RequestBody KnowledgeDocsDTO dto) {
+    public void uploadKnowledgeDoc(@RequestParam("file") MultipartFile file,
+                                   @ModelAttribute KnowledgeDocsDTO dto) {
         knowledgeDocsService.uploadKnowledgeDoc(file,dto);
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 public interface SegmentService {
 
     // 保存文件分片到向量库（已有基础逻辑，补充完善）
-    void saveSegments(KnowledgeDocs doc);
+    Integer saveSegments(KnowledgeDocs doc);
 
     // 根据文档ID查询其所有分片
     List<Document> getSegmentsByDocId(Long docId);
