@@ -1,10 +1,10 @@
-package com.tianji.aigc.service.impl;
+package com.tianji.aigc.storage;
 
 import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.*;
 import com.tianji.aigc.config.AliYunProperties;
-import com.tianji.aigc.service.FileStorage;
+import com.tianji.aigc.storage.FileStorage;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.AssertUtils;

@@ -53,6 +53,21 @@ export default [
     ],
   },
   {
+    path: '/ai',
+    component: Layout,
+    name: 'ai',
+    redirect: '/ai/index',
+    meta: { title: 'AI中心' },
+    children: [
+      {
+        path: 'index',
+        name: 'AIIndex',
+        component: () => import('@/pages/ai/index.vue'),
+        meta: { title: 'AI中心' },
+      },
+    ],
+  },
+  {
     path: '/askDetails',
     component: Layout,
     name: 'askDetails',

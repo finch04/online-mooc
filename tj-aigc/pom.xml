@@ -96,6 +96,13 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <exclusions>
+                <!--                向量数据库和MySQL坑爹的版本冲突啊！-->
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--redisson-->
         <dependency>
@@ -112,22 +119,26 @@
             <artifactId>spring-ai-advisors-vector-store</artifactId>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.ai</groupId>-->
+<!--            <artifactId>spring-ai-starter-vector-store-elasticsearch</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>co.elastic.clients</groupId>-->
+<!--                    <artifactId>elasticsearch-java</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>co.elastic.clients</groupId>-->
+<!--            <artifactId>elasticsearch-java</artifactId>-->
+<!--            <version>8.15.5</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-vector-store-elasticsearch</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>co.elastic.clients</groupId>
-                    <artifactId>elasticsearch-java</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>spring-ai-starter-vector-store-qdrant</artifactId>
         </dependency>
-        <dependency>
-            <groupId>co.elastic.clients</groupId>
-            <artifactId>elasticsearch-java</artifactId>
-            <version>8.15.5</version>
-        </dependency>
-
 
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -170,6 +181,20 @@
                     <groupId>org.bouncycastle</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+
+        <!--pdfbox-->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.27</version>
+        </dependency>
+        <!--markdown-->
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+            <version>0.64.8</version>
         </dependency>
 
     </dependencies>

@@ -9,7 +9,7 @@ import com.alibaba.cloud.ai.dashscope.audio.synthesis.SpeechSynthesisPrompt;
 import com.alibaba.cloud.ai.dashscope.audio.transcription.AudioTranscriptionModel;
 import com.tianji.aigc.domain.param.AudioEventFilterParam;
 import com.tianji.aigc.service.AudioService;
-import com.tianji.aigc.service.FileStorage;
+import com.tianji.aigc.storage.FileStorage;
 import com.tianji.aigc.utils.AudioEventFilterUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

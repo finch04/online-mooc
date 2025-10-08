@@ -1,4 +1,4 @@
-package com.tianji.aigc.service;
+package com.tianji.aigc.storage;
 
 import java.io.InputStream;
 import java.util.List;

@@ -1,6 +1,5 @@
 package com.tianji.aigc.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
@@ -12,17 +11,14 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.tianji.aigc.domain.ChatRecord;
-import com.tianji.aigc.domain.ChatSession;
+import com.tianji.aigc.domain.po.ChatRecord;
+import com.tianji.aigc.domain.po.ChatSession;
 import com.tianji.aigc.domain.vo.AgentConfigVO;
 import com.tianji.aigc.domain.vo.ChatSessionVO;
 import com.tianji.aigc.domain.vo.MessageVO;
 import com.tianji.aigc.domain.vo.SessionVO;
-import com.tianji.aigc.enums.MessageTypeEnum;
 import com.tianji.aigc.mapper.ChatRecordMapper;
 import com.tianji.aigc.mapper.ChatSessionMapper;
-import com.tianji.aigc.memory.MyAssistantMessage;
-import com.tianji.aigc.memory.clean.DataSourceType;
 import com.tianji.aigc.service.AgentConfigService;
 import com.tianji.aigc.service.ChatService;
 import com.tianji.aigc.service.ChatSessionService;
@@ -31,8 +27,6 @@ import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 

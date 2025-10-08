@@ -5,7 +5,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.tianji.aigc.domain.ChatRecord;
+import com.tianji.aigc.domain.po.ChatRecord;
 import com.tianji.aigc.memory.MessageUtil;
 import com.tianji.aigc.memory.MyChatMemoryRepository;
 import com.tianji.aigc.service.ChatRecordService;

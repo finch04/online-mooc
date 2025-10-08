@@ -1,7 +1,7 @@
 package com.tianji.aigc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.tianji.aigc.domain.ChatRecord;
+import com.tianji.aigc.domain.po.ChatRecord;
 
 /**
  * 对话记忆
