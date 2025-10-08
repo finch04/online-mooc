@@ -3,6 +3,7 @@ package com.tianji.aigc.controller;
 import com.tianji.aigc.domain.dto.ImageGenerateDTO;
 import com.tianji.aigc.service.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import javax.validation.Valid;
  */
 @RestController
 @RequestMapping("/img")
+@Tag(name = "图片生成接口")
 @RequiredArgsConstructor
 public class ImageController {
 

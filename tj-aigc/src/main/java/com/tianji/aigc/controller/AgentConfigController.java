@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tianji.aigc.domain.vo.AgentConfigVO;
 import com.tianji.aigc.service.AgentConfigService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/agent/config")
+@Tag(name = "智能体配置管理")
 @RequiredArgsConstructor
 public class AgentConfigController {
 

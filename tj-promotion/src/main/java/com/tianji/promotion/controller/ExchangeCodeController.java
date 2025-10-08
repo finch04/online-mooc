@@ -4,6 +4,7 @@ import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.promotion.domain.query.CodeQuery;
 import com.tianji.promotion.domain.vo.ExchangeCodeVO;
 import com.tianji.promotion.service.IExchangeCodeService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,6 +31,7 @@ public class ExchangeCodeController {
 
     @GetMapping("page")
     @Schema(description = "分页查询兑换码")
+    @Operation(summary = "分页查询兑换码")
     public PageDTO<ExchangeCodeVO> queryCodePage(@Valid CodeQuery query){
         return codeService.queryCodePage(query);
     }

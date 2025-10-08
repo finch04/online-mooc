@@ -5,6 +5,7 @@ import com.tianji.live.protocol.MessageBody;
 import com.tianji.live.service.IChatBusiService;
 import com.tianji.live.service.IIMService;
 import com.tianji.live.service.IIMTokenService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class IMController {
      * 获取IM服务器地址
      * @return
      */
+    @Operation(summary = "获取IM服务器地址")
     @GetMapping("/getIMServer/{roomId}/{userId}")
     public Map<String,Object> getIMServer(@PathVariable("roomId") String roomId,
                                           @PathVariable("userId") String userId){
@@ -79,6 +81,7 @@ public class IMController {
     /**
      * 获取房间历史消息(未启用)
      */
+    @Operation(summary = "获取房间历史消息")
     @GetMapping("/messages/{roomId}")
     public List<MessageBody> getRoomMessages(@PathVariable Long roomId) {
         if (roomId == null || roomId <= 0) {
@@ -91,6 +94,7 @@ public class IMController {
 
     //TODO 往直播间发送广播消息。--只用作单机测试。
     // IMServer后端只做了单机测试，没做集群化处理。
+    @Operation(summary = "发送房间广播消息")
     @PostMapping("/sendRoomBroadCast")
     public void sendRoomBroadCast(Long roomId,String message){
         iMService.sendMesasgeToRoom(roomId,message);

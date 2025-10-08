@@ -28,7 +28,7 @@ public class CourseController {
         return searchService.queryCoursesForPortal(query);
     }
 
-    // @Hidden
+    @Operation(summary = "根据课程名称查询课程ID")
     @GetMapping("/name")
     public List<Long> queryCoursesIdByName(@RequestParam("keyword") String keyword){
         return searchService.queryCoursesIdByName(keyword);

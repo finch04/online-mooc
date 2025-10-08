@@ -95,7 +95,7 @@ public class UserController {
      * @param isStaff 是否是后台登录
      * @return 登录用户信息
      */
-    @Operation(hidden = true)
+    @Operation(summary = "登录")
     @PostMapping("/detail/{isStaff}")
     public LoginUserDTO queryUserDetail(
             @Valid @RequestBody LoginFormDTO loginDTO, @PathVariable("isStaff") boolean isStaff) {
@@ -108,7 +108,7 @@ public class UserController {
      * @param ids 用户id集合
      * @return 用户集合
      */
-    @Operation(hidden = true)
+    @Operation(summary = "根据id批量查询用户信息")
     @GetMapping("/list")
     public List<UserDTO> queryUserByIds(
             @Parameter(description = "用户id的列表") @RequestParam("ids") List<Long> ids) {
@@ -127,7 +127,7 @@ public class UserController {
      * @param id 用户id
      * @return 用户类型，0-普通学员，1-老师，2-其他员工
      */
-    @Operation(hidden = true)
+    @Operation(summary = "查询用户类型")
     @GetMapping("/{id}/type")
     public Integer queryUserType(@PathVariable("id") Long id) {
         User user = userService.getById(id);
@@ -137,7 +137,7 @@ public class UserController {
         return user.getType().getValue();
     }
 
-    @Operation(hidden = true)
+    @Operation(summary = "手机号换取用户id")
     @GetMapping("/ids")
     public Long exchangeUserIdWithPhone(@RequestParam("phone") String phone) {
         User user = userService
