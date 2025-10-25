@@ -1,0 +1,110 @@
+spring:
+  # 中间件配置
+#  data:
+#    mongodb:
+#      host: 192.168.150.101
+#      port: 27017
+#      database: tianji
+#      authentication-database: admin
+#      username: tianji
+#      password: "123321"
+#      auto-index-creation: true
+  # AI大模型配置
+  ai:
+    chat:
+      client:
+        enabled: false  # 禁用默认客户端
+      my-client:
+        enabled: true   # 启用自定义客户端
+    # OpenAI配置
+    openai:
+      base-url: https://api.chatanywhere.tech
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        enabled: true
+        options:
+          model: gpt-3.5-turbo
+      embedding:
+        enabled: false
+      audio:
+        transcription:
+          base-url: https://api.chatanywhere.tech/
+          api-key: ${OPENAI_API_KEY}
+          options:
+            model: whisper-1
+            response-format: text
+            temperature: 0
+            language: zh
+        speech:
+          base-url: https://api.chatanywhere.tech
+          api-key: ${OPENAI_API_KEY}
+          options:
+            model: tts-1
+            voice: alloy
+            response-format: mp3
+            speed: 1.0
+
+    # 阿里云DashScope配置
+    dashscope:
+      api-key: ${ALIYUN_API_KEY}
+      app-agent:
+        id: xxxxxxxxx
+        tools:
+          - "tool_xxxxx"
+          - "tool_xxxxx"
+      chat:
+        enabled: true
+        options:
+          model: qwen-plus  # 可切换为 qwen2.5-1.5b-instruct
+      embedding:
+        enabled: true
+        options:
+          model: text-embedding-v3
+          dimensions: 1024
+      audio:
+        transcription:
+          enabled: true
+          base-url: https://dashscope.aliyuncs.com
+          options:
+            model: speech-to-text-v1
+            format: wav
+            sample-rate: 16000
+            language: zh-CN
+        speech:
+          enabled: true
+          options:
+            model: text-to-speech-v1
+            voice: zh-CN-XiaoxiaoNeural
+            format: mp3
+            speed: 1.0
+            volume: 1.0
+            pitch: 1.0
+    # 向量库配置
+    vectorstore:
+      qdrant:
+        host: 192.168.150.101
+        port: 6334
+#        api-key: <qdrant api key>
+        collection-name: tianji
+        use-tls: false
+        initialize-schema: true
+
+  # AI提示词配置
+  prompt:
+    system:
+      chat:
+        data-id: system-chat-message.txt
+        group: DEFAULT_GROUP
+        timeout-ms: 20000
+      route-agent:
+        data-id: route-agent-system-message.txt
+      recommend-agent:
+        data-id: recommend-agent-system-message.txt
+      buy-agent:
+        data-id: buy-agent-system-message.txt
+      consult-agent:
+        data-id: consult-agent-system-message.txt
+      knowledge-agent:
+        data-id: knowledge-agent-system-message.txt
+      text:
+        data-id: text-system-chat-message.txt

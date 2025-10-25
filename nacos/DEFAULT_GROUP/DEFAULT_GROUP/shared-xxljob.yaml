@@ -1,0 +1,9 @@
+tj:
+  xxl-job:
+    access-token: tianji
+    admin:
+      address: http://192.168.150.101:8880/xxl-job-admin
+    executor:
+      appname: ${spring.application.name}
+      log-retention-days: 10
+      logPath: job/${spring.application.name}

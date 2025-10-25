@@ -1,0 +1,14 @@
+tj:
+  auth:
+    excludePath: # 无需登录即可访问的路径
+      - /categorys/all
+      - /courses/catas/index/list/{id}
+      - /courses/teachers/{id}
+      - /courses/catas/{id}
+      - /course/checkCoursePurchase
+      - /course/{id}
+      - /courses/portal
+      - /code
+      - /students/register
+      - /search
+      - /notify/**

@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    sentinel:
+      transport:
+        dashboard: 192.168.150.101:8090  # Sentinel 控制台 IP:端口（默认 8080）
+        port: 8719  # 客户端与控制台通信端口（默认 8719，若被占用会自动+1）
+      eager: true  # 启动时立即加载 Sentinel（可选）

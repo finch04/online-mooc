@@ -1,0 +1,25 @@
+# RocketMQ 基础配置
+rocketmq:
+  name-server: 192.168.150.101:9876  # NameServer地址，集群模式可配置多个，用逗号分隔
+  producer:
+    group: my-producer-group    # 生产者组名，需全局唯一
+    send-message-timeout: 3000  # 发送消息超时时间（毫秒）
+    compress-message-body-threshold: 4096  # 消息体压缩阈值（字节）
+    max-message-size: 4194304   # 最大消息大小（字节）
+    retry-times-when-send-failed: 2  # 同步发送失败重试次数
+    retry-times-when-send-async-failed: 2  # 异步发送失败重试次数
+    retry-next-server: true     # 发送失败时是否重试其他Broker
+  consumer:
+    group: my-consumer-group    # 消费者组名，需全局唯一
+    pull-batch-size: 32         # 批量拉取消息数量
+    consume-thread-min: 20      # 最小消费线程数
+    consume-thread-max: 64      # 最大消费线程数
+    consume-message-batch-max-size: 1  # 批量消费消息最大数量
+  # 可选：自动创建主题配置
+  topic:
+    auto-create: true
+    default-topics:
+      - name: order_topic
+        readQueueNums: 8
+        writeQueueNums: 8
+        perm: 6  # 读写权限

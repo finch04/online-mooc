@@ -1,0 +1,35 @@
+cosid:
+  enabled: true
+  namespace: tj
+  machine:
+    enabled: true
+    distributor:
+      type: jdbc
+  # 非严格递增的雪花ID
+  snowflake:
+    enabled: true
+    provider:
+      snowflakeId:
+        clock-sync: true
+        sequence-reset-threshold: 10
+    #关闭默认的__share__序列分发器 如果不关闭，会有Bean冲突问题
+    share:
+      enabled: false
+  # 严格递增的SegmentID
+  segment:
+    enabled: true
+    mode: chain
+    distributor:
+      type: jdbc
+      jdbc:
+        # 初始化cosid表
+        enable-auto-init-cosid-table: true
+    chain:
+      safe-distance: 10
+    provider:
+      sequence:
+        offset: 100
+        step: 1
+    #关闭默认的__share__序列分发器
+    share:
+      enabled: false

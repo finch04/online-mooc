@@ -1,0 +1,7 @@
+logging:
+  pattern:
+    dateformat: HH:mm:ss.SSS
+    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN}}){faint}-[${hostname}][%X{requestId:-sys}] %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n"
+    file: "%d{${LOG_DATEFORMAT_PATTERN}}-[${hostname}][%X{requestId:-sys}]-${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : %m%n"
+  file:
+    path: "logs/${spring.application.name}"

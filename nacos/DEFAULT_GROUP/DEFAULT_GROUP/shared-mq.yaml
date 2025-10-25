@@ -1,0 +1,15 @@
+spring:
+  rabbitmq:
+    host: ${tj.mq.host:192.168.150.101}
+    port: ${tj.mq.port:5672}
+    virtual-host: ${tj.mq.vhost:/tjxt}
+    username: ${tj.mq.username:tjxt}
+    password: ${tj.mq.password:123321}
+    listener:
+      simple:
+        retry:
+          enabled: ${tj.mq.listener.retry.enable:true} # 开启消费者失败重试
+          initial-interval: ${tj.mq.listener.retry.interval:1000ms} # 初始的失败等待时长为1秒
+          multiplier: ${tj.mq.listener.retry.multiplier:2} # 失败的等待时长倍数，下次等待时长 = multiplier * last-interval
+          max-attempts: ${tj.mq.listener.retry.max-attempts:3} # 最大重试次数
+          stateless: ${tj.mq.listener.retry.stateless:true} # true无状态；false有状态。如果业务中包含事务，这里改为false

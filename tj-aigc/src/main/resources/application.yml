@@ -4,6 +4,12 @@ server:
     uri-encoding: UTF-8
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB         # 单个文件最大2MB
+      max-request-size: 10MB     # 总请求大小限制
+      file-size-threshold: 0     # 所有文件都写入临时文件（避免内存溢出）
   profiles:
     active: local
   application:

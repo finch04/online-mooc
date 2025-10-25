@@ -1,0 +1,4 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://${tj.mongo.username:tianji}:${tj.mongo.password:123}@${tj.mongo.ip:192.168.150.101}:${tj.mongo.port:27017}/${tj.mongo.database:exam}

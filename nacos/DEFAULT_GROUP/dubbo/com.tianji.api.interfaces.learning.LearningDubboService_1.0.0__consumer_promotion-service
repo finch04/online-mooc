@@ -1,0 +1,1 @@
+{"init":"false","side":"consumer","release":"2.7.15","methods":"testSeata,sayHello","dubbo":"2.0.2","check":"false","interface":"com.tianji.api.interfaces.learning.LearningDubboService","version":"1.0.0","qos.enable":"false","revision":"1.0.0","metadata-type":"remote","application":"promotion-service","sticky":"false"}

@@ -1,0 +1,1 @@
+{"side":"consumer","release":"2.7.15","dubbo":"2.0.2","check":"false","interface":"com.alibaba.cloud.dubbo.service.DubboMetadataService","version":"1.0.0","qos.enable":"false","generic":"true","router":"-default,revisionRouter","metadata-type":"remote","application":"promotion-service","sticky":"false","group":"learning-service"}

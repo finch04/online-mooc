@@ -7,6 +7,7 @@
 **项目展示视频：**
 - 用户端：https://www.bilibili.com/video/BV1NEb5zBEko
 - 管理端：https://www.bilibili.com/video/BV1fdtRz6Efc
+- 直播功能展示： https://www.bilibili.com/video/BV1zox9zPEX6
 
 JDK17版本展示视频等功能基本完善再发布，敬请期待~
 
@@ -42,6 +43,7 @@ JDK17分支介绍：本分支将项目由JDK11版本升级为JDK17，并添加**
 | tj-trade     | 交易中心   | 处理交易相关业务，如订单管理、交易记录查询等                         |
 | tj-unqid     | ID生成服务 | 统一生成全局唯一ID，方便业务调用                              |
 | tj-user      | 用户中心   | 管理用户相关业务，如用户信息的增删改查、用户角色管理等                    | 
+
 
 
 ## 前端模块介绍
@@ -100,24 +102,26 @@ JDK17分支介绍：本分支将项目由JDK11版本升级为JDK17，并添加**
 > 集成MongoDB、Redis、MySQL等多异构数据源的数据存储方案
 > 
 > 基于Redis的Queue将数据定时持久化到MySQL的解决方案
->
 > 
-
+> 基于Nginx的rtmp模块实现平台级的直播推流方案
+> 
+> 企业级Websocket内存+Redis统一连接管理方案
+>
 
 ## 环境配置
 
 前端：node: v17.8.0 + npm: 8.5.5 || pnpm: 6.32.8
 
-后端：Java 11 + Spring Boot 3.3.5 + Spring Cloud Alibaba 2023.0.3.2 + Spring AI 1.0.0
+后端：Java 17 + Spring Boot 3.3.5 + Spring Cloud Alibaba 2023.0.3.2 + Spring AI 1.0.0
 
 中间件版本：
 
 - MySQL 8.0.29 
 - Redis 7.0.0
 - Nacos 2.1.0
-- elasticsearch 7.12.1
+- elasticsearch 8.13.4
 - RabbitMQ 3.8
-- Kibana 7.12.1
+- Kibana 8.13.4
 - XXL-JOB 2.3.0
 
 服务器版本：
@@ -129,7 +133,12 @@ JDK17分支介绍：本分支将项目由JDK11版本升级为JDK17，并添加**
 
 项目由JDK11升级到JDK17的改造笔记请参考：[项目升级日志](项目升级日志.md)
 
-如果您对项目有改造的想法、意见，或者您也想参与到项目代码的贡献，欢迎联系或私信我。QQ：1418875140
+如果您对项目有改造的想法、意见，或者您也想参与到项目代码的贡献，欢迎联系或私信我。
+
+个人公众号：正在绘制中
+
+![公众号](项目升级日志.assets/公众号.jpg)
+
 
 各位大佬们可以帮忙点个star，感激不尽。
 
