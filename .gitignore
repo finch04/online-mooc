@@ -15,4 +15,3 @@ target
 .project
 logs
 job
-/tj-pay/tj-pay-service/src/main/resources/bootstrap.yml
