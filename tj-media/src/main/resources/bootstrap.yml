@@ -58,7 +58,10 @@ tj:
       region: "ap-shanghai"
       procedure: "wisehub-base"
       urlKey: "HZFlxjPYoOm5AfShupOx"
+      # 旧版播放器签名字段，新版签名已改用 transcodeDefinition + contentInfo，可忽略本项
       pfcg: "basicDrmPreset"
+      # 必填：云点播控制台「视频处理」-「转码模板」中的模板数字 ID（播放 JWT 的 contentInfo.transcodeDefinition）
+      transcodeDefinition: 10
 #    cos:
 #      enable: true
 #      region: "ap-shanghai"

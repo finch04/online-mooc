@@ -20,7 +20,10 @@ import com.tianji.media.domain.po.Media;
 import com.tianji.media.domain.query.MediaQuery;
 import com.tianji.media.domain.vo.MediaVO;
 import com.tianji.media.domain.vo.VideoPlayVO;
+import com.tianji.media.config.PlatformProperties;
+import com.tianji.media.config.TencentProperties;
 import com.tianji.media.enums.FileStatus;
+import com.tianji.media.enums.Platform;
 import com.tianji.media.mapper.MediaMapper;
 import com.tianji.media.service.IMediaService;
 import com.tianji.media.storage.IMediaStorage;
@@ -53,6 +56,10 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
     private final UserClient userClient;
 
+    private final PlatformProperties platformProperties;
+
+    private final TencentProperties tencentProperties;
+
     @Override
     public String getUploadSignature() {
         return mediaStorage.getUploadSignature();
@@ -76,6 +83,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
             VideoPlayVO vo = new VideoPlayVO();
             vo.setSignature(signature);
             vo.setFileId(media.getFileId());
+            fillTencentAppId(vo);
             return vo;
         }
         // 2.2.否，判断课程章节是否免费
@@ -95,7 +103,15 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         VideoPlayVO vo = new VideoPlayVO();
         vo.setSignature(signature);
         vo.setFileId(media.getFileId());
+        fillTencentAppId(vo);
         return vo;
+    }
+
+    /** 与 JWT 中 appId 及 TCPlayer 的 appID 一致，仅当媒资走腾讯云时下发。 */
+    private void fillTencentAppId(VideoPlayVO vo) {
+        if (platformProperties.getMedia() == Platform.TENCENT && tencentProperties.getAppId() != null) {
+            vo.setAppId(tencentProperties.getAppId());
+        }
     }
 
 
@@ -109,6 +125,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         VideoPlayVO vo = new VideoPlayVO();
         vo.setSignature(signature);
         vo.setFileId(media.getFileId());
+        fillTencentAppId(vo);
         return vo;
     }
 

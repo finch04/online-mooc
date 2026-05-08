@@ -111,6 +111,7 @@ const finished = ref(false);
 // 记录播放相关参数
 const fileId = ref('')
 const signature = ref('')
+const vodAppId = ref(null)
 let timer = -1;
 let playing = false;
 // 当前播放小节信息缓存 
@@ -218,9 +219,16 @@ onUnmounted(() => {
 const currentPlayTime = ref(0)
 // 初始化视频播放器并播放视频 视频ID、播放器签名
 const player = ref(null)
-const initPlay = (fileID, psign) => {
+const initPlay = (fileID, psign, appID) => {
+  if (appID == null || appID === '') {
+    ElMessage({
+      message: '服务端未返回云点播 AppId，请检查媒资服务 tj.platform.media=TENCENT 与 tj.tencent.appId',
+      type: 'error'
+    })
+    return
+  }
   player.value = new TCPlayer(videoRef.value, {
-    appID: '1312394356',
+    appID: String(appID),
     fileID,
     psign,
     posterImage: true,
@@ -292,8 +300,9 @@ const getMediasSignatureData = async (sectionId) => {
   if (res.code === 200) {
     fileId.value = res.data.fileId
     signature.value = res.data.signature
+    vodAppId.value = res.data.appId ?? null
     if (player.value == null) {
-      initPlay(res.data.fileId, res.data.signature)
+      initPlay(res.data.fileId, res.data.signature, res.data.appId)
     }
     return true;
   } else {
@@ -336,7 +345,7 @@ const playHadle = async (val) => {
       }
       player.value.loadVideoByID(
           {
-            appID: '1312394356',
+            appID: String(vodAppId.value ?? ''),
             fileID: fileId.value,
             psign: signature.value,
           }

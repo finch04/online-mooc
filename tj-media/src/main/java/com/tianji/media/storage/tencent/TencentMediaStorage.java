@@ -86,25 +86,50 @@ public class TencentMediaStorage implements IMediaStorage {
         return Base64.encode(bytes);
     }
 
+    /**
+     * 生成云点播播放器 JWT 签名，字段需符合
+     * <a href="https://cloud.tencent.com/document/product/266/45554">播放器签名</a>，
+     * 其中 {@code contentInfo} 为必选；普通转码播放使用 {@code audioVideoType=Transcode} + {@code transcodeDefinition}。
+     */
     @Override
     public String getPlaySignature(String fieldId, Long userId, Integer freeExpired) {
-        long currentTime = System.currentTimeMillis() / 1000;
-
-        HashMap<String, Object> urlAccessInfo = new HashMap<>(2);
-       /* if (userId != null) {
-            urlAccessInfo.put("uid", String.valueOf(userId));
-        }*/
-        if (freeExpired != null) {
-            urlAccessInfo.put("exper", freeExpired * 60);
+        TencentProperties.VodProperties vod = tencentProperties.getVod();
+        Integer transcodeDefinition = vod.getTranscodeDefinition();
+        if (transcodeDefinition == null || transcodeDefinition <= 0) {
+            throw new CommonException("未正确配置 tj.tencent.vod.transcodeDefinition（正整数），请在云点播控制台创建转码模板并填入模板数字 ID");
         }
-        return JWT.create()
-                .setKey(tencentProperties.getVod().getUrlKey().getBytes(StandardCharsets.UTF_8))
-                .setPayload("appId", tencentProperties.getAppId())
+        long currentTime = System.currentTimeMillis() / 1000;
+        long expireTimeStamp = currentTime + vod.getVodValidSeconds();
+        if (expireTimeStamp > Integer.MAX_VALUE) {
+            expireTimeStamp = Integer.MAX_VALUE;
+        }
+
+        HashMap<String, Object> contentInfo = new HashMap<>(4);
+        contentInfo.put("audioVideoType", "Transcode");
+        contentInfo.put("transcodeDefinition", transcodeDefinition);
+
+        HashMap<String, Object> urlAccessInfo = new HashMap<>(4);
+        if (freeExpired != null) {
+            int exper = freeExpired * 60;
+            if (exper > 0 && exper < 30) {
+                exper = 30;
+            }
+            if (exper > 0) {
+                urlAccessInfo.put("exper", exper);
+            }
+        }
+
+        JWT jwt = JWT.create()
+                .setKey(vod.getUrlKey().getBytes(StandardCharsets.UTF_8))
+                .setPayload("appId", tencentProperties.getAppId().intValue())
                 .setPayload("fileId", fieldId)
+                .setPayload("contentInfo", contentInfo)
                 .setPayload("currentTimeStamp", currentTime)
-                .setPayload("pcfg", tencentProperties.getVod().getPfcg())
-                .setPayload("urlAccessInfo", urlAccessInfo)
-                .sign();
+                .setPayload("expireTimeStamp", (int) expireTimeStamp);
+        if (!urlAccessInfo.isEmpty()) {
+            jwt.setPayload("urlAccessInfo", urlAccessInfo);
+        }
+        return jwt.sign();
     }
 
     @Override

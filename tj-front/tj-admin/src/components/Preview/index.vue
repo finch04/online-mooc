@@ -36,25 +36,32 @@ const videoRef = ref(null);
 const player = ref(null);
 const fileId = ref("");
 const signature = ref("");
+const appId = ref(null);
 
 const getId = async (mediaId) => {
-  
-  await getMediasSignatureData(mediaId)
-    player.value.loadVideoByID(
-      {
-        appID: '1312394356',
-        fileID:fileId.value,
-        psign: signature.value,
-      }
-    )
-    player.value.currentTime(0)
-    player.value.play()
-    
+  await getMediasSignatureData(mediaId);
+  if (player.value != null && appId.value != null) {
+    player.value.loadVideoByID({
+      appID: String(appId.value),
+      fileID: fileId.value,
+      psign: signature.value,
+    });
+    player.value.currentTime(0);
+    player.value.play();
+  }
 };
 // ------定义方法------
-const initPlay = (fileID, psign) => {
+const initPlay = (fileID, psign, vodAppId) => {
+  if (vodAppId == null || vodAppId === "") {
+    ElMessage({
+      message: "服务端未返回云点播 AppId，请检查 tj.platform.media=TENCENT 与 tj.tencent.appId 配置",
+      type: "error",
+      showClose: false,
+    });
+    return;
+  }
   player.value = new TCPlayer(videoRef.value.id, {
-    appID: "1312394356",
+    appID: String(vodAppId),
     fileID,
     psign,
     posterImage: true,
@@ -81,10 +88,11 @@ const getMediasSignatureData = async (mediaId) => {
   await getMediasSignature({ mediaId })
     .then((res) => {
       if (res.code == 200) {
+        fileId.value = res.data.fileId;
+        signature.value = res.data.signature;
+        appId.value = res.data.appId ?? null;
         if (player.value == null) {
-          fileId.value = res.data.fileId;
-          signature.value = res.data.signature;
-          initPlay(res.data.fileId, res.data.signature);
+          initPlay(res.data.fileId, res.data.signature, res.data.appId);
         }
       } else {
         ElMessage({
@@ -98,8 +106,8 @@ const getMediasSignatureData = async (mediaId) => {
 };
 // 关闭弹层
 const handleClose = () => {
-  player.value.pause();
-  player.value = null
+  player.value?.pause();
+  player.value = null;
   emit("handleClose");
 };
 // 向父组件暴露方法
